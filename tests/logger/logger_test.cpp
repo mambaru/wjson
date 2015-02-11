@@ -1,5 +1,3 @@
-//#include <wfc/core/global.hpp>
-
 #include <iow/logger/logger.hpp>
 #include <iostream>
 #include <sstream>
