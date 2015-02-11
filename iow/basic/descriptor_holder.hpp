@@ -26,24 +26,36 @@ public:
   {
   }
   
+  typename descriptor_type::native_handle_type 
+  dup_native_() const
+  {
+    return ::dup( this->descriptor().native_handle() );
+  }
+  
   template<typename DescriptorType, typename IOServiceType, typename ProtocolType>
   DescriptorType dup_descriptor_(IOServiceType& io, const ProtocolType& protocol)
   {
+    return std::move( DescriptorType(io, protocol, this->dup_native_() ) );
+    /*
     typedef DescriptorType dup_descriptor_type;
     typedef typename dup_descriptor_type::native_handle_type dup_native_type;
     dup_native_type f = ::dup( this->descriptor().native_handle() );
     dup_descriptor_type dup_descriptor(io, protocol, f);
     return std::move(dup_descriptor);
+    */
   }
 
   template<typename DescriptorType, typename IOServiceType>
   DescriptorType dup_descriptor_1(IOServiceType& io, fas::false_)
   {
+    return std::move( DescriptorType(io, this->dup_native_() ) );
+    /*
     typedef DescriptorType dup_descriptor_type;
     typedef typename dup_descriptor_type::native_handle_type dup_native_type;
     dup_native_type f = ::dup( this->descriptor().native_handle() );
     dup_descriptor_type dup_descriptor(io, f);
     return std::move(dup_descriptor);
+    */
   }
 
   template<typename DescriptorType, typename IOServiceType>
