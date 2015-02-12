@@ -1,7 +1,9 @@
 /*
 Идея! Унаследовать uniq_ptr и включить туда объект статистики
 Обнумать настройку:
-  ip version
+  - ip version: ip4, ip6 -
+  Версию ip определим автоматом
+  http://stackoverflow.com/questions/10286042/using-boost-asio-to-accept-on-ipv6-link-scope-address
   protocol: tcp|udp|posix|local
   type: text | bin
   mode: stream | dgram  
@@ -22,20 +24,22 @@ dgram основной режим для udp (в одном пакете вес�
 
   _after_start_ -> _run_line_ 
                        |
-               |---->_read_more_  -> _make_buffer_ -<
+               |---->_read_more_  -> _make_buffer_ 
                |        |
-               |    _read_some_
-               |        : асинхронно всегда
-               |    _read_ready_  -> _on_read_(указатель на буффер)
+               |    _read_some_                                       _buffer_pool_
+               |        : асинхронно всегда                                  create()
+               |    _read_ready_  -> _on_read_(указатель на буффер)          free()
                |        |
                ---- _read_handler_ -> _incoming_ 
                                             : асинхронно или синхронно
                       _outgoing_      <---------                  
                           |
                       _write_more   -> _prepare_buffer_
-                          | если есть что 
-                      _write_some_
-                          |
-                      _write_ready_ -> _on_write_
+                          | если есть что                                    ^
+                      _write_some_                                           |
+                          |                                                  |
+                      _write_ready_ -> _on_write_                            |
+                              |                                              |
+                       _free_buffer_ -----------------------------------------
                          
   */                       

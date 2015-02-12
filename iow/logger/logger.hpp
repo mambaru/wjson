@@ -30,3 +30,17 @@ inline void only_for_log( Args&& ... ){}
 #define IOW_LOG_MESSAGE( X )       IOW_WRITE_LOG("iow", "message", X )
 #define IOW_LOG_FATAL( X )         IOW_WRITE_LOG("iow", "fatal",   X )
 
+#ifdef NDEBUG 
+# ifdef IOW_ENABLE_TRACE_LOG          // включить в Release режиме
+#   define IOW_LOG_TRACE( X )         IOW_WRITE_LOG("trace", "message",   X )
+# else
+#   define IOW_LOG_TRACE( X )         
+# endif
+#else
+# ifdef IOW_DISABLE_TRACE_LOG         // отключить в Debug режиме
+#   define IOW_LOG_TRACE( X )         
+# else
+#   define IOW_LOG_TRACE( X )         IOW_WRITE_LOG("trace", "message",   X )
+# endif
+#endif
+

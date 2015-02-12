@@ -3,7 +3,7 @@
 #include <iow/basic/callback_owner.hpp>
 #include <iow/basic/io_id.hpp>
 #include <iow/basic/tags.hpp>
-#include <iow/basic/asio.hpp>
+#include <iow/aux/asio.hpp>
 
 
 #include <fas/aop.hpp>
@@ -19,32 +19,32 @@
   self( typename super::io_service_type& io_service): super(io_service) {}                                \
   self(): super(){}                                                                                       \
   
-#define IOW_INHERITING_CONSTRUCTORS(self, super)                                                        \
-  self( super::io_service_type& io_service, const super::options_type& opt )            \
+#define IOW_INHERITING_CONSTRUCTORS(self, super)                                                          \
+  self( super::io_service_type& io_service, const super::options_type& opt )                              \
     : super(io_service, opt)                                                                              \
   {}                                                                                                      \
-  self(const super::options_type& opt ) : super(opt){}                                           \
-  self( super::io_service_type& io_service): super(io_service) {}                                \
+  self(const super::options_type& opt ) : super(opt){}                                                    \
+  self( super::io_service_type& io_service): super(io_service) {}                                         \
   self(): super(){}                                                                                       \
   
   
-#define IOW_IO_BASE_IMPL_T(super)                                                                           \
+#define IOW_IO_BASE_IMPL_T(super)                                                                         \
   void start() {                                                                                          \
     std::lock_guard< mutex_type > lk( super::mutex() );                                                   \
-    this->get_aspect().template gete< _before_start_ >()(*this);                                                  \
+    this->get_aspect().template gete< _before_start_ >()(*this);                                          \
     super::start_(*this);                                                                                 \
-    this->get_aspect().template gete< _after_start_ >()(*this);                                                   \
+    this->get_aspect().template gete< _after_start_ >()(*this);                                           \
   }                                                                                                       \
   void stop() {                                                                                           \
     std::lock_guard< mutex_type > lk( super::mutex() );                                                   \
-    this->get_aspect().template gete< _before_stop_ >()(*this);                                               \
+    this->get_aspect().template gete< _before_stop_ >()(*this);                                           \
     super::stop_(*this);                                                                                  \
-    this->get_aspect().template gete< _after_stop_ >()(*this);                                               \
+    this->get_aspect().template gete< _after_stop_ >()(*this);                                            \
   }                                                                                                       \
   void reset(const options_type& opt) {                                                                   \
     std::lock_guard< mutex_type > lk( super::mutex() );                                                   \
     super::reset_(*this, opt);                                                                            \
-    this->get_aspect().template gete< _on_reset_ >()(*this);                                               \
+    this->get_aspect().template gete< _on_reset_ >()(*this);                                              \
   }                                                                                                       \
 
   
@@ -54,15 +54,12 @@ template<typename A >
 class io_base
   : public ::fas::aspect_class<A>
 {
-  
 public:
-  
   typedef io_base<A> self;
   typedef ::fas::aspect_class<A> super;
   typedef ::iow::asio::io_service io_service_type;
   typedef std::shared_ptr<io_service_type> io_service_ptr;
   typedef io_service_type::strand strand_type;
-  
   
   typedef typename super::aspect::template advice_cast<_options_type_>::type options_type;
   typedef typename super::aspect::template advice_cast<_mutex_type_>::type mutex_type;

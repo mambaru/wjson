@@ -17,18 +17,20 @@ namespace iow{
   
 #ifndef IOW_DISABLE_GLOBAL_LOG
   
-  void init_log(log_writer writer);
-  logstream global_log(const std::string& name, const std::string& type);
+void init_log(log_writer writer);
+  
+logstream global_log(const std::string& name, const std::string& type);
   
 #else
   
-  void init_log(log_writer)
-  {
-  }
+void init_log(log_writer)
+{
+}
   
-  logstream global_log(const std::string& name, const std::string& type )
-  {
-    return logstream(name, type, nullptr);
-  }
+logstream global_log(const std::string& name, const std::string& type )
+{
+  return logstream(name, type, nullptr);
+}
+
 #endif
 }
