@@ -20,60 +20,74 @@ public:
   typedef typename super::io_service_type io_service_type;
   typedef typename super::aspect::template advice_cast<_descriptor_type_>::type descriptor_type;
   
-  descriptor_holder(io_service_type& io, const options_type& opt)
-    : super( io, opt)
-    , _descriptor( io )
-  {}
-
-  descriptor_holder(const options_type& opt)
-    : super( opt)
-    , _descriptor( super::get_io_service() )
-  {}
+  descriptor_holder(descriptor_type&& desc, const options_type& opt)
+    : super( desc.get_io_service(), opt)
+    , _descriptor( std::move(desc) )
+  {
+  }
   
-  /*
-   * 1. создаем новый объект
-   * 2. dub native_handle 
-   * 3. делаем assign сновым дескриптором
-   */
-  
-  /*
   typename descriptor_type::native_handle_type 
   dup_native_() const
   {
     return ::dup( this->descriptor().native_handle() );
   }
   
-  template<typename DescriptorType, typename ProtocolType>
-  DescriptorType&& dup_descriptor_(io_service_type& io, const ProtocolType& protocol)
+  template<typename DescriptorType, typename IOServiceType, typename ProtocolType>
+  DescriptorType dup_descriptor_(IOServiceType& io, const ProtocolType& protocol)
   {
     return std::move( DescriptorType(io, protocol, this->dup_native_() ) );
+    /*
+    typedef DescriptorType dup_descriptor_type;
+    typedef typename dup_descriptor_type::native_handle_type dup_native_type;
+    dup_native_type f = ::dup( this->descriptor().native_handle() );
+    dup_descriptor_type dup_descriptor(io, protocol, f);
+    return std::move(dup_descriptor);
+    */
   }
 
-  template<typename DescriptorType>
-  DescriptorType&& dup_descriptor_helper_(io_service_type& io, fas::false_)
+  template<typename DescriptorType, typename IOServiceType>
+  DescriptorType dup_descriptor_1(IOServiceType& io, fas::false_)
   {
     return std::move( DescriptorType(io, this->dup_native_() ) );
+    /*
+    typedef DescriptorType dup_descriptor_type;
+    typedef typename dup_descriptor_type::native_handle_type dup_native_type;
+    dup_native_type f = ::dup( this->descriptor().native_handle() );
+    dup_descriptor_type dup_descriptor(io, f);
+    return std::move(dup_descriptor);
+    */
   }
 
-  template<typename DescriptorType>
-  DescriptorType&& dup_descriptor_helper_(io_service_type& io, fas::true_)
+  template<typename DescriptorType, typename IOServiceType>
+  DescriptorType dup_descriptor_1(IOServiceType& io, fas::true_)
   {
-    return std::move( this->dup_descriptor_(io, this->descriptor().local_endpoint().protocol() ) );
+    typedef DescriptorType dup_descriptor_type;
+    typedef typename dup_descriptor_type::native_handle_type dup_native_type;
+    dup_native_type f = ::dup( this->descriptor().native_handle() );
+    dup_descriptor_type dup_descriptor(io, this->descriptor().local_endpoint().protocol(), f);
+    return std::move(dup_descriptor);
   }
   
-  template<typename DescriptorType>
-  DescriptorType&& dup_descriptor_(io_service_type& io)
+  template<typename DescriptorType, typename IOServiceType>
+  DescriptorType dup_descriptor_(IOServiceType& io)
   {
     return std::move(
-      this->dup_descriptor_helper_<DescriptorType>(
+      this->dup_descriptor_1<DescriptorType>(
         io,
         fas::bool_< has_protocol_type<DescriptorType>::value >()
       )
     );
+    /*
+    typedef DescriptorType dup_descriptor_type;
+    typedef typename dup_descriptor_type::native_handle_type dup_native_type;
+    dup_native_type f = ::dup( this->descriptor().native_handle() );
+    dup_descriptor_type dup_descriptor(io, f);
+    return std::move(dup_descriptor);
+    */
   }
 
   template<typename Holder, typename ProtocolType>
-  Holder&& dup_holder_(io_service_type& io, const ProtocolType& protocol, const typename Holder::options_type& opt)
+  Holder dup_holder_(io_service_type& io, const ProtocolType& protocol, const typename Holder::options_type& opt)
   {
     return std::move(Holder( std::move(this->dup_descriptor_< typename Holder::descriptor_type >(io, protocol)), opt));
   }
@@ -81,25 +95,18 @@ public:
   self&& dup_holder_(io_service_type& io, const options_type& opt)
   {
     return std::move(self( std::move(this->dup_descriptor_< descriptor_type >(io)), opt));
+    //return std::move( this->dup_holder_<self>( io, opt) );
   }
 
-  self&& dup_holder_(const options_type& opt, fas::false_ )
+  self&& dup_holder_(const options_type& opt)
   {
-    return std::move( self::dup_holder_(super::get_io_service(), opt) );
+    return std::move( this->dup_holder_( this->get_io_service(), opt) );
   }
 
-  self&& dup_holder_(const options_type& opt, fas::false_ )
-  {
-    return std::move( self::dup_holder_(super::get_io_service(), opt) );
-  }
-  */
-
-  /*
   self&& dup_holder_()
   {
     return std::move( this->dup_holder_( this->options_() ) );
   }
-  */
 
   
   
@@ -156,7 +163,6 @@ protected:
   */
 
 private:
-  
   descriptor_type _descriptor;
 };
 

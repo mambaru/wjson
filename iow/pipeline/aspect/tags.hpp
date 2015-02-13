@@ -7,21 +7,21 @@
                        |
                |---->_read_more_  -> _make_buffer_ 
                |        |
-               |    _read_some_                                       _buffer_pool_
+               |    _read_some_ [здесь цепочка]                             _buffer_pool_
                |        : асинхронно всегда                                  create()
                |    _read_ready_  -> _on_read_(указатель на буффер)          free()
                |        |
-               ---- _read_handler_ -> _incoming_ 
-                                            : асинхронно или синхронно
-                      _outgoing_      <---------                  
-                          |
-                      _write_more   -> _prepare_buffer_
-                          | если есть что                                    ^
-                      _write_some_                                           |
-                          |                                                  |
-                      _write_ready_ -> _on_write_                            |
-                              |                                              |
-                       _free_buffer_ -----------------------------------------
+               ---- _read_handler_ -> _incoming_                               ^
+                                            : асинхронно или синхронно         |
+                      _outgoing_      <---------                               |
+                          |                                                    |
+если все (nullptr) |->_write_more   -> _prepare_buffer_  -----------------------
+                   |      | если есть что                                    
+       если не все |->_write_some_   [здесь цепочка]                                           
+                   |       |                                                  
+                   ---_write_ready_ -> _on_write_                            
+                          |                                                  
+                      _free_buffer_ 
                          
 */
 

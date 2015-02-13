@@ -3,6 +3,7 @@
 #include <sstream>
 #include <memory>
 #include <iow/basic/descriptor_holder.hpp>
+#include <iow/aux/memory.hpp>
 #include <boost/asio.hpp>
 
 /*
@@ -32,7 +33,7 @@ public:
   typedef super::descriptor_type descriptor_type;
   
   descriptor_holder(io_service_type& io, options_type opt)
-    : super( std::move(descriptor_type(io)), opt )
+    : super( io, opt )
   {
   }
 };
@@ -51,14 +52,49 @@ private:
   S _stat;
 };
 
+
+template<typename T>
+class default_delete
+{
+public:
+  default_delete()
+  {
+    std::cout << "default_delete()" << std::endl;
+  }
+
+  ~default_delete()
+  {
+    std::cout << "~default_delete()" << std::endl;
+  }
+
+  default_delete(default_delete&&)
+  {
+    std::cout << "default_delete(default_delete&&)" << std::endl;
+  }
+
+  void operator()(T* t)
+  {
+    std::cout << "~default_delete::operator()()" << std::endl;
+    delete t;
+  }
+};
+
 int main()
 {
+  /*
+  {
+    auto x = std::make_unique<int >(10);
+    std::cout << *x << std::endl;
+    //std::get_deleter<default_delete<int>>(x);
+  }
+  return 0;
   auto tst = stat_wrapper< std::unique_ptr<int>, fas::empty_type>(nullptr, fas::empty_type());
-  *tst = 10;
+  */
+  //*tst = 10;
   descriptor_holder::io_service_type io_service;
   descriptor_holder holder(io_service, fas::empty_type() );
   
-  holder.dup_holder_();
+  //holder.dup_holder_();
   
   return 0;
 }
