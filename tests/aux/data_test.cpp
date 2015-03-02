@@ -40,7 +40,7 @@ struct data_line_init
 public:
   
   data_line_init() 
-    : fas::testing::unit("")
+    : fas::testing::unit("data_line_init", "data_line_init")
   {}
   
   template<typename T>
@@ -96,7 +96,6 @@ BEGIN_UNIT_LIST(data_line)
   , fas::advice<_data_line_init_, data_line_init<DataSize, DataCount, BufSize, WrnSize, MaxSize> >
   , fas::group< fas::testing::_units_, _data_line_init_>
   ADD_UNIT(data_line_first)
- 
 END_UNIT_LIST(data_line)
 
 
@@ -110,8 +109,11 @@ END_SUITE(aux)
 {
   ::fas::testing::suite_counts sc;
   aux_suite as;
-  as.run();
-  sc += as.counts();
+  for (int i =0 ; i < 10; i++)
+  {
+    as.run();
+    sc += as.counts();
+  }
   return sc;
 }
 
