@@ -38,7 +38,7 @@ IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -ggdb -march=core2 -DNDEBUG")
 ENDIF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
 
-SET(FASLIB_DIR "${CMAKE_SOURCE_DIR}/faslib")
+SET(FASLIB_DIR "${CMAKE_SOURCE_DIR}/../../faslib")
 SET(FAS_TESTING_CPP "${FASLIB_DIR}/fas/testing/testing.cpp")
 set(IOW_TEST_DIR "${CMAKE_BINARY_DIR}/bin-test")
 
@@ -53,3 +53,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_subdirectory(logger)
 add_subdirectory(basic)
+add_subdirectory(aux)
