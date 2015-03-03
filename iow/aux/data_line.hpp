@@ -87,7 +87,7 @@ public:
       _options.maxbuf = _options.bufsize;
     }
   }
-  
+
   const options_type& options() const
   {
     return _options;
@@ -100,6 +100,12 @@ public:
     else
       return this->next_rest_(std::move(d));
   }
+  
+  void confirm()
+  {
+    this->check_confirm_();
+    _line.pop_front();
+  }
 
   // Если данные отправленны все 
   data_ptr confirm_next()
@@ -111,15 +117,15 @@ public:
     _size -= _line.front()->size();
     return std::move( _line.front() );
   }
-  
+
   data_ptr confirm_next(data_ptr d, size_t size_confirmed)
   {
     if ( d->size() == size_confirmed )
       return this->confirm_next();
-    
+
     if (d->size() < size_confirmed )
       throw; // TODO exception
-      
+
     size_t tailsize = d->size() - size_confirmed;
     std::copy( d->begin() + size_confirmed, d->end(), d->begin() ); 
     d->resize(tailsize);
@@ -158,22 +164,31 @@ public:
     this->push_back_( std::move(d), offset );
   }
 
-  
+  bool unconfirmed() const
+  {
+    return !_line.empty() && _line.front()==nullptr;
+  }
+
   size_t size() const 
   {
     return _size;
   }
-  
+
+  size_t count() const
+  {
+    return _line.size() - this->unconfirmed();
+  }
+
   bool is_full() const
   {
     return _options.maxsize!=0 && _size > _options.maxsize;
   }
-  
+
   bool is_wrn() const
   {
     return _options.wrnsize!=0 && _size > _options.wrnsize;
   }
-  
+
   void clear()
   {
     _line.clear();
@@ -181,18 +196,19 @@ public:
   }
 
 private:
-  
+
   data_ptr next_first_(data_ptr d)
   {
     if ( d == nullptr )
       return nullptr;
 
-    if ( _options.except_first )
+    _line.push_back(nullptr);
+
+    if ( _options.except_first || d->size() <=  _options.maxbuf)
+    {
       return std::move(d);
-    
-    if ( d->size() <  _options.maxbuf )
-      return std::move(d);
-    
+    }
+
     this->push_back_( d->begin() + _options.bufsize, d->end() );
     d->resize(_options.bufsize);
     return std::move(d);
@@ -204,19 +220,19 @@ private:
     {
       this->push_back( std::move(d) );
     }
-    
+
     if ( _line.front() == nullptr )
     {
       return nullptr;
     }
-    
+
     d = std::move( _line.front() );
-    _line.pop_front();
+    // _line.pop_front();
     _size -= d->size();
     return std::move(d);
   }
 
-  
+
   void check_confirm_()
   {
     if ( _line.empty() )
@@ -224,7 +240,7 @@ private:
     if ( _line.front()!=nullptr )
       throw ; // TODO exception
   }
-  
+
   void push_back_(iterator beg, iterator end)
   {
     auto cur = beg; 
