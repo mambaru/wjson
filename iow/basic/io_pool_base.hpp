@@ -15,17 +15,17 @@
   self( typename super::io_service_type& io_service, const typename super::options_type& opt )            \
     : super(io_service, opt)                                                                              \
   {}                                                                                                      \
-  /*self(const typename super::options_type& opt ) : super(opt){}*/                                           \
-  /*self( typename super::io_service_type& io_service): super(io_service) {}*/                                \
-  /*self(): super(){}*/                                                                                       \
+  self(const typename super::options_type& opt ) : super(opt){}                                           \
+  self( typename super::io_service_type& io_service): super(io_service) {}                                \
+  self(): super(){}                                                                                       \
   
 #define IOW_INHERITING_CONSTRUCTORS(self, super)                                                          \
   self( super::io_service_type& io_service, const super::options_type& opt )                              \
     : super(io_service, opt)                                                                              \
   {}                                                                                                      \
-  /*self(const super::options_type& opt ) : super(opt){}                   */                                 \
-  /*self( super::io_service_type& io_service): super(io_service) {}        */                                 \
-  /*self(): super(){}                                                      */                             \
+  self(const super::options_type& opt ) : super(opt){}                                                    \
+  self( super::io_service_type& io_service): super(io_service) {}                                         \
+  self(): super(){}                                                                                       \
   
   
 #define IOW_IO_BASE_IMPL_T(super)                                                                         \
@@ -58,6 +58,8 @@ public:
   typedef io_base<A> self;
   typedef ::fas::aspect_class<A> super;
   typedef ::iow::asio::io_service io_service_type;
+  typedef std::shared_ptr<io_service_type> io_service_ptr;
+  typedef io_service_type::strand strand_type;
   
   typedef typename super::aspect::template advice_cast<_options_type_>::type options_type;
   typedef typename super::aspect::template advice_cast<_mutex_type_>::type mutex_type;
@@ -66,13 +68,36 @@ public:
   {
   }
   
-  io_base(io_service_type& io_service, const options_type& opt = options_type() )
-    : _io_service(io_service)
+  io_base(io_service_type& io_service, const options_type& opt )
+    : _io_service_ptr(nullptr)
+    , _io_service(io_service)
+    , _strand(_io_service)
+    , _thread(nullptr)
     , _options(opt)
     , _status(false)
   {
     _id = ::iow::create_id();
   }
+
+  // Запуск в отдельном потоке 
+  io_base(const options_type& opt )
+    : _io_service_ptr( std::make_shared<io_service_type>() )
+    , _io_service( *_io_service_ptr)
+    , _strand(_io_service)
+    , _thread(nullptr)
+    , _options(opt)
+    , _status(false)
+  {
+    _id = ::iow::create_id();
+  }
+  
+  io_base(io_service_type& io_service)
+    : io_base(io_service, options_type() )
+  {}
+
+  io_base()
+    : io_base( options_type() )
+  {}
 
   io_id_t get_id() const { return _id;}
   
@@ -86,6 +111,16 @@ public:
     return _io_service;
   }
 
+  strand_type& get_strand()
+  {
+    return _strand;
+  }
+
+  const strand_type& get_strand() const
+  {
+    return _strand;
+  }
+  
   options_type options() const
   {
     std::lock_guard< mutex_type > lk(_mutex);
@@ -114,19 +149,33 @@ public:
   }
 
   template<typename Handler>
-  Handler owner_wrap(Handler h)
+  void strand_post(Handler h)
   {
     std::lock_guard< mutex_type > lk(_mutex);
-    return std::move( this->owner_wrap_( std::move(h) ) );
+    this->strand_post_( std::move(h) );
   }
 
   template<typename Handler>
-  Handler post_wrap(Handler h)
+  Handler owner_wrap(Handler h)
   {
     std::lock_guard< mutex_type > lk(_mutex);
-    return std::move( this->post_wrap_( std::move(h) ) );
+    return this->owner_wrap_( std::move(h) );
   }
 
+  template<typename Handler>
+  Handler wrap_post(Handler h)
+  {
+    std::lock_guard< mutex_type > lk(_mutex);
+    return this->wrap_post_( std::move(h) );
+  }
+
+  template<typename Handler>
+  Handler wrap_strand(Handler h)
+  {
+    std::lock_guard< mutex_type > lk(_mutex);
+    return this->wrap_strand_( std::move(h) );
+  }
+  
   mutex_type& mutex() const
   {
     return _mutex;
@@ -153,59 +202,102 @@ public:
   template<typename Handler>
   void post_(Handler h)
   {
-    _io_service.post( std::move( this->owner_wrap_( std::move(h) ) ) );
+    typedef std::function<void()> post_fun;
+    _io_service.post( this->owner_wrap_<post_fun>( std::move(h) ) );
   }
 
   template<typename Handler>
-  auto owner_wrap_(Handler h) 
-    -> callback_wrapper< typename std::remove_reference<Handler>::type >
+  void strand_post_(Handler h)
   {
-    return std::move( _owner.wrap(std::move(h)) );
+    _strand.post( this->owner_wrap_<Handler>( std::move(h) ) );
   }
 
   template<typename Handler>
-  Handler post_wrap_(Handler h)
+  Handler owner_wrap_(Handler h)
   {
-    return std::move(
-      this->owner_wrap_(
+    return _owner.wrap<Handler>(std::move(h));
+  }
+
+  template<typename Handler>
+  Handler wrap_post_(Handler h)
+  {
+    return 
+      this->owner_wrap_<Handler>(
         std::move(
           _io_service.wrap(
             std::move(
-              this->owner_wrap_( std::move(h) )
+              this->owner_wrap_<Handler>( std::move(h) )
             )
           )
         )
-      ) 
-    );
+      );
+  }
+
+  template<typename Handler>
+  Handler wrap_strand_(Handler h)
+  {
+    return 
+      this->owner_wrap_<Handler>(
+        std::move(
+          _strand.wrap(
+            std::move(
+              this->owner_wrap_<Handler>( std::move(h) )
+            )
+          )
+        )
+      );
   }
   
 protected:
   
   template<typename T>
-  void reset_(T&, const options_type& opt )
+  void reset_( T& t, const options_type& opt )
   {
     _owner.reset();
     _options = opt;
     _status = false;
+    t.get_aspect().template gete<_on_reset_>()(t);
   }
 
   template<typename T>
-  void start_(T&)
+  void start_(T& t)
   {
+    t.get_aspect().template gete< _before_start_ >()(t);
+    if ( _io_service_ptr!= nullptr )
+    {
+      _thread=std::make_shared<std::thread>([this]()
+      {
+        io_service_type::work wrk(this->_io_service);
+        this->_io_service.run();
+      } );
+    }
     _status = true;
+    t.get_aspect().template gete< _after_start_ >()(t);
   }
   
   template<typename T>
-  void stop_(T&)
+  void stop_(T& t)
   {
-    _owner.reset();
+    t.get_aspect().template gete< _before_stop_ >()(t);
+    _io_service.stop();
+    if ( _thread != nullptr )
+    {
+      _thread->join();
+      _thread = nullptr;
+    }
     _status = false;
+    t.get_aspect().template gete< _before_start_ >()(t);
   }
+  
   
 private:
   callback_owner _owner;
+  io_service_ptr _io_service_ptr;
   io_service_type& _io_service;
+  strand_type _strand;
+  std::shared_ptr<std::thread> _thread;
   options_type _options;
+  
   bool _status;
   io_id_t _id;
   mutable mutex_type _mutex;

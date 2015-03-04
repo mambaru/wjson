@@ -1,56 +1,37 @@
 #pragma once
 
 #include <iow/aux/memory.hpp>
-#include <list>
+#include <queue>
 #include <memory>
 #include <stdexcept>
 #include <boost/concept_check.hpp>
 
 namespace iow{ 
 
-  /*
-enum struct data_line_split_mode{
-  disable,        // [default] запретить разбиение пакетов
-  enable,         // Разбивать все пакеты, которые большe buffsize
-  except_first,   // Исключить первый, но разбить остаток при подтверждении
-  except_confirm  // Исключить первый и не разбивать остаток при подтверждении
-};
-
-enum struct data_line_merge_mode{
-  // Объединение происходит только если линия не пуста
-  disable,        // [default] запретить объединение пакетов
-  enable,         // Объеденять со следующим, если суммарный размер не превышает buffsize
-  except_confirm  // Не объединять со следующим при подтверждении
-};
-
-enum struct data_line_mode{
-
-};
-*/
-
-
-template<typename N>
-class data_line_excepttion
+class confirm_error
   : public std::logic_error
 {
 public:
-  data_line_excepttion()
-    : std::logic_error( N()() )
+  confirm_error()
+    : std::logic_error( "iow::data_line: confirm_error" )
   {
   }
 };
 
+
+
 struct data_line_options
 {
-  size_t bufsize /*= 8*1024*/;
-  size_t maxbuf  /*= 8*1024*/; 
-  size_t minbuf  /*= 128*/; 
-  size_t wrnsize /*= 1024*1024*/;
-  size_t maxsize /*= 1024*1024*1024*/;
+  size_t bufsize = 8*1024;
+  size_t maxbuf  = 8*1024; 
+  size_t minbuf  = 0; 
+  // Наверное убрать отсюда
+  size_t wrnsize = 1024*1024;
+  size_t maxsize = 1024*1024*1024;
 
   // TODO: дурацкие название
-  bool except_first /*= true*/; // Если maxbuff или minbuff != 0 и bufsize!=0
-  bool except_confirm /*= true*/;
+  bool except_first = true; // Если maxbuff или minbuff != 0 и bufsize!=0
+  bool except_confirm = true;
 };
 
 template<typename DataType>
@@ -62,13 +43,13 @@ public:
   typedef std::unique_ptr<data_type> data_ptr;
   typedef typename data_type::iterator iterator;
   
-  data_line()
+  data_line() noexcept
     : _options()
     , _size(0)
   {
   }
   
-  void set_options(const options_type& options) 
+  void set_options(const options_type& options) noexcept
   {
     _options = options;
     
@@ -88,12 +69,17 @@ public:
     }
   }
 
-  const options_type& options() const
+  const options_type& options() const noexcept
   {
     return _options;
   }
 
-  data_ptr next(data_ptr d)
+  data_ptr next() 
+  {
+    return this->next(nullptr);
+  }
+  
+  data_ptr next(data_ptr d) noexcept
   {
     if ( _line.empty() )
       return this->next_first_(std::move(d));
@@ -101,31 +87,47 @@ public:
       return this->next_rest_(std::move(d));
   }
   
-  void confirm()
+  void confirm() noexcept
   {
-    this->check_confirm_();
+    if ( !this->check_confirm_() )
+      return;
+    
     _line.pop_front();
   }
 
   // Если данные отправленны все 
-  data_ptr confirm_next()
+  data_ptr confirm_and_next() noexcept
   {
-    this->check_confirm_();
-    _line.pop_front();
+    this->confirm();
     if ( _line.empty() )
       return nullptr;
     _size -= _line.front()->size();
     return std::move( _line.front() );
   }
 
-  data_ptr confirm_next(data_ptr d, size_t size_confirmed)
+  data_ptr confirm_and_next(data_ptr d, size_t size_confirmed) noexcept
   {
-    if ( d->size() == size_confirmed )
-      return this->confirm_next();
+    if ( !this->check_confirm_() )
+    {
+      if ( d!=nullptr )
+      {
+        this->push_back_(std::move(d), size_confirmed);
+      }
+      return this->next();
+    }
+
+    if ( d==nullptr || d->size() == size_confirmed )
+    {
+      return this->confirm_and_next();
+    }
 
     if (d->size() < size_confirmed )
-      throw; // TODO exception
-
+    {
+      size_confirmed = d->size();
+    }
+    
+#warning Разбить хвост, если большой и вставить в начало
+    
     size_t tailsize = d->size() - size_confirmed;
     std::copy( d->begin() + size_confirmed, d->end(), d->begin() ); 
     d->resize(tailsize);
@@ -137,15 +139,17 @@ public:
       size_t nextsize = (*itr)->size();
       if ( cursize + nextsize < _options.maxbuf )
       {
-        std::copy( (*itr)->begin(), (*itr)->end(), std::inserter( *d, d->end()));
-        _size -= (*itr)->size();
-        _line.pop_front();
-        _line.back() = nullptr;
+         std::copy( (*itr)->begin(), (*itr)->end(), std::inserter( *d, d->end()));
+         _size -= (*itr)->size();
+         _line.pop_front();
+         _line.front() = nullptr;
       }
     }
+    
+    return std::move(d);
   }
 
-  void rollback(data_ptr d)
+  void rollback(data_ptr d) noexcept
   {
     if ( _line.empty() )
       return; // TODO exception
@@ -156,7 +160,7 @@ public:
       _size += d->size();
   }
 
-  void push_back(data_ptr d)
+  void push_back(data_ptr d) noexcept
   {
     if ( d == nullptr )
       return;
@@ -164,32 +168,32 @@ public:
     this->push_back_( std::move(d), offset );
   }
 
-  bool unconfirmed() const
+  bool unconfirmed() const noexcept
   {
     return !_line.empty() && _line.front()==nullptr;
   }
 
-  size_t size() const 
+  size_t size() const noexcept
   {
     return _size;
   }
 
-  size_t count() const
+  size_t count() const noexcept
   {
     return _line.size() - this->unconfirmed();
   }
 
-  bool is_full() const
+  bool is_full() const noexcept
   {
     return _options.maxsize!=0 && _size > _options.maxsize;
   }
 
-  bool is_wrn() const
+  bool is_wrn() const noexcept
   {
     return _options.wrnsize!=0 && _size > _options.wrnsize;
   }
 
-  void clear()
+  void clear() noexcept
   {
     _line.clear();
     _size = 0;
@@ -197,7 +201,7 @@ public:
 
 private:
 
-  data_ptr next_first_(data_ptr d)
+  data_ptr next_first_(data_ptr d) noexcept
   {
     if ( d == nullptr )
       return nullptr;
@@ -214,7 +218,7 @@ private:
     return std::move(d);
   }
 
-  data_ptr next_rest_(data_ptr d)
+  data_ptr next_rest_(data_ptr d) noexcept
   {
     if ( d!=nullptr )
     {
@@ -227,22 +231,21 @@ private:
     }
 
     d = std::move( _line.front() );
-    // _line.pop_front();
     _size -= d->size();
     return std::move(d);
   }
 
 
-  void check_confirm_()
+  bool check_confirm_() noexcept
   {
-    if ( _line.empty() )
-      throw ; // TODO exception
-    if ( _line.front()!=nullptr )
-      throw ; // TODO exception
+    return !_line.empty() && _line.front()==nullptr;
   }
 
-  void push_back_(iterator beg, iterator end)
+  void push_back_(iterator beg, iterator end) noexcept
   {
+    if ( beg == end )
+      return;
+
     auto cur = beg; 
     while (beg!=end)
     {
@@ -257,8 +260,11 @@ private:
     }
   }
   
-  void push_back_(data_ptr d, size_t offset)
+  void push_back_(data_ptr d, size_t offset) noexcept
   {
+    if (d->size()==offset)
+      return;
+    
     _line.push_back( std::move(d) );
     auto& dd = _line.back();
     bool more = std::distance( dd->begin() + offset, dd->end() ) > static_cast<std::ptrdiff_t>(_options.maxbuf);
@@ -278,8 +284,11 @@ private:
   }
   
   // Объеденить с хвостом (если имеет смысл)
-  size_t merge_( iterator beg, iterator end )
+  size_t merge_( iterator beg, iterator end ) noexcept
   {
+    if ( beg == end )
+      return 0;
+    
     size_t size=0;
     // Объединить с последним элементом?
     bool merge = !_line.empty() && _line.back()!=nullptr && _line.back()->size() < _options.minbuf;
@@ -291,7 +300,7 @@ private:
       size_t cursize = std::distance(beg, end);
       
       // Сколько скопировать в хвост
-      size_t size = _options.bufsize - backsize;
+      size = _options.bufsize - backsize;
       
       bool fulmerge = ( cursize <= size )
                         || ( cursize - size < _options.minbuf 
@@ -311,66 +320,11 @@ private:
     }
     return size;
   }
-
-private:
-  /**
-   * @param d - данные или nullptr
-   * @result следующая порция данных
-   * 
-   */
-  data_ptr create_old(data_ptr d)
-  {
-    if ( d == nullptr )
-    {
-      // Взять следующую порцию (если есть)
-      if ( !_line.empty() && _line.front()==nullptr )
-      {
-        // Это подверждение отправки
-        _line.pop();
-      }
-
-      if ( !_line.empty() )
-      {
-        // Если есть еще данные 
-        d = std::move(_line.front() );
-        _size -= d->size();  
-        return std::move(d);
-      }
-    }
-    else
-    {
-      // При пустой очереди, сразу возвращаем
-      if ( _line.empty() )
-      {
-        // Признак того, что ожидаем подверждение
-        _line.push(nullptr);
-        return std::move(d);
-      }
-
-      // Игногируем при переполнении 
-      if ( this->is_full() )
-        return nullptr;
-
-      // Очередь не пуста, ставим в конец
-      _size += d->size();
-      if ( _line.back()!=nullptr && (_line.back()->size()) + d->size() <= _options.bufsize )
-      {
-        _line.back()->reserve(_options.bufsize);
-        std::copy(d->begin(), d->end(), std::inserter( *(_line.back()), _line.back()->end()));
-      }
-      else
-      {
-        _line.push( std::move(d) );
-      }
-    }
-    return nullptr;
-  }
-
   
 private:
   options_type _options;
   size_t _size;
-  std::list<data_ptr> _line;
+  std::deque<data_ptr> _line;
 };
 
 }

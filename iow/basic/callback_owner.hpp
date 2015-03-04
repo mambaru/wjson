@@ -11,13 +11,13 @@
 namespace iow{
   
 template<typename H, typename NA >
-struct callback_wrapper
+struct callback_wrapper2
 {
   H _handler;
   NA _not_alive;
   typedef std::weak_ptr<int> weak_type;
   
-  callback_wrapper(H h, NA not_alive,  weak_type alive)
+  callback_wrapper2(H h, NA not_alive,  weak_type alive)
     : _handler( h )
     , _not_alive(not_alive )
     , _alive(alive)
@@ -40,12 +40,12 @@ private:
 };
 
 template<typename H>
-struct callback_wrapper2
+struct callback_wrapper
 {
   H _handler;
   typedef std::weak_ptr<int> weak_type;
   
-  callback_wrapper2(H h, weak_type alive)
+  callback_wrapper(H h, weak_type alive)
     : _handler( h )
     , _alive(alive)
   {
@@ -107,17 +107,17 @@ public:
   }
 
   template<typename Handler, typename NotAliveHandler>
-  callback_wrapper<Handler, NotAliveHandler>
+  callback_wrapper2< typename std::remove_reference<Handler>::type, NotAliveHandler>
   wrap(Handler handler, NotAliveHandler not_alive)
   {
-    return callback_wrapper<Handler, NotAliveHandler>( handler, not_alive, _alive);
+    return callback_wrapper2< typename std::remove_reference<Handler>::type, NotAliveHandler>( std::move(handler), not_alive, _alive);
   }
 
   template<typename Handler>
-  callback_wrapper2<Handler>
+  callback_wrapper<typename std::remove_reference<Handler>::type>
   wrap(Handler handler)
   {
-    return callback_wrapper2<Handler>( handler, _alive);
+    return callback_wrapper< typename std::remove_reference<Handler>::type>( handler, _alive);
   }
 
 private:
