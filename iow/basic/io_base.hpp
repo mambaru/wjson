@@ -60,6 +60,7 @@ public:
   typedef ::iow::asio::io_service io_service_type;
   
   typedef typename super::aspect::template advice_cast<_options_type_>::type options_type;
+  typedef typename super::aspect::template advice_cast<_context_type_>::type context_type;
   typedef typename super::aspect::template advice_cast<_mutex_type_>::type mutex_type;
   
   ~io_base()
@@ -140,6 +141,16 @@ public:
     return _options;
   }
 
+  const context_type& context_() const
+  {
+    return _context;
+  }
+
+  context_type& context_()
+  {
+    return _context;
+  }
+
   bool status_() const
   {
     return _status;
@@ -187,6 +198,8 @@ protected:
     _owner.reset();
     _options = opt;
     _status = false;
+    _id = ::iow::create_id();
+    _context.reset();
   }
 
   template<typename T>
@@ -209,6 +222,7 @@ private:
   bool _status;
   io_id_t _id;
   mutable mutex_type _mutex;
+  context_type _context;
 };
 
 }

@@ -5,6 +5,7 @@ namespace iow{
 // io_base
 struct _mutex_type_;
 struct _options_type_;
+struct _context_type_;
   
 struct _before_start_;
 struct _after_start_;

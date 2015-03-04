@@ -5,7 +5,7 @@
 
   _after_start_ -> _run_line_ 
                        |
-               |---->_read_more_  -> _make_buffer_ 
+               |---->_read_more_  -> _make_data_ 
                |        |
                |    _read_some_ [здесь цепочка]                             _buffer_pool_
                |        : асинхронно всегда                                  create()
