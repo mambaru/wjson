@@ -8,6 +8,8 @@
 
 namespace iow{ 
 
+#warning Возвращать итераторы, чтобы не перемещать при подтверждении, а при полученни перемещать в wait object
+  
 class confirm_error
   : public std::logic_error
 {
@@ -25,6 +27,8 @@ struct data_line_options
   size_t bufsize = 8*1024;
   size_t maxbuf  = 8*1024; 
   size_t minbuf  = 0; 
+  // Пул буфферов, для размещения 
+  size_t poolsize = 0;
   // Наверное убрать отсюда
   size_t wrnsize = 1024*1024;
   size_t maxsize = 1024*1024*1024;
