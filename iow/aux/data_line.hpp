@@ -20,8 +20,6 @@ public:
   }
 };
 
-
-
 struct data_line_options
 {
   size_t bufsize = 8*1024;
@@ -37,6 +35,7 @@ struct data_line_options
   bool except_first = true; // Если maxbuff или minbuff != 0 и bufsize!=0
   bool except_confirm = true;
 };
+
 
 template<typename DataType>
 class data_line

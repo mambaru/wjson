@@ -39,7 +39,7 @@ struct aspect_acceptor
 {};
 
 template<typename A>
-class acceptor:
+class acceptor final:
   public ::iow::acceptor_base< typename fas::merge_aspect< A, aspect_acceptor >::type > 
 {
 public:
@@ -49,15 +49,15 @@ public:
   typedef typename super::options_type    options_type;
   typedef typename super::descriptor_type descriptor_type;
   
+  /*
   acceptor(io_service_type& io, const options_type& opt)
     : super( io, opt)
   {
-  }
+  }*/
   
   void listen()
   {
     // COMMON_LOG_MESSAGE("listen " << super::options().host << ":" << super::options().port)
-    
     boost::asio::ip::tcp::resolver resolver( super::get_io_service() );
     boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve(
     {
@@ -70,7 +70,11 @@ public:
     super::descriptor().bind(endpoint);
     super::descriptor().listen( super::options().backlog );
   }
-  
+
+  IOW_INHERITING_CONSTRUCTORS_T(acceptor, super)
+  IOW_IO_BASE_IMPL_T(super)
+
+
 };
 
 }}

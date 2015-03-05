@@ -30,19 +30,19 @@
   
 #define IOW_IO_BASE_IMPL_T(super)                                                                         \
   void start() {                                                                                          \
-    std::lock_guard< mutex_type > lk( super::mutex() );                                                   \
+    std::lock_guard< typename super::mutex_type > lk( super::mutex() );                                                   \
     this->get_aspect().template gete< _before_start_ >()(*this);                                          \
     super::start_(*this);                                                                                 \
     this->get_aspect().template gete< _after_start_ >()(*this);                                           \
   }                                                                                                       \
   void stop() {                                                                                           \
-    std::lock_guard< mutex_type > lk( super::mutex() );                                                   \
+    std::lock_guard< typename super::mutex_type > lk( super::mutex() );                                                   \
     this->get_aspect().template gete< _before_stop_ >()(*this);                                           \
     super::stop_(*this);                                                                                  \
     this->get_aspect().template gete< _after_stop_ >()(*this);                                            \
   }                                                                                                       \
   void reset(const options_type& opt) {                                                                   \
-    std::lock_guard< mutex_type > lk( super::mutex() );                                                   \
+    std::lock_guard< typename super::mutex_type > lk( super::mutex() );                                                   \
     super::reset_(*this, opt);                                                                            \
     this->get_aspect().template gete< _on_reset_ >()(*this);                                              \
   }                                                                                                       \
