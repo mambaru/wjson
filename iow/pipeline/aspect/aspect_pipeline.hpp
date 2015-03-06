@@ -1,5 +1,14 @@
 #pragma once
 
+#include <iow/pipeline/aspect/tags.hpp>
+#include <iow/pipeline/aspect/ad_run_line.hpp>
+#include <iow/pipeline/aspect/ad_read_more.hpp>
+//#include <iow/pipeline/aspect/ad_read_some.hpp>
+#include <iow/pipeline/aspect/ad_read_ready.hpp>
+#include <iow/pipeline/aspect/ad_read_handler.hpp>
+#include <iow/pipeline/descriptor_holder.hpp>
+
+#include <fas/aop.hpp>
 /*
 Базовый конвейер
 
@@ -27,25 +36,12 @@
 
 namespace iow{
   
-struct _on_line_;
-struct _run_line_;
-struct _read_more_;
-struct _make_buffer_; 
-struct _read_some_;
-struct _buffer_pool_;
-struct _read_ready_;
-struct _on_read_;
-struct _read_handler_;
-struct _incoming_;
-struct _outgoing_;  
-struct _write_more_;
-struct _prepare_buffer_;
-struct _write_some_;
-struct _write_ready_;
-struct _on_write_;
-struct _free_buffer_;
-
-struct _data_type_;
-struct _data_ptr_;
+struct aspect_pipeline: fas::aspect<
+  fas::advice< _run_line_, ad_run_line >,
+  fas::advice< _read_more_, ad_read_more >,
+  fas::advice< _read_ready_, ad_read_ready >,
+  fas::advice< _read_handler_, ad_read_handler >,
+  fas::alias< _after_start_, _run_line_>
+>{};
 
 }

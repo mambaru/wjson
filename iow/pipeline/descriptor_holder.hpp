@@ -1,30 +1,37 @@
 #pragma once
 
 #include <iow/basic/io_base.hpp>
+#include <iow/pipeline/aspect/aspect_pipeline.hpp>
 #include <fas/typemanip/has_typename.hpp>
 
 namespace iow{
   
 FAS_HAS_TYPENAME(has_protocol_type, protocol_type)
 
-template<typename A = fas::aspect<> >
+template<typename A = fas::empty_type >
 class descriptor_holder
-  : public io_base< A >
+  : public io_base< typename fas::merge_aspect<A, aspect_pipeline>::type  >
 {
 public:
   
   typedef descriptor_holder<A> self;
-  typedef io_base< A > super;
+  typedef io_base< typename fas::merge_aspect<A, aspect_pipeline>::type > super;
   
   typedef typename super::options_type options_type;
   typedef typename super::io_service_type io_service_type;
   typedef typename super::aspect::template advice_cast<_descriptor_type_>::type descriptor_type;
   
-  descriptor_holder(descriptor_type&& desc, const options_type& opt)
+  descriptor_holder(io_service_type& io, const options_type& opt)
+    : super( io, opt)
+    , _descriptor( io )
+  {
+  }
+  /*descriptor_holder(descriptor_type&& desc, const options_type& opt)
     : super( desc.get_io_service(), opt)
     , _descriptor( std::move(desc) )
   {
   }
+  */
   
   typename descriptor_type::native_handle_type 
   dup_native_() const

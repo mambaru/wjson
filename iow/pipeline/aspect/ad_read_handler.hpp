@@ -1,6 +1,7 @@
 #pragma once
-#include <boost/concept_check.hpp>
-#include <mutex>
+
+#include <iow/pipeline/aspect/tags.hpp>
+#include <memory>
 
 namespace iow{ 
   
@@ -9,6 +10,8 @@ struct ad_read_handler
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
+    std::cout << "READ HANDLER" << std::endl;
+    /*
     if ( t.incoming_handler_ != nullptr )
     {
       outgoung_handler_t callback = t.outgoung_handler_ ;
@@ -34,6 +37,7 @@ struct ad_read_handler
     {
       t.get_aspect().template get<_incoming_>()( std::move(d) );
     }
+    */
   }
 };
 

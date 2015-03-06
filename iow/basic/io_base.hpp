@@ -115,14 +115,16 @@ public:
   }
 
   template<typename Handler>
-  Handler owner_wrap(Handler h)
+  auto owner_wrap(Handler h)
+    -> callback_wrapper< typename std::remove_reference<Handler>::type >
   {
     std::lock_guard< mutex_type > lk(_mutex);
     return std::move( this->owner_wrap_( std::move(h) ) );
   }
 
   template<typename Handler>
-  Handler post_wrap(Handler h)
+  auto post_wrap(Handler h)
+    -> callback_wrapper< typename std::remove_reference<Handler>::type >
   {
     std::lock_guard< mutex_type > lk(_mutex);
     return std::move( this->post_wrap_( std::move(h) ) );
@@ -175,7 +177,8 @@ public:
   }
 
   template<typename Handler>
-  Handler post_wrap_(Handler h)
+  auto post_wrap_(Handler h)
+    -> callback_wrapper< typename std::remove_reference<Handler>::type >
   {
     return std::move(
       this->owner_wrap_(
