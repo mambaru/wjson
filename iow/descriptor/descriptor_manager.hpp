@@ -35,7 +35,16 @@ public:
   virtual descriptor_ptr create()
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    _pool.empty()
+    descriptor_ptr d;
+    if ( !_pool.empty() )
+    {
+      d = std::move(_pool.back());
+      _pool.pop_back();
+    }
+    else
+    {
+      // Сделать и инициализировать 
+    }
     return nullptr;
   };
 
