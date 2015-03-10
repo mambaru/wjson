@@ -2,6 +2,7 @@
 
 #include <iow/pipeline/aspect/tags.hpp>
 #include <memory>
+#include <iostream>
 
 namespace iow{ 
   
@@ -31,7 +32,7 @@ struct ad_read_handler
           }
         });
       }
-      t.incoming_handler_(t.get_id(), std::move(d),  )
+      t.incoming_handler_(t.get_id(), std::move(d), t.outgoung_handler_ )
     }
     else
     {

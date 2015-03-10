@@ -9,19 +9,19 @@ namespace iow{
 FAS_HAS_TYPENAME(has_protocol_type, protocol_type)
 
 template<typename A = fas::empty_type >
-class descriptor_holder
+class pipeline
   : public io_base< typename fas::merge_aspect<A, aspect_pipeline>::type  >
 {
 public:
   
-  typedef descriptor_holder<A> self;
+  typedef pipeline<A> self;
   typedef io_base< typename fas::merge_aspect<A, aspect_pipeline>::type > super;
   
   typedef typename super::options_type options_type;
   typedef typename super::io_service_type io_service_type;
   typedef typename super::aspect::template advice_cast<_descriptor_type_>::type descriptor_type;
   
-  descriptor_holder(io_service_type& io, const options_type& opt)
+  pipeline(io_service_type& io, const options_type& opt)
     : super( io, opt)
     , _descriptor( io )
   {

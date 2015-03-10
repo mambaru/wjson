@@ -6,7 +6,6 @@
 //#include <iow/pipeline/aspect/ad_read_some.hpp>
 #include <iow/pipeline/aspect/ad_read_ready.hpp>
 #include <iow/pipeline/aspect/ad_read_handler.hpp>
-#include <iow/pipeline/descriptor_holder.hpp>
 
 #include <fas/aop.hpp>
 /*

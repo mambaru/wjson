@@ -2,10 +2,9 @@
 
 #include <cstddef>
 #include <atomic>
+#include <iow/basic/types.hpp>
 
 namespace iow{ 
-
-typedef size_t io_id_t;
 
 inline io_id_t create_id()
 {
