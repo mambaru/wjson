@@ -18,6 +18,15 @@ public:
   
   typedef typename super::options_type options_type;
   typedef typename super::io_service_type io_service_type;
+  typedef typename super::context_type context_type;
+  typedef typename context_type::data_type data_type;
+  typedef typename context_type::data_ptr  data_ptr;
+  
+  typedef typename context_type::outgoing_handler_t outgoing_handler_t;
+  typedef typename context_type::incoming_handler_t incoming_handler_t;
+  typedef typename context_type::startup_handler_t  startup_handler_t;
+  typedef typename context_type::shutdown_handler_t shutdown_handler_t;
+
   typedef typename super::aspect::template advice_cast<_descriptor_type_>::type descriptor_type;
   
   descriptor_holder(io_service_type& io, const options_type& opt)
@@ -25,10 +34,11 @@ public:
     , _descriptor( io )
   {}
 
+  /*
   descriptor_holder(const options_type& opt)
     : super( opt)
     , _descriptor( super::get_io_service() )
-  {}
+  {}*/
   
   /*
    * 1. создаем новый объект
@@ -124,7 +134,19 @@ public:
   {
     return _descriptor;
   }
-  
+
+// ------------------------------
+
+  descriptor_type& descriptor_()
+  {
+    return _descriptor;
+  }
+
+  const descriptor_type& descriptor_() const
+  {
+    return _descriptor;
+  }
+
 
 protected:
   template<typename T>

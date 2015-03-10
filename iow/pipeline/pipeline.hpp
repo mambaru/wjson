@@ -1,21 +1,21 @@
 #pragma once
 
-#include <iow/basic/io_base.hpp>
+#include <iow/descriptor/descriptor_holder.hpp>
 #include <iow/pipeline/aspect/aspect_pipeline.hpp>
 #include <fas/typemanip/has_typename.hpp>
 
 namespace iow{
   
-FAS_HAS_TYPENAME(has_protocol_type, protocol_type)
+//FAS_HAS_TYPENAME(has_protocol_type, protocol_type)
 
 template<typename A = fas::empty_type >
 class pipeline
-  : public io_base< typename fas::merge_aspect<A, aspect_pipeline>::type  >
+  : public descriptor_holder< typename fas::merge_aspect<A, aspect_pipeline>::type  >
 {
 public:
   
   typedef pipeline<A> self;
-  typedef io_base< typename fas::merge_aspect<A, aspect_pipeline>::type > super;
+  typedef descriptor_holder< typename fas::merge_aspect<A, aspect_pipeline>::type > super;
   
   typedef typename super::options_type options_type;
   typedef typename super::io_service_type io_service_type;
@@ -23,16 +23,10 @@ public:
   
   pipeline(io_service_type& io, const options_type& opt)
     : super( io, opt)
-    , _descriptor( io )
   {
   }
-  /*descriptor_holder(descriptor_type&& desc, const options_type& opt)
-    : super( desc.get_io_service(), opt)
-    , _descriptor( std::move(desc) )
-  {
-  }
-  */
   
+  /*
   typename descriptor_type::native_handle_type 
   dup_native_() const
   {
@@ -43,26 +37,12 @@ public:
   DescriptorType dup_descriptor_(IOServiceType& io, const ProtocolType& protocol)
   {
     return std::move( DescriptorType(io, protocol, this->dup_native_() ) );
-    /*
-    typedef DescriptorType dup_descriptor_type;
-    typedef typename dup_descriptor_type::native_handle_type dup_native_type;
-    dup_native_type f = ::dup( this->descriptor().native_handle() );
-    dup_descriptor_type dup_descriptor(io, protocol, f);
-    return std::move(dup_descriptor);
-    */
   }
 
   template<typename DescriptorType, typename IOServiceType>
   DescriptorType dup_descriptor_1(IOServiceType& io, fas::false_)
   {
     return std::move( DescriptorType(io, this->dup_native_() ) );
-    /*
-    typedef DescriptorType dup_descriptor_type;
-    typedef typename dup_descriptor_type::native_handle_type dup_native_type;
-    dup_native_type f = ::dup( this->descriptor().native_handle() );
-    dup_descriptor_type dup_descriptor(io, f);
-    return std::move(dup_descriptor);
-    */
   }
 
   template<typename DescriptorType, typename IOServiceType>
@@ -84,13 +64,6 @@ public:
         fas::bool_< has_protocol_type<DescriptorType>::value >()
       )
     );
-    /*
-    typedef DescriptorType dup_descriptor_type;
-    typedef typename dup_descriptor_type::native_handle_type dup_native_type;
-    dup_native_type f = ::dup( this->descriptor().native_handle() );
-    dup_descriptor_type dup_descriptor(io, f);
-    return std::move(dup_descriptor);
-    */
   }
 
   template<typename Holder, typename ProtocolType>
@@ -102,7 +75,6 @@ public:
   self&& dup_holder_(io_service_type& io, const options_type& opt)
   {
     return std::move(self( std::move(this->dup_descriptor_< descriptor_type >(io)), opt));
-    //return std::move( this->dup_holder_<self>( io, opt) );
   }
 
   self&& dup_holder_(const options_type& opt)
@@ -115,20 +87,6 @@ public:
     return std::move( this->dup_holder_( this->options_() ) );
   }
 
-  
-  
-  /*
-  template<typename Holder>
-  Holder dup(typename Holder::options_type& opt)
-  {
-    typedef typename Holder::descriptor_type dup_descriptor_type;
-    typedef typename dup_descriptor_type::native_handle_type dup_native_type;
-    dup_native_type f = ::dup( this->descriptor().native_handle() );
-    dup_descriptor_type dup_descriptor(this->get_io_service(), typename descriptor_type::protocol_type(), f );
-    return Holder( std::move(dup_descriptor), opt );
-  }
-  */
-  
   descriptor_type& descriptor()
   {
     return _descriptor;
@@ -138,9 +96,11 @@ public:
   {
     return _descriptor;
   }
+  */
   
 
 protected:
+  /*
   template<typename T>
   void stop_(T& t)
   {
@@ -154,6 +114,7 @@ protected:
     
     super::stop_(t);
   }
+  */
   
   /*
   template<typename DescriptorType, typename IOService, typename ProtocolType>
@@ -170,7 +131,7 @@ protected:
   */
 
 private:
-  descriptor_type _descriptor;
+  //descriptor_type _descriptor;
 };
 
 }

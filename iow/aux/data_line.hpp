@@ -8,7 +8,7 @@
 
 namespace iow{ 
 
-#warning Возвращать итераторы, чтобы не перемещать при подтверждении, а при полученни перемещать в wait object
+#warning Возвращать итераторы, чтобы не перемещать при подтверждении, а при полученни перемещать в wait object. Или сразу boost::asio::buffer?
   
 class confirm_error
   : public std::logic_error

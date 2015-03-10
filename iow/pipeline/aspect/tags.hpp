@@ -30,7 +30,7 @@ namespace iow{
 struct _on_line_;
 struct _run_line_;
 struct _read_more_;
-struct _make_buffer_; 
+struct _make_data_; 
 struct _read_some_;
 struct _buffer_pool_;
 struct _read_ready_;
@@ -45,7 +45,7 @@ struct _write_ready_;
 struct _on_write_;
 struct _free_buffer_;
 
-struct _data_type_;
-struct _data_ptr_;
+// struct _data_type_;
+// struct _data_ptr_;
 
 }

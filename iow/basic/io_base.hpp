@@ -70,12 +70,13 @@ public:
   io_base(io_service_type& io_service, const options_type& opt = options_type() )
     : _io_service(io_service)
     , _options(opt)
-    , _status(false)
+    , _context()
+    // , _status(false)
+    //, _id(0)
   {
-    _id = ::iow::create_id();
   }
 
-  io_id_t get_id() const { return _id;}
+  io_id_t get_id() const { return this->context_();}
   
   io_service_type& get_io_service()
   {
@@ -155,12 +156,12 @@ public:
 
   bool status_() const
   {
-    return _status;
+    return _context.status;
   }
 
   void cancel_()
   {
-    _status = false;
+    _context.reset();
   }
 
   template<typename Handler>
@@ -200,30 +201,31 @@ protected:
   {
     _owner.reset();
     _options = opt;
-    _status = false;
-    _id = ::iow::create_id();
     _context.reset();
   }
 
   template<typename T>
   void start_(T&)
   {
-    _status = true;
+    _context.status = true;
+    _context.id = ::iow::create_id();
+    _owner.reset();
+    _context.reset();
   }
   
   template<typename T>
   void stop_(T&)
   {
     _owner.reset();
-    _status = false;
+    _context.reset();
   }
   
 private:
   callback_owner _owner;
   io_service_type& _io_service;
   options_type _options;
-  bool _status;
-  io_id_t _id;
+  // bool _status;
+  // io_id_t _id;
   mutable mutex_type _mutex;
   context_type _context;
 };

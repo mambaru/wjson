@@ -1,15 +1,15 @@
 #pragma once
 
-#include <iow/basic/types.hpp>
+#include <iow/descriptor/descriptor_context.hpp>
 #include <memory>
 #include <functional>
 
 namespace iow{
 
-typedef std::function<void()> startup_handler;
-struct pipeline_context
+template<typename DataType, typename DataPtr = std::unique_ptr<DataType> >
+struct pipeline_context: descriptor_context<DataType, DataPtr >
 {
 
-}
+};
 
 }

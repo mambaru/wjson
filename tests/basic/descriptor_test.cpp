@@ -3,7 +3,8 @@
 #include <sstream>
 #include <memory>
 #include <iow/basic/io_context.hpp>
-#include <iow/basic/descriptor_holder.hpp>
+#include <iow/descriptor/descriptor_holder.hpp>
+#include <iow/descriptor/descriptor_context.hpp>
 #include <iow/aux/memory.hpp>
 #include <boost/asio.hpp>
 
@@ -20,7 +21,7 @@ struct aspect_test: fas::aspect< fas::type_list_n<
   // fas::type< ::iow::_descriptor_type_, ::boost::asio::posix::stream_descriptor>,
   fas::type< ::iow::_descriptor_type_, ::boost::asio::ip::tcp::socket>,
   fas::type< ::iow::_options_type_, fas::empty_type>,
-  fas::type< ::iow::_context_type_, iow::io_context>,
+  fas::type< ::iow::_context_type_, iow::descriptor_context<std::string> >,
   fas::type< ::iow::_mutex_type_, std::mutex>
   >::type
 > {};

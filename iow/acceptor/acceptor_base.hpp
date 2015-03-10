@@ -1,34 +1,21 @@
 #pragma once
 
-#include<iow/pipeline/pipeline.hpp>
+#include<iow/descriptor/descriptor_holder.hpp>
+#include<iow/descriptor/descriptor_context.hpp>
+#include<iow/pipeline/ioline/ioline.hpp>
+#include<iow/pipeline/ioline/ioline_context.hpp>
+#include<iow/pipeline/ioline/ioline_options.hpp>
 #include <iow/basic/io_context.hpp>
 #include <list>
 
 namespace iow{
   
-struct acceptor_context: ::iow::io_context
+template<typename ConnType>
+struct acceptor_context: ::iow::ioline_context<ConnType >
 {
   
 };
 
-struct ad_make_descriptor
-{
-  template<typename T>
-  auto operator()(T& t)
-    -> typename T::data_ptr
-  {
-    std::cout << "Make descriptor..." << std::endl;
-    typedef typename T::data_type descriptor_type;
-    typedef typename T::data_ptr  descriptor_ptr;
-    descriptor_ptr d = std::make_shared<descriptor_type>( t.get_io_service(), t.options_().connection );
-    return d;
-    
-    /*
-      typedef typename T::descriptor_type descriptor_type;
-      return std::move( descriptor_type(t.get_io_service(), t.options() ) );
-    */
-  }
-};
 
 struct ad_accept
 {
@@ -55,56 +42,27 @@ struct ad_accept
       conn->descriptor(),
       callback
     );
-    
-    /*
-    auto dd = std::make_shared<typename T::data_ptr>( std::move(d) );
-    auto pthis=t.shared_from_this();
-    auto callback =         [pthis, dd]( boost::system::error_code ec )
-        { 
-          typename T::lock_guard lk( pthis->mutex() );
-          
-          if ( !pthis->status() )
-            return;
-
-          if ( !pthis->descriptor().is_open() )
-            return;
-          
-          pthis->get_aspect().template get< _outgoing_>()(*pthis, std::move(*dd), ec);
-        };
-    */
-    //auto wcallback = t.owner().wrap(callback);
-
-    
-    /*
-    t.mutex().unlock();
-    t.descriptor().async_accept
-    (
-      **dd,
-      callback
-    );
-    t.mutex().lock();
-    */
   }
 };
 
 struct aspect_acceptor_base: fas::aspect< 
-  fas::type< _context_type_, acceptor_context>
-  ,fas::advice<_make_buffer_, ad_make_descriptor>
-  , fas::advice<_read_some_, ad_accept>
+  /*fas::type< _context_type_, acceptor_context>
+  ,*//*fas::advice<_make_buffer_, ad_make_descriptor>
+  ,*/ fas::advice<_read_some_, ad_accept>
 > {};
 
 template<typename A = fas::aspect<> >
 class acceptor_base
-  : public pipeline< typename fas::merge_aspect<A, aspect_acceptor_base>::type  >
+  : public ioline< typename fas::merge_aspect<A, aspect_acceptor_base>::type  >
 {
 public:
   typedef acceptor_base<A> self;
-  typedef pipeline< typename fas::merge_aspect<A, aspect_acceptor_base>::type  > super;
+  typedef ioline< typename fas::merge_aspect<A, aspect_acceptor_base>::type  > super;
   typedef typename super::io_service_type io_service_type;
   typedef typename super::options_type options_type;
   
-  typedef typename super::aspect::template advice_cast<_data_type_>::type data_type;
-  typedef typename super::aspect::template advice_cast<_data_ptr_>::type data_ptr;
+  //typedef typename super::aspect::template advice_cast<_data_type_>::type data_type;
+  //typedef typename super::aspect::template advice_cast<_data_ptr_>::type data_ptr;
 
   
   acceptor_base(io_service_type& io, const options_type& opt)
@@ -117,14 +75,14 @@ namespace ip{ namespace tcp{
 
 struct connection_options{};
   
-struct acceptor_options
+struct acceptor_options: ioline_options<connection_options>
 {
   size_t backlog = 1024;
   
   std::string host = "0.0.0.0";
   std::string port = "12345";
   
-  connection_options connection;
+  //connection_options connection;
 };
 
 
@@ -153,7 +111,7 @@ struct ad_listen
   //fas::type< _data_ptr_, std::shared_ptr< descriptor_holder<> > > // TODO: временно
 
 
-struct connection_context{};
+struct connection_context: descriptor_context< std::string, std::unique_ptr<std::string> > {};
 
 struct aspect_connection: fas::aspect<
   fas::type<_options_type_, connection_options>,
@@ -177,12 +135,15 @@ public:
 };
 
 
+struct acceptor_context: descriptor_context< connection<>, std::shared_ptr<connection<> > >{};
+
 struct aspect_acceptor
   : fas::aspect< 
       fas::type<_descriptor_type_, ::iow::asio::ip::tcp::acceptor >,
       fas::type<_options_type_, acceptor_options>,
-      fas::type<_data_type_, connection<> >,
-      fas::type<_data_ptr_, std::shared_ptr<connection<> > >,
+      fas::type<_context_type_, acceptor_context>,
+      //fas::type<_data_type_, connection<> >,
+      //fas::type<_data_ptr_, std::shared_ptr<connection<> > >,
       fas::type< ::iow::_mutex_type_, std::mutex>,
       fas::advice<_listen_, ad_listen>
     > 

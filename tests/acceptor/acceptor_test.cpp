@@ -4,7 +4,7 @@
 
 typedef fas::aspect< 
   fas::type< iow::_options_type_, fas::empty_type>,
-  fas::type< iow::_context_type_, fas::empty_type>,
+  //fas::type< iow::_context_type_, fas::empty_type>,
   fas::type< iow::_mutex_type_, fas::empty_type>,
   fas::type< iow::_descriptor_type_, ::iow::asio::ip::tcp::acceptor>
 > aspect_tmp;
