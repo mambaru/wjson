@@ -9,7 +9,7 @@ namespace iow{
 struct ad_read_handler
 {
   template<typename T>
-  void operator()(T& t, typename T::data_ptr d)
+  void operator()(T& /*t*/, typename T::data_ptr /*d*/)
   {
     std::cout << "READ HANDLER" << std::endl;
     /*

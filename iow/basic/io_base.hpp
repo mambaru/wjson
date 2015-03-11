@@ -5,7 +5,6 @@
 #include <iow/basic/tags.hpp>
 #include <iow/aux/asio.hpp>
 
-
 #include <fas/aop.hpp>
 
 #include <thread>
@@ -41,7 +40,7 @@
     super::stop_(*this);                                                                                  \
     this->get_aspect().template gete< _after_stop_ >()(*this);                                            \
   }                                                                                                       \
-  void reset(const options_type& opt) {                                                                   \
+  void reset(const typename super::options_type& opt) {                                                                   \
     std::lock_guard< typename super::mutex_type > lk( super::mutex() );                                                   \
     super::reset_(*this, opt);                                                                            \
     this->get_aspect().template gete< _on_reset_ >()(*this);                                              \
@@ -68,7 +67,8 @@ public:
   }
   
   io_base(io_service_type& io_service, const options_type& opt = options_type() )
-    : _io_service(io_service)
+    : super()
+    , _io_service(io_service)
     , _options(opt)
     , _context()
     // , _status(false)

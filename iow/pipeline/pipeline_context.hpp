@@ -4,12 +4,12 @@
 #include <memory>
 #include <functional>
 
-namespace iow{
+namespace iow{ namespace pipeline{
 
 template<typename DataType, typename DataPtr = std::unique_ptr<DataType> >
-struct pipeline_context: descriptor_context<DataType, DataPtr >
+struct context: descriptor_context<DataType, DataPtr >
 {
 
 };
 
-}
+}}

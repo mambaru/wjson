@@ -2,13 +2,13 @@
 
 #include <iow/pipeline/pipeline_context.hpp>
 
-namespace iow{
+namespace iow{ namespace ioline{
   
 template<typename ConnType >
-struct ioline_context
-  : pipeline_context< ConnType, std::shared_ptr<ConnType>  >
+struct context
+  : public ::iow::pipeline::context< ConnType, std::shared_ptr<ConnType>  >
 {
-  using pipeline_context< ConnType, std::shared_ptr<ConnType>  >::reset;
+  using ::iow::pipeline::context< ConnType, std::shared_ptr<ConnType>  >::reset;
 };
 
-}
+}}

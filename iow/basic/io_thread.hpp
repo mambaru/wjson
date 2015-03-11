@@ -19,7 +19,7 @@ class io_thread
 public:
   typedef io_thread self;
   typedef Subject subject_type;
-  typedef std::shared_ptr<subject_type>  subject_ptr;
+  //typedef std::shared_ptr<subject_type>  subject_ptr;
   typedef typename subject_type::io_service_type io_service_type;
   typedef typename subject_type::options_type options_type;
   

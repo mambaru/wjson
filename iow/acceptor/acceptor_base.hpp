@@ -11,7 +11,7 @@
 namespace iow{
   
 template<typename ConnType>
-struct acceptor_context: ::iow::ioline_context<ConnType >
+struct acceptor_context: ::iow::ioline::context<ConnType >
 {
   
 };
@@ -53,11 +53,11 @@ struct aspect_acceptor_base: fas::aspect<
 
 template<typename A = fas::aspect<> >
 class acceptor_base
-  : public ioline< typename fas::merge_aspect<A, aspect_acceptor_base>::type  >
+  : public descriptor_holder< typename fas::merge_aspect<A, aspect_acceptor_base>::type  >
 {
 public:
   typedef acceptor_base<A> self;
-  typedef ioline< typename fas::merge_aspect<A, aspect_acceptor_base>::type  > super;
+  typedef descriptor_holder< typename fas::merge_aspect<A, aspect_acceptor_base>::type  > super;
   typedef typename super::io_service_type io_service_type;
   typedef typename super::options_type options_type;
   
@@ -122,9 +122,9 @@ struct aspect_connection: fas::aspect<
 
 template<typename A = fas::aspect<> >
 class connection
-  : public ::iow::pipeline< typename fas::merge_aspect<A, aspect_connection>::type >
+  : public ::iow::descriptor_holder< typename fas::merge_aspect<A, aspect_connection>::type >
 {
-  typedef ::iow::pipeline< typename fas::merge_aspect<A, aspect_connection>::type > super;
+  typedef ::iow::descriptor_holder< typename fas::merge_aspect<A, aspect_connection>::type > super;
   typedef connection<A> self;
 public:
   connection(typename super::io_service_type& io, const typename super::options_type& opt)

@@ -5,6 +5,7 @@
 
 namespace iow{
   
+  /*
 template<typename A = fas::empty_type >
 class ioline
   : public pipeline< typename fas::merge_aspect<A, aspect_ioline>::type  >
@@ -27,5 +28,6 @@ protected:
 private:
 
 };
+*/
 
 }
