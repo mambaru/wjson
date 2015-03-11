@@ -1,8 +1,8 @@
 #include <fas/aop.hpp>
 #include <iow/types.hpp>
 #include <iow/descriptor/descriptor_options.hpp>
-#include <iow/pipeline/pipeline_context.hpp>
-#include <iow/pipeline/aspect/aspect_pipeline.hpp>
+#include <iow/proactor/pipeline_context.hpp>
+#include <iow/proactor/aspect/aspect_pipeline.hpp>
 #include <iow/basic/tags.hpp>
 #include <iow/aux/memory.hpp>
 

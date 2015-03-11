@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iow/descriptor/descriptor_holder.hpp>
-#include <iow/pipeline/aspect/aspect_pipeline.hpp>
+#include <iow/proactor/aspect/aspect_pipeline.hpp>
 #include <fas/typemanip/has_typename.hpp>
 
 namespace iow{

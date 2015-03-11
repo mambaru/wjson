@@ -1,7 +1,7 @@
 #pragma once
 
-#include <iow/pipeline/pipeline.hpp>
-#include <iow/pipeline/ioline/aspect/aspect_ioline.hpp>
+#include <iow/proactor/pipeline.hpp>
+#include <iow/proactor/ioline/aspect/aspect_ioline.hpp>
 
 namespace iow{
   
