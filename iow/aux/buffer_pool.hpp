@@ -9,13 +9,13 @@ class buffer_pool
   : public data_pool<DataType>
 {
   typedef data_pool<DataType> super;
-  typedef typename super::data_type;
-  typedef typename super::data_ptr;
+  typedef typename super::data_type data_type;
+  typedef typename super::data_ptr  data_ptr;
   
 public:
   
-  typedef DataType data_type;
-  typedef std::unique_ptr<data_type> data_ptr;
+  //typedef DataType data_type;
+  //typedef std::unique_ptr<data_type> data_ptr;
   
   buffer_pool()
     : super()
@@ -28,7 +28,7 @@ public:
     _buffsize = buffsize;
   }
   
-  data_ptr create() const
+  data_ptr create() 
   {
     data_ptr d = super::create();
     if ( d->empty() )

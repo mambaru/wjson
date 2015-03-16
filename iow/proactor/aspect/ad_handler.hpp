@@ -4,14 +4,14 @@
 #include <memory>
 #include <iostream>
 
-namespace iow{ 
+namespace iow{ namespace proactor{
   
-struct ad_read_handler
+struct ad_handler
 {
   template<typename T>
-  void operator()(T& /*t*/, typename T::data_ptr /*d*/)
+  void operator()(T& /*t*/, typename T::data_ptr d)
   {
-    std::cout << "READ HANDLER" << std::endl;
+    std::cout << "READ HANDLER " << std::string(d->begin(), d->end() ) << std::endl;
     /*
     if ( t.incoming_handler_ != nullptr )
     {
@@ -42,4 +42,4 @@ struct ad_read_handler
   }
 };
 
-}
+}}

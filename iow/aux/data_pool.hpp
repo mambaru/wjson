@@ -24,7 +24,7 @@ public:
     _pool.resize(poolsize);
   }
   
-  data_ptr create() const
+  data_ptr create()
   {
     if ( _pool.empty() )
       return std::make_unique<data_type>();

@@ -1,5 +1,13 @@
 #pragma once
 
+#include <iow/proactor/aspect/tags.hpp>
+#include <iow/proactor/aspect/ad_run.hpp>
+#include <iow/proactor/aspect/ad_more.hpp>
+//#include <iow/pipeline/aspect/ad_read_some.hpp>
+#include <iow/proactor/aspect/ad_ready.hpp>
+#include <iow/proactor/aspect/ad_handler.hpp>
+
+#include <fas/aop.hpp>
 /*
 Базовый конвейер
 
@@ -27,25 +35,16 @@
 
 namespace iow{ namespace proactor{
   
-struct _on_run_;
-struct _run_;
-struct _more_;
-struct _make_data_; 
-struct _some_;
-struct _buffer_pool_;
-struct _ready_;
-struct _on_ready_;
-struct _handler_;
-struct _incoming_;
-struct _outgoing_;  
-struct _write_more_;
-struct _prepare_buffer_;
-struct _write_some_;
-struct _write_ready_;
-struct _on_write_;
-struct _free_buffer_;
+typedef fas::type_list_n<
+  fas::advice< _run_, ad_run >,
+  fas::advice< _more_, ad_more >,
+  fas::advice< _ready_, ad_ready >,
+  fas::advice< _handler_, ad_handler >,
+  fas::alias< _after_start_, _run_>
+>::type advice_list;  
 
-// struct _data_type_;
-// struct _data_ptr_;
+struct aspect: fas::aspect<
+  advice_list
+>{};
 
 }}

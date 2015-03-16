@@ -2,7 +2,7 @@
 #include <iow/types.hpp>
 #include <iow/descriptor/descriptor_options.hpp>
 #include <iow/proactor/pipeline_context.hpp>
-#include <iow/proactor/aspect/aspect_pipeline.hpp>
+#include <iow/proactor/aspect/aspect.hpp>
 #include <iow/basic/tags.hpp>
 #include <iow/aux/memory.hpp>
 
@@ -52,7 +52,7 @@ struct ad_async_read_some
       std::cout << ec.message() << std::endl;
       std::cout << bytes_transferred << std::endl;
       
-      pthis->get_aspect().template get<_read_handler_>()(*pthis, std::move(*dd) /*, std::move(ec), bytes_transferred*/);
+      pthis->get_aspect().template get<_handler_>()(*pthis, std::move(*dd) /*, std::move(ec), bytes_transferred*/);
     };
     
     //t.mutex().unlock();
@@ -65,14 +65,14 @@ struct ad_async_read_some
 
 template<domain D, trasport Tr>
 struct aspect_protocol: fas::aspect<
-  aspect_pipeline,
+  ::iow::proactor::advice_list,
   fas::type<_options_type_, descriptor_options>,
   fas::type<_context_type_, pipeline::context< std::vector<char>, std::unique_ptr<std::vector<char>> > >,
   fas::type<_mutex_type_, std::recursive_mutex >,
   fas::type<_descriptor_type_, ::boost::asio::posix::stream_descriptor >,
   fas::advice<_make_data_, ad_make_data>,
-  fas::advice<_read_some_, ad_async_read_some>,
-  fas::group<_after_start_, _run_line_>
+  fas::advice<_some_, ad_async_read_some>,
+  fas::group<_after_start_, _run_>
 >{};
 
 template<type Ty>

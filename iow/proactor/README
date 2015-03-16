@@ -43,3 +43,16 @@ dgram основной режим для udp (в одном пакете вес�
                        _free_buffer_ -----------------------------------------
                          
   */                       
+
+
+Аспект TCP-connection stream text-line (rn):
+aspect - готов к употреблению
+advice_list (не включает context, options, и alias )
+
+proactor::data::stream::line::advice_list
+  //aspect(context, options)
+  -> proactor::advice_list (не включает context, options, и alias )
+  -> proactor::data::advice_list
+  -> proactor::data::stream::advice_list
+  -> proactor::data::line::advice_list
+
