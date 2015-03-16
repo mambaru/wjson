@@ -17,7 +17,7 @@
 class stream_emulator
 {
 public:
-  stream_descriptor(iow::asio::io_service& io)
+  stream_emulator(::iow::asio::io_service& io)
     : _io(io)
     , _step(0)
     , _pos(0)

@@ -19,10 +19,7 @@ struct ad_prepare_data
   template<typename T>
   typename T::data_ptr operator()(T& t, typename T::data_ptr d)
   {
-    return std::move(d);
-#warning TODO
-    //return t.context_().incoming_biffer.create();
-    //return std::make_unique<typename T::data_type>( t.options().input_buffer_size );
+    return t.context_().incoming_buffer.create();
   }
 };
 
