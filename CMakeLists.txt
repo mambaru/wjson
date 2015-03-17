@@ -7,8 +7,9 @@ include_directories(../../faslib)
 
 # add_subdirectory(tests)
 
-if ( WFC_BUILD_ALL )
-  #add_subdirectory(tests)
+if ( IOW_BUILD_ALL )
+  enable_testing()
+  add_subdirectory(tests)
   #add_subdirectory(tutorial)
 endif()
 
