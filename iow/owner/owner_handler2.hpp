@@ -14,20 +14,19 @@ namespace iow{
 template<typename H, typename NA >
 struct owner_handler2
 {
-  H _handler;
-  NA _not_alive;
   typedef std::weak_ptr<int> weak_type;
   
-  owner_handler2(H&& h, NA&& not_alive,  weak_type alive)
-    : _handler( h )
-    , _not_alive(not_alive )
+  owner_handler2(H&& h, NA&& nh,  weak_type alive)
+    : _handler(  std::forward<H>(h) )
+    , _not_alive(  std::forward<NA>(nh) )
     , _alive(alive)
   {
   }
   
   template <class... Args>
   auto operator()(Args&&... args)
-    -> decltype( _handler(std::forward<Args>(args)...)) 
+    // -> decltype( _handler(std::forward<Args>(args)...)) 
+    ->  typename std::result_of< H(Args&&...) >::type
   {
     if ( auto p = _alive.lock() )
     {
@@ -37,6 +36,8 @@ struct owner_handler2
     return _not_alive(std::forward<Args>(args)...);
   }
 private:
+  H _handler;
+  NA _not_alive;
   weak_type _alive;
 };
 

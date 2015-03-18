@@ -1,5 +1,6 @@
 set( SUITE_LIST
   io_base_suite.cpp
+  flow_suite.cpp
 )
 
 add_executable( io_test ${FAS_TESTING_CPP} io_test.cpp ${SUITE_LIST} )

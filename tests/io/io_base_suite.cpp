@@ -7,15 +7,16 @@
 class foo
 {
 public:
-  virtual ~foo(){};
+  ~foo(){ /*std::cout << "~foo()" << std::endl;*/ printf("~foo\n"); };
   foo():counter(0){std::cout << "foo()" << std::endl;}
-  foo(const foo& f){std::cout << "foo(const foo&)" << std::endl; counter = f.counter + 1;}
-  foo(foo&& f){std::cout << "foo(foo&&)" << std::endl; counter = f.counter + 1;}
+  foo(const foo& f){ std::cout << "foo(const foo&)" << std::endl; counter = f.counter + 1;}
+  //foo(foo&& f){std::cout << "foo(foo&&)" << std::endl; counter = f.counter + 1;}
   void operator=( foo& f){std::cout << "=(foo&)" << std::endl; counter = f.counter + 1;}
-  void operator=( foo&& f){std::cout << "=(foo&&)" << std::endl; counter = f.counter + 1;}
+  //void operator=( foo&& f){std::cout << "=(foo&&)" << std::endl; counter = f.counter + 1;}
   void doit() const{ std::cout << "counter: " << counter << std::endl;}
   int counter;
 };
+
 
 struct _start_;
 struct ad_start
@@ -132,6 +133,8 @@ UNIT(start, "")
   t << is_true< assert >(io.get_id()==1) << FAS_TESTING_FILE_LINE;
 }
 
+void global_fun(int i){ std::cout << "global " << i << std::endl;}
+
 UNIT(owner, "")
 {
   using namespace fas::testing;
@@ -139,15 +142,22 @@ UNIT(owner, "")
   
   iobase io;
   bool flag = false;
-  typedef std::function<void()> handler_type;
   
   foo f;
   int counter = 0;
-  auto test1= io.wrap( [&flag, &counter, f](bool val)
+  auto test1= io.wrap( std::move([&flag, &counter, f](bool val)
   {
     flag = val;
     counter = f.counter;
-  } );
+  }) );
+  std::cout << "??" << std::endl;
+  auto alive = io.get_aspect().get< ::iow::io::_owner_ >().alive();
+  std::cout << *alive << std::endl;
+  
+  std::cout << "??? " << std::endl;
+  
+  auto global_test= io.wrap(&global_fun);
+  global_test(33);
   
   test1(true);
   t << is_true< assert >(counter==1) << counter<< FAS_TESTING_FILE_LINE;

@@ -47,21 +47,26 @@ public:
   */
   
   template<typename Handler>
-  //owner_handler<typename std::remove_reference<Handler>::type>
-  owner_handler<Handler>
-  wrap(Handler&& handler)
+  owner_handler<typename std::remove_reference<Handler>::type>
+  //owner_handler<Handler>
+  wrap(Handler&& h)
   {
-    return owner_handler< Handler >( handler, _alive);
-    //return owner_handler< typename std::remove_reference<Handler>::type>( handler, _alive);
+    //return owner_handler< Handler >( handler, _alive);
+    return std::move(owner_handler< typename std::remove_reference<Handler>::type >( std::forward<Handler>(h), _alive));
   }
 
   template<typename Handler, typename NotAliveHandler>
-  //owner_handler2< typename std::remove_reference<Handler>::type, NotAliveHandler>
-  owner_handler2< Handler, NotAliveHandler>
-  wrap(Handler&& handler, NotAliveHandler&& not_alive)
+  owner_handler2< typename std::remove_reference<Handler>::type, typename std::remove_reference<NotAliveHandler>::type>&&
+  //owner_handler2< Handler, NotAliveHandler>
+  wrap(Handler&& h, NotAliveHandler&& nh)
   {
-    return owner_handler2< Handler, NotAliveHandler>( handler, not_alive, _alive);
-    //return owner_handler2< typename std::remove_reference<Handler>::type, NotAliveHandler>( handler, not_alive, _alive);
+    //return owner_handler2< Handler, NotAliveHandler>( handler, not_alive, _alive);
+    return std::move(
+      owner_handler2< 
+	typename std::remove_reference<Handler>::type, 
+	typename std::remove_reference<NotAliveHandler>::type
+      >( std::forward<Handler>(h), std::forward<NotAliveHandler>(nh), _alive)
+    );
   }
 
 private:

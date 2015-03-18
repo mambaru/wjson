@@ -16,7 +16,7 @@ struct ad_more
     }
     else
     {
-      t.get_aspect().template gete< _on_done_ >(t);
+      t.get_aspect().template gete< _on_done_ >()(t);
     }
   }
 };
