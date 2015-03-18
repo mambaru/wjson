@@ -18,7 +18,7 @@ struct owner_handler2
   NA _not_alive;
   typedef std::weak_ptr<int> weak_type;
   
-  owner_handler2(H h, NA not_alive,  weak_type alive)
+  owner_handler2(H&& h, NA&& not_alive,  weak_type alive)
     : _handler( h )
     , _not_alive(not_alive )
     , _alive(alive)

@@ -17,7 +17,7 @@ struct owner_handler
   H _handler;
   typedef std::weak_ptr<int> weak_type;
   
-  owner_handler(H h, weak_type alive)
+  owner_handler(H&& h, weak_type alive)
     : _handler( h )
     , _alive(alive)
   {
