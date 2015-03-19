@@ -30,43 +30,38 @@ public:
   owner(owner&& ) = default;
   owner& operator = (owner&& ) = default;
 
-  alive_type& alive() {return _alive;}
-  const alive_type& alive() const {return _alive;}
+  alive_type& alive() { return _alive; }
+  const alive_type& alive() const { return _alive; }
   
   void reset()
   {
-    _alive = std::make_shared<int>(1);
+    _alive = std::make_shared<int>(*_alive + 1);
   }
-  
-  /*
-  template<typename Handler>
-  struct handler
-  {
-    typedef owner_handler< typename std::remove_reference<Handler>::type > type;
-  };
-  */
   
   template<typename Handler>
   owner_handler<typename std::remove_reference<Handler>::type>
-  //owner_handler<Handler>
   wrap(Handler&& h)
   {
-    //return owner_handler< Handler >( handler, _alive);
-    return std::move(owner_handler< typename std::remove_reference<Handler>::type >( std::forward<Handler>(h), _alive));
+    return owner_handler< typename std::remove_reference<Handler>::type >( std::forward<Handler>(h), std::weak_ptr<int>(_alive));
   }
 
-  template<typename Handler, typename NotAliveHandler>
-  owner_handler2< typename std::remove_reference<Handler>::type, typename std::remove_reference<NotAliveHandler>::type>&&
-  //owner_handler2< Handler, NotAliveHandler>
-  wrap(Handler&& h, NotAliveHandler&& nh)
+  template<typename Handler, typename AltHandler>
+  owner_handler2< 
+    typename std::remove_reference<Handler>::type, 
+    typename std::remove_reference<AltHandler>::type
+  >
+  wrap(Handler&& h, AltHandler&& nh)
   {
-    //return owner_handler2< Handler, NotAliveHandler>( handler, not_alive, _alive);
-    return std::move(
+    return 
       owner_handler2< 
-	typename std::remove_reference<Handler>::type, 
-	typename std::remove_reference<NotAliveHandler>::type
-      >( std::forward<Handler>(h), std::forward<NotAliveHandler>(nh), _alive)
-    );
+        typename std::remove_reference<Handler>::type, 
+        typename std::remove_reference<AltHandler>::type
+      >( 
+          std::forward<Handler>(h), 
+          std::forward<AltHandler>(nh), 
+          std::weak_ptr<int>(_alive)
+       )
+    ;
   }
 
 private:

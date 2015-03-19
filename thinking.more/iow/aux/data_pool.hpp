@@ -22,6 +22,7 @@ public:
   {
     _poolsize = poolsize;
     _pool.resize(poolsize);
+    _pool.shrink_to_fit();
   }
   
   data_ptr create()

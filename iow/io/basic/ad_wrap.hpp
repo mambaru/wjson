@@ -14,11 +14,11 @@ struct ad_wrap
     return t.get_aspect().template get<_owner_>().wrap( std::forward<Handler>(h) );
   }
 
-  template<typename T, typename Handler, typename NotAliveHandler>
-  auto operator()(T& t, Handler&& h, NotAliveHandler&& nh)
+  template<typename T, typename Handler, typename AltHandler>
+  auto operator()(T& t, Handler&& h, AltHandler&& nh)
     -> decltype( t.get_aspect().template get<_owner_>().wrap( h, nh ) )
   {
-    return t.get_aspect().template get<_owner_>().wrap( std::forward<Handler>(h), std::forward<NotAliveHandler>(nh) );
+    return std::move(t.get_aspect().template get<_owner_>().wrap( std::forward<Handler>(h), std::forward<AltHandler>(nh) ));
   }
 };
   

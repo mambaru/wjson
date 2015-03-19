@@ -51,4 +51,5 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${WFC_TEST_DIR})
 
+add_subdirectory(owner)
 add_subdirectory(io)

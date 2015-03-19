@@ -4,20 +4,6 @@
 #include <fas/testing.hpp>
 
 
-class foo
-{
-public:
-  ~foo(){ /*std::cout << "~foo()" << std::endl;*/ printf("~foo\n"); };
-  foo():counter(0){std::cout << "foo()" << std::endl;}
-  foo(const foo& f){ std::cout << "foo(const foo&)" << std::endl; counter = f.counter + 1;}
-  //foo(foo&& f){std::cout << "foo(foo&&)" << std::endl; counter = f.counter + 1;}
-  void operator=( foo& f){std::cout << "=(foo&)" << std::endl; counter = f.counter + 1;}
-  //void operator=( foo&& f){std::cout << "=(foo&&)" << std::endl; counter = f.counter + 1;}
-  void doit() const{ std::cout << "counter: " << counter << std::endl;}
-  int counter;
-};
-
-
 struct _start_;
 struct ad_start
 {
@@ -29,7 +15,6 @@ struct ad_start
     t.started = true;
   }
 };
-
 
 struct _init_;
 struct ad_init
@@ -112,6 +97,7 @@ UNIT(init, "")
   t << is_true< assert >(io.get_id()==0) << FAS_TESTING_FILE_LINE;
 }
 
+
 UNIT(start, "")
 {
   using namespace fas::testing;
@@ -133,45 +119,29 @@ UNIT(start, "")
   t << is_true< assert >(io.get_id()==1) << FAS_TESTING_FILE_LINE;
 }
 
-void global_fun(int i){ std::cout << "global " << i << std::endl;}
 
 UNIT(owner, "")
 {
   using namespace fas::testing;
   
-  
   iobase io;
-  bool flag = false;
+  int value = 0;
+  auto test1= io.wrap([&value](int val) { value = val; });
   
-  foo f;
-  int counter = 0;
-  auto test1= io.wrap( std::move([&flag, &counter, f](bool val)
-  {
-    flag = val;
-    counter = f.counter;
-  }) );
-  std::cout << "??" << std::endl;
-  auto alive = io.get_aspect().get< ::iow::io::_owner_ >().alive();
-  std::cout << *alive << std::endl;
-  
-  std::cout << "??? " << std::endl;
-  
-  auto global_test= io.wrap(&global_fun);
-  global_test(33);
-  
-  test1(true);
-  t << is_true< assert >(counter==1) << counter<< FAS_TESTING_FILE_LINE;
-  t << is_true< assert >(flag) << FAS_TESTING_FILE_LINE;
+  test1(10);
+  t << is_true< assert >(value==10) << value << FAS_TESTING_FILE_LINE;
   io.reset();
-  test1(false);
-  t << is_true< assert >(counter==1) << FAS_TESTING_FILE_LINE;
-  t << is_true< assert >(flag) << FAS_TESTING_FILE_LINE;
-  t << nothing;
+  test1(20);
+  t << is_true< assert >(value==10) << value << FAS_TESTING_FILE_LINE;
+
+  auto test2= io.wrap([&value](int val) { value = val; }, [&value](int val) { value = val*-1; });
+
+  test2(30);
+  t << is_true< assert >(value==30) << value << FAS_TESTING_FILE_LINE;
+  io.reset();
+  test2(40);
+  t << is_true< assert >(value==-40) << value << FAS_TESTING_FILE_LINE;
   
-  std::cout << "id: " << io.get_id() << std::endl;
-  io.start(20);
-  io.stop();
-  t << is_true< assert >(io.get_id()==2) << FAS_TESTING_FILE_LINE;
 }
 
 BEGIN_SUITE(io_base,"")

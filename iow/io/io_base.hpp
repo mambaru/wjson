@@ -84,7 +84,15 @@ public:
     -> typename result_of<_wrap_, Handler>::type
   {
     std::lock_guard< mutex_type > lk(_mutex);
-    return std::move(this->wrap_( *this, std::forward<Handler>(h) ));
+    return this->wrap_( *this, std::forward<Handler>(h) );
+  }
+
+  template<typename Handler, typename AltHandler>
+  auto wrap(Handler&& h, AltHandler&& ah)
+    -> typename result_of<_wrap_, Handler, AltHandler>::type
+  {
+    std::lock_guard< mutex_type > lk(_mutex);
+    return this->wrap_( *this, std::forward<Handler>(h), std::forward<AltHandler>(ah) );
   }
 
 public:
@@ -129,9 +137,16 @@ public:
   auto wrap_(T& t, Handler&& h) 
     -> typename result_of<_wrap_, Handler>::type
   {
-    return std::move(t.get_aspect().template get<_wrap_>()(t, std::forward<Handler>(h) ));
+    return t.get_aspect().template get<_wrap_>()(t, std::forward<Handler>(h) );
   }
-  
+
+  template<typename T, typename Handler, typename AltHandler>
+  auto wrap_(T& t, Handler&& h, AltHandler&& ah) 
+    -> typename result_of<_wrap_, Handler, AltHandler>::type
+  {
+    return t.get_aspect().template get<_wrap_>()(t, std::forward<Handler>(h), std::forward<AltHandler>(ah) );
+  }
+
 private:
   
   mutable mutex_type _mutex;

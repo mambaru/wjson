@@ -96,7 +96,7 @@ UNIT(flow, "")
   t<<nothing;
 }
 
-BEGIN_SUITE(flow,"")
+BEGIN_SUITE(pipe,"")
   ADD_UNIT(flow)
-END_SUITE(flow)
+END_SUITE(pipe)
 
