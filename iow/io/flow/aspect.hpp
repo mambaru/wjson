@@ -8,7 +8,7 @@
 #include <fas/aop.hpp>
 
 namespace iow{ namespace io{ namespace flow{
-  
+
 template<typename HandlerTag, typename InputType >
 struct aspect: fas::aspect<
   fas::advice< _start_, ad_start >,

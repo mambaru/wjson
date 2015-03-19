@@ -1,9 +1,9 @@
 #pragma once
 
-#include <iow/io/flow/tags.hpp>
-#include <iow/io/flow/ad_start.hpp>
-#include <iow/io/flow/ad_more.hpp>
-#include <iow/io/flow/ad_complete.hpp>
+#include <iow/io/pipe/tags.hpp>
+#include <iow/io/pipe/ad_output.hpp>
+#include <iow/io/pipe/ad_more.hpp>
+#include <iow/io/pipe/ad_complete.hpp>
 
 #include <fas/aop.hpp>
 

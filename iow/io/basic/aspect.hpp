@@ -11,7 +11,7 @@
 
 
 namespace iow{ namespace io{ namespace basic{
-  
+
 template<typename MutexType = std::recursive_mutex>  
 struct aspect: fas::aspect<
 
@@ -19,12 +19,12 @@ struct aspect: fas::aspect<
   fas::advice< _start_, ad_start>,
   fas::advice< _stop_,  ad_stop>,
   fas::advice< _wrap_,  ad_wrap>,
-    
+
   fas::value< _io_id_, size_t>,
   fas::value< _status_, bool>,
   fas::value< _owner_, owner>,
 
   fas::type< _mutex_type_, MutexType>
 >{};
-  
+
 }}}

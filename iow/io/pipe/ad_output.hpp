@@ -3,7 +3,7 @@
 #include <iow/io/flow/tags.hpp>
 
 namespace iow{ namespace io{ namespace pipe{
-  
+
 struct ad_output
 {
   template<typename T>

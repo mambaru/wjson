@@ -58,7 +58,6 @@ public:
     this->start_(*this, opt);
   }
 
-  
   template<typename O>
   void initialize(O&& opt)
   {

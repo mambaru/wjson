@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iow/io/flow/tags.hpp>
+#include <functional>
 
 namespace iow{ namespace io{ namespace pipe{
  
