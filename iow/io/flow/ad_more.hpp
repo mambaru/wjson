@@ -9,7 +9,9 @@ struct ad_more
   template<typename T>
   void operator()(T& t)
   {
-    auto d = t.get_aspect().template get< _factory_ >()(t);
+    auto d = t.get_aspect().template get< _create_ >()(t);
+    t.get_aspect().template get< _some_ >()(t, std::move(d) );
+    /*
     if ( d!=nullptr )
     {
       t.get_aspect().template get< _some_ >()(t, std::move(d) );
@@ -17,7 +19,7 @@ struct ad_more
     else
     {
       t.get_aspect().template gete< _on_done_ >()(t);
-    }
+    }*/
   }
 };
 

@@ -6,10 +6,11 @@ namespace iow{ namespace io{ namespace pipe{
 
 struct ad_output
 {
-  template<typename T>
-  void operator()(T& t, typename T::output_t d)
+  template<typename T, typename D>
+  void operator()(T& t, D d)
   {
-    t.get_aspect().template get<_more_>()(t, std::move(d), 0);
+    t.get_aspect().template get<_entry_>()(t, std::move(d) );
+    t.get_aspect().template get<_more_>()(t);
   }
 };
 

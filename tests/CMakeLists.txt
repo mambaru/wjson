@@ -52,4 +52,5 @@ set(IOW_TEST_DIR "${CMAKE_BINARY_DIR}/bin-test")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${IOW_TEST_DIR})
 
 add_subdirectory(owner)
+add_subdirectory(aux)
 add_subdirectory(io)

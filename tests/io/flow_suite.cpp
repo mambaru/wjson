@@ -27,8 +27,12 @@ struct ad_some
   template<typename T>
   void operator()(T& t, typename T::input_t d)
   {
+    if ( t.input.empty() )
+      return;
+    
     auto dd = std::make_shared<typename T::input_t>( std::move(d) );
     t.service.post([&t, dd](){
+      std::cout << "POST" << std::endl;
       auto tmp = std::move(t.input.front());
       t.input.pop_front();
       std::copy(tmp->begin(), tmp->end(), (*dd)->begin());
@@ -53,10 +57,12 @@ struct ad_factory
 class flow
   : public ::iow::io::io_base< fas::aspect< 
       ::iow::io::basic::aspect<>::advice_list,
-      ::iow::io::flow::aspect< _handler_, data_ptr >::advice_list,
+      ::iow::io::flow::aspect::advice_list,
+      //::iow::io::flow::aspect< _handler_ /*, data_ptr*/ >::advice_list,
       fas::advice<_handler_, ad_handler>,
-      fas::advice< ::iow::io::flow::_factory_, ad_factory>,
-      fas::advice< ::iow::io::flow::_some_, ad_some>
+      fas::advice< ::iow::io::flow::_create_, ad_factory>,
+      fas::advice< ::iow::io::flow::_some_, ad_some>,
+      fas::alias< ::iow::io::flow::_confirm_, _handler_>
     > >
 {
   

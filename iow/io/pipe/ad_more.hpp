@@ -7,17 +7,20 @@ namespace iow{ namespace io{ namespace pipe{
 struct ad_more
 {
   template<typename T>
-  void operator()(T& t, typename T::output_t d, size_t bytes_transferred)
+  void operator()(T& t)
   {
-    auto dd = t.get_aspect().template get< _factory_ >()(t, std::move(d), bytes_transferred);
-    if ( dd!=nullptr )
+    auto p = t.get_aspect().template get< _next_ >()(t);
+    t.get_aspect().template get< _some_ >()(t, std::move(p) );
+    /*
+    if ( p.first!=nullptr )
     {
-      t.get_aspect().template get< _some_ >()(t, std::move(dd) );
+      t.get_aspect().template get< _some_ >()(t, p.first,  p.second );
     }
     else
     {
       t.get_aspect().template gete< _on_done_ >()(t);
     }
+    */
   }
 };
 
