@@ -113,7 +113,22 @@ public:
 
   void entry(data_ptr d)
   {
-    this->entry_( std::move(d) );
+    if ( d==nullptr || d->empty() )
+      return;
+
+    _size += d->size();
+    if ( _list!=nullptr )
+    {
+      // Проверить, может смержиьт с последним элементом
+    }
+    else if ( _cur != nullptr )
+    {
+      // СОздать и добавить в _list
+    }
+    else
+    {
+      _cur = std::move(d);
+    }
   }
   
   bool ready() const
@@ -125,14 +140,14 @@ public:
   {
     if ( !this->ready() )
       return data_pair();
-    
+
     _wait = true;
-    return data_pair( cur_ptr_(), cur_size_() );
-    /*
-    _wait = std::move( _list.front() );
-    _list.pop_front();
-    return data_pair( &(_wait->front()), _wait->size());
-    */
+    auto size = cur_size_();
+    auto ptr  = cur_ptr_();
+    _offset += size
+    if ( _cur->size() > _offset )
+      throw;
+    return data_pair( ptr, size );
   }
 
   data_ptr confirm(data_pair p)
@@ -185,32 +200,6 @@ private:
     return size;
   }
 
-  void entry_( data_ptr d)
-  {
-    _size += d->size();
-    if ( _list!=nullptr )
-    {
-      // Проверить, может смержиьт с последним элементом
-    }
-    else if ( _cur != nullptr )
-    {
-      // СОздать и добавить в _list
-    }
-    else
-    {
-      _cur = std::move(d);
-    }
-    
-    // Проверять на _wait не имеет смысла, чтобы обавть в _cur. Т.к. если _cur!=nullptr то это всегда wait
-    /*
-    // TODO: оптимизировать для minbuf
-    if ( _cur!=nullptr )
-    {
-      _list.push_back(d);
-    }
-    */
-  }
-  
 private:
   options_ptr _options;
   size_t _size;
