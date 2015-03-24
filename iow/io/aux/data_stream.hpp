@@ -9,7 +9,7 @@
 
 namespace iow{ namespace io{
 
-#warning Возвращать итераторы, чтобы не перемещать при подтверждении, а при полученни перемещать в wait object. Или сразу boost::asio::buffer?
+//#warning Возвращать итераторы, чтобы не перемещать при подтверждении, а при полученни перемещать в wait object. Или сразу boost::asio::buffer?
   
 class confirm_error
   : public std::logic_error
@@ -72,8 +72,18 @@ public:
   
 public:
   
+  data_stream() noexcept
+    : _options(nullptr)
+    , _size(0)
+    , _offset(0)
+    , _wait(false)
+    , _error(false)
+  {
+    
+  }
+  
   explicit data_stream(options_ptr options) noexcept
-    : _options_ptr(options )
+    : _options(options )
     , _size(0)
     , _offset(0)
     , _wait(false)
@@ -94,7 +104,7 @@ public:
     : _options( other._options)
     , _size( other._size)
     , _offset( other._offset)
-    , _curr( std::move(other._curr))
+    , _cur( std::move(other._cur))
     , _list( std::move(other._list))
     , _wait( other._wait)
     , _error( other._error)
@@ -106,9 +116,29 @@ public:
     _options = options;
   }
 
-  options_ptr options() const noexcept
+  options_ptr get_options() const noexcept
   {
     return _options;
+  }
+  
+  size_t size() const noexcept
+  {
+    return _size;
+  }
+
+  size_t count() const noexcept
+  {
+    return _list!=nullptr ? _list->size() : 0;
+  }
+  
+  void clear() 
+  {
+    _size = 0;
+    _offset = 0;
+    _cur = nullptr;
+    _list = nullptr;
+    _wait = false;
+    _error = false;
   }
 
   void entry(data_ptr d)
@@ -120,10 +150,13 @@ public:
     if ( _list!=nullptr )
     {
       // Проверить, может смержиьт с последним элементом
+      _list->push_back( std::move(d) );
     }
     else if ( _cur != nullptr )
     {
       // СОздать и добавить в _list
+      _list = std::make_unique<deque_list>();
+      _list->push_back( std::move(d) );
     }
     else
     {
@@ -133,7 +166,7 @@ public:
   
   bool ready() const
   {
-    return _wait == false && !( _cur!=nullptr );
+    return _wait == false && _cur!=nullptr;
   }
 
   data_pair next()
@@ -142,10 +175,10 @@ public:
       return data_pair();
 
     _wait = true;
-    auto size = cur_size_();
-    auto ptr  = cur_ptr_();
-    _offset += size
-    if ( _cur->size() > _offset )
+    auto size = this->cur_size_();
+    auto ptr  = this->cur_ptr_();
+    _offset += size;
+    if ( _offset > _cur->size() )
       throw;
     return data_pair( ptr, size );
   }
@@ -154,11 +187,12 @@ public:
   {
     data_ptr result = nullptr;
     
-    if ( !this->ready() ) 
+    if ( this->ready() ) 
       throw; //!!!!
       
     _wait = false;
-    _offset += p.second;
+    //_offset += p.second;
+    _size -= p.second;
     if ( _offset == _cur->size() )
     {
       result = std::move(_cur);
@@ -174,6 +208,7 @@ public:
     else if ( _options!=nullptr && _cur->size() < _options->minbuf )
     {
       // TODO: перенести из _list в хвост _cur, если _cur мал
+      throw;
     }
     return std::move(result);
   }
@@ -201,6 +236,7 @@ private:
   }
 
 private:
+  
   options_ptr _options;
   size_t _size;
   size_t _offset;
@@ -305,7 +341,7 @@ public:
       size_confirmed = d->size();
     }
     
-#warning Разбить хвост, если большой и вставить в начало
+// #warning Разбить хвост, если большой и вставить в начало
     
     size_t tailsize = d->size() - size_confirmed;
     std::copy( d->begin() + size_confirmed, d->end(), d->begin() ); 

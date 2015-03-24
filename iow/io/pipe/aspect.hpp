@@ -9,12 +9,11 @@
 
 namespace iow{ namespace io{ namespace pipe{
   
-//template<typename OutputType >
+
 struct aspect: fas::aspect<
   fas::advice< _output_, ad_output >,
   fas::advice< _more_, ad_more >,
-  fas::advice< _complete_, ad_complete >/*,
-  fas::type< _output_type_, OutputType >*/
+  fas::advice< _complete_, ad_complete >
 >{};
 
 }}}

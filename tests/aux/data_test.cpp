@@ -43,7 +43,6 @@ data_line_test_options getopt(
   return dlto;
 }
 
-
 struct generator
 {
   template<typename T>
@@ -55,8 +54,9 @@ struct generator
     typedef typename data_line_t::data_ptr data_ptr;
     
     data_ptr d = std::make_unique<data_type>();
-    for ( size_t j=offset; j < offset + size; j++)
+    for ( size_t j = offset; j < offset + size; j++)
       d->push_back('A'+j%10);
+    
     return std::move(d);
   }
 };
@@ -68,30 +68,26 @@ generate(T& t, size_t offset, size_t size)
   return t.get_aspect().template get<_generator_>()(t, offset, size);
 }
 
-
 struct init_line
 {
   template<typename T>
   void operator()(T& t)
   {
+    using namespace fas::testing;
     auto& data_line = t.get_aspect().template get<_data_line_>();
     typedef typename std::remove_reference<decltype(data_line)>::type data_line_t;
-    
     typedef typename data_line_t::data_ptr data_ptr;
 
-    auto& opt = t.get_aspect().template get<_test_options_>();
-
+    auto opt = t.get_aspect().template get<_test_options_>();
     data_line.clear();
-    data_line.set_options(opt);
-    static_cast<iow::io::data_stream_options&>(opt) = data_line.options();
-
+    data_line.set_options( opt );
     data_ptr first;
-    for (size_t i =0; i < opt.data_count; i++)
+    for (size_t i = 0; i < opt->data_count; i++ )
     {
-      data_ptr d = t.get_aspect().template get<_generator_>()(t, i, opt.data_size);
-      data_line.push_back(std::move(d));
+      //t << message("generate: ") << i;
+      data_ptr d = t.get_aspect().template get<_generator_>()( t, i, opt->data_size );
+      data_line.entry( std::move(d) );
     }
-    
   }
 };
 
@@ -101,11 +97,11 @@ UNIT(init_test, "")
   t.get_aspect().template get<_init_line_>()(t);
 
   auto& data_line = t.get_aspect().template get<_data_line_>();
-  auto& test_opt = t.get_aspect().template get<_test_options_>();
-  auto& dl_opt = data_line.options();
-
-  const char* buf1 = reinterpret_cast<const char*>(&test_opt);
-  const char* buf2 = reinterpret_cast<const char*>(&dl_opt);
+  auto test_opt = t.get_aspect().template get<_test_options_>();
+  auto dl_opt = data_line.get_options();
+  
+  const char* buf1 = reinterpret_cast<const char*>( &*test_opt);
+  const char* buf2 = reinterpret_cast<const char*>( &*dl_opt );
   
   int cmpres = std::memcmp( buf1,  buf2, sizeof(dl_opt) );
   bool opt_test = ( 0 ==  cmpres) ;
@@ -113,24 +109,28 @@ UNIT(init_test, "")
   t << stop;
 
   size_t linesize = data_line.size();
-  size_t testsize = test_opt.data_size * test_opt.data_count;
-  t << is_true<assert>( linesize == testsize) << " " << linesize << "!=" << testsize << ":" << FAS_TESTING_FILE_LINE;
+  size_t testsize = test_opt->data_size * test_opt->data_count;
+  t << is_true<assert>( linesize == testsize ) << " " << linesize << "!=" << testsize << ":" << FAS_TESTING_FILE_LINE;
   
   linesize = 0;
   size_t linecount = 0;
   size_t initcount = data_line.count();
-  auto d = data_line.next(nullptr);
-  while ( d != nullptr )
+  auto d = data_line.next();
+  
+  while ( d.first != nullptr )
   {
-    ++linecount;
-    linesize += d->size();
-    t << equal<assert>( data_line.size()+linesize, testsize) << FAS_TESTING_FILE_LINE;
-    t << equal<assert>( data_line.count()+linecount, initcount) << FAS_TESTING_FILE_LINE;
+    if ( initcount != linecount )
+      ++linecount;
+    linesize += d.second;
+    data_line.confirm(d);
+    t << message("data_line::count: ") << data_line.count(); 
+    t << equal<assert>( data_line.size()  + linesize,  testsize  ) << data_line.size()  + linesize << "!=" << testsize << FAS_TESTING_FILE_LINE;
+    t << equal<assert>( data_line.count() + linecount, initcount ) << data_line.count() + linecount<< "!=" << initcount << FAS_TESTING_FILE_LINE;
     t << stop;
-    d = data_line.confirm_and_next();
+    d = data_line.next();
   }
-  t << equal<assert, size_t>( data_line.size(), 0) << FAS_TESTING_FILE_LINE;
-  t << equal<assert, size_t>( data_line.count(), 0) << FAS_TESTING_FILE_LINE;
+  t << equal<assert, size_t>( data_line.size(),  0 ) << data_line.size() << FAS_TESTING_FILE_LINE;
+  t << equal<assert, size_t>( data_line.count(), 0 ) << data_line.count() << FAS_TESTING_FILE_LINE;
 }
 
 UNIT(nobuf_test, "non-buffering mode")
@@ -141,25 +141,26 @@ UNIT(nobuf_test, "non-buffering mode")
     
   data_line.clear();
   data_line.set_options(test_opt);
-  auto& dl_opt = data_line.options();
+  auto dl_opt = data_line.get_options();
 
-  size_t maxbuf = dl_opt.maxbuf;
+  size_t maxbuf = dl_opt->maxbuf;
   size_t cursize = 1;
-  for (size_t c = 0; c < test_opt.data_count; ++c)
+  for (size_t c = 0; c < test_opt->data_count; ++c)
   {
     auto d1 = generate(t, c, cursize);
     auto d2 = generate(t, c, cursize);
-    auto d3 = data_line.next( std::move(d1) );
-    t << is_true<assert>( d3!=nullptr ) << "c: " << c << ": " << FAS_TESTING_FILE_LINE;
+    data_line.entry( std::move(d1) );
+    auto d3 = data_line.next();
+    t << is_true<assert>( d3.first!=nullptr ) << "c: " << c << ": " << FAS_TESTING_FILE_LINE;
     t << stop;
-    t << equal<assert>( *d3, *d2 ) << "c: " << c << ", " << *d3 << "!=" << *d2 << FAS_TESTING_FILE_LINE;
+    t << equal<assert, std::string>( d3.first, *d2 ) << "c: " << c << ", " << d3.first << "!=" << *d2 << FAS_TESTING_FILE_LINE;
     t << is_true<assert>( data_line.size()==0 )  << FAS_TESTING_FILE_LINE;
     t << is_true<assert>( data_line.count()==0 ) << FAS_TESTING_FILE_LINE;
     t << stop;
     cursize += 1;
     if ( cursize > maxbuf )
       cursize = 1;
-    data_line.confirm();
+    data_line.confirm(d3);
   }
 }
 
@@ -177,30 +178,44 @@ UNIT(fullbuf_test, "full-buffering mode")
   //typedef typename decltype(data_line)::data_ptr  data_ptr;
 
   auto test_opt = t.get_aspect().template get<_test_options_>();
-  test_opt.except_first = false;
-  test_opt.except_confirm = false;
+  //!!! test_opt.except_first = false;
+  //!!! test_opt.except_confirm = false;
 
   data_line.clear();
   data_line.set_options(test_opt);
-  auto& dl_opt = data_line.options();
+  auto dl_opt = data_line.get_options();
 
-  size_t maxbuf = dl_opt.maxbuf*2;
+  size_t maxbuf = dl_opt->maxbuf*2;
   size_t cursize = 1;
-  for (size_t c = 0; c < test_opt.data_count; ++c)
+  for (size_t c = 0; c < test_opt->data_count; ++c)
   {
     auto d1 = generate(t, 0, cursize); // исходные данные и результат
     auto d2 = generate(t, 0, cursize); // для проверки
-    auto d3 = data_line.next( std::move(d1) ); // следующая порция
-    while ( d3 != nullptr )
+    data_line.entry( std::move(d1) );  // следующая порция
+    auto d3 = data_line.next();        // следующая порция
+    while ( d3.first != nullptr )
     {
       if ( d1==nullptr )
-        d1=std::make_unique<data_type>(d3->begin(), d3->end());
+      {
+        d1 = std::make_unique<data_type>( d3.first, d3.first + d3.second );
+      }
       else
-        std::copy(d3->begin(), d3->end(), std::back_inserter(*d1));
-      d3 = data_line.confirm_and_next();
+      {
+        std::copy( d3.first, d3.first + d3.second, std::back_inserter(*d1) );
+      }
+      data_line.confirm(d3);
+      d3 = data_line.next();
     }
-    t << equal<assert>( *d1, *d2 ) << "c: " << c << ", " << *d1 << "!=" << *d2 << FAS_TESTING_FILE_LINE;
-    t << stop;
+    
+    if ( d1!=nullptr )
+    {
+      t << equal<assert, std::string>( *d1, *d2 ) << "c: " << c << ", " << *d1 << "!=" << *d2 << FAS_TESTING_FILE_LINE;
+      t << stop;
+    }
+    else
+    {
+      t << fatal("d1==nullptr");
+    }
     cursize += 1;
     if ( cursize > maxbuf )
       cursize = 1;
@@ -212,29 +227,30 @@ UNIT(ignore_first_test, "buffering with ignore first flag mode")
   using namespace fas::testing;
   auto& data_line = t.get_aspect().template get<_data_line_>();
   auto test_opt = t.get_aspect().template get<_test_options_>();
-  test_opt.except_first   = true;
-  test_opt.except_confirm = true;
+  //!! test_opt.except_first   = true;
+  //!! test_opt.except_confirm = true;
   data_line.clear();
   data_line.set_options(test_opt);
-  auto& dl_opt = data_line.options();
+  auto dl_opt = data_line.get_options();
   
   size_t cursize = 1;
-  size_t maxbuf = (dl_opt.maxbuf * 3) / 2;
-  for (size_t c = 0; c < test_opt.data_count; ++c)
+  size_t maxbuf = (dl_opt->maxbuf * 3) / 2;
+  for (size_t c = 0; c < test_opt->data_count; ++c)
   {
     auto d1 = generate(t, c, cursize);
     auto d2 = generate(t, c, cursize);
-    auto d3 = data_line.next( std::move(d1) );
-    t << is_true<assert>( d3!=nullptr ) << "c: " << c << ": " << FAS_TESTING_FILE_LINE;
+    data_line.entry( std::move(d1) );
+    auto d3 = data_line.next();
+    t << is_true<assert>( d3.first!=nullptr ) << "c: " << c << ": " << FAS_TESTING_FILE_LINE;
     t << stop;
-    t << equal<assert>( *d3, *d2 ) << "c: " << c << ", " << *d3 << "!=" << *d2 << FAS_TESTING_FILE_LINE;
+    t << equal<assert, std::string>( d3.first, *d2 ) << "c: " << c << ", " << d3.first << "!=" << *d2 << FAS_TESTING_FILE_LINE;
     t << is_true<assert>( data_line.size()==0 )  << FAS_TESTING_FILE_LINE;
     t << is_true<assert>( data_line.count()==0 ) << FAS_TESTING_FILE_LINE;
     t << stop;
     cursize += 1;
     if ( cursize > maxbuf )
       cursize = 1;
-    data_line.confirm();
+    data_line.confirm(d3);
   }
 }
 
@@ -245,48 +261,50 @@ UNIT(partconfirm_test, "partconfirm_test")
   auto test_opt = t.get_aspect().template get<_test_options_>();
   typedef typename std::remove_reference< decltype( data_line ) >::type::data_type data_type;
   
-  test_opt.except_first   = false;
-  test_opt.except_confirm = false;
+  //!! test_opt.except_first   = false;
+  //!! test_opt.except_confirm = false;
   data_line.clear();
   data_line.set_options(test_opt);
-  auto& dl_opt = data_line.options();
+  auto dl_opt = data_line.get_options();
   
   size_t cursize = 1;
-  size_t maxbuf = (dl_opt.maxbuf * 3) / 2;
+  size_t maxbuf = (dl_opt->maxbuf * 3) / 2;
   data_type result1, result2;
-  for (size_t c = 0; c < test_opt.data_count; ++c)
+  for (size_t c = 0; c < test_opt->data_count; ++c)
   {
     auto d1 = generate(t, c, cursize);
     std::copy( d1->begin(), d1->end(), std::back_inserter(result1));
-    data_line.push_back( std::move(d1) );
+    data_line.entry( std::move(d1) );
     cursize += 1;
     if ( cursize > maxbuf )
       cursize = 1;
   }
   
   auto d2 = data_line.next();
-  while(d2!=nullptr)
+  while( d2.first!=nullptr )
   {
-    size_t size =  d2->size()/3;
-    if ( size==0 && d2->size()!=0 ) size = 1;
-    std::copy( d2->begin(), d2->begin() + size, std::back_inserter(result2));
-    d2 = data_line.confirm_and_next(std::move(d2), size);
+    size_t size = d2.second/3;
+    if ( size==0 && d2.second!=0 )
+      size = 1;
+    std::copy( d2.first, d2.first + d2.second, std::back_inserter(result2) );
+    data_line.confirm(d2);
+    d2 = data_line.next();
   }
   
-  t << equal<assert>( result1, result2 )       << result1 << "!=" << result2 << FAS_TESTING_FILE_LINE;
+  t <<   equal<assert>( result1, result2 )     << result1 << "!=" << result2 << FAS_TESTING_FILE_LINE;
   t << is_true<assert>( data_line.size()==0 )  << FAS_TESTING_FILE_LINE;
   t << is_true<assert>( data_line.count()==0 ) << FAS_TESTING_FILE_LINE;
 }
 
-
-
 BEGIN_SUITE(aux,"aux suite")
   ADD_UNIT(init_test)
+  /*
   ADD_UNIT(nobuf_test)
   ADD_UNIT(fullbuf_test)
   ADD_UNIT(ignore_first_test)
   ADD_UNIT(partconfirm_test)
-  ADD_VALUE(_test_options_, data_line_test_options )
+  */
+  ADD_VALUE(_test_options_, std::shared_ptr<data_line_test_options> )
   ADD_VALUE(_data_line_, ::iow::io::data_stream< std::string > )
   ADD_ADVICE(_generator_, generator)
   ADD_ADVICE(_init_line_, init_line)
@@ -296,21 +314,26 @@ END_SUITE(aux)
 {
   data_line_test_options optlist[]={
   //       bufsize maxbuf minbuf wrnsize maxsize except_first except_confirm data_size data_count
-    getopt(0,      0,     0,     0,      0,      false,        false,        10,       10),
-    getopt(10,     0,     0,     0,      0,      false,        false,        100,      100),
-    getopt(10,     10,    10,    0,      0,      false,        false,        11,       1),
-    getopt(10,     20,    5,     0,      0,      false,        false,        11,       33),
-    getopt(10,     20,    5,     0,      0,      false,        false,        100,      100),
-    getopt(33,     34,    32,    0,      0,      false,        false,        1000,     1000),
+    getopt( 0,      0,     0,     0,      0,      false,        false,        10,       10   ),
+    getopt( 10,     0,     0,     0,      0,      false,        false,        100,      100  ),
+    getopt( 10,     10,    10,    0,      0,      false,        false,        11,       1    ),
+    getopt( 10,     20,    5,     0,      0,      false,        false,        11,       33   ),
+    getopt( 10,     20,    5,     0,      0,      false,        false,        100,      100  ),
+    getopt( 33,     34,    32,    0,      0,      false,        false,        1000,     1000 ),
   };
   std::cout << sizeof(optlist) <<std::endl;
   ::fas::testing::suite_counts sc;
   aux_suite as;
-  auto& opt = as.get_aspect().get<_test_options_>();
-  for (size_t i =0 ; i < std::extent<decltype(optlist)>::value; i++)
+  
+  as.get_aspect().get<_test_options_>() 
+    = std::make_shared<data_line_test_options>();
+    
+  auto opt = as.get_aspect().get<_test_options_>();
+  for (size_t i =0 ; i < std::extent< decltype(optlist) >::value; i++)
   {
     std::cout << std::endl << i << std::endl;
-    opt=optlist[i];
+    *opt=optlist[i];
+    opt->fix();
     as.run();
     sc += as.counts();
   }
