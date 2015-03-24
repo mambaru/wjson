@@ -76,7 +76,7 @@ public:
     : _options(nullptr)
     , _size(0)
     , _offset(0)
-    , _wait(false)
+    , _wait(0)
     , _error(false)
   {
     
@@ -86,7 +86,7 @@ public:
     : _options(options )
     , _size(0)
     , _offset(0)
-    , _wait(false)
+    , _wait(0)
     , _error(false)
   {
   }
@@ -95,7 +95,7 @@ public:
     : _options(other._options)
     , _size(0)
     , _offset(0)
-    , _wait(false)
+    , _wait(0)
     , _error(false)
   {
   }
@@ -110,7 +110,17 @@ public:
     , _error( other._error)
   {
   }
-  
+
+  void clear()
+  {
+    _size = 0;
+    _offset = 0;
+    _cur = nullptr;
+    _list = nullptr;
+    _wait = 0;
+    _error = false;
+  }
+
   void set_options(options_ptr options) noexcept
   {
     _options = options;
@@ -120,7 +130,7 @@ public:
   {
     return _options;
   }
-  
+
   size_t size() const noexcept
   {
     return _size;
@@ -128,18 +138,30 @@ public:
 
   size_t count() const noexcept
   {
-    return _list!=nullptr ? _list->size() : 0;
+    return (_list!=nullptr ? _list->size() : 0) + static_cast<size_t>( _cur!=nullptr );
   }
-  
-  void clear() 
+
+  size_t capacity() const noexcept
   {
-    _size = 0;
-    _offset = 0;
-    _cur = nullptr;
-    _list = nullptr;
-    _wait = false;
-    _error = false;
+    size_t result = _cur!=nullptr ? _cur->capacity() : 0;
+    if ( _list!=nullptr )
+    {
+      for ( auto& d : _list )
+        result += _list->capacity();
+    }
+    return result;
   }
+
+  bool ready() const
+  {
+    return _wait == 0 && _cur!=nullptr;
+  }
+
+  bool waiting() const
+  {
+    return _wait != 0;
+  }
+
 
   void entry(data_ptr d)
   {
@@ -147,36 +169,44 @@ public:
       return;
 
     _size += d->size();
-    if ( _list!=nullptr )
-    {
-      // Проверить, может смержиьт с последним элементом
-      _list->push_back( std::move(d) );
-    }
-    else if ( _cur != nullptr )
-    {
-      // СОздать и добавить в _list
-      _list = std::make_unique<deque_list>();
-      _list->push_back( std::move(d) );
-    }
-    else
+
+    if ( _cur == nullptr )
     {
       _cur = std::move(d);
     }
+    else
+    {
+      if ( _options!=nullptr )
+      {
+        data_ptr& last = _list!=nullptr && !_list->empty()
+          ? _list->back()
+          : _cur;
+        size_t sumsize = last->size() + d->size();
+        if ( sumsize < _options->minbuf )
+        {
+          last->reserve(sumsize);
+          std::copy( d->begin(), d->end(), std::inserter(*last, last->end() ) );
+          return;
+        }
+      }
+
+      if ( _list==nullptr )
+      {
+        _list = std::make_unique<deque_list>();
+      }
+      _list->push_back( std::move(d) );
+    }
   }
-  
-  bool ready() const
-  {
-    return _wait == false && _cur!=nullptr;
-  }
+
 
   data_pair next()
   {
     if ( !this->ready() )
       return data_pair();
 
-    _wait = true;
     auto size = this->cur_size_();
     auto ptr  = this->cur_ptr_();
+    _wait = size;
     _offset += size;
     if ( _offset > _cur->size() )
       throw;
@@ -186,18 +216,18 @@ public:
   data_ptr confirm(data_pair p)
   {
     data_ptr result = nullptr;
-    
+
     if ( this->ready() ) 
       throw; //!!!!
-      
-    _wait = false;
+
+    _wait = 0;
     //_offset += p.second;
     _size -= p.second;
     if ( _offset == _cur->size() )
     {
       result = std::move(_cur);
       _offset = 0;
-      
+
       if (_list!=nullptr && !_list->empty() )
       {
         _cur = std::move( _list->front() );
@@ -242,7 +272,7 @@ private:
   size_t _offset;
   data_ptr _cur;
   deque_ptr _list;
-  bool _wait;
+  size_t _wait; // в байтах
   bool _error; // состояние ошибки
 };
 
