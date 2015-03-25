@@ -8,7 +8,7 @@ struct _complete_;
 
 struct _some_;
 
-struct _entry_;
+struct _attach_;
 struct _next_;
 struct _confirm_;
 // struct _free_;

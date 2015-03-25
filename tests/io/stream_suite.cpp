@@ -1,8 +1,11 @@
 #include <iostream>
 #include <iow/io/io_base.hpp>
 #include <iow/io/basic/aspect.hpp>
-#include <iow/io/flow/aspect.hpp>
+#include <iow/io/stream/aspect.hpp>
+/*
+ * #include <iow/io/flow/aspect.hpp>
 #include <iow/io/pipe/aspect.hpp>
+*/
 #include <iow/memory.hpp>
 #include <iow/asio.hpp>
 
@@ -18,8 +21,8 @@ typedef std::unique_ptr<data_type> data_ptr;
 
 struct ad_read_some
 {
-  template<typename T>
-  void operator()(T& t, typename T::input_t d)
+  template<typename T, typename D>
+  void operator()(T& t, D d)
   {
     if ( t.input.empty() )
       return;
@@ -38,7 +41,7 @@ struct ad_read_some
 struct ad_write_some
 {
   template<typename T, typename P>
-  void operator()(T& t, P p/*, size_t size*/)
+  void operator()(T& t, P p)
   {
     if ( p.first == nullptr )
       return;
@@ -51,71 +54,20 @@ struct ad_write_some
   }
 };
 
-struct ad_input_factory
+struct stream_options
 {
-  template<typename T>
-  typename T::input_t operator()(T& t)
-  {
-    if ( t.input.empty() )
-      return nullptr;
-    return std::make_unique<data_type>(100);
-  }
+  typedef ::iow::io::data_pool< data_type > buffer_pool_type;
+  typedef std::shared_ptr<buffer_pool_type> buffer_pool_ptr;
+  typedef ::iow::io::write_buffer_options write_buffer_options;
+  std::shared_ptr<::iow::io::write_buffer_options> write_buffer;
+  buffer_pool_ptr buffer_pool;
 };
 
-struct ad_entry
-{
-  template<typename T>
-  void operator()(T& , typename T::output_t d)
-  {
-    data = std::move(d);
-  }
-  data_ptr data;
-};
-
-struct ad_free
-{
-  template<typename T>
-  void operator()(T& , typename T::output_t )
-  {
-  }
-};
-
-struct ad_confirm
-{
-  template<typename T, typename D>
-  void operator()(T& t, D /*, size_t*/ )
-  {
-    auto &d = t.get_aspect().template get< ::iow::io::pipe::_attach_ >().data;
-    d.reset();
-    //return std::move(d);
-  }
-};
-
-struct ad_next
-{
-  template<typename T>
-  std::pair<const char*, size_t> operator()(T& t)
-  {
-    auto &d = t.get_aspect().template get< ::iow::io::pipe::_attach_ >().data;
-    if ( d == nullptr )
-      return std::pair<const char*, size_t>(nullptr, 0);
-    return std::make_pair( &((*d)[0]), d->size() );
-  }
-};
-
-
-
-class pipe1
+class stream
   : public ::iow::io::io_base< fas::aspect< 
       ::iow::io::basic::aspect<>::advice_list,
-      ::iow::io::flow::aspect::advice_list,
-      ::iow::io::pipe::aspect::advice_list,
+      ::iow::io::stream::aspect<data_type>::advice_list,
       fas::alias< ::iow::io::flow::_confirm_, ::iow::io::pipe::_output_>,
-      fas::advice< ::iow::io::flow::_create_, ad_input_factory>,
-      fas::advice< ::iow::io::pipe::_attach_, ad_entry>,
-      fas::advice< ::iow::io::pipe::_next_, ad_next>,
-      //fas::advice< ::iow::io::pipe::_free_, ad_free>,
-      fas::advice< ::iow::io::pipe::_confirm_, ad_confirm>,
       fas::advice< ::iow::io::flow::_some_, ad_read_some>,
       fas::advice< ::iow::io::pipe::_some_, ad_write_some>
     > >
@@ -124,13 +76,23 @@ public:
   typedef data_ptr input_t;
   typedef data_ptr output_t;
 
-  pipe1(::iow::asio::io_service& io)
+  stream(::iow::asio::io_service& io)
     : service(io) 
   {}
   
   void start() 
   {
-    this->start_(*this, fas::empty_type() ); 
+    /*
+    typedef ::iow::io::data_pool< data_type > buffer_pool;
+    auto pool = std::make_shared< buffer_pool >();
+    this->get_aspect().template get< ::iow::io::stream::_buffer_pool_>() = pool;
+    */
+    stream_options opt;
+    opt.buffer_pool = std::make_shared<stream_options::buffer_pool_type>();
+    opt.buffer_pool->init(10, 1024);
+    opt.write_buffer = std::make_shared<stream_options::write_buffer_options>();
+    opt.write_buffer->fix();
+    this->start_(*this, opt ); 
   }
   
   void add(std::string val)
@@ -143,12 +105,12 @@ public:
   std::string result;
 };
 
-UNIT(pipe1, "")
+UNIT(stream, "")
 {
   using namespace fas::testing;
   
   ::iow::asio::io_service io;
-  pipe1 f(io);
+  stream f(io);
   
   f.add("Hello ");
   f.add("world");
@@ -159,7 +121,7 @@ UNIT(pipe1, "")
   
 }
 
-BEGIN_SUITE(pipe,"")
-  ADD_UNIT(pipe1)
-END_SUITE(pipe)
+BEGIN_SUITE(stream,"")
+  ADD_UNIT(stream)
+END_SUITE(stream)
 

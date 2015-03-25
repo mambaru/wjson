@@ -2,6 +2,7 @@ set( SUITE_LIST
   io_base_suite.cpp
   flow_suite.cpp
   pipe_suite.cpp
+  stream_suite.cpp
   factory_suite.cpp
 )
 

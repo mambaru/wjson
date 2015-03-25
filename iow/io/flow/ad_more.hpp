@@ -11,15 +11,6 @@ struct ad_more
   {
     auto d = t.get_aspect().template get< _create_ >()(t);
     t.get_aspect().template get< _some_ >()(t, std::move(d) );
-    /*
-    if ( d!=nullptr )
-    {
-      t.get_aspect().template get< _some_ >()(t, std::move(d) );
-    }
-    else
-    {
-      t.get_aspect().template gete< _on_done_ >()(t);
-    }*/
   }
 };
 

@@ -9,7 +9,6 @@
 
 namespace iow{ namespace io{ namespace pipe{
   
-
 struct aspect: fas::aspect<
   fas::advice< _output_, ad_output >,
   fas::advice< _more_, ad_more >,

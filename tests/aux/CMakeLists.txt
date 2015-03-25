@@ -1,5 +1,6 @@
-add_executable(data_test ${FAS_TESTING_CPP} data_test.cpp )
+add_executable(write_buffer_test ${FAS_TESTING_CPP} write_buffer_test.cpp )
+add_executable(write_buffer_bench write_buffer_bench.cpp )
 
-add_test(NAME data_test COMMAND data_test WORKING_DIRECTORY ${IOW_TEST_DIR})
+add_test(NAME write_buffer_test COMMAND write_buffer_test WORKING_DIRECTORY ${IOW_TEST_DIR})
 
 

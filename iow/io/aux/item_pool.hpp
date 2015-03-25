@@ -22,7 +22,7 @@ public:
   void init(size_t poolsize) 
   {
     _poolsize = poolsize;
-    _pool.resize(poolsize);
+    _pool.reserve(poolsize);
     _pool.shrink_to_fit();
   }
   
@@ -40,7 +40,7 @@ public:
   {
     if ( is_full() )
       return;
-    _pool.push_back(d);
+    _pool.push_back( std::move(d) );
   }
   
   bool is_full() const
@@ -53,4 +53,4 @@ private:
   std::vector<data_ptr> _pool;
 };
 
-}}}
+}}
