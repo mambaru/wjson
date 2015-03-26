@@ -218,7 +218,13 @@ public:
   std::pair<size_t, size_t>
   search_()
   {
+    /*
+    auto& last = _outlist!=0 && !_outlist->empty() 
+                 ? _outlist->front()
+                 : _outbuf;
+    ;
     return std::pair<size_t, size_t>();
+    */
   }
 
 private:

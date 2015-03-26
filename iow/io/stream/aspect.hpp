@@ -8,7 +8,6 @@
 #include <iow/io/stream/tags.hpp>
 #include <iow/io/basic/tags.hpp>
 #include <fas/aop.hpp>
-#include <../cdaemon/geoip_converter/types.h>
 
 namespace iow{ namespace io{ namespace stream{
   
