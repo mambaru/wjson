@@ -24,16 +24,23 @@ struct ad_read_some
   template<typename T, typename D>
   void operator()(T& t, D d)
   {
+    std::cout << "ad_read_some: " << d.second << std::endl;
     if ( t.input.empty() )
       return;
     
-    auto dd = std::make_shared<typename T::input_t>( std::move(d) );
-    t.service.post([&t, dd](){
+    //auto dd = std::make_shared<typename T::input_t>( std::move(d) );
+    
+    t.service.post([&t, d](){
+      auto dd = d;
       auto tmp = std::move(t.input.front());
       t.input.pop_front();
-      std::copy(tmp->begin(), tmp->end(), (*dd)->begin());
+      /*std::copy(tmp->begin(), tmp->end(), (*dd)->begin());
       (*dd)->resize(tmp->size());
-      t.get_aspect().template get< ::iow::io::flow::_complete_>()(t, std::move(*dd));
+    */
+      std::copy(tmp->begin(), tmp->end(), dd.first);
+      dd.second = tmp->size();
+      
+      t.get_aspect().template get< ::iow::io::flow::_complete_>()(t, std::move(dd));
     });
   }
 };
@@ -59,15 +66,19 @@ struct stream_options
   typedef ::iow::io::data_pool< data_type > buffer_pool_type;
   typedef std::shared_ptr<buffer_pool_type> buffer_pool_ptr;
   typedef ::iow::io::write_buffer_options write_buffer_options;
-  std::shared_ptr<::iow::io::write_buffer_options> write_buffer;
+  typedef ::iow::io::read_buffer_options<data_type> read_buffer_options;
+  std::shared_ptr<write_buffer_options> write_buffer;
+  std::shared_ptr<read_buffer_options> read_buffer;
   buffer_pool_ptr buffer_pool;
 };
+
 
 class stream
   : public ::iow::io::io_base< fas::aspect< 
       ::iow::io::basic::aspect<>::advice_list,
       ::iow::io::stream::aspect<data_type>::advice_list,
-      fas::alias< ::iow::io::flow::_confirm_, ::iow::io::pipe::_output_>,
+      fas::alias< ::iow::io::stream::_handler_, ::iow::io::pipe::_output_>,
+      //fas::alias< ::iow::io::flow::_confirm_, ::iow::io::pipe::_output_>,
       fas::advice< ::iow::io::flow::_some_, ad_read_some>,
       fas::advice< ::iow::io::pipe::_some_, ad_write_some>
     > >
@@ -92,6 +103,7 @@ public:
     opt.buffer_pool->init(10, 1024);
     opt.write_buffer = std::make_shared<stream_options::write_buffer_options>();
     opt.write_buffer->fix();
+    opt.read_buffer = std::make_shared<stream_options::read_buffer_options>();
     this->start_(*this, opt ); 
   }
   

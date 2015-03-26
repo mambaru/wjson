@@ -6,6 +6,7 @@ namespace iow{ namespace io{
 struct _reset_;
 struct _start_;
 struct _stop_;
+struct _shutdown_;
 struct _wrap_;
 
 // io_base values

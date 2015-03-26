@@ -5,6 +5,7 @@ namespace iow{ namespace io{ namespace flow{
 struct _start_;
 struct _more_;
 struct _complete_;
+struct _handler_;
 
 
 struct _some_;

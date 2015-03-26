@@ -62,7 +62,8 @@ class flow
       fas::advice<_handler_, ad_handler>,
       fas::advice< ::iow::io::flow::_create_, ad_factory>,
       fas::advice< ::iow::io::flow::_some_, ad_some>,
-      fas::alias< ::iow::io::flow::_confirm_, _handler_>
+      fas::alias< ::iow::io::flow::_confirm_, _handler_>,
+      fas::stub< ::iow::io::flow::_handler_ >
     > >
 {
   

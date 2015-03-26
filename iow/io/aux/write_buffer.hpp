@@ -3,23 +3,10 @@
 #include <iow/memory.hpp>
 #include <queue>
 #include <memory>
-#include <stdexcept>
-#include <boost/concept_check.hpp>
-//#include <boost/concept_check.hpp>
+
 
 namespace iow{ namespace io{
 
-//#warning Возвращать итераторы, чтобы не перемещать при подтверждении, а при полученни перемещать в wait object. Или сразу boost::asio::buffer?
-  
-class confirm_error
-  : public std::logic_error
-{
-public:
-  confirm_error()
-    : std::logic_error( "iow::data_line: confirm_error" )
-  {
-  }
-};
 
 struct write_buffer_options
 {

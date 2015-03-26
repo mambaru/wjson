@@ -2,6 +2,8 @@
 #include <chrono>
 #include <iostream>
 #include <fcntl.h>
+#include <unistd.h>
+
 
 
 typedef std::vector<char> data_type;

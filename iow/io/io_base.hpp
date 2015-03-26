@@ -55,14 +55,14 @@ public:
   void start(O&& opt)
   {
     std::lock_guard< mutex_type > lk(_mutex);
-    this->start_(*this, opt);
+    this->start_(*this, std::forward<O>(opt));
   }
 
   template<typename O>
   void initialize(O&& opt)
   {
     std::lock_guard< mutex_type > lk(_mutex);
-    this->initialize_(*this, opt);
+    this->initialize_(*this, std::forward<O>(opt));
   }
 
   void stop()
@@ -71,6 +71,14 @@ public:
     this->stop_(*this);
   }
 
+  
+
+  void shutdown()
+  {
+    std::lock_guard< mutex_type > lk(_mutex);
+    this->stop_(*this);
+  }
+  
   template<typename Tg, typename ...Args>
   struct result_of
   {
@@ -117,13 +125,13 @@ public:
   template<typename T, typename O>
   void start_(T& t, O&& opt )
   {
-    t.get_aspect().template get<_start_>()(t, opt );
+    t.get_aspect().template get<_start_>()(t, std::forward<O>(opt) );
   }
 
   template<typename T, typename O>
   void initialize_(T& t, O&& opt )
   {
-    t.get_aspect().template gete<_initialize_>()(t, opt );
+    t.get_aspect().template gete<_initialize_>()(t, std::forward<O>(opt) );
   }
 
   template<typename T>
@@ -131,6 +139,14 @@ public:
   {
     t.get_aspect().template get<_stop_>()(t);
   }
+
+  template<typename T, typename Handler>
+  void shutdown_(T& t, Handler&& handler)
+  {
+    t.get_aspect().template get<_shutdown_>()(t, std::forward<Handler>(handler));
+  }
+  
+  
 
   template<typename T, typename Handler>
   auto wrap_(T& t, Handler&& h) 

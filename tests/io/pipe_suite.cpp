@@ -117,7 +117,8 @@ class pipe1
       //fas::advice< ::iow::io::pipe::_free_, ad_free>,
       fas::advice< ::iow::io::pipe::_confirm_, ad_confirm>,
       fas::advice< ::iow::io::flow::_some_, ad_read_some>,
-      fas::advice< ::iow::io::pipe::_some_, ad_write_some>
+      fas::advice< ::iow::io::pipe::_some_, ad_write_some>,
+      fas::stub<::iow::io::flow::_handler_>
     > >
 {
 public:
