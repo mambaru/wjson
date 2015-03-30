@@ -218,6 +218,19 @@ public:
   std::pair<size_t, size_t>
   search_()
   {
+    std::pair<size_t, size_t> pos(0UL, 0UL);
+    if ( this->_options == nullptr || this->_options->sep.empty() )
+      return pos;
+    
+    size_t count = _outbuf!=nullptr;
+    if ( count==1 && _outlist!=nullptr )
+      count = _outlist->size();
+    
+    /*if ( this->search_( std::cref(this->_outbuf), pos) )
+      return pos;
+    */
+    
+    
     /*
     auto& last = _outlist!=0 && !_outlist->empty() 
                  ? _outlist->front()
@@ -225,6 +238,15 @@ public:
     ;
     return std::pair<size_t, size_t>();
     */
+  }
+  
+  data_ptr& get_by_id_(size_t pos)
+  {
+    if (pos == 0)
+      return _outbuf;
+    auto itr = _outlist->begin();
+    std::advance( *_outlist, pos-1);
+    return *itr;
   }
 
 private:
