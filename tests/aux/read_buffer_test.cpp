@@ -7,6 +7,12 @@ typedef std::vector<char> data_type;
 typedef std::string sep_type;
 typedef ::iow::io::read_buffer<data_type, sep_type> read_buffer;
 
+
+struct options
+{
+  std::string sep;
+};
+
 UNIT(basic_test, "")
 {
   using namespace fas::testing;
@@ -59,15 +65,14 @@ UNIT(basic_test, "")
 UNIT(basic_sep1, "")
 {
   using namespace fas::testing;
-  typedef read_buffer::options_type options_type;
-  std::shared_ptr<options_type> opt = std::make_shared<options_type>();
-  opt->sep="\n";
+  options opt;
+  opt.sep="\n";
   read_buffer buf;
   buf.set_options(opt);
   
-  std::vector< std::string > result;
+  std::string result;
   size_t arr1[] = {3, 1, 3, 4, 3, 6};
-  char *str1 = "aa\n\nbb\n\ncc\n\ndd\n\nee\n\n";
+  const char *str1 = "aa\n\nbb\n\ncc\n\ndd\n\nee\n\n";
   const char str2[][10]={"aa\n", "\n", "bb\n", "\ncc\n", "\ndd", "\n\nee\n\n"};
   
   // настроено один next на один attach
@@ -92,55 +97,19 @@ UNIT(basic_sep1, "")
     t << stop;
     while ( d!=nullptr )
     {
-      result.push_back(std::string(d->begin(), d->end()));
+      auto curres = std::string(d->begin(), d->end());
+      result += curres;
+      t << message("string=") << "[" << curres << "]" ;
       d = buf.detach();
-      t << message("string=") << result.back() << ":" << result.back().size();
     }
   }
+  t << equal<assert, std::string>( result , std::string(str1) ) << "["<< result << "]" << FAS_TESTING_FILE_LINE;
 }
 
 
 UNIT(basic_sep2, "")
 {
   using namespace fas::testing;
-  typedef read_buffer::options_type options_type;
-  std::shared_ptr<options_type> opt = std::make_shared<options_type>();
-  opt->sep="\r\n";
-  read_buffer buf;
-  buf.set_options(opt);
-  
-  std::vector< std::string > result;
-  size_t arr1[] = {4, 1, 3, 8, 1};
-  size_t arr2[] = {4, 1, 3, 8, 1};
-  char *str1 = "aa\r\n\r\nb\r\ncc\r\ndd\r\n";
-  const char str2[][10]={"aa\n\r", "\r", "\nb\r", "\ncc\r\ndd\r", "\n"};
-  
-  // настроено один next на один attach
-  for ( size_t i = 0 ; i < 5; ++i )
-  {
-    t << message("i=") << i;
-    if ( buf.need_buffer() )
-    {
-      auto res = buf.attach( std::make_unique<data_type>(arr1[i]) );
-      t << is_true<assert>( res == nullptr ) << FAS_TESTING_FILE_LINE;
-    }
-    
-    auto p = buf.next();
-    t << is_true<assert>( p.first != nullptr ) << FAS_TESTING_FILE_LINE;
-    t << is_true<assert>( p.second == arr1[i] ) << FAS_TESTING_FILE_LINE;
-    t << stop;
-    std::memcpy(p.first, str2[i], p.second );
-    bool cfrm = buf.confirm(p);
-    t << is_true<assert>( cfrm ) << FAS_TESTING_FILE_LINE;
-    auto d = buf.detach();
-    t << is_true<assert>( d != nullptr ) << FAS_TESTING_FILE_LINE;
-    t << stop;
-    while ( d!=nullptr )
-    {
-      result.push_back(std::string(d->begin(), d->end()));
-      d = buf.detach();
-    }
-  }
 }
 
 
