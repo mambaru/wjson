@@ -1,92 +1,39 @@
 #pragma once
 
 #include <iow/memory.hpp>
+#include <fas/typemanip/empty_type.hpp>
 #include <queue>
 #include <memory>
+#include <algorithm>
+#include <boost/concept_check.hpp>
 
 namespace iow{ namespace io{
   
-template<typename DataType>
+template<typename SepType>
 struct read_buffer_options
 {
-  /*typedef data_pool<DataType> pool_type;
-  typedef std::shared_ptr<pool_type> pool_ptr;
-  */
-  
-  // Рекомендованный размер буфера для чтения
-  size_t bufsize = 8*1024;
-  
-  DataType sep;
-  // Макс. размер буфера, далее идет расщепление ()
-  size_t maxbuf  = 8*1024; 
-  // Мин. размер буфера, далее идет объединение 
-  size_t minbuf  = 0; 
-  // максимальный размер всех буферов
-  size_t maxsize = 1024*1024*1024;
-
+  SepType sep;
 };
 
-template<typename DataType>
+
+template<typename DataType, typename SepType>
 class read_buffer
 {
 public:
-  typedef read_buffer_options<DataType> options_type;
+  typedef read_buffer_options<SepType> options_type;
   typedef std::shared_ptr<options_type> options_ptr;
   typedef DataType data_type;
   typedef typename data_type::value_type value_type;
   typedef value_type* value_ptr;
   typedef std::unique_ptr<data_type> data_ptr;
   typedef std::pair<value_ptr, size_t> data_pair;
-  typedef std::deque<data_ptr> deque_list;
-  typedef std::unique_ptr<deque_list> deque_ptr;
-
 public:
+
+  read_buffer()
+    : _offset()
+    , _offbuf()
+  {}
   
-  read_buffer() noexcept
-    : _size(0)
-    , _outoff(0)
-    , _wait(nullptr)
-    , _outbuf(nullptr)
-    , _options(nullptr)
-  {
-  }
-  
-  explicit read_buffer(options_ptr options) noexcept
-    : _size(0)
-    , _outoff(0)
-    , _wait(nullptr)
-    , _outbuf(nullptr)
-    , _options(options )
-  {
-  }
-
-  read_buffer(const read_buffer& other) noexcept
-    : _size(0)
-    , _outoff(0)
-    , _wait(0)
-    , _options(other._options)
-  {
-  }
-
-  read_buffer(read_buffer&& other) noexcept
-    : _size( other._size)
-    , _outoff( other._offset)
-    , _outbuf( std::move(other._outbuf))
-    , _outlist( std::move(other._outlist))
-    , _wait( other._wait)
-    , _options( other._options)
-  {
-  }
-
-  void clear()
-  {
-    _size = 0;
-    _outoff = 0;
-    _outbuf = nullptr;
-    _outlist = nullptr;
-    _wait = nullptr;
-  }
-
   void set_options(options_ptr options) noexcept
   {
     _options = options;
@@ -97,31 +44,69 @@ public:
     return _options;
   }
   
+  size_t count() const
+  {
+    return (_outbuf != nullptr) + (_outlist!=nullptr ?  _outlist->size() : 0 );
+  }
+
+  
+  /// @return true если необходимо приатачить буфер 
+  bool need_buffer() const
+  {
+    return _inbuf == nullptr;
+  }
+  
+  // Можем приатачить один буфер
+  /// @return nullptr если был приаттачен, либо будет вернут обратно, если это сделать невозможно 
   data_ptr attach(data_ptr d)
   {
-    if ( _inbuf != nullptr )
+    if ( !this->need_buffer() )
       return std::move(d);
     
     _inbuf = std::move(d);
     return nullptr;
   }
   
-  // Следующий для чтения
   data_pair next()
   {
-    if ( _wait != nullptr || _inbuf == nullptr)
-      return data_pair();
-    _wait = std::move( _inbuf );
-    return data_pair( &_wait->front(), _wait->size() );
+    data_pair result(0,0);
+    
+    // Еще в ожидании
+    if ( _wait != nullptr )
+      return result;
+    
+    // Нужно дочитать в хвост исходящего буфера
+    if ( _offset != 0 && false )
+    {
+      // Только кагда используеться сепаратор
+      // TODO: проверку на размер буфера
+      _wait = std::move( this->last_() );
+      result.first = &_wait->front() + _offset;
+      result.second = _wait->size() - _offset;
+    }
+    else if ( _inbuf != nullptr )
+    {
+      _wait = std::move( _inbuf );
+      result.first = &_wait->front();
+      result.second = _wait->size();
+    }
+
+    return result;
   }
   
-  void confirm(data_pair d)
+  bool confirm(data_pair d)
   {
     if ( _wait == nullptr )
-      return;
-      
-    _wait->resize( d.second );
+      return false;
     
+    if ( &(_wait->front()) + _offset - d.first != 0 )
+      return false;
+    
+    if ( _wait->size() < _offset + d.second )
+      return false;
+        
+    _wait->resize( _offset + d.second );
+
     if ( _outbuf == nullptr )
     {
       _outbuf = std::move(_wait);
@@ -134,15 +119,7 @@ public:
       }
       _outlist->push_back( std::move(_wait) );
     }
-  }
-  
-  void switch_next_()
-  {
-    if ( _outlist!=nullptr && !_outlist->empty() )
-    {
-      _outbuf = std::move(_outlist->front());
-      _outlist->pop_front();
-    }
+    return true;
   }
   
   // Забрать распарсенный блок
@@ -151,115 +128,167 @@ public:
     if ( _outbuf == nullptr )
       return nullptr;
     
+    if ( _options==nullptr || _options->sep.empty() )
+    {
+      auto result = std::move(_outbuf);
+      switch_front_();
+      return std::move(result);
+    }
+    
+    // Используется сепаратор
+    return parse_detach_();
+  }
+
+private:
+  typedef std::deque<data_ptr> deque_list;
+  typedef std::unique_ptr<deque_list> deque_ptr;
+  typedef std::pair<size_t, size_t> search_pair;
+
+private:
+  
+  constexpr size_t npos() const
+  {
+    return -1;
+  }
+
+  
+  data_ptr parse_detach_()
+  {
     data_ptr result = nullptr;
-    if (_options==0 || _options->sep.empty() )
+    search_pair p = this->search_();
+    
+    if ( p.first == 0)
     {
-      result = std::move(_outbuf);
-      switch_next_();
-    }
-    else
+      result = this->detach_first_(p);
+    } 
+    else if ( p.first != npos() )
     {
-      auto p = search_();
-      if ( p.first==1 )
-      {
-        if ( p.second == _outbuf->size() )
-        {
-          result == std::move(_outbuf);
-          if ( _outoff!=0 )
-          {
-            std::copy( result->begin() + _outoff, result->end(), result->begin() );
-            result->resize( result->size() - _outoff);
-            _outoff = 0;
-          }
-          switch_next_();
-        }
-        else
-        {
-          result = std::make_unique<data_type>( _outbuf->begin() + _outoff, _outbuf->begin() + p.second);
-          _outoff += result->size();
-        }
-      }
-      else
-      {
-        size_t size = _outbuf->size() - _outoff;
-        auto itr = _outlist->begin();
-        for (size_t i = 0; i < p.first - 2; ++i, ++itr )
-          size += (*itr)->size();
-        size += p.second;
-        result = std::make_unique<data_type>();
-        result->reserve(size);
-        std::copy( _outbuf->begin() + _outoff, _outbuf->end(), std::inserter(*result, result->end() ) );
-        itr = _outlist->begin();
-        for (size_t i = 0; i < p.first - 2; ++i, ++itr )
-        {
-          std::copy( _outlist->front()->begin(), _outlist->front()->end(), std::inserter(*result, result->end() ) );
-          _outlist->pop_front();
-        }
-        switch_next_();
-        // в _outbuf теперь последний
-        std::copy( _outbuf->begin(),  _outbuf->begin() + p.second, std::inserter(*result, result->end() ) );
-        if ( p.second == _outbuf->size() )
-        {
-          switch_next_();
-          _outoff = 0;
-        }
-        else
-        {
-          _outoff = p.second;
-        }
-      }
+      result = this->detach_list_(p);
     }
-      
+    
     return std::move(result);
   }
   
-  // first количество буфферов
-  // pos   позиция в буфуре, до которой копировать
-  std::pair<size_t, size_t>
-  search_()
+  data_ptr detach_first_(search_pair p)
   {
-    std::pair<size_t, size_t> pos(0UL, 0UL);
-    if ( this->_options == nullptr || this->_options->sep.empty() )
-      return pos;
-    
-    size_t count = _outbuf!=nullptr;
-    if ( count==1 && _outlist!=nullptr )
-      count = _outlist->size();
-    
-    /*if ( this->search_( std::cref(this->_outbuf), pos) )
-      return pos;
-    */
-    
-    
+    data_ptr result = nullptr;
+    if ( p.second == _outbuf->size() )
+    {
+      result = std::move(_outbuf);
+      if ( _offset!=0 )
+      {
+        std::copy( result->begin() + _offset, result->end(), result->begin() );
+        result->resize( result->size() - _offset);
+        _offset = 0;
+      }
+      switch_front_();
+    }
+    else
+    {
+      result = std::make_unique<data_type>( _outbuf->begin() + _offset, _outbuf->begin() + p.second);
+      _offset += result->size();
+    }
+    return std::move(result);
+  }
+
+  data_ptr detach_list_(search_pair p)
+  {
+    return nullptr;
+  }
+
+  
+  data_ptr& last_()
+  {
+    if ( _outlist!= nullptr && !_outlist->empty() )
+      return _outlist->back();
+    return _outbuf;
+  }
+  
+  void switch_front_()
+  {
+    // Если задействован список
+    // (м.б. задействован если используеться сепаратор)
+    if ( _outlist!=nullptr && !_outlist->empty() )
+    {
+      _outbuf = std::move(_outlist->front());
+      _outlist->pop_front();
+    }
+  }
+  
+private:
+
+  search_pair search_()
+  {
+    auto& sep = _options->sep;
+    size_t cnt = this->count();
+    for ( size_t i = _offbuf; i < cnt; ++i )
+    {
+      data_ptr& cur = this->get_by_i_(i);
+      auto itr = std::find( cur->begin() + _offset, cur->end(), sep.back() );
+      if ( itr != cur->end() )
+      {
+        ++itr;
+        _offbuf = 0;
+        return search_pair( i, std::distance(cur->begin(), itr ) );
+      }
+    }
+    // ??? 
+    _offset = 0;
+    _offbuf = this->count() - 1;
+    return search_pair(npos(), npos());
     /*
-    auto& last = _outlist!=0 && !_outlist->empty() 
-                 ? _outlist->front()
-                 : _outbuf;
-    ;
-    return std::pair<size_t, size_t>();
+    data_ptr& last = this->last_();
+    auto itr = std::find( last->begin() + _offset, last->end(), sep.back() );
+    if ( itr == last->end() )
+      return search_pair(npos(), npos());
+    
+    if ( sep.size() == 1 )
+    {
+      ++itr;
+      return search_pair( this->count()-1, std::distance(last->begin(), itr ) );
+    }
+    
+    return search_pair(npos(), npos());
+    
+    if ( std::distance(last->begin(), itr) < sep.size() )
+    {
+      // возможно разбит, проерить
+    }
+    else
+    {
+      
+    }
     */
   }
   
-  data_ptr& get_by_id_(size_t pos)
+private:
+  data_ptr& get_by_i_(size_t pos)
   {
     if (pos == 0)
       return _outbuf;
     auto itr = _outlist->begin();
-    std::advance( *_outlist, pos-1);
+    std::advance( itr, pos-1);
     return *itr;
   }
 
-private:
-  
-  size_t _size;
-  size_t _outpos;
-  size_t _outoff; // offset в буфере который был отдан
-  data_ptr _wait; // текущий буфер для чтения 
-  options_ptr _options;
-  data_ptr    _inbuf;
-  data_ptr    _outbuf;
-  deque_ptr   _outlist;
 
+
+  
+  
+private:
+  options_ptr _options;
+  
+  // Входящий буфер чтения
+  data_ptr    _inbuf;
+  // Тейкущий буфер чтения (ожидает подтверждения)
+  data_ptr    _wait;
+  size_t      _offset;
+  size_t      _offbuf;
+  // Исходящий буфер чтения (подтвержден)
+  data_ptr    _outbuf;
+  // Список исходящих буферов
+  // Используеться при парсинге, если за один проход не удалось рапарсить 
+  deque_ptr   _outlist;
 };
 
 }}
