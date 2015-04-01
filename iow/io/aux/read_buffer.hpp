@@ -9,17 +9,26 @@
 
 namespace iow{ namespace io{
   
-template<typename SepType>
+template<typename DataType>
 struct read_buffer_options
 {
-  SepType sep;
+  typedef std::unique_ptr<DataType> data_ptr;
+  std::string sep;
+  size_t bufsize;
+  size_t maxsize;
+  size_t maxbuf;
+  size_t minbuf;
+  std::function< data_ptr(size_t) > create;
+  std::function< void(data_ptr) > free;
+
 };
 
 
-template<typename DataType, typename SepType>
+template<typename DataType>
 class read_buffer
 {
 public:
+  typedef read_buffer_options<DataType> options_type;
   typedef DataType data_type;
   typedef typename data_type::value_type value_type;
   typedef value_type* value_ptr;
@@ -27,107 +36,283 @@ public:
   typedef std::unique_ptr<value_type[]> sep_ptr;
   typedef std::pair<value_ptr, size_t> data_pair;
   typedef std::function<data_ptr(size_t)> create_fun;
-  typedef std::function<vois(data_ptr)> free_fun;
+  typedef std::function<void(data_ptr)> free_fun;
 
 public:
 
   read_buffer()
+    : _sep(nullptr)
+    , _sep_size(0)
+    , _bufsize(4096)
+    , _maxsize(4096*1024)
+    , _maxbuf(4096*4)
+    , _minbuf(512)
+    , _create(nullptr)
+    , _free(nullptr)
+    , _offset(0)
+    , _readbuf(-1)
+    , _readpos(-1)
+    , _parsebuf(0)
+    , _parsepos(0)
   {}
 
   template<typename O>
-  void set_options(const O& /*opt*/) noexcept
+  void set_options(const O& opt) noexcept
   {
+    if ( opt.sep.empty() )
+    {
+      _sep = nullptr;
+      _sep_size=0;
+    }
+    else
+    {
+      _sep_size = opt.sep.size();
+      _sep=sep_ptr(new value_type[_sep_size]);
+      std::copy(opt.sep.begin(), opt.sep.end(), _sep.get() );
+    }
+    
+    _bufsize = opt.bufsize;
+    _maxsize = opt.maxsize;
+    _maxbuf = opt.maxbuf;
+    _minbuf = opt.minbuf;
+    _create = opt.create;
+    _free = opt.free;
   }
 
   template<typename O>
   void get_options(O& opt) const noexcept
   {
+    if ( _sep_size!=0 )
+    {
+      opt.sep.assign(_sep.get(), _sep.get() + _sep_size);
+    }
+    else
+    {
+      opt.sep.clear();
+    }
+    
+    opt.bufsize =_bufsize;
+    opt.maxsize = _maxsize;
+    opt.maxbuf = _maxbuf;
+    opt.minbuf = _minbuf;
+    opt.create = _create;
+    opt.free = _free;
   }
 
   size_t count() const
   {
-    return _outlist.size();
-  }
-
-  /// @return true если необходимо приатачить буфер 
-  bool need_buffer() const
-  {
-    return _inbuf == nullptr;
+    return _buffers.size();
   }
   
-  // Можем приатачить один буфер
-  /// @return nullptr если был приаттачен, либо будет вернут обратно, если это сделать невозможно 
-  data_ptr attach(data_ptr d)
+  bool waiting() const
   {
-    if ( !this->need_buffer() )
-      return std::move(d);
-    
-    _inbuf = std::move(d);
-    return nullptr;
+    return _readbuf!=-1;
+  }
+  
+  data_pair next_new_()
+  {
+    _buffers.push_back( create_() );
+    _readbuf = _buffers.size()-1;
+    _readpos = 0;
+    data_ptr& last = _buffers.back();
+    return data_pair( &((*last)[0]), last->size());
   }
   
   data_pair next()
   {
     data_pair result(0,0);
+    if ( waiting() )
+      return result;
+    
+    if ( _buffers.empty() )
+      return next_new_();
+    
+    data_ptr& last = _buffers.back();
+    
+    size_t reserve = last->capacity() - last->size();
+    if ( reserve > _minbuf && last->size() + _bufsize < _maxbuf )
+    {
+      size_t nextsize = _bufsize < reserve ? _bufsize : reserve;
+      _readbuf = _buffers.size() - 1;
+      _readpos = last->size();
+      last->resize( last->size() + nextsize  );
+      result.first = &((*last)[_readpos]);
+      result.second = nextsize;
+    }
+    else
+    {
+      result = next_new_();
+    }
+    
     return result;
   }
   
   bool confirm(data_pair d)
   {
-    if ( _wait == nullptr )
+    if ( !waiting() )
+    {
+      return false;
+    }
+    
+    auto& buf = _buffers[_readbuf];
+    
+    if ( &( (*buf)[0]) + _readpos - d.first != 0 )
+      return false;
+    
+    if ( buf->size() < _readpos + d.second )
       return false;
 
-    if ( &(_wait->front()) + _wait_offset - d.first != 0 )
-      return false;
-
-    if ( _wait->size() < _wait_offset + d.second )
-      return false;
-
-    _wait->resize( _wait_offset + d.second );
-    _outlist.push_back( std::move(_wait) );
+    buf->resize( _readpos + d.second );
+    
+    _readpos = -1;
+    _readbuf = -1;
     return true;
   }
   
   // Забрать распарсенный блок
   data_ptr detach()
   {
-    if ( _outlist.empty() )
+    if ( _buffers.empty() )
       return nullptr;
     
-    if ( _sep_size == 0 )
+    bool found = false;
+    
+    if (_sep_size==0)
     {
-      auto result = std::move(_outlist.front());
-      _outlist.pop_front();
-      return std::move(result);
+      found = true;
+      if ( _readbuf==-1 )
+      {
+        _parsebuf = _buffers.size() - 1;
+        _parsepos = _buffers.back()->size();
+      }
+      else if (_readpos != 0)
+      {
+        _parsebuf = _readbuf;
+        _parsepos = _readpos;
+      }
+      else if ( _readbuf != 0 )
+      {
+        _parsebuf = _readbuf - 1;
+        _parsepos = _buffers[0]->size();
+      }
+      else
+      {
+        return nullptr;
+      }
     }
     
-    // TODO:
-    return nullptr;
+    for ( size_t i = _parsebuf; !found && i < _buffers.size(); ++i)
+    {
+      data_type& buf = *(_buffers[i]);
+      size_t to = ( i == _readbuf ) ? _readpos : buf.size();
+      auto itr = std::find(buf.begin() + _parsepos, buf.begin() + to, _sep[_sep_size-1]);
+      if ( itr!= buf.end() )
+      {
+        found = true;
+        _parsepos = std::distance(buf.begin(), itr) + 1;
+        // TODO: Проверку на длинный разделитель
+        break;
+      }
+      _parsepos=0;
+      ++_parsebuf;
+    }
+    
+    if ( !found )
+      return nullptr;
+    
+    data_ptr result = nullptr;
+    if ( _parsebuf==0 )
+    {
+      if ( _buffers[0]->size()==_parsepos )
+      {
+        result = std::move(_buffers[0]);
+        _buffers.pop_front();
+        _readbuf -= (_readbuf!=-1);
+        _parsepos = 0;
+
+        if ( _offset != 0 )
+        {
+          std::copy( result->begin() + _offset, result->end(), result->begin() );
+          result->resize( result->size() - _offset);
+          _offset = 0;
+        }
+      }
+      else
+      {
+        result = create_(_parsepos - _offset);
+        std::copy(_buffers[0]->begin() + _offset, _buffers[0]->begin() + _parsepos, result->begin() );
+        //result = std::make_unique<data_type>(_buffers[0]->begin() + _offset, _buffers[0]->begin() + _parsepos);
+        _offset = _parsepos;
+      }
+    }
+    else
+    {
+      size_t size = _buffers[0]->size() - _offset + _parsepos;
+      for ( size_t i=1 ; i < _parsebuf; ++i)
+      {
+        size += _buffers[i]->size();
+      }
+      result = create_(size);
+      result->clear();
+      std::copy(_buffers[0]->begin() + _offset, _buffers[0]->end(), std::inserter(*result, result->end()));
+      for ( size_t i=1 ; i < _parsebuf; ++i)
+      {
+        std::copy(_buffers[i]->begin() + _offset, _buffers[i]->end(), std::inserter(*result, result->end()));
+      }
+      std::copy(_buffers[_parsebuf]->begin(), _buffers[_parsebuf]->begin() + _parsepos, std::inserter(*result, result->end()));
+      
+      if ( _buffers[_parsebuf]->size() == _parsepos )
+      {
+        if ( _parsebuf == _buffers.size() - 1 )
+        {
+          _buffers.clear();
+        }
+        else
+        {
+          std::move( _buffers.begin() + _parsebuf + 1, _buffers.end(), _buffers.begin());
+          _buffers.resize( _buffers.size() - _parsebuf - 1);
+          if (_readbuf!=-1)
+          {
+            _readbuf -= (_parsebuf + 1);
+          }
+        }
+        _parsebuf = 0; // ?? -1
+        _parsepos = 0;
+      }
+      else
+      {
+        std::move( _buffers.begin() + _parsebuf, _buffers.end(), _buffers.begin());
+        _buffers.resize( _buffers.size() - _parsebuf);
+        if ( _readbuf!=-1 )
+          _readbuf -= _parsebuf;
+        _offset = _parsebuf;
+        _parsebuf = 0;
+      }
+      
+    }
+    return std::move(result);
   }
 
 private:
+
   typedef std::deque<data_ptr> buffer_list;
-  //typedef std::unique_ptr<deque_list> deque_ptr;
-  //typedef std::pair<size_t, size_t> search_pair;
 
-private:
-
-  constexpr size_t npos() const
-  {
-    return -1;
-  }
-  
   data_ptr create_(size_t size) const
   {
-    if ( create_ )
-      return create_(size);
+    if ( _create!=nullptr )
+      return _create(size);
     return std::make_unique<data_type>(size);
+  }
+
+  data_ptr create_() const
+  {
+    return create_(_bufsize);
   }
   
   void free_(data_ptr d) const
   {
-    if ( free_ )
-      free_( std::move(d) );
+    if ( _free != nullptr)
+      _free( std::move(d) );
   }
 
 private:
@@ -135,19 +320,22 @@ private:
 // options
   sep_ptr _sep;
   size_t _sep_size;
+  size_t _bufsize;
+  size_t _maxsize;
+  size_t _maxbuf;
+  size_t _minbuf;
   create_fun _create;
   free_fun _free;
 
-// buffers
-  data_ptr    _inbuf;
-  data_ptr    _wait;
-  buffer_list   _outlist;
 
-// state
-  size_t _wait_offset;
-  size_t _search_buffer;
-  size_t _search_offset;
+  size_t  _offset;  // Смещение в первом буфере
+  size_t  _readbuf; // -1 - если не ожидает подтверждения
+  size_t  _readpos;
+  
+  size_t  _parsebuf;
+  size_t  _parsepos;
 
+  buffer_list   _buffers;
 };
 
 }}
