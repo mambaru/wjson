@@ -14,13 +14,13 @@ struct read_buffer_options
 {
   typedef std::unique_ptr<DataType> data_ptr;
   std::string sep;
-  size_t bufsize;
-  size_t maxsize;
-  size_t maxbuf;
-  size_t minbuf;
+  size_t bufsize=4096;
+  size_t maxsize=4096*1024;
+  size_t maxbuf=4096*2;
+  size_t minbuf=0;
+  bool fast_mode = false;
   std::function< data_ptr(size_t) > create;
   std::function< void(data_ptr) > free;
-
 };
 
 
@@ -56,6 +56,12 @@ public:
     , _parsepos(0)
   {}
 
+  read_buffer(const read_buffer&) = delete;
+  read_buffer(read_buffer&&) = delete;
+  
+  read_buffer& operator=(const read_buffer&) = delete;
+  read_buffer& operator=(read_buffer&&) = delete;
+
   template<typename O>
   void set_options(const O& opt) noexcept
   {
@@ -70,13 +76,33 @@ public:
       _sep=sep_ptr(new value_type[_sep_size]);
       std::copy(opt.sep.begin(), opt.sep.end(), _sep.get() );
     }
-    
+
     _bufsize = opt.bufsize;
     _maxsize = opt.maxsize;
     _maxbuf = opt.maxbuf;
     _minbuf = opt.minbuf;
     _create = opt.create;
     _free = opt.free;
+
+    if ( _bufsize == 0 )
+    {
+      _bufsize = 4096;
+    }
+
+    if ( _minbuf > _bufsize )
+    {
+      _minbuf = _bufsize;
+    }
+
+    if ( _maxbuf < _bufsize )
+    {
+      _maxbuf = _bufsize;
+    }
+
+    if ( _maxsize == 0 )
+    {
+      _maxsize = 4096*1024;
+    }
   }
 
   template<typename O>
@@ -197,6 +223,7 @@ public:
       }
       else
       {
+        // ??
         return nullptr;
       }
     }
@@ -208,10 +235,29 @@ public:
       auto itr = std::find(buf.begin() + _parsepos, buf.begin() + to, _sep[_sep_size-1]);
       if ( itr!= buf.end() )
       {
-        found = true;
-        _parsepos = std::distance(buf.begin(), itr) + 1;
-        // TODO: Проверку на длинный разделитель
-        break;
+        if (_sep_size == 1)
+        {
+          found = true;
+        }
+        else
+        {
+#error todo для сепаратора
+          // TODO: проверить, вмещаемся ли в текущий буфер
+          /*
+          auto bufitr = _buffers.begin() + i;
+          auto itr2 = itr - 1;
+          for ( size_t j=1; j < _sep_size; ++j)
+          {
+            std::abort();
+          }
+          */
+        }
+
+        if (found)
+        {
+          _parsepos = std::distance(buf.begin(), itr) + 1;
+          break;
+        }
       }
       _parsepos=0;
       ++_parsebuf;
@@ -241,7 +287,6 @@ public:
       {
         result = create_(_parsepos - _offset);
         std::copy(_buffers[0]->begin() + _offset, _buffers[0]->begin() + _parsepos, result->begin() );
-        //result = std::make_unique<data_type>(_buffers[0]->begin() + _offset, _buffers[0]->begin() + _parsepos);
         _offset = _parsepos;
       }
     }
