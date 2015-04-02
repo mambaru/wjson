@@ -176,6 +176,7 @@ UNIT(basic_sep1, "")
             {"aa|", "|", "bb|", "|", "cc|", "|", "dd|", "|", "ee|", "|"}
            );
   
+  /*
   opt.bufsize = 1;
   opt.minbuf = 1;
   buf.set_options(opt);
@@ -191,6 +192,8 @@ UNIT(basic_sep1, "")
             {"aa", "||", "bb", "||", "cc", "||", "dd", "||", "ee", "||"},
             {"aa|", "|", "bb|", "|", "cc|", "|", "dd|", "|", "ee|", "|"}
            );
+           
+   */
 
 }
 
@@ -234,8 +237,8 @@ UNIT(basic_sep2, "")
 
 BEGIN_SUITE(read_buffer, "read_buffer suite")
   //ADD_UNIT(basic_test)
-  //ADD_UNIT(basic_sep1)
-  ADD_UNIT(basic_sep2)
+  ADD_UNIT(basic_sep1)
+  ///ADD_UNIT(basic_sep2)
 END_SUITE(read_buffer)
 
 BEGIN_TEST

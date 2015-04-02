@@ -37,6 +37,9 @@ public:
   typedef std::pair<value_ptr, size_t> data_pair;
   typedef std::function<data_ptr(size_t)> create_fun;
   typedef std::function<void(data_ptr)> free_fun;
+private:
+  typedef typename data_type::const_iterator const_iterator;
+  typedef std::pair<size_t, size_t> search_pair;
 
 public:
 
@@ -143,18 +146,18 @@ public:
     data_ptr& last = _buffers.back();
     return data_pair( &((*last)[0]), last->size());
   }
-  
+
   data_pair next()
   {
     data_pair result(0,0);
     if ( waiting() )
       return result;
-    
+
     if ( _buffers.empty() )
       return next_new_();
-    
+
     data_ptr& last = _buffers.back();
-    
+
     size_t reserve = last->capacity() - last->size();
     if ( reserve > _minbuf && last->size() + _bufsize < _maxbuf )
     {
@@ -179,30 +182,280 @@ public:
     {
       return false;
     }
-    
+
     auto& buf = _buffers[_readbuf];
-    
+
     if ( &( (*buf)[0]) + _readpos - d.first != 0 )
       return false;
-    
+
     if ( buf->size() < _readpos + d.second )
       return false;
 
     buf->resize( _readpos + d.second );
-    
+
     _readpos = -1;
     _readbuf = -1;
     return true;
   }
+
+  const_iterator begin_(size_t pos) const
+  {
+    const_iterator itr = _buffers[pos]->begin();
+    if ( pos == 0 )
+      itr += _offset;
+    return itr;
+  }
+
+  const_iterator end_(size_t pos) const
+  {
+    // Если _readpos==0?
+    if ( pos == _readbuf )
+    {
+      return _buffers[pos]->begin() + _readpos;
+    }
+    return _buffers[pos]->end();
+  }
   
-  // Забрать распарсенный блок
+  size_t last_buff_() const 
+  {
+    if ( _readbuf==-1 || _readpos > 0)
+    {
+      return _buffers.size() - 1;
+    }
+    else if (_buffers.size() > 1 )
+    {
+      return _buffers.size() - 2;
+    }
+    return -1;
+  }
+
+  const_iterator last_(size_t pos) const
+  {
+    // Если _readpos==0?
+    auto& buf = *(_buffers[pos]);
+    if ( pos == _readbuf )
+    {
+      return buf.begin() + _readpos - 1;
+    }
+    return buf.begin() + buf.size() - 1;
+  }
+
+  void dec_(size_t& pos, const_iterator& itr) const
+  {
+    auto beg = begin_(pos);
+    if ( beg != itr )
+    {
+      --itr;
+    }
+    else
+    {
+      if ( pos == 0 )
+      {
+        pos = -1;
+        return;
+      }
+      --pos;
+      itr = last_(pos);
+    }
+  }
+
+  bool check_sep_( size_t pos, const_iterator itr) const
+  {
+    if ( _sep_size < 2)
+      return true;
+
+    dec_(pos, itr);
+    if ( pos == -1 )
+      return false;
+
+    if ( _sep_size == 2 )
+      return *itr == _sep[0];
+
+    value_type* sbeg = _sep.get();
+    value_type* scur = sbeg + _sep_size - 2;
+    if ( *itr != *scur )
+    {
+      return false;
+    }
+    else if (_sep_size == 2)
+    {
+      return true;
+    }
+
+    for(;;)
+    {
+      --scur;
+      dec_(pos, itr);
+      if (pos==-1)
+        return false;
+      if ( *itr != *scur )
+        return false;
+      if (scur==sbeg)
+        return true;
+    }
+  }
+
+  search_pair empty_search_() const
+  {
+    if ( _readbuf==-1 )
+    {
+      // Если последний буфер не выделен под чтение
+      return search_pair(_buffers.size() - 1, _buffers.back()->size());
+    }
+    else if (_readpos != 0)
+    {
+      // Если последний буфер выделен под чтение, но не сначала
+      return search_pair(_readbuf, _readpos);
+    }
+    else if ( _readbuf != 0 )
+    {
+      // Если последний буфер выделен под чтение с начала
+      // и он не первый
+      return search_pair( _readbuf-1, _buffers[_readbuf-1]->size());
+    }
+    // Нет готовых данных
+    return search_pair(-1, -1);
+  }
+
+  search_pair search_() const
+  {
+    if ( _buffers.empty() )
+      return search_pair(-1, -1);
+
+    if (_sep_size==0)
+      return empty_search_();
+
+    size_t last = last_buff_();
+
+    if ( last==-1)
+      return search_pair(-1, -1);
+
+    for (size_t i=_parsebuf; i < last + 1; ++i)
+    {
+      auto beg = begin_(i);
+      auto end = end_(i);
+      auto itr = std::find(beg, end, _sep[_sep_size-1]);
+
+      // если нашли в текущем буфере последний байт сепаратора
+      if ( itr != end && check_sep_(i, itr) )
+      {
+        return search_pair( i, std::distance(beg, itr) + 1 );
+      }
+    }
+
+    return search_pair(-1, -1);
+  }
+
+  data_ptr make_result_if_first_(const search_pair& p)
+  {
+    if ( p.first!=0 )
+      return nullptr;
+
+    data_ptr result = nullptr;
+    // Если можем полностью захватить буфер
+    if ( _buffers[0]->size() == p.second )
+    {
+      result = std::move(_buffers[0]);
+      // Если ральные данные не с начала буфера
+      if (_offset!=0)
+      {
+        std::copy( result->begin() + _offset, result->end(), result->begin() );
+        result->resize( result->size() - _offset);
+      }
+    }
+    else
+    {
+      result = create_(p.second - _offset);
+      std::copy(_buffers[0]->begin() + _offset, _buffers[0]->begin() + p.second, result->begin() );
+    }
+    return std::move(result);
+  }
+
+  data_ptr make_result_(const search_pair& p)
+  {
+    data_ptr result = make_result_if_first_(p);
+    
+    // Если блок готов в первом буфере
+    if ( result != nullptr )
+      return std::move(result);
+
+    // Расчитываем необходимый резерв
+    size_t reserve = 0;
+    for (size_t i=0; i < p.first + 1; ++i)
+    {
+      reserve+=_buffers[i]->size();
+    }
+    
+    // reserve с небольшим оверхедом, поэтому очищаем и используем inserter
+    result = create_(reserve);
+    result->clear();
+
+    // Копируем со всех буферов, что готовы
+    for (size_t i=0; i < p.first + 1; ++i)
+    {
+      std::copy(begin_(i), end_(i), std::inserter(*result, result->end()));
+    }
+    return std::move(result);
+  }
+
+  // Удаляем отработанные буферы и настраиваем состояние
+  void prepare_(const search_pair& p) 
+  {
+    if ( p.first==0 )
+    {
+      if ( _buffers[0] == nullptr )
+      {
+        _buffers.pop_front();
+        _offset = 0;
+        _parsebuf = 0;
+        _parsepos = 0;
+      }
+      else
+      {
+        _offset = p.second;
+        _parsepos = p.second;
+        _parsebuf = 0;
+      }
+    }
+    else
+    {
+      bool complete = _buffers[p.first]->size() == p.second;
+      size_t off = p.first + complete + 1;
+      std::move(_buffers.begin(), _buffers.begin() + off, _buffers.begin() );
+      _buffers.resize( _buffers.size() - off );
+      _parsebuf = 0;
+      _offset = complete ? 0 : p.second;
+      _parsepos = _offset;
+    }
+  }
+
   data_ptr detach()
   {
     if ( _buffers.empty() )
       return nullptr;
-    
+
+    auto res = search_();
+    if (res.first==-1)
+    {
+      _parsebuf = last_buff_();
+      // Если есть ожидания чтения
+      _parsepos = _readpos!=-1 ? _readpos : _buffers[_parsebuf]->size();
+      return nullptr;
+    }
+
+    auto resbuf = make_result_(res);
+    prepare_(res);
+    return std::move(resbuf);
+  }
+
+
+  // Забрать распарсенный блок
+  data_ptr detach_old()
+  {
+    if ( _buffers.empty() )
+      return nullptr;
+
     bool found = false;
-    
     if (_sep_size==0)
     {
       found = true;
@@ -411,6 +664,7 @@ public:
     return std::move(result);
   }
 
+private:
 private:
 
   typedef std::deque<data_ptr> buffer_list;
