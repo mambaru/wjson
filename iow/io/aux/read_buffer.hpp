@@ -228,39 +228,112 @@ public:
       }
     }
     
+    // Перебираем все доступные буферы 
     for ( size_t i = _parsebuf; !found && i < _buffers.size(); ++i)
     {
       data_type& buf = *(_buffers[i]);
+      // Позиция до которой искать ( от _readpos буфер для текущей операции чтения)
       size_t to = ( i == _readbuf ) ? _readpos : buf.size();
+      // Находим последний символ разделителя в текущем буфере 
       auto itr = std::find(buf.begin() + _parsepos, buf.begin() + to, _sep[_sep_size-1]);
-      if ( itr!= buf.end() )
+      while ( itr!= buf.end() )
       {
-        if (_sep_size == 1)
+        auto itr2 = itr;
+        _parsepos = std::distance(buf.begin(), itr) + 1;
+        found = true;
+
+        // Если разделитель больше 1, то сравнимваем остальные с конца
+        if (_sep_size != 1)
         {
-          found = true;
-        }
-        else
-        {
-#error todo для сепаратора
-          // TODO: проверить, вмещаемся ли в текущий буфер
-          /*
-          auto bufitr = _buffers.begin() + i;
-          auto itr2 = itr - 1;
-          for ( size_t j=1; j < _sep_size; ++j)
+          // Если разделител разбит на несколько буферов
+          if ( _parsepos < _sep_size )
           {
-            std::abort();
+            size_t last = i;
+            if ( itr2 != buf.begin() || last!=0 )
+            {
+              /*
+              if ( last==0 )
+              {
+                found = false;
+                break;
+              }
+              */
+              --last;
+              itr2 = _buffers[last]->begin() + _buffers[last]->size() - 1;
+            }
+            // Перебираем все буфера от текущего до первого
+            // (на случай если длина разделителя 3 на дри буфера по байту)
+            auto bbeg = _buffers.begin();
+            auto bcur = _buffers.begin() + last;
+            value_type* sbeg = _sep.get();
+            // Предпоследний символ разделителя
+            value_type* scur = sbeg + _sep_size - 2;
+            // Перебираем все, с предпоследнего символа (последний уже совпал)
+            for ( ; scur >= sbeg && found; --scur)
+            {
+              found = *itr2 == *scur;
+              if ( found )
+              {
+                size_t offset = ( bcur==bbeg ) ? _offset : 0;
+                if ( itr2 == (*bcur)->begin() + offset )
+                {
+                  if ( bcur != bbeg)
+                  {
+                    --bcur;
+                    itr2 = (*bcur)->begin() + (*bcur)->size() - 1;
+                  }
+                  else
+                  {
+                    found = (scur==sbeg);
+                  }
+                }
+                else
+                {
+                  //abort();
+                  --itr2;
+                }
+              }
+            }
+            // found = (scur == sbeg);
           }
-          */
+          else
+          {
+            if (itr2 != buf.begin())
+            {
+              --itr2;
+              auto beg = buf.begin();
+              if ( i==0 )
+                std::advance(beg, _offset);
+              value_type* sbeg = _sep.get();
+              value_type* scur = sbeg + _sep_size - 2;
+              for ( ; scur >= sbeg && found; --scur, --itr2)
+              {
+                found = (itr2 >= beg) && (*itr2 == *scur);
+              }
+            }
+            else
+            {
+              // Ошибка 
+              found = false;
+            }
+          }
         }
 
         if (found)
         {
-          _parsepos = std::distance(buf.begin(), itr) + 1;
+          // _parsepos = dist + 1;
           break;
         }
+        
+        // Продолжаем поиск (для разделителей > 1)
+        itr = std::find(buf.begin() + _parsepos, buf.begin() + to, _sep[_sep_size-1]);
+      } // while;
+      
+      if ( !found && _parsepos == buf.size())
+      {
+        _parsepos=0;
+        ++_parsebuf;
       }
-      _parsepos=0;
-      ++_parsebuf;
     }
     
     if ( !found )
@@ -330,7 +403,7 @@ public:
         _buffers.resize( _buffers.size() - _parsebuf);
         if ( _readbuf!=-1 )
           _readbuf -= _parsebuf;
-        _offset = _parsebuf;
+        _offset = _parsepos;
         _parsebuf = 0;
       }
       

@@ -82,7 +82,6 @@ void test_buff1(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
   std::vector<std::string> vectres;
   for (auto& s: reads)
   {
-    t << message("[") << s << "]";
     incoming+= s;
     auto p = buf.next();
     t << is_true<assert>(s.size() <= p.second) << FAS_TESTING_FILE_LINE;
@@ -96,7 +95,9 @@ void test_buff1(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
     {
       t << is_true<assert>( !d->empty() ) << FAS_TESTING_FILE_LINE;
       t << stop;
-      vectres.push_back(std::string(d->begin(), d->end()));
+      auto str = std::string(d->begin(), d->end());
+      t << message("pack: ") << str;
+      vectres.push_back(str);
       result += vectres.back();
       d = buf.detach();
     }
@@ -136,6 +137,7 @@ void test_buff2(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
     t << is_true<assert>( !d->empty() ) << FAS_TESTING_FILE_LINE;
     t << stop;
     auto str = std::string(d->begin(), d->end());
+    t << message("pack: ") << str;
     vectres.push_back(str);
     result += str;
     d = buf.detach();
@@ -153,7 +155,7 @@ template<typename T/*, typename ...Args*/>
 void test_buff(T& t, read_buffer& buf, /*Args&&... args*/ std::vector<std::string> reads, std::vector<std::string> chk)
 {
   test_buff1(t, buf, reads, chk);
-  test_buff2(t, buf, reads, chk);
+  //test_buff2(t, buf, reads, chk);
 }
 
 
@@ -167,13 +169,15 @@ UNIT(basic_sep1, "")
   buf.get_options(opt);
   opt.sep="|";
   opt.bufsize = 6;
-  opt.minbuf = 3;
+  opt.minbuf = 6;
   buf.set_options(opt);
   test_buff(t, buf, 
             {"aa|", "|", "bb|", "|cc|", "|dd", "||ee||"}, 
             {"aa|", "|", "bb|", "|", "cc|", "|", "dd|", "|", "ee|", "|"}
            );
+  
   opt.bufsize = 1;
+  opt.minbuf = 1;
   buf.set_options(opt);
   test_buff(t, buf, 
             {"a", "a", "|", "|", "b", "b", "|", "|", "c", "c", "|", "|", "d", "d", "|", "|", "e", "e", "|", "|"},
@@ -181,68 +185,57 @@ UNIT(basic_sep1, "")
            );
   
   opt.bufsize = 2;
+  opt.minbuf = 2;
   buf.set_options(opt);
   test_buff(t, buf, 
             {"aa", "||", "bb", "||", "cc", "||", "dd", "||", "ee", "||"},
             {"aa|", "|", "bb|", "|", "cc|", "|", "dd|", "|", "ee|", "|"}
            );
 
-  /*
-  options opt;
-  opt.sep="\n";
-  read_buffer buf;
-  buf.get_options(opt);
-  opt.bufsize = 1;
-  buf.set_options(opt);
-  
-  std::string result;
-  size_t arr1[] = {3, 1, 3, 4, 3, 6};
-  const char *str1 = "aa\n\nbb\n\ncc\n\ndd\n\nee\n\n";
-  const char str2[][10]={"aa\n", "\n", "bb\n", "\ncc\n", "\ndd", "\n\nee\n\n"};
-  
-  // настроено один next на один attach
-  for ( size_t i = 0 ; i < 6; ++i )
-  {
-    t << message("i=") << i;
-    //if ( buf.need_buffer() )
-    {
-      //auto res = buf.attach( std::make_unique<data_type>(arr1[i]) );
-      //t << is_true<assert>( res == nullptr ) << FAS_TESTING_FILE_LINE;
-    }
-    
-    auto p = buf.next();
-    t << is_true<assert>( p.first != nullptr ) << FAS_TESTING_FILE_LINE;
-    //! t << is_true<assert>( p.second == arr1[i] ) << p.second << "!=" << arr1[i] << FAS_TESTING_FILE_LINE;
-    t << stop;
-    std::memcpy(p.first, str2[i], p.second );
-    bool cfrm = buf.confirm(p);
-    t << is_true<assert>( cfrm ) << FAS_TESTING_FILE_LINE;
-    auto d = buf.detach();
-    t << is_true<assert>( d != nullptr ) << FAS_TESTING_FILE_LINE;
-    t << stop;
-    while ( d!=nullptr )
-    {
-      auto curres = std::string(d->begin(), d->end());
-      result += curres;
-      t << message("string=") << "[" << curres << "]" ;
-      d = buf.detach();
-    }
-  }
-  t << equal<assert, std::string>( result , std::string(str1) ) << "["<< result << "]" << FAS_TESTING_FILE_LINE;
-  */
 }
 
 
 UNIT(basic_sep2, "")
 {
   using namespace fas::testing;
+    read_buffer buf;
+  options opt;
+  buf.get_options(opt);
+  opt.sep="##";
+  opt.bufsize = 10;
+  opt.minbuf = 10;
+  buf.set_options(opt);
+  
+  test_buff(t, buf, 
+            {"aa##", "##", "bb##", "##cc##", "##dd", "####ee####"}, 
+            {"aa##", "##", "bb##", "##", "cc##", "##", "dd##", "##", "ee##", "##"}
+           );
+  
+  
+  /*
+  opt.bufsize = 1;
+  opt.minbuf = 1;
+  buf.set_options(opt);
+  test_buff(t, buf, 
+            {"a", "a", "#","#", "#","#", "b", "b", "#","#", "#","#", "c", "c", "#","#", "#","#", "d", "d", "#","#", "#","#", "e", "e", "#","#", "#","#"},
+            {"aa##", "##", "bb##", "##", "cc##", "##", "dd##", "##", "ee##", "##"}
+           );
+           
+  opt.bufsize = 2;
+  opt.minbuf = 2;
+  buf.set_options(opt);
+  test_buff(t, buf, 
+            {"aa", "####", "bb", "####", "cc", "####", "dd", "####", "ee", "####"},
+            {"aa##", "##", "bb##", "##", "cc##", "##", "dd##", "##", "ee##", "##"}
+           );
+  */
 }
 
 
 BEGIN_SUITE(read_buffer, "read_buffer suite")
-  ADD_UNIT(basic_test)
-  ADD_UNIT(basic_sep1)
-  //ADD_UNIT(basic_sep2)
+  //ADD_UNIT(basic_test)
+  //ADD_UNIT(basic_sep1)
+  ADD_UNIT(basic_sep2)
 END_SUITE(read_buffer)
 
 BEGIN_TEST
