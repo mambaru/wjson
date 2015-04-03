@@ -332,15 +332,35 @@ public:
 
     for (size_t i=_parsebuf; i < last + 1; ++i)
     {
-      auto beg = begin_(i);
-      auto end = end_(i);
-      auto itr = std::find(beg, end, _sep[_sep_size-1]);
-
+      const_iterator end = end_(i);
+      const_iterator beg;
+      if ( i==_parsebuf )
+      {
+        beg = _buffers[i]->begin() + _parsepos;
+      }
+      else
+      {
+        beg = begin_(i);
+      }
+      
+      //auto itr = beg;
+      while ( beg!=end )
+      {
+        auto itr = std::find(beg, end, _sep[_sep_size-1]);
+        if ( itr != end && check_sep_(i, itr) )
+        {
+          return search_pair( i, std::distance(_buffers[i]->cbegin(), itr) + 1 );
+        }
+        ++beg;
+      }
+      
+      /*
       // если нашли в текущем буфере последний байт сепаратора
       if ( itr != end && check_sep_(i, itr) )
       {
-        return search_pair( i, std::distance(beg, itr) + 1 );
+        return search_pair( i, std::distance(_buffers[i]->cbegin(), itr) + 1 );
       }
+      */
     }
 
     return search_pair(-1, -1);
@@ -368,6 +388,7 @@ public:
       result = create_(p.second - _offset);
       std::copy(_buffers[0]->begin() + _offset, _buffers[0]->begin() + p.second, result->begin() );
     }
+    //std::cout << "make_result first : [" << std::string(result->begin(), result->end() ) << "]" << std::endl;
     return std::move(result);
   }
 
@@ -393,7 +414,14 @@ public:
     // Копируем со всех буферов, что готовы
     for (size_t i=0; i < p.first + 1; ++i)
     {
-      std::copy(begin_(i), end_(i), std::inserter(*result, result->end()));
+      if ( i != p.first )
+      {
+        std::copy(begin_(i), end_(i), std::inserter(*result, result->end()));
+      }
+      else
+      {
+        std::copy(begin_(i), _buffers[i]->cbegin() + p.second, std::inserter(*result, result->end()));
+      }
     }
     return std::move(result);
   }
@@ -420,9 +448,11 @@ public:
     else
     {
       bool complete = _buffers[p.first]->size() == p.second;
-      size_t off = p.first + complete + 1;
-      std::move(_buffers.begin(), _buffers.begin() + off, _buffers.begin() );
-      _buffers.resize( _buffers.size() - off );
+      size_t off = p.first + complete;
+      if ( off > 0 )
+      {
+        _buffers.erase( _buffers.begin(), _buffers.begin() + off );
+      }
       _parsebuf = 0;
       _offset = complete ? 0 : p.second;
       _parsepos = _offset;

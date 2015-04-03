@@ -1,4 +1,4 @@
-
+#include <iostream>
 #include <iow/io/aux/read_buffer.hpp>
 #include <fas/testing.hpp>
 #include <cstring>
@@ -65,9 +65,8 @@ UNIT(basic_test, "")
   auto d = buf.detach();
   t << is_true<assert>( d != nullptr) << FAS_TESTING_FILE_LINE;
   t << stop;
-  t << message("size:") << d->size();
+  
   auto str = std::string(d->begin(), d->end());
-  t << message("string:") << str;
   t << equal_str<assert>( std::string("ab"), str  ) << FAS_TESTING_FILE_LINE;
 }
 
@@ -75,8 +74,6 @@ template<typename T>
 void test_buff1(T& t, read_buffer& buf, std::vector<std::string> reads, std::vector<std::string> chk)
 {
   using namespace fas::testing;
-  t << message("--test_buff1--");
-  //std::vector<std::string> reads({args...});
   std::string incoming;
   std::string result;
   std::vector<std::string> vectres;
@@ -96,7 +93,6 @@ void test_buff1(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
       t << is_true<assert>( !d->empty() ) << FAS_TESTING_FILE_LINE;
       t << stop;
       auto str = std::string(d->begin(), d->end());
-      t << message("pack: ") << str;
       vectres.push_back(str);
       result += vectres.back();
       d = buf.detach();
@@ -110,10 +106,6 @@ template<typename T>
 void test_buff2(T& t, read_buffer& buf, std::vector<std::string> reads, std::vector<std::string> chk)
 {
   using namespace fas::testing;
-  t << message("--test_buff2--");
-  //std::vector<std::string> reads({args...});
-  //reads.emplace_back( std::forward<std::string>(args)...);
-  //=std::vector<std::string>( std::string(args)...); 
   std::string incoming;
   std::string result;
   for (auto& s: reads)
@@ -137,29 +129,67 @@ void test_buff2(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
     t << is_true<assert>( !d->empty() ) << FAS_TESTING_FILE_LINE;
     t << stop;
     auto str = std::string(d->begin(), d->end());
-    t << message("pack: ") << str;
     vectres.push_back(str);
     result += str;
     d = buf.detach();
   }
 
-  t << message("result:") << result;
-  t << message("count:") << count;
   t << equal<expect>(incoming, result) << incoming << "!=" << result << FAS_TESTING_FILE_LINE;
   t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
-  
 }
 
 
-template<typename T/*, typename ...Args*/>
+template<typename T>
 void test_buff(T& t, read_buffer& buf, /*Args&&... args*/ std::vector<std::string> reads, std::vector<std::string> chk)
 {
   test_buff1(t, buf, reads, chk);
-  //test_buff2(t, buf, reads, chk);
+  test_buff2(t, buf, reads, chk);
 }
 
-
-
+UNIT(basic_sep0, "")
+{
+  using namespace fas::testing;
+  read_buffer buf;
+  options opt;
+  buf.get_options(opt);
+  opt.sep="";
+  opt.bufsize = 6;
+  opt.minbuf = 6;
+  buf.set_options(opt);
+  test_buff1(t, buf, 
+            {"aa|", "|", "bb|", "|cc|", "|dd", "||ee||"}, 
+            {"aa|", "|", "bb|", "|cc|", "|dd", "||ee||"}
+           );
+  test_buff2(t, buf, 
+            {"aa|", "|", "bb|", "|cc|", "|dd", "||ee||"}, 
+            {"aa||bb||cc||dd||ee||"}  
+           );
+  
+  
+  opt.bufsize = 1;
+  opt.minbuf = 1;
+  buf.set_options(opt);
+  test_buff1(t, buf, 
+            {"a", "a", "|", "|", "b", "b", "|", "|", "c", "c", "|", "|", "d", "d", "|", "|", "e", "e", "|", "|"},
+            {"a", "a", "|", "|", "b", "b", "|", "|", "c", "c", "|", "|", "d", "d", "|", "|", "e", "e", "|", "|"}
+           );
+  test_buff2(t, buf, 
+            {"a", "a", "|", "|", "b", "b", "|", "|", "c", "c", "|", "|", "d", "d", "|", "|", "e", "e", "|", "|"},
+            {"aa||bb||cc||dd||ee||"}  
+           );
+  
+  opt.bufsize = 2;
+  opt.minbuf = 2;
+  buf.set_options(opt);
+  test_buff1(t, buf, 
+            {"aa", "||", "bb", "||", "cc", "||", "dd", "||", "ee", "||"},
+            {"aa", "||", "bb", "||", "cc", "||", "dd", "||", "ee", "||"}
+           );
+  test_buff2(t, buf, 
+            {"aa", "||", "bb", "||", "cc", "||", "dd", "||", "ee", "||"},
+            {"aa||bb||cc||dd||ee||"}  
+           );
+}
 
 UNIT(basic_sep1, "")
 {
@@ -176,7 +206,7 @@ UNIT(basic_sep1, "")
             {"aa|", "|", "bb|", "|", "cc|", "|", "dd|", "|", "ee|", "|"}
            );
   
-  /*
+  
   opt.bufsize = 1;
   opt.minbuf = 1;
   buf.set_options(opt);
@@ -193,8 +223,6 @@ UNIT(basic_sep1, "")
             {"aa|", "|", "bb|", "|", "cc|", "|", "dd|", "|", "ee|", "|"}
            );
            
-   */
-
 }
 
 
@@ -215,7 +243,7 @@ UNIT(basic_sep2, "")
            );
   
   
-  /*
+  
   opt.bufsize = 1;
   opt.minbuf = 1;
   buf.set_options(opt);
@@ -224,21 +252,57 @@ UNIT(basic_sep2, "")
             {"aa##", "##", "bb##", "##", "cc##", "##", "dd##", "##", "ee##", "##"}
            );
            
-  opt.bufsize = 2;
-  opt.minbuf = 2;
+  opt.bufsize = 4;
+  opt.minbuf = 4;
   buf.set_options(opt);
   test_buff(t, buf, 
             {"aa", "####", "bb", "####", "cc", "####", "dd", "####", "ee", "####"},
             {"aa##", "##", "bb##", "##", "cc##", "##", "dd##", "##", "ee##", "##"}
            );
-  */
+}
+
+UNIT(basic_sep3, "")
+{
+  using namespace fas::testing;
+    read_buffer buf;
+  options opt;
+  buf.get_options(opt);
+  opt.sep="@@@";
+  opt.bufsize = 20;
+  opt.minbuf = 20;
+  buf.set_options(opt);
+  
+  test_buff(t, buf, 
+            {"aa@@@", "@@@", "bb@@@", "@@@cc@@@", "@@@dd", "@@@@@@ee@@@@@@"}, 
+            {"aa@@@", "@@@", "bb@@@", "@@@", "cc@@@", "@@@", "dd@@@", "@@@", "ee@@@", "@@@"}
+           );
+  
+  
+  
+  opt.bufsize = 1;
+  opt.minbuf = 1;
+  buf.set_options(opt);
+  test_buff(t, buf, 
+            {"a", "a", "@","@","@", "@","@","@", "b", "b", "@", "@","@", "@", "@","@", "c", "c", "@", "@","@", "@", "@","@", "d", "d", "@", "@","@", "@", "@","@", "e", "e", "@","@","@", "@","@","@"},
+            {"aa@@@", "@@@", "bb@@@", "@@@", "cc@@@", "@@@", "dd@@@", "@@@", "ee@@@", "@@@"}
+           );
+           
+  opt.bufsize = 6;
+  opt.minbuf = 6;
+  buf.set_options(opt);
+  test_buff(t, buf, 
+            {"aa", "@@@@@@", "bb", "@@@@@@", "cc", "@@@@@@", "dd", "@@@@@@", "ee", "@@@@@@"},
+            {"aa@@@", "@@@", "bb@@@", "@@@", "cc@@@", "@@@", "dd@@@", "@@@", "ee@@@", "@@@"}
+           );
 }
 
 
 BEGIN_SUITE(read_buffer, "read_buffer suite")
-  //ADD_UNIT(basic_test)
+  ADD_UNIT(basic_test)
+  ADD_UNIT(basic_sep0)
   ADD_UNIT(basic_sep1)
-  ///ADD_UNIT(basic_sep2)
+  ADD_UNIT(basic_sep2)
+  ADD_UNIT(basic_sep3)
 END_SUITE(read_buffer)
 
 BEGIN_TEST
