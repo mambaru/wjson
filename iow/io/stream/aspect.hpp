@@ -3,7 +3,7 @@
 #include <iow/io/pipe/aspect.hpp>
 #include <iow/io/flow/aspect.hpp>
 #include <iow/io/aux/write_buffer.hpp>
-#include <iow/io/aux/read_buffer_old.hpp>
+#include <iow/io/aux/read_buffer.hpp>
 #include <iow/io/aux/data_pool.hpp>
 #include <iow/io/stream/tags.hpp>
 #include <iow/io/basic/tags.hpp>
@@ -17,6 +17,7 @@ struct ad_create
   template<typename T>
   std::pair<char*, size_t> operator()(T& t)
   {
+    /*
     std::unique_ptr<DataType> d;
     if ( nullptr != t.get_aspect().template get<_buffer_pool_>() )
     {
@@ -28,6 +29,7 @@ struct ad_create
       d = std::make_unique<DataType>(4096);
     }
     t.get_aspect().template get<_read_buffer_>().attach( std::move(d) );
+    */
     return t.get_aspect().template get<_read_buffer_>().next();
   }
 };
@@ -75,6 +77,11 @@ struct ad_read_handler
   {
     while (auto d = t.get_aspect().template get<_read_buffer_>().detach() )
     {
+      if ( d->empty() )
+      {
+        std::cout << "d=[" << std::string(d->begin(), d->end() ) << "]: " << d->size() << std::endl;
+        std::cout << "count: " << t.get_aspect().template get<_read_buffer_>().count()  << std::endl;
+      }
       t.get_aspect().template get<_handler_>()(t, std::move(d) );
     }
   }

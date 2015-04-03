@@ -68,7 +68,7 @@ struct stream_options
   typedef ::iow::io::write_buffer_options write_buffer_options;
   typedef ::iow::io::read_buffer_options<data_type> read_buffer_options;
   std::shared_ptr<write_buffer_options> write_buffer;
-  std::shared_ptr<read_buffer_options> read_buffer;
+  read_buffer_options read_buffer;
   buffer_pool_ptr buffer_pool;
 };
 
@@ -100,10 +100,14 @@ public:
     */
     stream_options opt;
     opt.buffer_pool = std::make_shared<stream_options::buffer_pool_type>();
-    opt.buffer_pool->init(10, 1024);
+    ::iow::io::data_pool_options dpo;
+    dpo.poolsize = 10;
+    dpo.minbuf = 128;
+    dpo.maxbuf = 1024;
+    opt.buffer_pool->set_options(dpo);
     opt.write_buffer = std::make_shared<stream_options::write_buffer_options>();
     opt.write_buffer->fix();
-    opt.read_buffer = std::make_shared<stream_options::read_buffer_options>();
+    //opt.read_buffer = std::make_shared<stream_options::read_buffer_options>();
     this->start_(*this, opt ); 
   }
   

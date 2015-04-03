@@ -6,7 +6,7 @@
 
 namespace iow{ namespace io{
   
-  
+// TODO: Убрать
 template<typename DataType>
 class item_pool
 {

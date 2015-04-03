@@ -19,7 +19,7 @@ struct read_buffer_options
   size_t maxbuf=4096*2;
   size_t minbuf=0;
   bool fast_mode = false;
-  std::function< data_ptr(size_t) > create;
+  std::function< data_ptr(size_t, size_t) > create;
   std::function< void(data_ptr) > free;
 };
 
@@ -35,7 +35,7 @@ public:
   typedef std::unique_ptr<data_type> data_ptr;
   typedef std::unique_ptr<value_type[]> sep_ptr;
   typedef std::pair<value_ptr, size_t> data_pair;
-  typedef std::function<data_ptr(size_t)> create_fun;
+  typedef std::function<data_ptr(size_t, size_t)> create_fun;
   typedef std::function<void(data_ptr)> free_fun;
 private:
   typedef typename data_type::const_iterator const_iterator;
@@ -52,18 +52,56 @@ public:
     , _minbuf(512)
     , _create(nullptr)
     , _free(nullptr)
+    
+    , _size(0)
     , _offset(0)
     , _readbuf(-1)
     , _readpos(-1)
     , _parsebuf(0)
     , _parsepos(0)
-  {}
+  {
+    _buffers.reserve(2);
+  }
 
-  read_buffer(const read_buffer&) = delete;
+  read_buffer(const read_buffer& other) = delete;
+  // Копируются только настройки
+  /*
+  read_buffer(const read_buffer& other)
+    : _size(0)
+    , _offset(0)
+    , _readbuf(-1)
+    , _readpos(-1)
+    , _parsebuf(0)
+    , _parsepos(0)
+  {
+    if ( other._sep != nullptr)
+    {
+      _sep_size = other._sep_size;
+      _sep=sep_ptr(new value_type[_sep_size]);
+      std::copy(other._sep.get(), other._sep.get() + _sep_size, _sep.get() );
+    }
+    else
+    {
+      _sep = nullptr;
+      _sep_size=0;
+    }
+    
+    _bufsize = other._bufsize;
+    _maxsize = other._maxsize;
+    _maxbuf = other._maxbuf;
+    _minbuf = other._minbuf;
+    _create = other._create;
+    _free = other._free;
+
+    _buffers.reserve(2);
+  }
+  */
+  
   read_buffer(read_buffer&&) = delete;
   
-  read_buffer& operator=(const read_buffer&) = delete;
-  read_buffer& operator=(read_buffer&&) = delete;
+  read_buffer& operator=(const read_buffer& other) = delete;
+
+  read_buffer& operator=(read_buffer&& other) = delete;
 
   template<typename O>
   void set_options(const O& opt) noexcept
@@ -90,6 +128,11 @@ public:
     if ( _bufsize == 0 )
     {
       _bufsize = 4096;
+    }
+    
+    if ( _minbuf==0 )
+    {
+      _minbuf=128;
     }
 
     if ( _minbuf > _bufsize )
@@ -120,31 +163,40 @@ public:
       opt.sep.clear();
     }
     
-    opt.bufsize =_bufsize;
+    opt.bufsize = _bufsize;
     opt.maxsize = _maxsize;
-    opt.maxbuf = _maxbuf;
-    opt.minbuf = _minbuf;
-    opt.create = _create;
-    opt.free = _free;
+    opt.maxbuf  = _maxbuf;
+    opt.minbuf  = _minbuf;
+    opt.create  = _create;
+    opt.free    = _free;
+  }
+  
+  void clear() noexcept
+  {
+    _buffers.clear();
   }
 
-  size_t count() const
+  size_t count() const noexcept
   {
     return _buffers.size();
   }
   
-  bool waiting() const
+  size_t size() const noexcept
+  {
+    return _size;
+  }
+  
+  size_t capacity() const noexcept
+  {
+    size_t result = 0;
+    for (auto& buf: _buffers)
+      result += _buffers.capacity();
+    return result;
+  }
+  
+  bool waiting() const noexcept
   {
     return _readbuf!=-1;
-  }
-
-  data_pair next_new_()
-  {
-    _buffers.push_back( create_() );
-    _readbuf = _buffers.size()-1;
-    _readpos = 0;
-    data_ptr& last = _buffers.back();
-    return data_pair( &((*last)[0]), last->size());
   }
 
   data_pair next()
@@ -155,13 +207,17 @@ public:
       return result;
 
     if ( _buffers.empty() )
-      return next_new_();
+      return create_for_next_();
 
     data_ptr& last = _buffers.back();
 
     size_t reserve = last->capacity() - last->size();
-    if ( reserve > _minbuf && last->size() + _bufsize < _maxbuf )
+    //if ( reserve > 0 )
+    //  std::cout << reserve << " " << _minbuf << " " << last->size()<< std::endl;
+    //if ( reserve > _minbuf && last->size() + _bufsize < _maxbuf )
+    if ( reserve > _minbuf && _minbuf!=0)
     {
+      // abort();
       size_t nextsize = _bufsize < reserve ? _bufsize : reserve;
       _readbuf = _buffers.size() - 1;
       _readpos = last->size();
@@ -171,7 +227,7 @@ public:
     }
     else
     {
-      result = next_new_();
+      result = create_for_next_();
     }
     
     return result;
@@ -180,9 +236,10 @@ public:
   bool confirm(data_pair d)
   {
     if ( !waiting() )
-    {
       return false;
-    }
+    
+    if ( _readbuf >= _buffers.size() )
+      return false;
 
     auto& buf = _buffers[_readbuf];
 
@@ -193,10 +250,100 @@ public:
       return false;
 
     buf->resize( _readpos + d.second );
+    _size += d.second;
 
     _readpos = -1;
     _readbuf = -1;
     return true;
+  }
+
+  data_ptr detach()
+  {
+    if ( _buffers.empty() )
+      return nullptr;
+
+    auto res = search_();
+    if (res.first==-1)
+    {
+      _parsebuf = last_buff_();
+      // Если есть ожидания чтения
+      _parsepos = _readpos!=-1 ? _readpos : _buffers[_parsebuf]->size();
+      return nullptr;
+    }
+
+    auto resbuf = make_result_(res);
+    prepare_(res);
+    _size -= resbuf->size();
+    return std::move(resbuf);
+  }
+
+private:
+  typedef std::vector<data_ptr> buffer_list;
+  
+private:
+
+  
+  data_ptr create_(size_t size, size_t maxbuf) const
+  {
+    if ( _create!=nullptr )
+      return _create(size, maxbuf);
+    return std::make_unique<data_type>(size);
+  }
+
+  
+  data_ptr create_(size_t size) const
+  {
+    return this->create_(size, _bufsize);
+    /*if ( _create!=nullptr )
+      return _create(size, _maxbuf);
+    return std::make_unique<data_type>(size);
+    */
+  }
+
+  data_ptr create_() const
+  {
+    return this->create_(_bufsize);
+  }
+  
+  void free_(data_ptr d) const
+  {
+    if ( _free != nullptr)
+      _free( std::move(d) );
+  }
+
+private:
+
+  /**************************************************************************/
+  /***************************** next helper ******************************/
+  /**************************************************************************/
+
+  
+  data_pair create_for_next_()
+  {
+    _buffers.push_back( create_() );
+    _readbuf = _buffers.size()-1;
+    _readpos = 0;
+    data_ptr& last = _buffers.back();
+    return data_pair( &((*last)[0]), last->size());
+  }
+
+  
+  /**************************************************************************/
+  /***************************** detach helper ******************************/
+  /**************************************************************************/
+
+  
+  size_t last_buff_() const 
+  {
+    if ( _readbuf==-1 || _readpos > 0)
+    {
+      return _buffers.size() - 1;
+    }
+    else if (_buffers.size() > 1 )
+    {
+      return _buffers.size() - 2;
+    }
+    return -1;
   }
 
   const_iterator begin_(size_t pos) const
@@ -240,10 +387,12 @@ public:
       if ( pos == 0 )
       {
         pos = -1;
-        return;
       }
-      --pos;
-      itr = last_(pos);
+      else
+      {
+        --pos;
+        itr = last_(pos);
+      }
     }
   }
 
@@ -283,7 +432,7 @@ public:
     }
   }
 
-  search_pair empty_search_() const
+  search_pair nosep_search_() const
   {
     if ( _readbuf==-1 )
     {
@@ -306,74 +455,13 @@ public:
   }
 
 
-
-  data_ptr detach()
-  {
-    if ( _buffers.empty() )
-      return nullptr;
-
-    auto res = search_();
-    if (res.first==-1)
-    {
-      _parsebuf = last_buff_();
-      // Если есть ожидания чтения
-      _parsepos = _readpos!=-1 ? _readpos : _buffers[_parsebuf]->size();
-      return nullptr;
-    }
-
-    auto resbuf = make_result_(res);
-    prepare_(res);
-    return std::move(resbuf);
-  }
-
-private:
-  typedef std::deque<data_ptr> buffer_list;
-  
-private:
-
-  data_ptr create_(size_t size) const
-  {
-    if ( _create!=nullptr )
-      return _create(size);
-    return std::make_unique<data_type>(size);
-  }
-
-  data_ptr create_() const
-  {
-    return create_(_bufsize);
-  }
-  
-  void free_(data_ptr d) const
-  {
-    if ( _free != nullptr)
-      _free( std::move(d) );
-  }
-
-private:
-  /**************************************************************************/
-  /***************************** detach helper ******************************/
-  /**************************************************************************/
-
-  size_t last_buff_() const 
-  {
-    if ( _readbuf==-1 || _readpos > 0)
-    {
-      return _buffers.size() - 1;
-    }
-    else if (_buffers.size() > 1 )
-    {
-      return _buffers.size() - 2;
-    }
-    return -1;
-  }
-
   search_pair search_() const
   {
     if ( _buffers.empty() )
       return search_pair(-1, -1);
 
     if (_sep_size==0)
-      return empty_search_();
+      return nosep_search_();
 
     size_t last = last_buff_();
 
@@ -393,7 +481,6 @@ private:
         beg = begin_(i);
       }
       
-      //auto itr = beg;
       while ( beg!=end )
       {
         auto itr = std::find(beg, end, _sep[_sep_size-1]);
@@ -415,7 +502,8 @@ private:
     {
       if ( _buffers[0] == nullptr )
       {
-        _buffers.pop_front();
+        free_(std::move( _buffers.front() ) );
+        _buffers.erase( _buffers.begin() );
         _offset = 0;
         _parsebuf = 0;
         _parsepos = 0;
@@ -433,6 +521,7 @@ private:
       size_t off = p.first + complete;
       if ( off > 0 )
       {
+        std::for_each(_buffers.begin(), _buffers.begin() + off, [this](data_ptr& d){ this->free_( std::move(d) );});
         _buffers.erase( _buffers.begin(), _buffers.begin() + off );
       }
       _parsebuf = 0;
@@ -457,7 +546,7 @@ private:
     }
     
     // reserve с небольшим оверхедом, поэтому очищаем и используем inserter
-    result = create_(reserve);
+    result = create_(reserve, reserve*2 < _maxbuf ? reserve*2 : reserve);
     result->clear();
 
     // Копируем со всех буферов, что готовы
@@ -482,19 +571,24 @@ private:
 
     data_ptr result = nullptr;
     // Если можем полностью захватить буфер
-    if ( _buffers[0]->size() == p.second )
+     size_t tmp = _buffers[0]->size();
+    if ( tmp == p.second )
     {
       result = std::move(_buffers[0]);
       // Если ральные данные не с начала буфера
       if (_offset!=0)
       {
+        result->erase(result->begin(), result->begin() + _offset);
+        /*
         std::copy( result->begin() + _offset, result->end(), result->begin() );
         result->resize( result->size() - _offset);
+        */
       }
     }
     else
     {
-      result = create_(p.second - _offset);
+      size_t size = p.second - _offset;
+      result = create_(p.second - _offset, size*2 < _maxbuf ? size*2 : size);
       std::copy(_buffers[0]->begin() + _offset, _buffers[0]->begin() + p.second, result->begin() );
     }
     return std::move(result);
@@ -514,6 +608,7 @@ private:
   free_fun _free;
 
 
+  size_t  _size;
   size_t  _offset;  // Смещение в первом буфере
   size_t  _readbuf; // -1 - если не ожидает подтверждения
   size_t  _readpos;

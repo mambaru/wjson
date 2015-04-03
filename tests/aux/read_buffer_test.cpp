@@ -138,12 +138,48 @@ void test_buff2(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
   t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
 }
 
+template<typename T>
+void test_buff3(T& t, read_buffer& buf, std::vector<std::string> reads, std::vector<std::string> chk)
+{
+  using namespace fas::testing;
+  std::string incoming;
+  std::string result;
+  std::vector<std::string> vectres;
+  for (auto& s: reads)
+  {
+    t << message(s);
+    incoming+= s;
+    auto p = buf.next();
+    t << is_true<assert>(s.size() <= p.second) << s.size() << " > " << p.second << FAS_TESTING_FILE_LINE;
+    t << stop;
+    std::strcpy( p.first, s.c_str());
+    p.second = s.size();
+    auto d = buf.detach();
+    while ( d!=nullptr )
+    {
+      t << is_true<assert>( !d->empty() ) << FAS_TESTING_FILE_LINE;
+      t << stop;
+      auto str = std::string(d->begin(), d->end());
+      vectres.push_back(str);
+      result += vectres.back();
+      d = buf.detach();
+    }
+    bool confirm = buf.confirm(p);
+    t << is_true<assert>( confirm ) << FAS_TESTING_FILE_LINE;
+    t << stop;
+  }
+  t << equal<expect>(incoming, result) << incoming << "!=" << result << FAS_TESTING_FILE_LINE;
+  t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
+}
+
+
 
 template<typename T>
 void test_buff(T& t, read_buffer& buf, /*Args&&... args*/ std::vector<std::string> reads, std::vector<std::string> chk)
 {
   test_buff1(t, buf, reads, chk);
   test_buff2(t, buf, reads, chk);
+  test_buff3(t, buf, reads, chk);
 }
 
 UNIT(basic_sep0, "")
