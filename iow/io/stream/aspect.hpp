@@ -40,8 +40,9 @@ struct ad_attach
   void operator()(T& t, D d)
   {
     auto &buf = t.get_aspect().template get<_write_buffer_>();
-    if ( buf.check(*d) )
-      buf.attach(std::move(d));
+    //if ( buf.check(*d) )
+    // TODO: проверить на maxbuf
+    buf.attach(std::move(d));
   }
 };
 
@@ -59,6 +60,12 @@ struct ad_write_confirm
   template<typename T>
   void operator()(T& t, std::pair<const char*, size_t> p)
   {
+    bool result = t.get_aspect().template get<_write_buffer_>().confirm(p);
+    if ( !result )
+    {
+      // Все закртыть, и выдать в log
+    }
+    /*
     auto d = t.get_aspect().template get<_write_buffer_>().confirm(p);
     if ( d != nullptr )
     {
@@ -67,6 +74,7 @@ struct ad_write_confirm
         t.get_aspect().template get<_buffer_pool_>()->free( std::move(d) );
       }
     }
+    */
   }
 };
 

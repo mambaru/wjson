@@ -15,7 +15,7 @@ struct read_buffer_options
   typedef std::unique_ptr<DataType> data_ptr;
   std::string sep;
   size_t bufsize=4096;
-  size_t maxsize=4096*1024;
+  //size_t maxsize=4096*1024;
   size_t maxbuf=4096*2;
   size_t minbuf=0;
   bool fast_mode = false;
@@ -47,7 +47,7 @@ public:
     : _sep(nullptr)
     , _sep_size(0)
     , _bufsize(4096)
-    , _maxsize(4096*1024)
+    //, _maxsize(4096*1024)
     , _maxbuf(4096*4)
     , _minbuf(512)
     , _create(nullptr)
@@ -119,7 +119,7 @@ public:
     }
 
     _bufsize = opt.bufsize;
-    _maxsize = opt.maxsize;
+    //_maxsize = opt.maxsize;
     _maxbuf = opt.maxbuf;
     _minbuf = opt.minbuf;
     _create = opt.create;
@@ -145,10 +145,12 @@ public:
       _maxbuf = _bufsize;
     }
 
+    /*
     if ( _maxsize == 0 )
     {
       _maxsize = 4096*1024;
     }
+    */
   }
 
   template<typename O>
@@ -164,7 +166,7 @@ public:
     }
     
     opt.bufsize = _bufsize;
-    opt.maxsize = _maxsize;
+    // opt.maxsize = _maxsize;
     opt.maxbuf  = _maxbuf;
     opt.minbuf  = _minbuf;
     opt.create  = _create;
@@ -601,7 +603,7 @@ private:
   sep_ptr _sep;
   size_t _sep_size;
   size_t _bufsize;
-  size_t _maxsize;
+  //size_t _maxsize;
   size_t _maxbuf;
   size_t _minbuf;
   create_fun _create;

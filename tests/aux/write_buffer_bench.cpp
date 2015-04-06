@@ -37,11 +37,12 @@ void run(size_t total, size_t count, size_t bufsize, size_t minbuf, size_t maxbu
   write_buffer buf;
   if ( bufsize != 0 )
   {
-    auto opt = std::make_shared<write_buffer::options_type>();
-    opt->bufsize = bufsize;
-    opt->minbuf = minbuf;
-    opt->maxbuf = maxbuf;
-    opt->fix();
+    //auto opt = std::make_shared<write_buffer::options_type>();
+    write_buffer::options_type opt;
+    buf.get_options(opt);
+    opt.bufsize = bufsize;
+    opt.minbuf = minbuf;
+    opt.maxbuf = maxbuf;
     buf.set_options(opt);
   }
   

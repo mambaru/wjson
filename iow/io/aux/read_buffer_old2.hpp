@@ -9,6 +9,7 @@
 
 namespace iow{ namespace io{
   
+/*
 template<typename SepType>
 struct read_buffer_options
 {
@@ -219,8 +220,8 @@ private:
       }
       data_ptr& cur = this->get_by_i_(p.first-1);
       std::copy(cur->begin(), cur->begin() + p.second, std::inserter(*d, d->end()));
-      /*if ( 
-      _offset = p.second*/
+      // if ( 
+      //  _offset = p.second
     }
     
     while (p.first != 1)
@@ -295,5 +296,6 @@ private:
   // Используеться при парсинге, если за один проход не удалось рапарсить 
   deque_ptr   _outlist;
 };
+*/
 
 }}

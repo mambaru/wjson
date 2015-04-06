@@ -12,7 +12,7 @@ struct _data_size_;
 struct _data_line_init_;
 struct _test_options_;
 
-struct data_line_test_options: iow::io::write_buffer_options
+struct data_line_test_options: iow::io::write_buffer_options< std::string /*std::vector<char>*/ >
 {
   size_t data_size;
   size_t data_count;
@@ -78,7 +78,7 @@ struct init_line
 
     auto opt = t.get_aspect().template get<_test_options_>();
     data_line.clear();
-    data_line.set_options( opt );
+    data_line.set_options( *opt );
     data_ptr first;
     for (size_t i = 0; i < opt->data_count; i++ )
     {
@@ -95,16 +95,21 @@ UNIT(init_test, "")
   t.get_aspect().template get<_init_line_>()(t);
 
   auto& data_line = t.get_aspect().template get<_data_line_>();
+  typedef typename std::remove_reference<decltype(data_line)>::type data_line_t;
   auto test_opt = t.get_aspect().template get<_test_options_>();
-  auto dl_opt = data_line.get_options();
+  data_line.set_options(*test_opt);
+  typename data_line_t::options_type dl_opt;
+  data_line.get_options(dl_opt);
   
+  /*
   const char* buf1 = reinterpret_cast<const char*>( &*test_opt);
-  const char* buf2 = reinterpret_cast<const char*>( &*dl_opt );
+  const char* buf2 = reinterpret_cast<const char*>( &dl_opt );
   
   int cmpres = std::memcmp( buf1,  buf2, sizeof(dl_opt) );
   bool opt_test = ( 0 ==  cmpres) ;
   t << is_true<assert>( opt_test ) << FAS_TESTING_FILE_LINE;
   t << stop;
+  */
 
   size_t linesize = data_line.size();
   size_t testsize = test_opt->data_size * test_opt->data_count;
@@ -135,13 +140,16 @@ UNIT(nobuf_test, "non-buffering mode")
 {
   using namespace fas::testing;
   auto& data_line = t.get_aspect().template get<_data_line_>();
+  typedef typename std::remove_reference<decltype(data_line)>::type data_line_t;
   auto test_opt = t.get_aspect().template get<_test_options_>();
     
   data_line.clear();
-  data_line.set_options(test_opt);
-  auto dl_opt = data_line.get_options();
+  data_line.set_options( *test_opt);
+  typename data_line_t::options_type dl_opt;
+  data_line.get_options(dl_opt);
+  //auto dl_opt = data_line.get_options();
 
-  size_t maxbuf = dl_opt->maxbuf;
+  size_t maxbuf = dl_opt.maxbuf;
   size_t cursize = 1;
   for (size_t c = 0; c < test_opt->data_count; ++c)
   {
@@ -173,17 +181,19 @@ UNIT(fullbuf_test, "full-buffering mode")
   typedef typename data_line_t::data_type data_type;
 
   data_line_t& data_line = t.get_aspect().template get<_data_line_>();
-  //typedef typename decltype(data_line)::data_ptr  data_ptr;
+  //typedef typename decltype(data_line)::data_ptr data_ptr;
 
   auto test_opt = t.get_aspect().template get<_test_options_>();
   //!!! test_opt.except_first = false;
   //!!! test_opt.except_confirm = false;
 
   data_line.clear();
-  data_line.set_options(test_opt);
-  auto dl_opt = data_line.get_options();
+  data_line.set_options( *test_opt);
+  typename data_line_t::options_type dl_opt;
+  data_line.get_options(dl_opt);
+  //auto dl_opt = data_line.get_options();
 
-  size_t maxbuf = dl_opt->maxbuf*2;
+  size_t maxbuf = dl_opt.maxbuf*2;
   size_t cursize = 1;
   for (size_t c = 0; c < test_opt->data_count; ++c)
   {
@@ -223,16 +233,18 @@ UNIT(fullbuf_test, "full-buffering mode")
 UNIT(ignore_first_test, "buffering with ignore first flag mode")
 {
   using namespace fas::testing;
+  typedef typename T::aspect::template advice_cast<_data_line_>::type data_line_t;
   auto& data_line = t.get_aspect().template get<_data_line_>();
   auto test_opt = t.get_aspect().template get<_test_options_>();
   test_opt->first_as_is = true;
   //!! test_opt.except_confirm = true;
   data_line.clear();
-  data_line.set_options(test_opt);
-  auto dl_opt = data_line.get_options();
+  data_line.set_options(*test_opt);
+  typename data_line_t::options_type dl_opt;
+  data_line.get_options(dl_opt);
   
   size_t cursize = 1;
-  size_t maxbuf = (dl_opt->maxbuf * 3) / 2;
+  size_t maxbuf = (dl_opt.maxbuf * 3) / 2;
   for (size_t c = 0; c < test_opt->data_count; ++c)
   {
     auto d1 = generate(t, c, cursize);
@@ -256,6 +268,7 @@ UNIT(ignore_first_test, "buffering with ignore first flag mode")
 UNIT(partconfirm_test, "partconfirm_test")
 {
   using namespace fas::testing;
+  typedef typename T::aspect::template advice_cast<_data_line_>::type data_line_t;
   auto& data_line = t.get_aspect().template get<_data_line_>();
   auto test_opt = t.get_aspect().template get<_test_options_>();
   typedef typename std::remove_reference< decltype( data_line ) >::type::data_type data_type;
@@ -263,11 +276,13 @@ UNIT(partconfirm_test, "partconfirm_test")
   //!! test_opt.except_first   = false;
   //!! test_opt.except_confirm = false;
   data_line.clear();
-  data_line.set_options(test_opt);
-  auto dl_opt = data_line.get_options();
+  data_line.set_options(*test_opt);
+  typename data_line_t::options_type dl_opt;
+  data_line.get_options(dl_opt);
+
   
   size_t cursize = 1;
-  size_t maxbuf = (dl_opt->maxbuf * 3) / 2;
+  size_t maxbuf = (dl_opt.maxbuf * 3) / 2;
   data_type result1, result2;
   for (size_t c = 0; c < test_opt->data_count; ++c)
   {
@@ -331,7 +346,7 @@ END_SUITE(aux)
   {
     std::cout << std::endl << i << std::endl;
     *opt=optlist[i];
-    opt->fix();
+    //opt->fix();
     as.run();
     sc += as.counts();
   }
