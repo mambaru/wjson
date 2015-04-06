@@ -74,6 +74,7 @@ template<typename T>
 void test_buff1(T& t, read_buffer& buf, std::vector<std::string> reads, std::vector<std::string> chk)
 {
   using namespace fas::testing;
+  t << message("test_buff1");
   std::string incoming;
   std::string result;
   std::vector<std::string> vectres;
@@ -106,6 +107,7 @@ template<typename T>
 void test_buff2(T& t, read_buffer& buf, std::vector<std::string> reads, std::vector<std::string> chk)
 {
   using namespace fas::testing;
+  t << message("test_buff2");
   std::string incoming;
   std::string result;
   for (auto& s: reads)
@@ -138,36 +140,49 @@ void test_buff2(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
   t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
 }
 
+
+template<typename T>
+void do_detach(T& t, read_buffer& buf, std::vector<std::string>& vectres, std::string& result)
+{
+  using namespace fas::testing;
+  auto d = buf.detach();
+  while ( d!=nullptr )
+  {
+    t << is_true<assert>( !d->empty() ) << FAS_TESTING_FILE_LINE;
+    t << stop;
+    auto str = std::string(d->begin(), d->end());
+    //t << message("detach: ") << str;
+    //t << message("-2-");
+    vectres.push_back(str);
+    result += vectres.back();
+    d = buf.detach();
+  }
+}
+
 template<typename T>
 void test_buff3(T& t, read_buffer& buf, std::vector<std::string> reads, std::vector<std::string> chk)
 {
   using namespace fas::testing;
+  t << message("test_buff3");
   std::string incoming;
   std::string result;
   std::vector<std::string> vectres;
   for (auto& s: reads)
   {
-    t << message(s);
+    // t << message("read:   ") << s ;
+    // t << message("-1-");
     incoming+= s;
     auto p = buf.next();
     t << is_true<assert>(s.size() <= p.second) << s.size() << " > " << p.second << FAS_TESTING_FILE_LINE;
     t << stop;
     std::strcpy( p.first, s.c_str());
     p.second = s.size();
-    auto d = buf.detach();
-    while ( d!=nullptr )
-    {
-      t << is_true<assert>( !d->empty() ) << FAS_TESTING_FILE_LINE;
-      t << stop;
-      auto str = std::string(d->begin(), d->end());
-      vectres.push_back(str);
-      result += vectres.back();
-      d = buf.detach();
-    }
+    do_detach(t, buf, vectres, result);
     bool confirm = buf.confirm(p);
     t << is_true<assert>( confirm ) << FAS_TESTING_FILE_LINE;
     t << stop;
   }
+  do_detach(t, buf, vectres, result);
   t << equal<expect>(incoming, result) << incoming << "!=" << result << FAS_TESTING_FILE_LINE;
   t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
 }
@@ -196,6 +211,7 @@ UNIT(basic_sep0, "")
             {"aa|", "|", "bb|", "|cc|", "|dd", "||ee||"}, 
             {"aa|", "|", "bb|", "|cc|", "|dd", "||ee||"}
            );
+  
   test_buff2(t, buf, 
             {"aa|", "|", "bb|", "|cc|", "|dd", "||ee||"}, 
             {"aa||bb||cc||dd||ee||"}  
@@ -225,6 +241,7 @@ UNIT(basic_sep0, "")
             {"aa", "||", "bb", "||", "cc", "||", "dd", "||", "ee", "||"},
             {"aa||bb||cc||dd||ee||"}  
            );
+  
 }
 
 UNIT(basic_sep1, "")
@@ -258,7 +275,7 @@ UNIT(basic_sep1, "")
             {"aa", "||", "bb", "||", "cc", "||", "dd", "||", "ee", "||"},
             {"aa|", "|", "bb|", "|", "cc|", "|", "dd|", "|", "ee|", "|"}
            );
-           
+  
 }
 
 
