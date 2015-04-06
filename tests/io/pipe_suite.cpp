@@ -111,7 +111,7 @@ class pipe1
       ::iow::io::flow::aspect::advice_list,
       ::iow::io::pipe::aspect::advice_list,
       fas::alias< ::iow::io::flow::_confirm_, ::iow::io::pipe::_output_>,
-      fas::advice< ::iow::io::flow::_create_, ad_input_factory>,
+      fas::advice< ::iow::io::flow::_next_, ad_input_factory>,
       fas::advice< ::iow::io::pipe::_attach_, ad_entry>,
       fas::advice< ::iow::io::pipe::_next_, ad_next>,
       //fas::advice< ::iow::io::pipe::_free_, ad_free>,

@@ -242,22 +242,24 @@ public:
 
     auto& buf = _buffers[_readbuf];
 
-    if ( &( (*buf)[0]) + _readpos - d.first != 0 )
-      return false;
+    if ( d.second > 0 )
+    {
+      if ( &( (*buf)[0]) + _readpos - d.first != 0 )
+        return false;
 
-    if ( buf->size() < _readpos + d.second )
-      return false;
-
+      if ( buf->size() < _readpos + d.second )
+        return false;
+      
+      _size += d.second;
+    }
     buf->resize( _readpos + d.second );
-    _size += d.second;
-
+    if ( buf->empty() )
+    {
+      free_( std::move(buf) );
+      _buffers.erase( _buffers.begin() + _readbuf );
+    }
     _readpos = -1;
     _readbuf = -1;
-    /*if ( _parsebuf == -1 )
-    {
-      _parsebuf = 0;
-      _parsepos = 0;
-    }*/
     return true;
   }
 
@@ -470,6 +472,11 @@ private:
 
   search_pair nosep_search_() const
   {
+    if ( _offset!=0 && _parsebuf==0 && _offset==_parsepos ) 
+    {
+      return search_pair(-1, -1);
+    }
+      
     if ( _readbuf==-1 )
     {
       // Если последний буфер не выделен под чтение

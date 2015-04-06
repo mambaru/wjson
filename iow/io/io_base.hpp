@@ -71,8 +71,6 @@ public:
     this->stop_(*this);
   }
 
-  
-
   void shutdown()
   {
     std::lock_guard< mutex_type > lk(_mutex);
@@ -145,8 +143,6 @@ public:
   {
     t.get_aspect().template get<_shutdown_>()(t, std::forward<Handler>(handler));
   }
-  
-  
 
   template<typename T, typename Handler>
   auto wrap_(T& t, Handler&& h) 

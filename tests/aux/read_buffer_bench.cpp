@@ -7,6 +7,11 @@
 #include <unistd.h>
 
 
+#ifndef NDEBUG
+#define TOTAL 1
+#else
+#define TOTAL 1000
+#endif
 
 typedef std::vector<char> data_type;
 typedef ::iow::io::read_buffer<data_type>  read_buffer;
@@ -120,19 +125,14 @@ void run(size_t packsize, size_t readsize, size_t total, size_t count, size_t bu
 
 int main()
 {
-  
-  /*
-  run(10,  1,  1000, 1000, 1, 1, 1, false);
-  run(10,  10, 1000, 1000, 10, 10, 10, false);
-  run(10,  10, 1000, 1000, 10, 5, 15, false);
-  run(10,  10, 1000, 1000, 128, 128, 256, false);
-  run(128, 10, 1000, 1000, 10, 128, 128, false);
-  run(128, 10, 1000, 1000, 10, 10, 10, true);
-  run(128, 10, 1000, 1000, 10, 10, 10, false);
-  */
-  run(128, 10, 1000, 1000, 4096, 4096, 4096, true);
-  run(128, 10, 1000, 1000, 4096, 4096, 4096, false);
-  /*
-  run(128, 128, 1000, 1000, 4096, 1024, 4096*2, true);
-  */
+  run(10,  1,  TOTAL, 1000, 1, 1, 1, false);
+  run(10,  10, TOTAL, 1000, 10, 10, 10, false);
+  run(10,  10, TOTAL, 1000, 10, 5, 15, false);
+  run(10,  10, TOTAL, 1000, 128, 128, 256, false);
+  run(128, 10, TOTAL, 1000, 10, 128, 128, false);
+  run(128, 10, TOTAL, 1000, 10, 10, 10, true);
+  run(128, 10, TOTAL, 1000, 10, 10, 10, false);
+  run(128, 10, TOTAL, 1000, 4096, 4096, 4096, true);
+  run(128, 10, TOTAL, 1000, 4096, 4096, 4096, false);
+  run(128, 128, TOTAL, 1000, 4096, 1024, 4096*2, true);
 }

@@ -11,8 +11,8 @@
 
 namespace iow{ namespace io{ namespace stream{
   
-template<typename DataType>
-struct ad_create
+//template<typename DataType>
+struct ad_read_next
 {
   template<typename T>
   std::pair<char*, size_t> operator()(T& t)
@@ -46,7 +46,7 @@ struct ad_attach
   }
 };
 
-struct ad_next
+struct ad_write_next
 {
   template<typename T>
   std::pair<const char*, size_t> operator()(T& t)
@@ -83,7 +83,9 @@ struct ad_read_handler
   template<typename T>
   void operator()(T& t)
   {
-    while (auto d = t.get_aspect().template get<_read_buffer_>().detach() )
+    std::cout << "ad_read_handler {{" << std::endl;
+    auto& buf = t.get_aspect().template get<_read_buffer_>();
+    while (auto d = buf.detach() )
     {
       //if ( d->empty() )
       //{
@@ -94,6 +96,7 @@ struct ad_read_handler
         abort();
       t.get_aspect().template get<_handler_>()(t, std::move(d) );
     }
+    std::cout << "}} ad_read_handler" << std::endl;
   }
 };
 
@@ -102,7 +105,8 @@ struct ad_read_confirm
   template<typename T>
   void operator()(T& t, std::pair<char*, size_t> p)
   {
-    t.get_aspect().template get<_read_buffer_>().confirm(p);
+    bool result = t.get_aspect().template get<_read_buffer_>().confirm(p);
+    std::cout << "ad_read_confirm: " << result << std::endl;
     
     /*
     auto d = t.get_aspect().template get<_write_buffer_>().confirm(p);
@@ -148,9 +152,9 @@ struct aspect: fas::aspect<
   fas::group< ::iow::io::_initialize_, _initialize_>,
   fas::group< ::iow::io::_after_stop_, _clear_>,
   fas::group< ::iow::io::_after_reset_, _clear_>,
-  fas::advice< ::iow::io::flow::_create_, ad_create< DataType > >,
+  fas::advice< ::iow::io::flow::_next_, ad_read_next >,
   fas::advice< ::iow::io::pipe::_attach_, ad_attach>,
-  fas::advice< ::iow::io::pipe::_next_, ad_next>,
+  fas::advice< ::iow::io::pipe::_next_, ad_write_next>,
   fas::advice< ::iow::io::flow::_confirm_, ad_read_confirm>,
   fas::advice< ::iow::io::flow::_handler_,  ad_read_handler>,
   fas::advice< ::iow::io::pipe::_confirm_, ad_write_confirm>,

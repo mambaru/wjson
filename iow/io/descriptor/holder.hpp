@@ -44,35 +44,39 @@ public:
   const descriptor_type& descriptor() const { return _descriptor;}
   
   descriptor_type& descriptor() { return _descriptor;}
-
   
   void reset()
   {
-    std::lock_guard< mutex_type > lk(_mutex);
+    std::lock_guard< mutex_type > lk( super::mutex() );
     super::reset_(*this);
   }
 
   template<typename O>
   void start(O&& opt)
   {
-    std::lock_guard< mutex_type > lk(_mutex);
+    std::lock_guard< mutex_type > lk( super::mutex() );
     super::start_(*this, std::forward<O>(opt));
   }
 
   template<typename O>
   void initialize(O&& opt)
   {
-    std::lock_guard< mutex_type > lk(_mutex);
+    std::lock_guard< mutex_type > lk( super::mutex() );
     super::initialize_(*this, std::forward<O>(opt));
+  }
+
+  void stop()
+  {
+    std::lock_guard< mutex_type > lk( super::mutex() );
+    super::stop_(*this);
   }
 
   template<typename Handler>
   void shutdown(Handler&& handler)
   {
-    std::lock_guard< mutex_type > lk(_mutex);
+    std::lock_guard< mutex_type > lk( super::mutex() );
     super::shutdown_(*this, std::forward<Handler>(handler));
   }
-  
 
 private:
   descriptor_type _descriptor;

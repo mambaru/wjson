@@ -11,7 +11,6 @@ struct ad_complete
   {
     t.get_aspect().template gete<_on_complete_>()(t, std::cref(d) );
     t.get_aspect().template get<_confirm_>()(t, std::move(d) );
-    // ---нет todo: доработать и поменять местами (чтобы отправил асинхронный запрос на чтение) а потом обрабатывал
     t.get_aspect().template get<_more_>()(t);
     t.get_aspect().template get<_handler_>()(t);
   }

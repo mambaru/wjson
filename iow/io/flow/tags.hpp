@@ -10,7 +10,7 @@ struct _handler_;
 
 struct _some_;
 struct _confirm_;
-struct _create_;
+struct _next_;
 
 struct _on_complete_;
 

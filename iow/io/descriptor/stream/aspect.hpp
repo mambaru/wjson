@@ -9,6 +9,7 @@
 
 namespace iow{ namespace io{ namespace descriptor{ namespace stream{
 
+  
 struct ad_async_read_some
 {
   template<typename T, typename P>
@@ -18,16 +19,16 @@ struct ad_async_read_some
       return;
     
     std::weak_ptr<T> wthis = t.shared_from_this();
-    auto handler = t.wrap([wthis, p]( boost::system::error_code ec , std::size_t bytes_transferred )
+    auto handler = t.wrap([wthis, p]( iow::system::error_code ec , std::size_t bytes_transferred )
     { 
       if ( auto pthis = pthis.lock() )
       {
         typename T::lock_guard lk(pthis->mutex());
-        pthis->get_aspect().template get<_read_handler_>()(*pthis, std::move(*dd), std::move(ec), bytes_transferred);
+        pthis->get_aspect().template get<_read_handler_>()(*pthis, std::move(p), std::move(ec), bytes_transferred);
       }
     });
     
-    t.descriptor().async_read_some( ::boost::asio::buffer( p.first, p.second ), handler);
+    t.descriptor().async_read_some( ::iow::asio::buffer( p.first, p.second ), std::move(handler) );
   }
 };
 

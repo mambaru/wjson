@@ -100,7 +100,8 @@ void test_buff1(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
     }
   }
   t << equal<expect>(incoming, result) << incoming << "!=" << result << FAS_TESTING_FILE_LINE;
-  t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
+  if ( !chk.empty() )
+    t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
 }
 
 template<typename T>
@@ -137,7 +138,8 @@ void test_buff2(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
   }
 
   t << equal<expect>(incoming, result) << incoming << "!=" << result << FAS_TESTING_FILE_LINE;
-  t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
+  if ( !chk.empty() )
+    t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
 }
 
 
@@ -184,9 +186,46 @@ void test_buff3(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
   }
   do_detach(t, buf, vectres, result);
   t << equal<expect>(incoming, result) << incoming << "!=" << result << FAS_TESTING_FILE_LINE;
-  t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
+  if ( !chk.empty() )
+    t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
 }
 
+template<typename T>
+void test_buff4(T& t, read_buffer& buf, std::vector<std::string> reads, std::vector<std::string> chk)
+{
+  using namespace fas::testing;
+  t << message("test_buff4");
+  std::string incoming;
+  std::string result;
+  std::vector<std::string> vectres;
+  auto p = buf.next();
+  for (auto& s: reads)
+  {
+    incoming += s;
+    t << is_true<assert>(s.size() <= p.second) << s.size() << " > " << p.second << FAS_TESTING_FILE_LINE;
+    t << stop;
+    std::strcpy( p.first, s.c_str());
+    p.second = s.size();
+    
+    bool confirm = buf.confirm(p);
+    t << is_true<assert>( confirm ) << FAS_TESTING_FILE_LINE;
+    t << stop;
+    p = buf.next();
+    do_detach(t, buf, vectres, result);
+  }
+  
+  p.second = 0;
+  bool confirm = buf.confirm(p);
+  t << is_true<assert>( confirm ) << FAS_TESTING_FILE_LINE;
+  t << stop;
+  
+  do_detach(t, buf, vectres, result);
+  t << equal<expect>(incoming, result) << incoming << "!=" << result << FAS_TESTING_FILE_LINE;
+  if ( !chk.empty() )
+    t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
+  t << equal<assert>(buf.size(), 0) << "buf.size()==" << buf.size() << FAS_TESTING_FILE_LINE;
+  t << equal<assert>(buf.count(), 0) << "buf.cout()==" << buf.count() << FAS_TESTING_FILE_LINE;
+}
 
 
 template<typename T>
@@ -195,6 +234,7 @@ void test_buff(T& t, read_buffer& buf, /*Args&&... args*/ std::vector<std::strin
   test_buff1(t, buf, reads, chk);
   test_buff2(t, buf, reads, chk);
   test_buff3(t, buf, reads, chk);
+  test_buff4(t, buf, reads, chk);
 }
 
 UNIT(basic_sep0, "")
@@ -207,39 +247,25 @@ UNIT(basic_sep0, "")
   opt.bufsize = 6;
   opt.minbuf = 6;
   buf.set_options(opt);
-  test_buff1(t, buf, 
+  test_buff(t, buf, 
             {"aa|", "|", "bb|", "|cc|", "|dd", "||ee||"}, 
-            {"aa|", "|", "bb|", "|cc|", "|dd", "||ee||"}
+            {}
            );
-  
-  test_buff2(t, buf, 
-            {"aa|", "|", "bb|", "|cc|", "|dd", "||ee||"}, 
-            {"aa||bb||cc||dd||ee||"}  
-           );
-  
   
   opt.bufsize = 1;
   opt.minbuf = 1;
   buf.set_options(opt);
-  test_buff1(t, buf, 
+  test_buff(t, buf, 
             {"a", "a", "|", "|", "b", "b", "|", "|", "c", "c", "|", "|", "d", "d", "|", "|", "e", "e", "|", "|"},
-            {"a", "a", "|", "|", "b", "b", "|", "|", "c", "c", "|", "|", "d", "d", "|", "|", "e", "e", "|", "|"}
-           );
-  test_buff2(t, buf, 
-            {"a", "a", "|", "|", "b", "b", "|", "|", "c", "c", "|", "|", "d", "d", "|", "|", "e", "e", "|", "|"},
-            {"aa||bb||cc||dd||ee||"}  
+            {}
            );
   
   opt.bufsize = 2;
   opt.minbuf = 2;
   buf.set_options(opt);
-  test_buff1(t, buf, 
+  test_buff(t, buf, 
             {"aa", "||", "bb", "||", "cc", "||", "dd", "||", "ee", "||"},
-            {"aa", "||", "bb", "||", "cc", "||", "dd", "||", "ee", "||"}
-           );
-  test_buff2(t, buf, 
-            {"aa", "||", "bb", "||", "cc", "||", "dd", "||", "ee", "||"},
-            {"aa||bb||cc||dd||ee||"}  
+            {}
            );
   
 }
@@ -254,10 +280,13 @@ UNIT(basic_sep1, "")
   opt.bufsize = 6;
   opt.minbuf = 6;
   buf.set_options(opt);
+  
+  
   test_buff(t, buf, 
             {"aa|", "|", "bb|", "|cc|", "|dd", "||ee||"}, 
             {"aa|", "|", "bb|", "|", "cc|", "|", "dd|", "|", "ee|", "|"}
            );
+  
   
   
   opt.bufsize = 1;
@@ -275,6 +304,8 @@ UNIT(basic_sep1, "")
             {"aa", "||", "bb", "||", "cc", "||", "dd", "||", "ee", "||"},
             {"aa|", "|", "bb|", "|", "cc|", "|", "dd|", "|", "ee|", "|"}
            );
+  
+  
   
 }
 

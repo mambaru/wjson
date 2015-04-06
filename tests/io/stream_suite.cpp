@@ -31,6 +31,7 @@ struct ad_read_some
     //auto dd = std::make_shared<typename T::input_t>( std::move(d) );
     
     t.service.post([&t, d](){
+       std::cout << "ad_read_some (post ready) : " << d.second << std::endl;
       auto dd = d;
       auto tmp = std::move(t.input.front());
       t.input.pop_front();
@@ -78,12 +79,12 @@ class stream
       ::iow::io::basic::aspect<>::advice_list,
       ::iow::io::stream::aspect<data_type>::advice_list,
       fas::alias< ::iow::io::stream::_handler_, ::iow::io::pipe::_output_>,
-      //fas::alias< ::iow::io::flow::_confirm_, ::iow::io::pipe::_output_>,
       fas::advice< ::iow::io::flow::_some_, ad_read_some>,
       fas::advice< ::iow::io::pipe::_some_, ad_write_some>
     > >
 {
 public:
+  typedef stream_options options_type;
   typedef data_ptr input_t;
   typedef data_ptr output_t;
 
@@ -93,11 +94,6 @@ public:
   
   void start() 
   {
-    /*
-    typedef ::iow::io::data_pool< data_type > buffer_pool;
-    auto pool = std::make_shared< buffer_pool >();
-    this->get_aspect().template get< ::iow::io::stream::_buffer_pool_>() = pool;
-    */
     stream_options opt;
     opt.buffer_pool = std::make_shared<stream_options::buffer_pool_type>();
     ::iow::io::data_pool_options dpo;
