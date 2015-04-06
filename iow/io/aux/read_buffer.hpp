@@ -214,9 +214,6 @@ public:
     data_ptr& last = _buffers.back();
 
     size_t reserve = last->capacity() - last->size();
-    //if ( reserve > 0 )
-    //  std::cout << reserve << " " << _minbuf << " " << last->size()<< std::endl;
-    //if ( reserve > _minbuf && last->size() + _bufsize < _maxbuf )
     if ( reserve > _minbuf && _minbuf!=0)
     {
       // abort();
@@ -256,6 +253,11 @@ public:
 
     _readpos = -1;
     _readbuf = -1;
+    /*if ( _parsebuf == -1 )
+    {
+      _parsebuf = 0;
+      _parsepos = 0;
+    }*/
     return true;
   }
 
@@ -267,9 +269,23 @@ public:
     auto res = search_();
     if (res.first==-1)
     {
+      if (_readbuf!=-1)
+      {
+        _parsebuf = _readbuf;
+        _parsepos = _readpos;
+      }
+      else
+      {
+        _parsebuf = _buffers.size()-1;
+        _parsepos = _buffers.back()->size();
+      }
+      /*
       _parsebuf = last_buff_();
+      if ( _parsebuf == -1)
+        _parsebuf = 0;
       // Если есть ожидания чтения
       _parsepos = _readpos!=-1 ? _readpos : _buffers[_parsebuf]->size();
+      */
       return nullptr;
     }
 
@@ -285,24 +301,29 @@ private:
 private:
 
   
-  data_ptr create_(size_t size, size_t maxbuf) const
+  data_ptr create_(size_t size, size_t maxbuf) const noexcept
   {
     if ( _create!=nullptr )
+    {
       return _create(size, maxbuf);
-    return std::make_unique<data_type>(size);
+    }
+
+    try
+    {
+      return std::make_unique<data_type>(size);
+    }
+    catch(const std::bad_alloc& )
+    {
+      return nullptr;
+    }
   }
 
-  
-  data_ptr create_(size_t size) const
+  data_ptr create_(size_t size) const noexcept
   {
     return this->create_(size, _bufsize);
-    /*if ( _create!=nullptr )
-      return _create(size, _maxbuf);
-    return std::make_unique<data_type>(size);
-    */
   }
 
-  data_ptr create_() const
+  data_ptr create_() const noexcept
   {
     return this->create_(_bufsize);
   }
@@ -322,7 +343,20 @@ private:
   
   data_pair create_for_next_()
   {
-    _buffers.push_back( create_() );
+    auto ptr = create_();
+    if ( ptr==nullptr )
+      return data_pair(nullptr, -1);
+
+    // Если закончили парсить на последнем буфере
+    if ( !_buffers.empty() 
+          && _parsebuf == _buffers.size() - 1
+          && _buffers[_parsebuf]->size() == _parsepos )
+    {
+      _parsebuf = _buffers.size();
+      _parsepos = 0;
+    }
+
+    _buffers.push_back( std::move(ptr) );
     _readbuf = _buffers.size()-1;
     _readpos = 0;
     data_ptr& last = _buffers.back();
@@ -337,7 +371,7 @@ private:
   
   size_t last_buff_() const 
   {
-    if ( _readbuf==-1 || _readpos > 0)
+    if ( _readbuf==-1 || (_readpos > 0 && _readpos!=-1) )
     {
       return _buffers.size() - 1;
     }
@@ -459,18 +493,30 @@ private:
 
   search_pair search_() const
   {
-    if ( _buffers.empty() )
+    if ( _buffers.empty() || _parsebuf==-1 )
       return search_pair(-1, -1);
 
     if (_sep_size==0)
       return nosep_search_();
 
+    // Если ожидаем confirm() для парсинга
+    if (_readbuf==_parsebuf && _readpos==_parsepos)
+      return search_pair(-1, -1);
+
+    // Если нужен next() confirm() для парсинга
+    if (_buffers[_parsebuf]->size() == _parsepos )
+      return search_pair(-1, -1);
+
+    // Если последний буфер выделен полностью для чтения, то игнорируем его
+    size_t toparse = _buffers.size() - (_readbuf!=-1 && _readpos==0);
+    /*
     size_t last = last_buff_();
 
     if ( last==-1)
       return search_pair(-1, -1);
+    */
 
-    for (size_t i=_parsebuf; i < last + 1; ++i)
+    for (size_t i=_parsebuf; i < /*last + 1*/toparse; ++i)
     {
       const_iterator end = end_(i);
       const_iterator beg;
@@ -480,9 +526,10 @@ private:
       }
       else
       {
+        // TODO: _buffers[i]->begin(), begin_ не имеет смысла
         beg = begin_(i);
       }
-      
+
       while ( beg!=end )
       {
         auto itr = std::find(beg, end, _sep[_sep_size-1]);
@@ -504,11 +551,18 @@ private:
     {
       if ( _buffers[0] == nullptr )
       {
+        _parsepos = 0;
+        _parsebuf = 0;
         free_(std::move( _buffers.front() ) );
         _buffers.erase( _buffers.begin() );
         _offset = 0;
-        _parsebuf = 0;
-        _parsepos = 0;
+
+        if (_readbuf != -1)
+        {
+          if (_readbuf==0)
+            abort();
+          --_readbuf;
+        }
       }
       else
       {
@@ -525,11 +579,18 @@ private:
       {
         std::for_each(_buffers.begin(), _buffers.begin() + off, [this](data_ptr& d){ this->free_( std::move(d) );});
         _buffers.erase( _buffers.begin(), _buffers.begin() + off );
+        if (_readbuf != -1)
+        {
+          if (_readbuf < off)
+            abort();
+          _readbuf-=off;
+        }
       }
       _parsebuf = 0;
       _offset = complete ? 0 : p.second;
       _parsepos = _offset;
     }
+
   }
 
   data_ptr make_result_(const search_pair& p)
@@ -615,7 +676,13 @@ private:
   size_t  _readbuf; // -1 - если не ожидает подтверждения
   size_t  _readpos;
   
+  // Номер буфера, с которого продолжить парсинг
+  //   при _buffers.empty() равен 0, но в это случае поиск не производится
   size_t  _parsebuf;
+  // Позиция в буфере, с которого продолжить парсинг
+  // Может быть равен _buffers[_parsebuf]->size() для _buffers.size()-1==_parsebuf
+  //   в этом случае корректируется при следующем next(), если выделяеться новый буфер
+  //   и поиск до confirm() недоступен
   size_t  _parsepos;
 
   buffer_list   _buffers;

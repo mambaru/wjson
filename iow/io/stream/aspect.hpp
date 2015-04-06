@@ -85,11 +85,13 @@ struct ad_read_handler
   {
     while (auto d = t.get_aspect().template get<_read_buffer_>().detach() )
     {
-      if ( d->empty() )
-      {
+      //if ( d->empty() )
+      //{
         std::cout << "d=[" << std::string(d->begin(), d->end() ) << "]: " << d->size() << std::endl;
         std::cout << "count: " << t.get_aspect().template get<_read_buffer_>().count()  << std::endl;
-      }
+      //}
+      if (d->empty() )
+        abort();
       t.get_aspect().template get<_handler_>()(t, std::move(d) );
     }
   }
