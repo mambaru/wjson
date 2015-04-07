@@ -649,6 +649,7 @@ private:
       if (_offset!=0)
       {
         result->erase(result->begin(), result->begin() + _offset);
+
         /*
         std::copy( result->begin() + _offset, result->end(), result->begin() );
         result->resize( result->size() - _offset);
