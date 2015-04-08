@@ -13,6 +13,7 @@ struct ad_read_confirm
     if ( !result )
     {
       // read error
+      // t.get_aspect().template get<_error_>(t, "")
     }
     /*
     auto d = t.get_aspect().template get<_write_buffer_>().confirm(p);

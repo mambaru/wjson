@@ -37,8 +37,10 @@ struct aspect: fas::aspect<
   fas::advice< ::iow::io::flow::_handler_,  ad_read_handler>,
   fas::advice< ::iow::io::pipe::_confirm_, ad_write_confirm>,
   fas::value< _write_buffer_, ::iow::io::write_buffer< DataType > >,
-  fas::value< _read_buffer_, ::iow::io::read_buffer< DataType > >,
+  fas::value< _read_buffer_, ::iow::io::read_buffer< DataType > >
+  /*,
   fas::value< _buffer_pool_, std::shared_ptr< ::iow::io::data_pool<DataType> > >
+  */
 >{};
 
 }}}

@@ -23,7 +23,7 @@ data_line_test_options getopt(
   size_t maxbuf, 
   size_t minbuf, 
   //size_t wrnsize,
-  size_t maxsize,
+  //size_t maxsize,
   bool  first_as_is,
   size_t data_size,
   size_t data_count
@@ -34,7 +34,7 @@ data_line_test_options getopt(
   dlto.maxbuf = maxbuf; 
   dlto.minbuf = minbuf;
   // dlto.wrnsize = wrnsize;
-  dlto.maxsize = maxsize;
+  //dlto.maxsize = maxsize;
   dlto.first_as_is = first_as_is;
   dlto.data_size = data_size;
   dlto.data_count = data_count;
@@ -326,13 +326,13 @@ END_SUITE(aux)
 ::fas::testing::suite_counts my_suite_run(int , char*[])
 {
   data_line_test_options optlist[]={
-  //       bufsize maxbuf minbuf maxsize first_as_is data_size data_count
-    getopt( 0,      0,     0,    0,      false,      10,       10   ),
-    getopt( 10,     0,     0,    0,      false,      100,      100  ),
-    getopt( 10,     10,    10,   0,      false,      11,       1    ),
-    getopt( 10,     20,    5,    0,      false,      11,       33   ),
-    getopt( 10,     20,    5,    0,      false,      100,      100  ),
-    getopt( 33,     34,    32,   0,      false,      1000,     1000 ),
+  //       bufsize maxbuf minbuf first_as_is data_size data_count
+    getopt( 0,      0,     0,    false,      10,       10   ),
+    getopt( 10,     0,     0,    false,      100,      100  ),
+    getopt( 10,     10,    10,   false,      11,       1    ),
+    getopt( 10,     20,    5,    false,      11,       33   ),
+    getopt( 10,     20,    5,    false,      100,      100  ),
+    getopt( 33,     34,    32,   false,      1000,     1000 ),
   };
   std::cout << sizeof(optlist) <<std::endl;
   ::fas::testing::suite_counts sc;

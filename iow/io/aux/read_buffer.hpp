@@ -13,12 +13,16 @@ template<typename DataType>
 struct read_buffer_options
 {
   typedef std::unique_ptr<DataType> data_ptr;
+  typedef std::function< data_ptr(size_t, size_t) > create_fun;
+  typedef std::function< void(data_ptr) > free_fun;
+
   std::string sep;
   size_t bufsize=4096;
   //size_t maxsize=4096*1024;
   size_t maxbuf=4096*2;
   size_t minbuf=0;
   bool fast_mode = false;
+  bool trimsep = false; // Отрезать сепаратор 
   std::function< data_ptr(size_t, size_t) > create;
   std::function< void(data_ptr) > free;
 };
@@ -50,6 +54,8 @@ public:
     //, _maxsize(4096*1024)
     , _maxbuf(4096*4)
     , _minbuf(512)
+    , _fast_mode(false)
+    , _trimsep(false)
     , _create(nullptr)
     , _free(nullptr)
     
@@ -122,6 +128,8 @@ public:
     //_maxsize = opt.maxsize;
     _maxbuf = opt.maxbuf;
     _minbuf = opt.minbuf;
+    _fast_mode = opt.fast_mode;
+    _trimsep = opt.trimsep;
     _create = opt.create;
     _free = opt.free;
 
@@ -166,15 +174,22 @@ public:
     }
     
     opt.bufsize = _bufsize;
-    // opt.maxsize = _maxsize;
     opt.maxbuf  = _maxbuf;
     opt.minbuf  = _minbuf;
+    opt.fast_mode = _fast_mode;
+    opt.trimsep = _trimsep;
     opt.create  = _create;
     opt.free    = _free;
   }
   
   void clear() noexcept
   {
+    _size = 0;
+    _offset = 0;
+    _readbuf = -1;
+    _readpos = -1;
+    _parsebuf = 0;
+    _parsepos = 0;
     _buffers.clear();
   }
 
@@ -675,6 +690,9 @@ private:
   //size_t _maxsize;
   size_t _maxbuf;
   size_t _minbuf;
+  bool _fast_mode;
+  bool _trimsep; // Отрезать сепаратор 
+
   create_fun _create;
   free_fun _free;
 

@@ -12,6 +12,8 @@ template<typename DataType>
 struct write_buffer_options
 {
   typedef std::unique_ptr<DataType> data_ptr;
+  typedef std::function< data_ptr(size_t, size_t) > create_fun;
+  typedef std::function< void(data_ptr) > free_fun;
   std::string sep;
 
   size_t bufsize = 8*1024;
@@ -21,12 +23,12 @@ struct write_buffer_options
   //size_t poolsize = 0;
   // Наверное убрать отсюда
   //size_t wrnsize = 1024*1024;
-  size_t maxsize = 1024*1024*1024;
+  //size_t maxsize = 1024*1024*1024;
 
   bool first_as_is = true; // Если maxbuff или minbuff != 0 и bufsize!=0
   
-  std::function< data_ptr(size_t, size_t) > create;
-  std::function< void(data_ptr) > free;
+  create_fun create;
+  free_fun free;
 
   /*
   
@@ -269,11 +271,24 @@ public:
     return _options==nullptr || ( _size + _offset + d.size() <= _options->maxsize );
   }
   */
+  
+  void addsep_( data_type& d, bool reserve )
+  {
+    if (_sep_size==0)
+      return;
+    
+    if (reserve)
+      d.reserve( d.size() + _sep_size );
+    
+    std::copy( _sep.get(), _sep.get() + _sep_size, std::inserter(d, d.begin()) );
+    
+  }
 
   void attach(data_ptr d)
   {
-    if ( d==nullptr || d->empty() )
+    if ( d==nullptr || ( d->empty() && _sep_size==0 ) )
       return;
+    
     
     /*
     if ( !check(*d) )
@@ -281,13 +296,15 @@ public:
       return std::move(d);
     }
     */
+    
+    
 
     _size += d->size();
 
     if ( _list.empty() )
     {
+      addsep_(*d, true);
       _list.push_back( std::move(d) );
-      //_cur = std::move(d);
     }
     else
     {
@@ -313,15 +330,17 @@ public:
       }
       */
       data_ptr& last = _list.back();
-      size_t sumsize = last->size() + d->size();
+      size_t sumsize = last->size() + d->size() + _sep_size;
       if ( last->size() < _minbuf && sumsize < _maxbuf )
       {
         last->reserve(sumsize);
         std::copy( d->begin(), d->end(), std::inserter(*last, last->end() ) );
+        addsep_(*last, false);
         free_(std::move(d));
       }
       else
       {
+        addsep_(*d, true);
         _list.push_back( std::move(d) );
       }
     }
