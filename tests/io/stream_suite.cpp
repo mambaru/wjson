@@ -3,8 +3,8 @@
 #include <iow/io/basic/aspect.hpp>
 #include <iow/io/stream/aspect.hpp>
 /*
- * #include <iow/io/flow/aspect.hpp>
-#include <iow/io/pipe/aspect.hpp>
+ * #include <iow/io/reader/aspect.hpp>
+#include <iow/io/writer/aspect.hpp>
 */
 #include <iow/memory.hpp>
 #include <iow/asio.hpp>
@@ -41,7 +41,7 @@ struct ad_read_some
       std::copy(tmp->begin(), tmp->end(), dd.first);
       dd.second = tmp->size();
       
-      t.get_aspect().template get< ::iow::io::flow::_complete_>()(t, std::move(dd));
+      t.get_aspect().template get< ::iow::io::reader::_complete_>()(t, std::move(dd));
     });
   }
 };
@@ -55,9 +55,9 @@ struct ad_write_some
       return;
     
     t.service.post([&t, p](){
-      std::cout << "pipe write" << std::endl;
+      std::cout << "writer write" << std::endl;
       t.result += std::string(p.first, p.first + p.second);
-      t.get_aspect().template get< ::iow::io::pipe::_complete_>()(t, std::move(p) /*.first, p.second*/ );
+      t.get_aspect().template get< ::iow::io::writer::_complete_>()(t, std::move(p) /*.first, p.second*/ );
     });
   }
 };
@@ -78,9 +78,11 @@ class stream
   : public ::iow::io::io_base< fas::aspect< 
       ::iow::io::basic::aspect<>::advice_list,
       ::iow::io::stream::aspect<data_type>::advice_list,
-      fas::alias< ::iow::io::stream::_handler_, ::iow::io::pipe::_output_>,
-      fas::advice< ::iow::io::flow::_some_, ad_read_some>,
-      fas::advice< ::iow::io::pipe::_some_, ad_write_some>
+      //fas::alias< ::iow::io::stream::_handler_, ::iow::io::writer::_output_>,
+      fas::alias< ::iow::io::reader::stream::_incoming_, ::iow::io::writer::_output_>,
+      fas::advice< ::iow::io::reader::_some_, ad_read_some>,
+      fas::advice< ::iow::io::writer::_some_, ad_write_some>,
+      fas::group< ::iow::io::_initialize_, ::iow::io::stream::_initialize_>
     > >
 {
 public:
@@ -118,7 +120,7 @@ public:
   std::string result;
 };
 
-UNIT(stream, "")
+UNIT(stream_unit, "")
 {
   using namespace fas::testing;
   
@@ -135,6 +137,6 @@ UNIT(stream, "")
 }
 
 BEGIN_SUITE(stream,"")
-  ADD_UNIT(stream)
+  ADD_UNIT(stream_unit)
 END_SUITE(stream)
 

@@ -3,6 +3,7 @@
 #include <iow/memory.hpp>
 #include <queue>
 #include <memory>
+#include <string>
 
 
 namespace iow{ namespace io{

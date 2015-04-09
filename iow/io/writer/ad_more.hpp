@@ -1,8 +1,8 @@
 #pragma once
 
-#include <iow/io/flow/tags.hpp>
+#include <iow/io/writer/tags.hpp>
 
-namespace iow{ namespace io{ namespace pipe{
+namespace iow{ namespace io{ namespace writer{
 
 struct ad_more
 {

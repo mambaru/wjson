@@ -1,13 +1,13 @@
 #pragma once
 
-#include <iow/io/flow/tags.hpp>
-#include <iow/io/flow/ad_start.hpp>
-#include <iow/io/flow/ad_more.hpp>
-#include <iow/io/flow/ad_complete.hpp>
+#include <iow/io/reader/tags.hpp>
+#include <iow/io/reader/ad_start.hpp>
+#include <iow/io/reader/ad_more.hpp>
+#include <iow/io/reader/ad_complete.hpp>
 
 #include <fas/aop.hpp>
 
-namespace iow{ namespace io{ namespace flow{
+namespace iow{ namespace io{ namespace reader{
 
 struct aspect: fas::aspect<
   fas::advice< _start_, ad_start >,

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <iow/io/flow/tags.hpp>
+#include <iow/io/writer/tags.hpp>
 #include <functional>
 
-namespace iow{ namespace io{ namespace pipe{
+namespace iow{ namespace io{ namespace writer{
  
 struct ad_complete
 {
@@ -11,7 +11,7 @@ struct ad_complete
   void operator()(T& t, P p)
   {
     t.get_aspect().template gete<_on_complete_>()(t, std::cref(p) );
-    t.get_aspect().template get< _confirm_ >()(t, std::move(p) );
+    t.get_aspect().template get<_confirm_ >()(t, std::move(p) );
     t.get_aspect().template get<_more_>()(t);
   }
 };

@@ -4,6 +4,7 @@
 
 namespace iow{ namespace io{ namespace stream{
 
+  /*
 struct ad_read_confirm
 {
   template<typename T>
@@ -15,17 +16,7 @@ struct ad_read_confirm
       // read error
       // t.get_aspect().template get<_error_>(t, "")
     }
-    /*
-    auto d = t.get_aspect().template get<_write_buffer_>().confirm(p);
-    if ( d != nullptr )
-    {
-      if ( t.get_aspect().template get<_buffer_pool_>()!=nullptr )
-      {
-        t.get_aspect().template get<_buffer_pool_>()->free( std::move(d) );
-      }
-    }
-    */
   }
 };
-
+*/
 }}}

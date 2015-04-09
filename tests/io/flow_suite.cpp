@@ -1,7 +1,7 @@
 #include <iostream>
 #include <iow/io/io_base.hpp>
 #include <iow/io/basic/aspect.hpp>
-#include <iow/io/flow/aspect.hpp>
+#include <iow/io/reader/aspect.hpp>
 #include <iow/memory.hpp>
 #include <iow/asio.hpp>
 
@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 #include <list>
+
 typedef std::vector<char> data_type;
 typedef std::unique_ptr<data_type> data_ptr;
 struct _handler_;
@@ -37,7 +38,7 @@ struct ad_some
       t.input.pop_front();
       std::copy(tmp->begin(), tmp->end(), (*dd)->begin());
       (*dd)->resize(tmp->size());
-      t.get_aspect().template get< ::iow::io::flow::_complete_>()(t, std::move(*dd));
+      t.get_aspect().template get< ::iow::io::reader::_complete_>()(t, std::move(*dd));
     });
   }
 };
@@ -54,23 +55,23 @@ struct ad_factory
 };
 
 
-class flow
+class flow1
   : public ::iow::io::io_base< fas::aspect< 
       ::iow::io::basic::aspect<>::advice_list,
-      ::iow::io::flow::aspect::advice_list,
+      ::iow::io::reader::aspect::advice_list,
       //::iow::io::flow::aspect< _handler_ /*, data_ptr*/ >::advice_list,
       fas::advice<_handler_, ad_handler>,
-      fas::advice< ::iow::io::flow::_next_, ad_factory>,
-      fas::advice< ::iow::io::flow::_some_, ad_some>,
-      fas::alias< ::iow::io::flow::_confirm_, _handler_>,
-      fas::stub< ::iow::io::flow::_handler_ >
+      fas::advice< ::iow::io::reader::_next_, ad_factory>,
+      fas::advice< ::iow::io::reader::_some_, ad_some>,
+      fas::alias< ::iow::io::reader::_confirm_, _handler_>,
+      fas::stub< ::iow::io::reader::_handler_ >
     > >
 {
   
 public:
   typedef data_ptr input_t;
 
-  flow(::iow::asio::io_service& io)
+  flow1(::iow::asio::io_service& io)
     : service(io) 
   {}
   
@@ -93,7 +94,7 @@ UNIT(flow, "")
 {
   using namespace fas::testing;
   ::iow::asio::io_service io;
-  flow f(io);
+  flow1 f(io);
   f.add("Hello ");
   f.add("world");
   f.add("!");

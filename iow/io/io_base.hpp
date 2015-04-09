@@ -129,7 +129,9 @@ public:
   template<typename T, typename O>
   void initialize_(T& t, O&& opt )
   {
-    t.get_aspect().template gete<_initialize_>()(t, std::forward<O>(opt) );
+    //!!! t.get_aspect().template gete<_initialize_>()(t, std::forward<O>(opt) );
+    // Определяет пользователь
+    t.get_aspect().template get<_initialize_>()(t, std::forward<O>(opt) );
   }
 
   template<typename T>

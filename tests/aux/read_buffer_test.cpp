@@ -2,6 +2,7 @@
 #include <iow/io/aux/read_buffer.hpp>
 #include <fas/testing.hpp>
 #include <cstring>
+#include <mutex>
 //#include <ucommon/socket.h>
 
 typedef std::vector<char> data_type;
@@ -223,8 +224,8 @@ void test_buff4(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
   t << equal<expect>(incoming, result) << incoming << "!=" << result << FAS_TESTING_FILE_LINE;
   if ( !chk.empty() )
     t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
-  t << equal<assert>(buf.size(), 0) << "buf.size()==" << buf.size() << FAS_TESTING_FILE_LINE;
-  t << equal<assert>(buf.count(), 0) << "buf.cout()==" << buf.count() << FAS_TESTING_FILE_LINE;
+  t << equal<assert, size_t>(buf.size(), 0) << "buf.size()==" << buf.size() << FAS_TESTING_FILE_LINE;
+  t << equal<assert, size_t>(buf.count(), 0) << "buf.cout()==" << buf.count() << FAS_TESTING_FILE_LINE;
 }
 
 

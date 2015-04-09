@@ -1,8 +1,8 @@
 #include <iostream>
 #include <iow/io/io_base.hpp>
 #include <iow/io/basic/aspect.hpp>
-#include <iow/io/flow/aspect.hpp>
-#include <iow/io/pipe/aspect.hpp>
+#include <iow/io/reader/aspect.hpp>
+#include <iow/io/writer/aspect.hpp>
 #include <iow/memory.hpp>
 #include <iow/asio.hpp>
 
@@ -30,7 +30,7 @@ struct ad_read_some
       t.input.pop_front();
       std::copy(tmp->begin(), tmp->end(), (*dd)->begin());
       (*dd)->resize(tmp->size());
-      t.get_aspect().template get< ::iow::io::flow::_complete_>()(t, std::move(*dd));
+      t.get_aspect().template get< ::iow::io::reader::_complete_>()(t, std::move(*dd));
     });
   }
 };
@@ -44,9 +44,9 @@ struct ad_write_some
       return;
     
     t.service.post([&t, p](){
-      std::cout << "pipe write" << std::endl;
+      std::cout << "writer write" << std::endl;
       t.result += std::string(p.first, p.first + p.second);
-      t.get_aspect().template get< ::iow::io::pipe::_complete_>()(t, std::move(p) /*.first, p.second*/ );
+      t.get_aspect().template get< ::iow::io::writer::_complete_>()(t, std::move(p) /*.first, p.second*/ );
     });
   }
 };
@@ -85,7 +85,7 @@ struct ad_confirm
   template<typename T, typename D>
   void operator()(T& t, D /*, size_t*/ )
   {
-    auto &d = t.get_aspect().template get< ::iow::io::pipe::_attach_ >().data;
+    auto &d = t.get_aspect().template get< ::iow::io::writer::_attach_ >().data;
     d.reset();
     //return std::move(d);
   }
@@ -96,7 +96,7 @@ struct ad_next
   template<typename T>
   std::pair<const char*, size_t> operator()(T& t)
   {
-    auto &d = t.get_aspect().template get< ::iow::io::pipe::_attach_ >().data;
+    auto &d = t.get_aspect().template get< ::iow::io::writer::_attach_ >().data;
     if ( d == nullptr )
       return std::pair<const char*, size_t>(nullptr, 0);
     return std::make_pair( &((*d)[0]), d->size() );
@@ -105,27 +105,27 @@ struct ad_next
 
 
 
-class pipe1
+class writer1
   : public ::iow::io::io_base< fas::aspect< 
       ::iow::io::basic::aspect<>::advice_list,
-      ::iow::io::flow::aspect::advice_list,
-      ::iow::io::pipe::aspect::advice_list,
-      fas::alias< ::iow::io::flow::_confirm_, ::iow::io::pipe::_output_>,
-      fas::advice< ::iow::io::flow::_next_, ad_input_factory>,
-      fas::advice< ::iow::io::pipe::_attach_, ad_entry>,
-      fas::advice< ::iow::io::pipe::_next_, ad_next>,
-      //fas::advice< ::iow::io::pipe::_free_, ad_free>,
-      fas::advice< ::iow::io::pipe::_confirm_, ad_confirm>,
-      fas::advice< ::iow::io::flow::_some_, ad_read_some>,
-      fas::advice< ::iow::io::pipe::_some_, ad_write_some>,
-      fas::stub<::iow::io::flow::_handler_>
+      ::iow::io::reader::aspect::advice_list,
+      ::iow::io::writer::aspect::advice_list,
+      fas::alias< ::iow::io::reader::_confirm_, ::iow::io::writer::_output_>,
+      fas::advice< ::iow::io::reader::_next_, ad_input_factory>,
+      fas::advice< ::iow::io::writer::_attach_, ad_entry>,
+      fas::advice< ::iow::io::writer::_next_, ad_next>,
+      //fas::advice< ::iow::io::writer::_free_, ad_free>,
+      fas::advice< ::iow::io::writer::_confirm_, ad_confirm>,
+      fas::advice< ::iow::io::reader::_some_, ad_read_some>,
+      fas::advice< ::iow::io::writer::_some_, ad_write_some>,
+      fas::stub< ::iow::io::reader::_handler_>
     > >
 {
 public:
   typedef data_ptr input_t;
   typedef data_ptr output_t;
 
-  pipe1(::iow::asio::io_service& io)
+  writer1(::iow::asio::io_service& io)
     : service(io) 
   {}
   
@@ -144,12 +144,12 @@ public:
   std::string result;
 };
 
-UNIT(pipe1, "")
+UNIT(pipe_unit, "")
 {
   using namespace fas::testing;
   
   ::iow::asio::io_service io;
-  pipe1 f(io);
+  writer1 f(io);
   
   f.add("Hello ");
   f.add("world");
@@ -161,6 +161,6 @@ UNIT(pipe1, "")
 }
 
 BEGIN_SUITE(pipe,"")
-  ADD_UNIT(pipe1)
+  ADD_UNIT(pipe_unit)
 END_SUITE(pipe)
 

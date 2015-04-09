@@ -1,13 +1,13 @@
 #pragma once
 
-#include <iow/io/stream/tags.hpp>
+#include <iow/io/reader/stream/tags.hpp>
 #include <utility>
+#include <memory>
 
-namespace iow{ namespace io{ namespace stream{
+namespace iow{ namespace io{ namespace reader{ namespace stream{
   
 //template<typename DataType>
-  /*
-struct ad_read_next
+struct ad_next
 {
   template<typename T>
   std::pair<char*, size_t> operator()(T& t)
@@ -23,7 +23,6 @@ struct ad_read_next
     //return t.get_aspect().template get<_read_buffer_>().next();
   }
 };
-*/
 
 
-}}}
+}}}}

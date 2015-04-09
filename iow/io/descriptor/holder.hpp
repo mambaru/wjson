@@ -1,32 +1,32 @@
 #pragma once
 #include <iow/io/io_base.hpp>
+#include <iow/io/descriptor/tags.hpp>
 
 namespace iow{ namespace io{ namespace descriptor{
 
 template<typename A>
 class holder
   : public io_base<A>
+  , public std::enable_shared_from_this< holder<A> >
 {
-private:
-  typedef holder_base<A> self;
+public:
+  typedef holder<A> self;
   typedef io_base<A> super;
- 
+
+private:
   using super::reset;
   using super::start;
   using super::initialize;
   using super::stop;
   using super::shutdown;
 
-public:
-  typedef holder_base<A> self;
-  typedef io_base<A> super;
-  
+public:  
   typedef typename super::mutex_type mutex_type;
   typedef typename super::aspect::template advice_cast<_descriptor_type_>::type descriptor_type;
 
 public:
   
-  holder_base(descriptor_type&& desc)
+  holder(descriptor_type&& desc)
     : super()
     , _descriptor( std::forward<descriptor_type>(desc))
   {}

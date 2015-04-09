@@ -213,7 +213,7 @@ public:
   
   bool waiting() const noexcept
   {
-    return _readbuf!=-1;
+    return _readbuf!=npos();
   }
 
   data_pair next()
@@ -284,9 +284,9 @@ public:
       return nullptr;
 
     auto res = search_();
-    if (res.first==-1)
+    if ( res.first== npos() )
     {
-      if (_readbuf!=-1)
+      if (_readbuf!=npos())
       {
         _parsebuf = _readbuf;
         _parsepos = _readpos;
@@ -316,6 +316,11 @@ private:
   typedef std::vector<data_ptr> buffer_list;
   
 private:
+  
+  constexpr size_t npos() const
+  {
+    return ~0;
+  }
 
   
   data_ptr create_(size_t size, size_t maxbuf) const noexcept
@@ -455,7 +460,7 @@ private:
       return true;
 
     dec_(pos, itr);
-    if ( pos == -1 )
+    if ( pos == npos() )
       return false;
 
     if ( _sep_size == 2 )
@@ -476,7 +481,7 @@ private:
     {
       --scur;
       dec_(pos, itr);
-      if (pos==-1)
+      if ( pos == npos() )
         return false;
       if ( *itr != *scur )
         return false;
@@ -492,7 +497,7 @@ private:
       return search_pair(-1, -1);
     }
       
-    if ( _readbuf==-1 )
+    if ( _readbuf==npos() )
     {
       // Если последний буфер не выделен под чтение
       return search_pair(_buffers.size() - 1, _buffers.back()->size());
@@ -515,7 +520,7 @@ private:
 
   search_pair search_() const
   {
-    if ( _buffers.empty() || _parsebuf==-1 )
+    if ( _buffers.empty() || _parsebuf==npos() )
       return search_pair(-1, -1);
 
     if (_sep_size==0)
@@ -530,7 +535,7 @@ private:
       return search_pair(-1, -1);
 
     // Если последний буфер выделен полностью для чтения, то игнорируем его
-    size_t toparse = _buffers.size() - (_readbuf!=-1 && _readpos==0);
+    size_t toparse = _buffers.size() - (_readbuf!=npos() && _readpos==0);
     /*
     size_t last = last_buff_();
 
@@ -579,7 +584,7 @@ private:
         _buffers.erase( _buffers.begin() );
         _offset = 0;
 
-        if (_readbuf != -1)
+        if (_readbuf != npos())
         {
           if (_readbuf==0)
             abort();
@@ -601,7 +606,7 @@ private:
       {
         std::for_each(_buffers.begin(), _buffers.begin() + off, [this](data_ptr& d){ this->free_( std::move(d) );});
         _buffers.erase( _buffers.begin(), _buffers.begin() + off );
-        if (_readbuf != -1)
+        if (_readbuf != npos())
         {
           if (_readbuf < off)
             abort();

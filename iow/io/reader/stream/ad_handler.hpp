@@ -1,11 +1,11 @@
 #pragma once
 
-#include <iow/io/stream/tags.hpp>
+#include <iow/io/reader/stream/tags.hpp>
+#include <memory>
 
-namespace iow{ namespace io{ namespace stream{
+namespace iow{ namespace io{ namespace reader{ namespace stream{
   
-  /*
-struct ad_read_handler
+struct ad_handler
 {
   template<typename T>
   void operator()(T& t)
@@ -19,10 +19,10 @@ struct ad_read_handler
         // Кривая ошибка
         // t.get_aspect().template get<_aaaa_>()(t, "");
       }
-      t.get_aspect().template get<_handler_>()(t, std::move(d) );
+      t.get_aspect().template get<_incoming_>()(t, std::move(d) );
     }
   }
 };
-*/
 
-}}}
+
+}}}}

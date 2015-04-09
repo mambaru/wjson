@@ -1,6 +1,6 @@
 #pragma once
 
-namespace iow{ namespace io{ namespace pipe{
+namespace iow{ namespace io{ namespace writer{
   
 struct _output_;
 struct _more_;
