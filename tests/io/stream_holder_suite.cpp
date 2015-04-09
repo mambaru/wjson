@@ -11,10 +11,10 @@ typedef iow::asio::posix::stream_descriptor descriptor_type;
 typedef iow::io::descriptor::stream::options options_type;
 
 struct aspect_stream: fas::aspect<
-  ::iow::io::basic::aspect<std::recursive_mutex>,
-  ::iow::io::stream::aspect< data_type >, 
+  fas::type< ::iow::io::descriptor::_descriptor_type_, iow::asio::posix::stream_descriptor>,
   ::iow::io::descriptor::stream::aspect,
-  fas::type< ::iow::io::descriptor::_descriptor_type_, iow::asio::posix::stream_descriptor>
+  ::iow::io::stream::aspect< data_type >, 
+  ::iow::io::basic::aspect<std::recursive_mutex>
 >{};
 
 typedef ::iow::io::descriptor::holder<aspect_stream> stream_holder;

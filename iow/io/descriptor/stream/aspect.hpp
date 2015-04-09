@@ -42,7 +42,7 @@ struct options:
   typedef context::incoming_handler_fun  incoming_handler_fun;
   typedef context::startup_handler_fun   startup_handler_fun;
   typedef context::shutdown_handler_fun  shutdown_handler_fun;
-  
+
   outgoing_handler_fun outgoing_handler;
   incoming_handler_fun incoming_handler;
   startup_handler_fun  startup_handler;

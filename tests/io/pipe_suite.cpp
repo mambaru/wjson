@@ -107,9 +107,6 @@ struct ad_next
 
 class writer1
   : public ::iow::io::io_base< fas::aspect< 
-      ::iow::io::basic::aspect<>::advice_list,
-      ::iow::io::reader::aspect::advice_list,
-      ::iow::io::writer::aspect::advice_list,
       fas::alias< ::iow::io::reader::_confirm_, ::iow::io::writer::_output_>,
       fas::advice< ::iow::io::reader::_next_, ad_input_factory>,
       fas::advice< ::iow::io::writer::_attach_, ad_entry>,
@@ -118,7 +115,10 @@ class writer1
       fas::advice< ::iow::io::writer::_confirm_, ad_confirm>,
       fas::advice< ::iow::io::reader::_some_, ad_read_some>,
       fas::advice< ::iow::io::writer::_some_, ad_write_some>,
-      fas::stub< ::iow::io::reader::_handler_>
+      fas::stub< ::iow::io::reader::_handler_>,
+      ::iow::io::basic::aspect<>::advice_list,
+      ::iow::io::reader::aspect::advice_list,
+      ::iow::io::writer::aspect::advice_list
     > >
 {
 public:

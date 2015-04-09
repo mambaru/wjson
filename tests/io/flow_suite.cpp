@@ -57,14 +57,14 @@ struct ad_factory
 
 class flow1
   : public ::iow::io::io_base< fas::aspect< 
-      ::iow::io::basic::aspect<>::advice_list,
-      ::iow::io::reader::aspect::advice_list,
       //::iow::io::flow::aspect< _handler_ /*, data_ptr*/ >::advice_list,
       fas::advice<_handler_, ad_handler>,
       fas::advice< ::iow::io::reader::_next_, ad_factory>,
       fas::advice< ::iow::io::reader::_some_, ad_some>,
       fas::alias< ::iow::io::reader::_confirm_, _handler_>,
-      fas::stub< ::iow::io::reader::_handler_ >
+      fas::stub< ::iow::io::reader::_handler_ >,
+      ::iow::io::basic::aspect<>::advice_list,
+      ::iow::io::reader::aspect::advice_list
     > >
 {
   

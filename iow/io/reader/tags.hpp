@@ -9,6 +9,8 @@ struct _handler_;
 
 
 struct _some_;
+struct _read_some_;
+struct _make_handler_;
 struct _confirm_;
 struct _next_;
 
