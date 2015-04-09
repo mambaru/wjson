@@ -1,20 +1,10 @@
 #pragma once
 
-#include <iow/io/stream/ad_clear.hpp>
+
 #include <iow/io/stream/ad_initialize.hpp>
-//#include <iow/io/stream/ad_read_confirm.hpp>
-//#include <iow/io/stream/ad_read_handler.hpp>
-//#include <iow/io/stream/ad_read_next.hpp>
-//#include <iow/io/stream/ad_write_attach.hpp>
-//#include <iow/io/stream/ad_write_next.hpp>
-//#include <iow/io/stream/ad_write_confirm.hpp>
 #include <iow/io/stream/tags.hpp>
 
-#include <iow/io/writer/aspect.hpp>
-//#include <iow/io/reader/aspect.hpp>
-#include <iow/io/aux/write_buffer.hpp>
-#include <iow/io/aux/read_buffer.hpp>
-#include <iow/io/aux/data_pool.hpp>
+//#include <iow/io/aux/data_pool.hpp>
 
 #include <iow/io/basic/tags.hpp>
 #include <fas/aop.hpp>
