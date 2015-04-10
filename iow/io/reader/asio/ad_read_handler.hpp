@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iow/io/reader/asio/tags.hpp>
+
 namespace iow{ namespace io{ namespace reader{ namespace asio{
 
 struct ad_read_handler

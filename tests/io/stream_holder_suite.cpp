@@ -1,6 +1,8 @@
 #include <iostream>
 #include <iow/io/descriptor/holder.hpp>
 #include <iow/io/descriptor/stream/aspect.hpp>
+#include <iow/io/reader/asio/aspect.hpp>
+#include <iow/io/writer/asio/aspect.hpp>
 #include <iow/io/stream/aspect.hpp>
 #include <iow/io/basic/aspect.hpp>
 
@@ -13,8 +15,10 @@ typedef iow::io::descriptor::stream::options options_type;
 struct aspect_stream: fas::aspect<
   fas::type< ::iow::io::descriptor::_descriptor_type_, iow::asio::posix::stream_descriptor>,
   ::iow::io::descriptor::stream::aspect,
-  ::iow::io::stream::aspect< data_type >, 
-  ::iow::io::basic::aspect<std::recursive_mutex>
+  ::iow::io::reader::asio::aspect::advice_list,
+  ::iow::io::writer::asio::aspect::advice_list,
+  ::iow::io::stream::aspect< data_type >::advice_list, 
+  ::iow::io::basic::aspect<std::recursive_mutex>::advice_list
 >{};
 
 typedef ::iow::io::descriptor::holder<aspect_stream> stream_holder;

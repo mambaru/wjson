@@ -2,6 +2,6 @@
 
 namespace iow{ namespace io{ namespace reader{ namespace asio{
 
-struct _handler_;
+struct _read_handler_;
 
 }}}}

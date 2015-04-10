@@ -19,6 +19,7 @@ struct _mutex_type_;
 
 // io_base events
 struct _after_reset_;
+struct _before_start_;
 struct _after_start_;
 struct _initialize_;
 struct _before_stop_;
