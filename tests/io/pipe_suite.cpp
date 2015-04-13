@@ -72,6 +72,15 @@ struct ad_entry
   data_ptr data;
 };
 
+struct ad_can_write
+{
+  template<typename T, typename P>
+  bool operator()(T& , P p)
+  {
+    return true;
+  }
+};
+
 struct ad_free
 {
   template<typename T>
@@ -114,6 +123,7 @@ class writer1
       //fas::advice< ::iow::io::writer::_free_, ad_free>,
       fas::advice< ::iow::io::writer::_confirm_, ad_confirm>,
       fas::advice< ::iow::io::reader::_some_, ad_read_some>,
+      fas::advice< ::iow::io::writer::_can_write_, ad_can_write>,
       fas::advice< ::iow::io::writer::_some_, ad_write_some>,
       fas::stub< ::iow::io::reader::_handler_>,
       ::iow::io::basic::aspect<>::advice_list,

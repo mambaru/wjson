@@ -9,8 +9,8 @@ namespace iow{ namespace io{ namespace writer{ namespace stream{
 
 struct ad_confirm
 {
-  template<typename T>
-  void operator()(T& t, std::pair<const char*, size_t> p)
+  template<typename T, typename P>
+  void operator()(T& t, P p)
   {
     bool result = t.get_aspect().template get<_write_buffer_>().confirm(p);
     if ( !result )

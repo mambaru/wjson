@@ -12,7 +12,18 @@
 #include <fas/aop.hpp>
 
 namespace iow{ namespace io{ namespace writer{ namespace stream{
-  
+
+struct ad_can_write
+{
+  template<typename T, typename P>
+  bool operator()(T& , P p)
+  {
+    std::cout << "can write: " << p.second << " " << (p.first!=nullptr) << std::endl;
+
+    return p.second!=0 && p.first!=nullptr;
+  }
+};
+
 template<typename DataType = std::vector<char> >
 struct aspect: fas::aspect<
   ::iow::io::writer::aspect::advice_list,
@@ -23,6 +34,7 @@ struct aspect: fas::aspect<
   fas::advice< ::iow::io::writer::_next_, ad_next >,
   fas::advice< ::iow::io::writer::_confirm_, ad_confirm>,
   fas::advice< ::iow::io::writer::_attach_,  ad_attach>,
+  fas::advice< ::iow::io::writer::_can_write_, ad_can_write>,
   fas::value< _write_buffer_, ::iow::io::write_buffer< DataType > >
 
 >{};

@@ -3,6 +3,10 @@
 #include <iow/io/acceptor/tags.hpp>
 #include <iow/io/basic/aspect.hpp>
 #include <iow/io/reader/aspect.hpp>
+#include <iow/io/reader/asio/aspect.hpp>
+#include <iow/io/writer/asio/aspect.hpp>
+#include <iow/io/stream/aspect.hpp>
+#include <iow/io/descriptor/stream/aspect.hpp>
 #include <iow/asio.hpp>
 #include <iow/system.hpp>
 #include <fas/aop.hpp>
@@ -119,9 +123,18 @@ struct ad_next
 typedef ::iow::io::descriptor::holder<
   fas::aspect<
     ::iow::io::basic::aspect<>::advice_list,
+    ::iow::io::descriptor::stream::aspect,
+    ::iow::io::stream::aspect<>,
+    ::iow::io::reader::asio::aspect,
+    ::iow::io::writer::asio::aspect,
     fas::type< ::iow::io::descriptor::_descriptor_type_, ::iow::asio::ip::tcp::socket >
   >
 > test_connection;
+
+struct tmp_opt: ::iow::io::descriptor::stream::options
+{
+  
+};
 
 struct ad_confirm
 {
@@ -129,6 +142,16 @@ struct ad_confirm
   template<typename T, typename P>
   void operator()(T& , P p)
   {
+    tmp_opt opt;
+    opt.incoming_handler = []( tmp_opt::data_ptr d, size_t id, tmp_opt::outgoing_handler_fun callback)
+    {
+      std::cout << "handler! " << id << std::endl;
+      callback( std::move(d) );
+    };
+    opt.reader.sep="\r\n";
+    opt.writer.sep="";
+    std::cout << "start !" << std::endl;
+    p->start(opt);
     tmp.push_back(p);
   }
 };

@@ -12,7 +12,7 @@ struct _confirm_;
 
 struct _make_handler_;
 struct _write_some_;
-// struct _free_;
+struct _can_write_;
 
 
 //struct _output_type_;

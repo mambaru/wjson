@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iow/io/reader/asio/tags.hpp>
+#include <iow/system.hpp>
 
 namespace iow{ namespace io{ namespace reader{ namespace asio{
 
