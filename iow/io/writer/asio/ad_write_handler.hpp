@@ -5,6 +5,7 @@
 
 namespace iow{ namespace io{ namespace writer{ namespace asio{
 
+// TODO: mv ad_write_complete
 struct ad_write_handler
 {
   template<typename T, typename P>

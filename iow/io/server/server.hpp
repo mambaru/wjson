@@ -6,6 +6,7 @@
 
 namespace iow{ namespace io{ namespace server{
   
+// server{ stream{ manager??? } } или в acceptors или manager??? (descriptor::manager???? - да!!!)
 struct options
 {
   std::string host;

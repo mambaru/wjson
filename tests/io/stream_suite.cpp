@@ -77,11 +77,12 @@ struct stream_options
 class stream
   : public ::iow::io::io_base< fas::aspect< 
       //fas::alias< ::iow::io::stream::_handler_, ::iow::io::writer::_output_>,
+      fas::type< ::iow::io::_options_type_, fas::empty_type >,
       fas::alias< ::iow::io::reader::stream::_incoming_, ::iow::io::writer::_output_>,
       fas::advice< ::iow::io::reader::_some_, ad_read_some>,
       fas::advice< ::iow::io::writer::_some_, ad_write_some>,
       fas::group< ::iow::io::_initialize_, ::iow::io::stream::_initialize_>,
-      ::iow::io::basic::aspect<>::advice_list,
+      ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
       ::iow::io::stream::aspect<data_type>::advice_list
     > >
 {

@@ -52,7 +52,7 @@ struct ad_reset
 
 class iobase
   : public ::iow::io::io_base< fas::aspect< 
-      ::iow::io::basic::aspect<>::advice_list,
+      ::iow::io::basic::aspect< std::recursive_mutex >::advice_list,
       fas::advice<_start_, ad_start>,
       fas::advice<_init_,  ad_init>,
       fas::advice<_stop_,  ad_stop>,
@@ -60,7 +60,8 @@ class iobase
       fas::group< ::iow::io::_initialize_, _init_>,
       fas::group< ::iow::io::_after_stop_, _stop_>,
       fas::group< ::iow::io::_after_reset_, _reset_>,
-      fas::group< ::iow::io::_after_start_, _start_>
+      fas::group< ::iow::io::_after_start_, _start_>,
+      fas::type< ::iow::io::_options_type_, fas::empty_type >
     > >
 {
 

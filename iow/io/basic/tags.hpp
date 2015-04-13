@@ -7,15 +7,22 @@ struct _reset_;
 struct _start_;
 struct _stop_;
 struct _shutdown_;
-struct _wrap_;
+struct _wrap_;     
 
 // io_base values
-struct _io_id_;
-struct _status_;
-struct _owner_;
+struct _io_id_;   // TODO: del (context)
+struct _status_;  // TODO: del (context)
+struct _owner_;   // TODO: del (context)
+
+namespace basic{
+struct _create_id_;
+struct _context_;
+}
+
 
 // io_base types
-struct _mutex_type_;
+struct _mutex_type_; // TODO: del (context)
+struct _options_type_;
 
 // io_base events
 struct _after_reset_;

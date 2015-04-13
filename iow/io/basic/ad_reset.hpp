@@ -9,7 +9,8 @@ struct ad_reset
   template<typename T>
   void operator()(T& t)
   {
-    t.get_aspect().template get<_owner_>().reset();
+    //t.get_aspect().template get<_owner_>().reset();
+    t.get_aspect().template get<_context_>().holder.reset();
     t.get_aspect().template gete<_after_reset_>()(t);
   }
 };

@@ -4,6 +4,7 @@
 #include <iow/asio.hpp>
 
 typedef ::iow::io::descriptor::holder< fas::aspect<
+  fas::type< ::iow::io::_options_type_, fas::empty_type >,
   ::iow::io::acceptor::aspect::advice_list,
   fas::type< ::iow::io::descriptor::_descriptor_type_, iow::asio::ip::tcp::acceptor >
 > > tcp_acceptror;

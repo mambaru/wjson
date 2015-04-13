@@ -1,5 +1,8 @@
 #pragma once
 
+// test_connection
+#include <iow/ip/tcp/connection/connection.hpp>
+
 #include <iow/io/acceptor/tags.hpp>
 #include <iow/io/basic/aspect.hpp>
 #include <iow/io/reader/aspect.hpp>
@@ -120,8 +123,10 @@ struct ad_next
 };
 
 
-typedef ::iow::io::descriptor::holder<
+// ip/tcp socket stream connection
+/*typedef ::iow::io::descriptor::holder<
   fas::aspect<
+    fas::type< ::iow::io::_options_type_, fas::empty_type >,
     ::iow::io::basic::aspect<>::advice_list,
     ::iow::io::descriptor::stream::aspect,
     ::iow::io::stream::aspect<>,
@@ -130,6 +135,11 @@ typedef ::iow::io::descriptor::holder<
     fas::type< ::iow::io::descriptor::_descriptor_type_, ::iow::asio::ip::tcp::socket >
   >
 > test_connection;
+*/
+/*struct test_connection: ::iow::ip::tcp::connection<> {};*/
+
+
+typedef ::iow::ip::tcp::connection::connection<> test_connection;
 
 struct tmp_opt: ::iow::io::descriptor::stream::options
 {
@@ -143,13 +153,15 @@ struct ad_confirm
   void operator()(T& , P p)
   {
     tmp_opt opt;
-    opt.incoming_handler = []( tmp_opt::data_ptr d, size_t id, tmp_opt::outgoing_handler_fun callback)
+    opt.incoming_handler = []( tmp_opt::data_ptr d, size_t id, tmp_opt::outgoing_handler_t callback)
     {
       std::cout << "handler! " << id << std::endl;
       callback( std::move(d) );
     };
+    /*!!!
     opt.reader.sep="\r\n";
     opt.writer.sep="";
+    */
     std::cout << "start !" << std::endl;
     p->start(opt);
     tmp.push_back(p);
@@ -158,7 +170,7 @@ struct ad_confirm
 
 
 struct aspect: fas::aspect<
-  ::iow::io::basic::aspect<>::advice_list,
+  ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
   ::iow::io::reader::aspect,
   fas::advice< ::iow::io::reader::_next_, ad_next>,
   //fas::advice<_listen_, ad_listen>,

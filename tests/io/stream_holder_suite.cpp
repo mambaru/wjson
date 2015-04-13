@@ -18,7 +18,8 @@ struct aspect_stream: fas::aspect<
   ::iow::io::reader::asio::aspect::advice_list,
   ::iow::io::writer::asio::aspect::advice_list,
   ::iow::io::stream::aspect< data_type >::advice_list, 
-  ::iow::io::basic::aspect<std::recursive_mutex>::advice_list
+  ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
+  fas::type< ::iow::io::_options_type_, fas::empty_type >
 >{};
 
 typedef ::iow::io::descriptor::holder<aspect_stream> stream_holder;
@@ -47,7 +48,7 @@ UNIT(stream_holder_unit, "")
   t << message("...write:") << res1;
   
   options_type opt;
-  opt.incoming_handler = [&](options_type::data_ptr d, size_t, options_type::outgoing_handler_fun /*callback*/){
+  opt.incoming_handler = [&](options_type::data_ptr d, size_t, options_type::outgoing_handler_t /*callback*/){
     std::cout << std::endl << "yooooooooooo!!!" << std::endl;
     std::cout << std::endl << std::string(d->begin(), d->end() );
     h2->get_aspect().get< ::iow::io::writer::_output_>()( *h2, std::move(d) );

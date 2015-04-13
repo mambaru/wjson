@@ -1,14 +1,19 @@
 #pragma once
 
+/*
 #include <iow/io/aux/read_buffer.hpp>
 #include <iow/io/aux/write_buffer.hpp>
 
 #define IOW_STREAM_DEFAULT_MAXSIZE (1024*1024*128)
 #define IOW_STREAM_DEFAULT_WRNSIZE (1024*1024)
+*/
+
+#include <iow/io/reader/stream/options.hpp>
+#include <iow/io/writer/stream/options.hpp>
 
 namespace iow{ namespace io{ namespace stream{
   
-  
+/*
 template<typename DataType>
 struct reader_options:
   ::iow::io::read_buffer_options<DataType>
@@ -24,12 +29,13 @@ struct writer_options:
   size_t maxsize = IOW_STREAM_DEFAULT_MAXSIZE;
   size_t wrnsize = IOW_STREAM_DEFAULT_WRNSIZE;
 };
+*/
 
 template<typename DataType>
-struct stream_options
+struct options
 {
-  reader_options<DataType> reader;
-  writer_options<DataType> writer;
+  ::iow::io::reader::stream::options<DataType> reader;
+  ::iow::io::writer::stream::options<DataType> writer;
 };
 
 }}}

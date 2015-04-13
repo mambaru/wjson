@@ -11,10 +11,44 @@
 #include <iow/asio.hpp>
 #include <fas/aop.hpp>
 
-namespace iow{ namespace io{ namespace descriptor{ namespace stream{
+namespace iow{ namespace io{ namespace descriptor{
 
+template<typename ID, typename DataType, typename DataPtr>
 struct context
 {
+  typedef ID io_id_t;
+  typedef DataType data_type;
+  typedef DataPtr  data_ptr;
+  
+  typedef std::function< void(data_ptr) > outgoing_handler_t;
+  typedef std::function< void(data_ptr, io_id_t, outgoing_handler_t) > incoming_handler_t;
+  typedef std::function< void(io_id_t, outgoing_handler_t) > startup_handler_t;
+  typedef std::function< void(io_id_t) > shutdown_handler_t;
+
+  outgoing_handler_t outgoing_handler;
+  incoming_handler_t incoming_handler;
+  startup_handler_t  startup_handler;
+  shutdown_handler_t shutdown_handler;
+};
+  
+
+namespace stream{
+
+typedef ::iow::io::descriptor::context<
+  size_t, 
+  std::vector<char>, 
+  std::unique_ptr<std::vector<char> >
+> stream_context;
+
+  
+struct context: stream_context
+  // --- ::basic::context<ID>
+  // typedef ID io_id_t
+{
+  typedef ::iow::io::data_pool< stream_context::data_type> pool_type;
+  typedef std::shared_ptr< pool_type> pool_ptr;
+
+  /*
   typedef std::vector<char> data_type;
   typedef std::unique_ptr<data_type>  data_ptr;
   typedef ::iow::io::data_pool<data_type> pool_type;
@@ -29,24 +63,24 @@ struct context
   incoming_handler_fun incoming_handler;
   startup_handler_fun  startup_handler;
   shutdown_handler_fun shutdown_handler;
-  
+  */
 };
 
 struct options: 
-  public ::iow::io::stream::stream_options<context::data_type>
+  public ::iow::io::stream::options<context::data_type>
 {
   typedef context::data_type data_type;
   typedef context::data_ptr  data_ptr; 
   typedef context::pool_ptr              pool_ptr;
-  typedef context::outgoing_handler_fun  outgoing_handler_fun;
-  typedef context::incoming_handler_fun  incoming_handler_fun;
-  typedef context::startup_handler_fun   startup_handler_fun;
-  typedef context::shutdown_handler_fun  shutdown_handler_fun;
+  typedef context::outgoing_handler_t  outgoing_handler_t;
+  typedef context::incoming_handler_t  incoming_handler_t;
+  typedef context::startup_handler_t   startup_handler_t;
+  typedef context::shutdown_handler_t  shutdown_handler_t;
 
-  outgoing_handler_fun outgoing_handler;
-  incoming_handler_fun incoming_handler;
-  startup_handler_fun  startup_handler;
-  shutdown_handler_fun shutdown_handler;
+  outgoing_handler_t outgoing_handler;
+  incoming_handler_t incoming_handler;
+  startup_handler_t  startup_handler;
+  shutdown_handler_t shutdown_handler;
   pool_ptr pool;
 };
 
@@ -58,24 +92,26 @@ struct ad_initialize
   {
     typedef typename T::aspect::template advice_cast<_context_>::type context_type;
     context_type& cntx = t.get_aspect().template get<_context_>();
-    
-    std::weak_ptr<T> wthis = t.shared_from_this();
-    auto callback = cntx.outgoing_handler;
-    cntx.outgoing_handler = t.wrap([wthis, callback](typename context_type::data_ptr d)
+    if (  opt.incoming_handler != nullptr )
     {
-      if ( auto pthis = wthis.lock() )
+      std::weak_ptr<T> wthis = t.shared_from_this();
+      auto callback = cntx.outgoing_handler;
+      cntx.outgoing_handler = t.wrap([wthis, callback](typename context_type::data_ptr d)
       {
-        std::lock_guard<typename T::mutex_type> lk( pthis->mutex() );
-        if ( callback != nullptr )
+        if ( auto pthis = wthis.lock() )
         {
-          callback(std::move(d));
+          std::lock_guard<typename T::mutex_type> lk( pthis->mutex() );
+          if ( callback != nullptr )
+          {
+            callback(std::move(d));
+          }
+          else
+          {
+            pthis->get_aspect().template get<_incoming_>()( *pthis, std::move(d) );
+          }
         }
-        else
-        {
-          pthis->get_aspect().template get<_incoming_>()( *pthis, std::move(d) );
-        }
-      }
-    });
+      });
+    }
 
     
     cntx.incoming_handler  = opt.incoming_handler;
@@ -116,6 +152,7 @@ struct ad_incoming_handler
   }
 };
   
+
 struct ad_async_read_some
 {
   template<typename T, typename P, typename H>

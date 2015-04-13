@@ -9,7 +9,7 @@ namespace iow{ namespace io{ namespace writer{ namespace stream{
   
 
 template<typename DataType>
-struct writer_options:
+struct options:
   ::iow::io::write_buffer_options<DataType>
 {
   // Вынести на более высокий уровень

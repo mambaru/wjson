@@ -75,7 +75,7 @@ struct ad_entry
 struct ad_can_write
 {
   template<typename T, typename P>
-  bool operator()(T& , P p)
+  bool operator()(T& , P /*p*/)
   {
     return true;
   }
@@ -126,7 +126,8 @@ class writer1
       fas::advice< ::iow::io::writer::_can_write_, ad_can_write>,
       fas::advice< ::iow::io::writer::_some_, ad_write_some>,
       fas::stub< ::iow::io::reader::_handler_>,
-      ::iow::io::basic::aspect<>::advice_list,
+      fas::type< ::iow::io::_options_type_, fas::empty_type >,
+      ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
       ::iow::io::reader::aspect::advice_list,
       ::iow::io::writer::aspect::advice_list
     > >

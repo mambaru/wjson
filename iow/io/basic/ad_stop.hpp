@@ -11,7 +11,8 @@ struct ad_stop
   {
     t.get_aspect().template gete<_before_stop_>()(t);
     t.get_aspect().template get<_reset_>()(t);
-    t.get_aspect().template get<_status_>()=false;
+    //t.get_aspect().template get<_status_>()=false;
+    t.get_aspect().template get<_context_>().status=false;
     t.get_aspect().template gete<_after_stop_>()(t);
   }
 };
