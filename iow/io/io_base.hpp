@@ -70,6 +70,7 @@ public:
     this->start_(*this, std::forward<O>(opt));
   }
 
+  // TODO: reconfigure ???
   template<typename O>
   void initialize(O&& opt)
   {

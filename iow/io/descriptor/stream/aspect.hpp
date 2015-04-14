@@ -6,66 +6,44 @@
 #include <iow/io/reader/tags.hpp>
 #include <iow/io/writer/tags.hpp>
 #include <iow/io/descriptor/stream/tags.hpp>
+#include <iow/io/descriptor/context.hpp>
+#include <iow/io/descriptor/options.hpp>
 #include <iow/io/aux/data_pool.hpp>
 #include <iow/system.hpp>
 #include <iow/asio.hpp>
 #include <fas/aop.hpp>
 
-namespace iow{ namespace io{ namespace descriptor{
+namespace iow{ namespace io{ namespace descriptor{ namespace stream{
 
-template<typename ID, typename DataType, typename DataPtr>
-struct context
-{
-  typedef ID io_id_t;
-  typedef DataType data_type;
-  typedef DataPtr  data_ptr;
-  
-  typedef std::function< void(data_ptr) > outgoing_handler_t;
-  typedef std::function< void(data_ptr, io_id_t, outgoing_handler_t) > incoming_handler_t;
-  typedef std::function< void(io_id_t, outgoing_handler_t) > startup_handler_t;
-  typedef std::function< void(io_id_t) > shutdown_handler_t;
-
-  outgoing_handler_t outgoing_handler;
-  incoming_handler_t incoming_handler;
-  startup_handler_t  startup_handler;
-  shutdown_handler_t shutdown_handler;
-};
-  
-
-namespace stream{
-
+/*
 typedef ::iow::io::descriptor::context<
   size_t, 
   std::vector<char>, 
   std::unique_ptr<std::vector<char> >
 > stream_context;
+*/
+using stream_context = ::iow::io::descriptor::context<
+  size_t, 
+  std::vector<char>, 
+  std::unique_ptr<std::vector<char> >
+>;
 
-  
 struct context: stream_context
-  // --- ::basic::context<ID>
-  // typedef ID io_id_t
 {
   typedef ::iow::io::data_pool< stream_context::data_type> pool_type;
   typedef std::shared_ptr< pool_type> pool_ptr;
-
-  /*
-  typedef std::vector<char> data_type;
-  typedef std::unique_ptr<data_type>  data_ptr;
-  typedef ::iow::io::data_pool<data_type> pool_type;
-  typedef std::shared_ptr<pool_type> pool_ptr;
-  typedef size_t io_id_t;
-  typedef std::function< void(data_ptr) > outgoing_handler_fun;
-  typedef std::function< void(data_ptr, io_id_t, outgoing_handler_fun) > incoming_handler_fun;
-  typedef std::function< void(io_id_t, outgoing_handler_fun) > startup_handler_fun;
-  typedef std::function< void(io_id_t) > shutdown_handler_fun;
-
-  outgoing_handler_fun outgoing_handler;
-  incoming_handler_fun incoming_handler;
-  startup_handler_fun  startup_handler;
-  shutdown_handler_fun shutdown_handler;
-  */
+  pool_ptr pool;
 };
 
+struct options: 
+  ::iow::io::descriptor::options<context>,
+  ::iow::io::stream::options<context::data_type>
+{
+  typedef context::pool_ptr pool_ptr;
+  pool_ptr pool;
+};
+
+/*
 struct options: 
   public ::iow::io::stream::options<context::data_type>
 {
@@ -83,7 +61,7 @@ struct options:
   shutdown_handler_t shutdown_handler;
   pool_ptr pool;
 };
-
+*/
 // Универсальный для всех
 struct ad_initialize
 {
@@ -94,8 +72,8 @@ struct ad_initialize
     context_type& cntx = t.get_aspect().template get<_context_>();
     if (  opt.incoming_handler != nullptr )
     {
-      std::weak_ptr<T> wthis = t.shared_from_this();
       auto callback = cntx.outgoing_handler;
+      std::weak_ptr<T> wthis = t.shared_from_this();
       cntx.outgoing_handler = t.wrap([wthis, callback](typename context_type::data_ptr d)
       {
         if ( auto pthis = wthis.lock() )
@@ -113,12 +91,11 @@ struct ad_initialize
       });
     }
 
-    
     cntx.incoming_handler  = opt.incoming_handler;
     cntx.startup_handler   = opt.startup_handler;
     cntx.shutdown_handler  = opt.shutdown_handler;
     
-    t.get_aspect().template get< ::iow::io::stream::_initialize_>()( t, std::forward<O>(opt) );
+    t.get_aspect().template get< ::iow::io::stream::_initialize_ >()( t, std::forward<O>(opt) );
   }
 };
 
