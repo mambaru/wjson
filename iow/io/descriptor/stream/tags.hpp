@@ -2,7 +2,6 @@
 
 namespace iow{ namespace io{ namespace descriptor{ namespace stream{
 
-struct _context_;
 struct _initialize_;
 struct _read_handler_;
 struct _write_handler_;
