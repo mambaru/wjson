@@ -8,6 +8,7 @@
 #include <iow/io/descriptor/stream/tags.hpp>
 #include <iow/io/descriptor/context.hpp>
 #include <iow/io/descriptor/options.hpp>
+#include <iow/io/descriptor/aspect.hpp>
 #include <iow/io/descriptor/ad_initialize.hpp>
 #include <iow/io/descriptor/ad_incoming_handler.hpp>
 #include <iow/io/aux/data_pool.hpp>
@@ -82,11 +83,13 @@ struct ad_async_write_some
 struct aspect: fas::aspect<
   fas::value< _context_, context >,
   fas::advice< ::iow::io::reader::stream::_incoming_, ad_incoming_handler>,
-  fas::alias< _incoming_, ::iow::io::writer::_output_>,
+  fas::alias< _outgoing_, ::iow::io::writer::_output_>,
   fas::advice< ::iow::io::reader::_read_some_, ad_async_read_some>,
   fas::advice< ::iow::io::writer::_write_some_, ad_async_write_some>,
   fas::advice< _initialize_, ad_initialize<true, ::iow::io::stream::_initialize_> >,
-  fas::group< ::iow::io::_initialize_, _initialize_>
+  fas::group< ::iow::io::_initialize_, _initialize_>,
+  ::iow::io::descriptor::aspect
+  
 >{};
   
 }}}}

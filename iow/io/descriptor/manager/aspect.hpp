@@ -6,6 +6,50 @@
 #include <memory>
 namespace iow{ namespace io{ namespace descriptor{ namespace manager{
 
+struct manager_options
+{
+  
+};
+
+template<typename DescriptorHolder>
+class manager_impl
+{
+public:
+  typedef DescriptorHolder holder_type;
+  typedef std::shared_ptr<holder_type> holder_ptr;
+  typedef typename holder_type::descriptor_type descriptor_type;
+  typedef typename holder_type::options_type options_type;
+  typedef typename holder_type::io_id_type io_id_type;
+  typedef ::iow::asio::io_service io_service;
+  
+  manager_impl(io_service& io)
+    : _io(io)
+  {}
+  
+  descriptor_type next()
+  {
+    return descriptor_type(_io);
+  }
+  
+  bool confirm(descriptor_type d)
+  {
+    return 
+  }
+
+  holder_ptr detach()
+  {
+    return nullptr;
+  }
+  
+  
+private:
+  typedef std::map< io_id_type, holder_ptr> holder_map;
+  io_service _io;
+  holder_map _holders;
+
+};
+
+  
 template<typename DescriptorHolder>
 struct context
 {
