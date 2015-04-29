@@ -247,6 +247,12 @@ public:
     return result;
   }
   
+  bool rollback(data_pair d)
+  {
+    d.second = 0;
+    return this->confirm(d);
+  }
+  
   bool confirm(data_pair d)
   {
     if ( !waiting() )

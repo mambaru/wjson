@@ -41,12 +41,10 @@ public:
     return nullptr;
   }
   
-  
 private:
   typedef std::map< io_id_type, holder_ptr> holder_map;
   io_service _io;
   holder_map _holders;
-
 };
 
   

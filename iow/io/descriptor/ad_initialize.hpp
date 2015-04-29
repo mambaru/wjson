@@ -14,7 +14,7 @@ struct ad_initialize
   template<typename T, typename O>
   void operator()(T& t, O&& opt) 
   {
-    typedef typename T::aspect::template advice_cast<_context_>::type context_type;
+    typedef typename T::aspect::template advice_cast< _context_>::type context_type;
     context_type& cntx = t.get_aspect().template get<_context_>();
     if (  opt.incoming_handler != nullptr )
     {
@@ -47,7 +47,7 @@ private:
         }
         else
         {
-          pthis->get_aspect().template get<_incoming_>()( *pthis, std::move(d) );
+          pthis->get_aspect().template get<_outgoing_>()( *pthis, std::move(d) );
         }
       }
     });

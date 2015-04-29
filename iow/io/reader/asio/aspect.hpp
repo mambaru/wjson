@@ -11,7 +11,8 @@ namespace iow{ namespace io{ namespace reader{ namespace asio{
 
 struct aspect: fas::aspect<
     fas::advice<_make_handler_, ad_make_handler>,
-    fas::advice<_read_handler_, ad_read_handler>
+    fas::advice<_read_handler_, ad_read_handler>,
+    fas::advice<_error_handler_, ad_error_handler>
 >{};
 
 

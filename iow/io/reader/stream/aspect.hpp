@@ -23,6 +23,7 @@ struct aspect: fas::aspect<
   fas::group< ::iow::io::_after_reset_, _clear_>,
   fas::advice< ::iow::io::reader::_next_, ad_next >,
   fas::advice< ::iow::io::reader::_confirm_, ad_confirm>,
+  fas::advice< ::iow::io::reader::_rollback_, ad_rollback>,
   fas::advice< ::iow::io::reader::_handler_,  ad_handler>,
   fas::value< _read_buffer_, ::iow::io::read_buffer< DataType > >
 >{};

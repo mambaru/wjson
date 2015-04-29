@@ -20,6 +20,7 @@ struct _context_;
 }
 
 
+
 // io_base types
 struct _mutex_type_; // TODO: del (context)
 struct _options_type_;
@@ -31,6 +32,7 @@ struct _after_start_;
 struct _initialize_;
 struct _before_stop_;
 struct _after_stop_;
+struct _on_error_;
 
 }}
 

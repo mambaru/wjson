@@ -17,13 +17,69 @@
 #include <list>
 
 namespace iow{ namespace io{ namespace acceptor{
- 
+
+template<typename DescriptorHolder>
+class holder_manager
+{
+  // TODO: сделать пул, и ограничения 
+public:
+  typedef DescriptorHolder holder_type;
+  typedef std::shared_ptr<holder_type> holder_ptr;
+  typedef typename holder_type::descriptor_type descriptor_type;
+  typedef typename holder_type::options_type options_type;
+  typedef typename holder_type::io_id_type io_id_type;
+  typedef ::iow::asio::io_service io_service;
+  
+  void attach(io_id_type id, holder_ptr h)
+  {
+    _holders[id] = h;
+    
+    std::cout << "holder_manager::attach size=" <<_holders.size() << std::endl;
+  }
+  
+  holder_ptr create(io_service& io)
+  {
+    // TODO: взять из пула
+    return std::make_shared<holder_type>( descriptor_type(io) );
+  }
+  
+  void close(io_id_type id)
+  {
+    auto itr = _holders.find(id);
+    if ( itr != _holders.end() )
+    {
+      this->free(itr->second);
+      _holders.erase(itr);
+    }
+    else
+    {
+      //Сказать что-то в лог
+    }
+    std::cout << "holder_manager::close size=" <<_holders.size() << std::endl;
+  }
+  
+  void free(holder_ptr h)
+  {
+    h->reset();
+  }
+  
+private:
+  typedef std::map< io_id_type, holder_ptr> holder_map;
+  
+  holder_map _holders;
+};
+
+  
 template<typename ConnectionType>
 struct context
 {
   typedef ConnectionType connection_type;
   typedef std::shared_ptr<connection_type> connection_ptr;
-  connection_ptr connection;
+  typedef holder_manager<connection_type> manager_type;
+  typedef std::shared_ptr<manager_type> manager_ptr;
+  //connection_ptr connection;
+  manager_ptr manager;
+  
 };
 
 struct options
@@ -38,6 +94,10 @@ struct ad_initialize
   template<typename T, typename O>
   void operator()(T& t, const O& opt)
   {
+    typedef typename T::aspect::template advice_cast< _context_ >::type context_type;
+    t.get_aspect().template get<_context_>().manager 
+      = std::make_shared<typename context_type::manager_type>();
+    
     // t.descriptor().listen();
     iow::asio::ip::tcp::resolver resolver( t.descriptor().get_io_service() );
     iow::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
@@ -115,10 +175,12 @@ struct ad_next
   auto operator()(T& t)
     -> typename get_type<T>::connection_ptr
   {
+    return t.get_aspect().template get<_context_>().manager->create( t.descriptor().get_io_service() );
+    /*
     typedef typename get_type<T>::connection_type connection_type;
     typedef typename get_type<T>::descriptor_type descriptor_type;
-    //auto& cntx = t.get_aspect().template get<_context_>();
     return std::make_shared<connection_type>( descriptor_type(t.descriptor().get_io_service()) );
+    */
   }
 };
 
@@ -148,23 +210,39 @@ struct tmp_opt: ::iow::io::descriptor::stream::options
 
 struct ad_confirm
 {
-  std::list< std::shared_ptr<test_connection> > tmp;
+  //std::list< std::shared_ptr<test_connection> > tmp;
   template<typename T, typename P>
-  void operator()(T& , P p)
+  void operator()(T& t, P p)
   {
+    typedef typename T::io_id_type io_id_type;
     tmp_opt opt;
     opt.incoming_handler = []( tmp_opt::data_ptr d, size_t id, tmp_opt::outgoing_handler_t callback)
     {
       std::cout << "handler! " << id << std::endl;
       callback( std::move(d) );
     };
+    
+    std::weak_ptr<T> wthis = t.shared_from_this();
+    opt.shutdown_handler = t.wrap([wthis](io_id_type id)
+    {
+      if ( auto pthis = wthis.lock() )
+      {
+        std::cout << "shutdown !" << std::endl;
+        std::lock_guard<typename T::mutex_type> lk(pthis->mutex());
+        pthis->get_aspect().template get<_context_>().manager->close(id);
+      }
+    });
+
+    
+    
     /*!!!
     opt.reader.sep="\r\n";
     opt.writer.sep="";
     */
     std::cout << "start !" << std::endl;
     p->start(opt);
-    tmp.push_back(p);
+    t.get_aspect().template get<_context_>().manager->attach(p->get_id(), p);
+    // tmp.push_back(p);
   }
 };
 

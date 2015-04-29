@@ -54,6 +54,18 @@ struct ad_after_start
 struct ad_before_stop
 {
   // TODO: shutdown_handler
+  // TODO: в дескриптор
+  template<typename T>
+  void operator()(T& t)
+  {
+    auto& cntx_basic = t.get_aspect().template get< ::iow::io::basic::_context_ >();
+    auto& cntx = t.get_aspect().template get< _context_ >();
+    if ( cntx.shutdown_handler )
+    {
+      cntx.shutdown_handler( cntx_basic.io_id );
+    }
+    t.descriptor().close();
+  }
 };
 
 struct ad_async_read_some
@@ -82,6 +94,8 @@ struct ad_async_write_some
   
 struct aspect: fas::aspect<
   fas::value< _context_, context >,
+  fas::advice< _before_stop_, ad_before_stop>,
+  fas::group< ::iow::io::_before_stop_, _before_stop_>,
   fas::advice< ::iow::io::reader::stream::_incoming_, ad_incoming_handler>,
   fas::alias< _outgoing_, ::iow::io::writer::_output_>,
   fas::advice< ::iow::io::reader::_read_some_, ad_async_read_some>,

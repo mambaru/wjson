@@ -13,6 +13,7 @@ typedef iow::asio::posix::stream_descriptor descriptor_type;
 typedef iow::io::descriptor::stream::options options_type;
 
 struct aspect_stream: fas::aspect<
+  fas::alias< ::iow::io::descriptor::_outgoing_, ::iow::io::writer::_output_>,
   fas::type< ::iow::io::descriptor::_descriptor_type_, iow::asio::posix::stream_descriptor>,
   ::iow::io::descriptor::stream::aspect,
   ::iow::io::reader::asio::aspect::advice_list,
@@ -20,6 +21,7 @@ struct aspect_stream: fas::aspect<
   ::iow::io::stream::aspect< data_type >::advice_list, 
   ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
   fas::type< ::iow::io::_options_type_, fas::empty_type >
+  
 >{};
 
 typedef ::iow::io::descriptor::holder<aspect_stream> stream_holder;
