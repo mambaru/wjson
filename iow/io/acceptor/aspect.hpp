@@ -176,30 +176,8 @@ struct ad_next
     -> typename get_type<T>::connection_ptr
   {
     return t.get_aspect().template get<_context_>().manager->create( t.descriptor().get_io_service() );
-    /*
-    typedef typename get_type<T>::connection_type connection_type;
-    typedef typename get_type<T>::descriptor_type descriptor_type;
-    return std::make_shared<connection_type>( descriptor_type(t.descriptor().get_io_service()) );
-    */
   }
 };
-
-
-// ip/tcp socket stream connection
-/*typedef ::iow::io::descriptor::holder<
-  fas::aspect<
-    fas::type< ::iow::io::_options_type_, fas::empty_type >,
-    ::iow::io::basic::aspect<>::advice_list,
-    ::iow::io::descriptor::stream::aspect,
-    ::iow::io::stream::aspect<>,
-    ::iow::io::reader::asio::aspect,
-    ::iow::io::writer::asio::aspect,
-    fas::type< ::iow::io::descriptor::_descriptor_type_, ::iow::asio::ip::tcp::socket >
-  >
-> test_connection;
-*/
-/*struct test_connection: ::iow::ip::tcp::connection<> {};*/
-
 
 typedef ::iow::ip::tcp::connection::connection<> test_connection;
 

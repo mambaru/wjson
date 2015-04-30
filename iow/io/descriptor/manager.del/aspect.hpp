@@ -6,6 +6,7 @@
 #include <memory>
 namespace iow{ namespace io{ namespace descriptor{ namespace manager{
 
+  /*
 struct manager_options
 {
   
@@ -79,5 +80,5 @@ struct aspect: fas::aspect<
   advice_initialize,
   fas::advice<_initialize_, ad_initialize>
 >{};
-
+*/
 }}}}

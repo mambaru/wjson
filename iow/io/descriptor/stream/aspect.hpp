@@ -16,6 +16,10 @@
 #include <iow/asio.hpp>
 #include <fas/aop.hpp>
 
+
+#include <iow/io/descriptor/stream/ad_async_read_some.hpp>
+#include <iow/io/descriptor/stream/ad_async_write_some.hpp>
+
 namespace iow{ namespace io{ namespace descriptor{ namespace stream{
 
 /*
@@ -49,6 +53,15 @@ struct options:
 struct ad_after_start
 {
   // TODO: startup_handler
+  template<typename T>
+  void operator()(T& t)
+  {
+    auto& cntx = t.get_aspect().template get< _context_ >();
+    if ( cntx.startup_handler )
+    {
+      cntx.startup_handler( t.get_id_(t), cntx.outgoing_handler);
+    }
+  }
 };
 
 struct ad_before_stop
@@ -58,40 +71,17 @@ struct ad_before_stop
   template<typename T>
   void operator()(T& t)
   {
-    auto& cntx_basic = t.get_aspect().template get< ::iow::io::basic::_context_ >();
+    //auto& cntx_basic = t.get_aspect().template get< ::iow::io::basic::_context_ >();
     auto& cntx = t.get_aspect().template get< _context_ >();
     if ( cntx.shutdown_handler )
     {
-      cntx.shutdown_handler( cntx_basic.io_id );
+      cntx.shutdown_handler( t.get_id_(t) );
     }
     t.descriptor().close();
   }
 };
 
-struct ad_async_read_some
-{
-  template<typename T, typename P, typename H>
-  void operator()(T& t, P p, H&& handler)
-  {
-    t.descriptor().async_read_some(
-      ::iow::asio::buffer( p.first, p.second ),
-      std::forward<H>(handler)
-    );
-  }
-};
 
-struct ad_async_write_some
-{
-  template<typename T, typename P, typename H>
-  void operator()(T& t, P p, H&& handler)
-  {
-    t.descriptor().async_write_some(
-      ::boost::asio::buffer( p.first, p.second ),
-      std::forward<H>(handler)
-    );
-  }
-};
-  
 struct aspect: fas::aspect<
   fas::value< _context_, context >,
   fas::advice< _before_stop_, ad_before_stop>,
