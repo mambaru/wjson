@@ -21,8 +21,11 @@ namespace iow{ namespace io{ namespace acceptor{
 template<typename DescriptorHolder>
 class holder_manager
 {
+  //
   // TODO: сделать пул, и ограничения 
+  //
 public:
+
   typedef DescriptorHolder holder_type;
   typedef std::shared_ptr<holder_type> holder_ptr;
   typedef typename holder_type::descriptor_type descriptor_type;
@@ -64,6 +67,7 @@ public:
   }
   
 private:
+  
   typedef std::map< io_id_type, holder_ptr> holder_map;
   
   holder_map _holders;
@@ -79,7 +83,6 @@ struct context
   typedef std::shared_ptr<manager_type> manager_ptr;
   //connection_ptr connection;
   manager_ptr manager;
-  
 };
 
 struct options
