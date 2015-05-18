@@ -19,7 +19,7 @@ inline void only_for_log( Args&& ... ){}
 #   define IOW_WRITE_LOG( name, type, out ) ::iow::global_log(name, type) << out << std::endl;
 #   define IOW_WRITE_LOG_PROGRESS( name, type, out ) ::wfc::global_log(name, type) << out << "\r";
 #else
-#   define IOW_WRITE_LOG(name, type, out) ;
+#   define IOW_WRITE_LOG(name, type, out)
 #   define IOW_WRITE_LOG_PROGRESS( name, type, out )
 #endif
 

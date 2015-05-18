@@ -4,6 +4,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 
+
 #include "global_log.hpp"
 #include "logstream.hpp"
 
@@ -26,3 +27,5 @@ logstream global_log(const std::string& name, const std::string& type)
 }
 
 }
+
+
