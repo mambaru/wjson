@@ -1,5 +1,4 @@
 
-
 namespace iow{ namespace json{
 
 /// ////////////////////////////////////////////////////////////
@@ -62,7 +61,7 @@ public:
       throw unexpected_end_fragment();
 
     if ( *(beg++) != '{' ) 
-      throw expected_of("{", std::distance(beg, end) );
+      throw expected_of("{", std::distance(beg, end) + 1 );
 
     beg = parser::parse_space(beg, end);
     if ( beg==end ) 
@@ -81,7 +80,7 @@ public:
       throw unexpected_end_fragment();
 
     if ( *(beg++) != '}' ) 
-      throw expected_of("}", std::distance(beg, end));
+      throw expected_of("}", std::distance(beg, end) + 1);
 
     return beg;
   }

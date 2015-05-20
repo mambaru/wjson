@@ -1,3 +1,4 @@
+
 namespace iow{ namespace json{
 
 class json_error: public std::runtime_error
@@ -122,7 +123,10 @@ class expected_of
 {
 public:
   expected_of(const std::string& str, size_t tail_of = 0)
-    : json_error( std::string("expected of '") + str + std::string("'"), tail_of) {}
+    : json_error( 
+        std::string("expected of '") + str + std::string("'"), 
+        tail_of
+      ) {}
 };
 
 }}

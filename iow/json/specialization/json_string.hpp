@@ -52,7 +52,7 @@ public:
       throw unexpected_end_fragment();
 
     if ( *(beg++) != '"' ) 
-      throw expected_of("\"");
+      throw expected_of("\"", std::distance(beg, end) + 1);
 
     for ( ;beg!=end && *beg!='"' && n!=0; )
     {
@@ -83,7 +83,7 @@ public:
       throw unexpected_end_fragment();
 
     if ( *(beg++) != '"' ) 
-      throw expected_of("\"");
+      throw expected_of("\"", std::distance(beg, end) + 1);
 
     return beg;
     // return ++beg;
