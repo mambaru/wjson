@@ -11,7 +11,7 @@
 
 namespace iow{
   
-typedef std::function<void(
+typedef std::function<bool(
   const std::string& name, 
   const std::string& type, 
   const std::string& str)

@@ -16,6 +16,11 @@ void init_log(log_writer writer)
 {
   static_writer = writer;
 }
+
+bool log_status()
+{
+  return static_writer!=nullptr;
+}
   
 logstream global_log(const std::string& name, const std::string& type)
 {

@@ -19,13 +19,15 @@ class logstream
 public:
   ~logstream()
   {
+    bool ready = false;
     if ( writer_ )
     {
-      writer_(_name, _type, _ss.str());
+      ready = writer_(_name, _type, _ss.str());
     }
-    else
+    
+    if ( !ready )
     {
-#ifndef WFC_DISABLE_CLOG
+#ifndef IOW_DISABLE_CLOG
       std::clog << _name << " " << _type << " " << _ss.str();
 #endif
     }
