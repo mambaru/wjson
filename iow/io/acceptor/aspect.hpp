@@ -1,7 +1,7 @@
 #pragma once
 
 // test_connection
-#include <iow/ip/tcp/connection/connection.hpp>
+//#include <iow/ip/tcp/connection/connection.hpp>
 
 #include <iow/io/acceptor/tags.hpp>
 #include <iow/io/acceptor/context.hpp>
@@ -25,8 +25,6 @@
 #include <list>
 
 namespace iow{ namespace io{ namespace acceptor{
-
-typedef ::iow::ip::tcp::connection::connection<> test_connection;
 
 struct ad_confirm
 {
@@ -97,7 +95,7 @@ struct ad_initialize
 };
 
 
-struct aspect: fas::aspect<
+struct aspect_base: fas::aspect<
   ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
   ::iow::io::reader::aspect,
   fas::advice< ::iow::io::reader::_next_, ad_next>,
@@ -107,9 +105,35 @@ struct aspect: fas::aspect<
   fas::advice< ::iow::io::reader::_read_some_, ad_async_accept>,
   fas::advice< ::iow::io::reader::_confirm_,  ad_confirm>,
   fas::stub< ::iow::io::reader::_handler_>,
-  fas::advice< _accept_handler_, ad_accept_handler>,
-  fas::value< _context_, context<test_connection> >
+  fas::advice< _accept_handler_, ad_accept_handler>
 >{};
+
+template<typename ConnectionType>
+struct aspect: fas::aspect<
+  aspect_base::advice_list,
+  fas::value< _context_, context<ConnectionType> >
+>{};
+
+/*template<typename ConnectionType, typename A = fas::empty_type>
+class acceptor: 
+  public ::iow::io::descriptor::holder< 
+    typename fas::merge_aspect<A, aspect<ConnectionType> >::type 
+  >
+{
+};
+*/
+
+/*
+template <typename ConnectionType, typename A = fas::empty_type>
+using acceptor = ::iow::io::descriptor::holder< typename fas::merge_aspect<A, aspect<ConnectionType> >::type >;
+*/
+
+/*typedef ::iow::io::descriptor::holder< fas::aspect<
+  fas::type< ::iow::io::_options_type_, fas::empty_type >,
+  ::iow::io::acceptor::aspect::advice_list,
+  fas::type< ::iow::io::descriptor::_descriptor_type_, iow::asio::ip::tcp::acceptor >
+> > tcp_acceptror;
+*/
 
   
 }}}

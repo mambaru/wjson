@@ -29,6 +29,11 @@ struct aspect: fas::aspect<
   ::iow::io::basic::aspect<>::advice_list
 >{};
 
+template<typename A = ::fas::aspect<> >
+class server:
+{
+  
+};
 
 
   

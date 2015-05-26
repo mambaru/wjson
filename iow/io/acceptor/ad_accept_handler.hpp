@@ -12,7 +12,7 @@ struct ad_accept_handler
   {
     if ( !ec )
     {
-      t.get_aspect().template get<::iow::io::reader::_complete_>()(t, std::move(p));
+      t.get_aspect().template get< ::iow::io::reader::_complete_ >()(t, std::move(p));
     }
     else
     {

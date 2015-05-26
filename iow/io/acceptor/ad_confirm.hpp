@@ -13,7 +13,7 @@ struct ad_confirm
   {
     typedef typename T::io_id_type io_id_type;
     typedef typename type_<T>::options_type options_type;
-    options_type opt;
+    options_type opt = t.get_aspect().template get<_context_>().connection_options;
     
     opt.incoming_handler = []( 
       typename options_type::data_ptr d, 

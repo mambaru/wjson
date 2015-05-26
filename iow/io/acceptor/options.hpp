@@ -4,11 +4,13 @@
 
 namespace iow{ namespace io{ namespace acceptor{
 
+template<typename ConnectionsOptions>
 struct options
 {
+  typedef ConnectionsOptions connection_options_type;
+  connection_options_type connection_options;
+  int max_connections = 0;
   std::string host;
-  std::string port;
-  int backlog = 1024;
 };
 
   
