@@ -1,13 +1,12 @@
 #pragma once
 
-#include <iow/ip/tcp/acceptor/acceptor.hpp>
 #include <iow/ip/tcp/server/aspect.hpp>
+#include <iow/io/basic_io.hpp>
 #include <iow/asio.hpp>
 #include <fas/aop.hpp>
 
 namespace iow{ namespace ip{ namespace tcp{ namespace server{
 
-struct acceptor: ::iow::ip::tcp::acceptor::acceptor<>{};
 
 /*
 template< typename AcceptorType = acceptor, typename A = fas::aspect<> >
@@ -16,23 +15,32 @@ using server = ::iow::io::io_base< typename fas::merge_aspect< A, aspect<Accepto
 
 template< typename AcceptorType = acceptor, typename A = fas::aspect<> >
 class server
-  : public ::iow::io::io_base< typename fas::merge_aspect< A, aspect<AcceptorType> >::type >
+  : public ::iow::io::basic_io< typename fas::merge_aspect< A, aspect<AcceptorType> >::type >
 {
 public:
-  
-  server(::iow::asio::io_service& io)
+  typedef ::iow::io::basic_io< typename fas::merge_aspect< A, aspect<AcceptorType> >::type > super;
+  typedef typename super::aspect::template advice_cast<_io_service_type_>::type io_service_type;
+
+  server( io_service_type& io)
     :_io_service(io)
   {
   }
-  
-  ::iow::asio::io_service& get_io_service() 
+
+  io_service_type& get_io_service() 
   {
     return _io_service;
   }
-  
+
+  template<typename O>
+  void start(O&& opt)
+  {
+    std::lock_guard< typename super::mutex_type > lk( super::mutex());
+    this->start_(*this, std::forward<O>(opt));
+  }
+
 public:
-  
-  ::iow::asio::io_service& _io_service;
+
+  io_service_type& _io_service;
 };
 
 }}}}
