@@ -63,6 +63,7 @@ class flow1
       fas::advice< ::iow::io::reader::_some_, ad_some>,
       fas::alias< ::iow::io::reader::_confirm_, _handler_>,
       fas::stub< ::iow::io::reader::_handler_ >,
+      fas::stub< ::iow::io::_initialize_ >,
       ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
       ::iow::io::reader::aspect::advice_list,
       fas::type< ::iow::io::_options_type_, fas::empty_type >

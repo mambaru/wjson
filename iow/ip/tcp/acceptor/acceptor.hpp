@@ -7,7 +7,9 @@
 
 namespace iow{ namespace ip{ namespace tcp{ namespace acceptor{
 
-struct connection: public ::iow::ip::tcp::connection::connection<>{};
+//struct connection: public ::iow::ip::tcp::connection::connection<>{};
+  
+typedef ::iow::ip::tcp::connection::connection<> connection;
   
 template<
   typename ConnectionType = connection, 

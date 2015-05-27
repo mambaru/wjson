@@ -112,6 +112,7 @@ public:
   template<typename O>
   void set_options(const O& opt) noexcept
   {
+    std::cout << "read_buffer::set_options sep=[" << opt.sep << "]" << std::endl;
     if ( opt.sep.empty() )
     {
       _sep = nullptr;
@@ -218,6 +219,14 @@ public:
 
   data_pair next()
   {
+    if ( _sep!=nullptr )
+    {
+      std::cout << "read buffer next sep=" << std::string( _sep.get(), _sep.get() + _sep_size ) << std::endl;
+    }
+    else
+    {
+      std::cout << "_sep==nullptr" << std::endl;
+    }
     data_pair result(0,0);
 
     if ( waiting() )

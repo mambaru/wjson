@@ -67,6 +67,11 @@ template<typename N,
         >
 struct member_p;
 
+
+template<typename ...Args>
+using member_list = typename fas::type_list_n<Args...>::type;
+
+
 /** Ахтунг! замороченые правила:
   * L и M типа member с одинаковыми N (именами)
   * сериализация:

@@ -20,6 +20,7 @@ struct aspect_stream: fas::aspect<
   ::iow::io::writer::asio::aspect::advice_list,
   ::iow::io::stream::aspect< data_type >::advice_list, 
   ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
+  fas::stub< ::iow::io::_initialize_ >,
   fas::type< ::iow::io::_options_type_, fas::empty_type >
   
 >{};

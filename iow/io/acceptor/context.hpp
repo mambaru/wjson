@@ -14,7 +14,7 @@ struct context
   typedef ::iow::io::descriptor::manager<connection_type> manager_type;
   typedef std::shared_ptr<manager_type> manager_ptr;
   
-  connection_options_type options;
+  connection_options_type connection_options;
   manager_ptr manager;
 };
   

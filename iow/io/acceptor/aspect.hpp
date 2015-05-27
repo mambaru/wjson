@@ -6,6 +6,7 @@
 #include <iow/io/acceptor/tags.hpp>
 #include <iow/io/acceptor/context.hpp>
 #include <iow/io/acceptor/options.hpp>
+#include <iow/io/acceptor/ad_confirm.hpp>
 #include <iow/io/acceptor/ad_accept_handler.hpp>
 #include <iow/io/acceptor/ad_make_handler.hpp>
 #include <iow/io/acceptor/ad_async_accept.hpp>
@@ -24,8 +25,11 @@
 #include <boost/concept_check.hpp>
 #include <list>
 
+
+
 namespace iow{ namespace io{ namespace acceptor{
 
+  /*
 struct ad_confirm
 {
   
@@ -68,14 +72,17 @@ private:
     typedef typename context_type::connection_type connection_type;
     typedef typename connection_type::options_type options_type;
   };
-
 };
+*/
 
 struct ad_initialize
 {
   template<typename T, typename O>
   void operator()(T& t, const O& opt)
   {
+    std::cout << "acceptor::ad_initialize sep=[" << opt.connection_options.reader.sep.size() << "]" << std::endl;
+    t.get_aspect().template get<_context_>().connection_options = opt.connection_options;
+    // TODO: убрать в TCP и сделать after_start
     typedef typename T::aspect::template advice_cast< _context_ >::type context_type;
     t.get_aspect().template get<_context_>().manager 
       = std::make_shared<typename context_type::manager_type>();
@@ -93,6 +100,16 @@ struct ad_initialize
     t.descriptor().listen( opt.backlog );
   }
 };
+
+/*
+struct ad_listen
+{
+  template<typename T, typename O>
+  void operator()(T& t, const O& opt)
+  {
+  }
+};
+*/
 
 
 struct aspect_base: fas::aspect<

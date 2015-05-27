@@ -126,6 +126,7 @@ class writer1
       fas::advice< ::iow::io::writer::_can_write_, ad_can_write>,
       fas::advice< ::iow::io::writer::_some_, ad_write_some>,
       fas::stub< ::iow::io::reader::_handler_>,
+      fas::stub< ::iow::io::_initialize_ >,
       fas::type< ::iow::io::_options_type_, fas::empty_type >,
       ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
       ::iow::io::reader::aspect::advice_list,
