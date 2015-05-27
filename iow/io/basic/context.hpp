@@ -1,8 +1,8 @@
 #pragma once
 
 #include <iow/owner/owner.hpp>
+#include <iow/io/types.hpp>
 #include <fas/aop.hpp>
-#include <mutex>
 #include <functional>
 
 namespace iow{ namespace io{ namespace basic{
@@ -10,7 +10,7 @@ namespace iow{ namespace io{ namespace basic{
 template<typename MutexType /*= std::recursive_mutex */>  
 struct context
 {
-  typedef size_t io_id_type;
+  typedef ::iow::io::io_id_t io_id_type;
   typedef bool status_type;
   typedef owner owner_type;
   typedef MutexType mutex_type;

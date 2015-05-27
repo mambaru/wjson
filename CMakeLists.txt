@@ -13,8 +13,9 @@ SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -ggdb -DNDEBUG -march=core2 ${CMAKE_CXX_
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -ggdb -DNDEBUG -march=core2 ${CMAKE_CXX_FLAGS}")
 
 add_library(
-  iow SHARED
+  iow
   iow/logger/global_log.cpp
+  iow/jsonrpc/incoming/incoming_holder.cpp
 )
 
 if ( IOW_BUILD_ALL )
