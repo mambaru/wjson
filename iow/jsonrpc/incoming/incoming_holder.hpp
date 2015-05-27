@@ -83,7 +83,7 @@ public:
     typename J::serializer()(*result, _incoming.result.first, _incoming.result.second);
     return std::move(result);
   }
-  
+
   template<typename J>
   std::unique_ptr<typename J::target> get_params() const
   {
@@ -95,7 +95,7 @@ public:
     typename J::serializer()(*result, _incoming.params.first, _incoming.params.second);
     return std::move(result);
   }
-  
+
   template<typename J>
   std::unique_ptr<typename J::target> get_error() const
   {
