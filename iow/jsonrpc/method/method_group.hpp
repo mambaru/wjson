@@ -1,0 +1,21 @@
+#pragma once
+
+#include <fas/aop.hpp>
+
+namespace iow{ namespace jsonrpc{
+
+template<typename T>
+using method_group = fas::type_list< T,
+                     fas::type_list< fas::group<_method_, typename T::tag>
+                     > > ;
+  /*
+template<typename T>
+struct method_group
+  : fas::type_list< T,
+    fas::type_list< fas::group<_method_, typename T::tag>
+    > > 
+{
+};
+
+*/
+}}
