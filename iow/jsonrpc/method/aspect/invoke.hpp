@@ -2,12 +2,11 @@
 
 #include <iow/jsonrpc/errors.hpp>
 #include <iow/jsonrpc/method/aspect/tags.hpp>
-#include <iow/logger.hpp>
+#include <iow/logger/logger.hpp>
+#include <iow/memory.hpp>
 #include <fas/aop.hpp>
-#include <memory>
 
 namespace iow{ namespace jsonrpc{
-
 
 template<typename JParams, typename JResult, typename Handler, typename JError = error_json>
 struct invoke: Handler
@@ -18,11 +17,11 @@ struct invoke: Handler
 
   advice_class& get_advice() { return *this;}
   const advice_class& get_advice() const { return *this;}
-  
+
   typedef JParams params_json;
   typedef JResult result_json;
   typedef JError  error_json;
-  
+
   typedef typename params_json::target  params_type;
   typedef typename result_json::target  result_type;
   typedef typename error_json::target   error_type;
@@ -47,7 +46,7 @@ struct invoke: Handler
     }
     catch (const json::json_error& e)
     {
-      COMMON_LOG_ERROR("jsonrpc::invoke Invalid Params: " << holder.params_error_message(e) )
+      JSONRPC_LOG_ERROR("jsonrpc::invoke Invalid Params: " << holder.params_error_message(e) )
       if ( holder.has_id() )
       {
         TT::template send_error<T, error_json>( 
@@ -58,7 +57,7 @@ struct invoke: Handler
       }
       return;
     }
-      
+
     try // server_error
     {
       if ( holder.is_notify() )
@@ -69,15 +68,15 @@ struct invoke: Handler
       {
         auto ph = std::make_shared<incoming_holder>( std::move(holder) );
         Handler::operator()( t, std::move(req), 
-          [ph, outgoing_handler]( result_ptr params, error_ptr err )
+          [ph, outgoing_handler]( result_ptr result, error_ptr err )
           {
             try
             {
               if (err == nullptr )
               {
                 TT::template send_result<T, result_json>( 
-                  std::move(*ph), 
-                  std::move(params), 
+                  std::move(*ph),
+                  std::move(result),
                   std::move(outgoing_handler) 
                 );
               }
@@ -92,12 +91,12 @@ struct invoke: Handler
             }
             catch(const std::exception& e)
             {
-              DAEMON_LOG_FATAL("jsonrpc service exception: " << e.what() )
+              JSONRPC_LOG_FATAL("jsonrpc service exception: " << e.what() )
               abort();
             }
             catch(...)
             {
-              DAEMON_LOG_FATAL("jsonrpc service unhandled exception")
+              JSONRPC_LOG_FATAL("jsonrpc service unhandled exception")
               abort();
             }
           } // callback 
@@ -106,7 +105,7 @@ struct invoke: Handler
     }
     catch(const std::exception& e)
     {
-      DAEMON_LOG_ERROR("iow::jsonrpc::invoke::operator() : " << e.what() )
+      JSONRPC_LOG_ERROR("iow::jsonrpc::invoke::operator() : " << e.what() )
       // Ахтунг! holder перемещен
       holder = decltype(holder)(nullptr);
       TT::template send_error<T, error_json>( 
@@ -118,7 +117,7 @@ struct invoke: Handler
     }
     catch(...)
     {
-      DAEMON_LOG_ERROR("iow::jsonrpc::invoke::operator() : unhandled exception (Server Error)")
+      JSONRPC_LOG_ERROR("iow::jsonrpc::invoke::operator() : unhandled exception (Server Error)")
       // Ахтунг! holder перемещен
       holder = decltype(holder)(nullptr);
       TT::template send_error<T, error_json>( 

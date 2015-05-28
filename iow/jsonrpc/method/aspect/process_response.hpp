@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iow/jsonrpc/method/aspect/tags.hpp>
-#include <iow/logger.hpp>
+#include <iow/logger/logger.hpp>
 #include <fas/aop.hpp>
 #include <memory>
 
@@ -29,16 +29,16 @@ struct process_response
       }
       catch(::iow::json::json_error& e)
       {
-        COMMON_LOG_ERROR("iow::jsonrpc::process_response (result): json exception: " << e.what() << std::endl << holder.result_error_message(e) );
+        JSONRPC_LOG_ERROR("iow::jsonrpc::process_response (result): json exception: " << e.what() << std::endl << holder.result_error_message(e) );
         callback( nullptr, nullptr);
       }
       catch(std::exception& e)
       {
-        COMMON_LOG_ERROR("iow::jsonrpc::process_response (result): exception: " << e.what());
+        JSONRPC_LOG_ERROR("iow::jsonrpc::process_response (result): exception: " << e.what());
       }
       catch(...)
       {
-        COMMON_LOG_ERROR("iow::jsonrpc::process_response (result): unhandled exception");
+        JSONRPC_LOG_ERROR("iow::jsonrpc::process_response (result): unhandled exception");
       }
     }
     else if ( holder.is_error() )
@@ -50,16 +50,16 @@ struct process_response
       }
       catch(::iow::json::json_error& e)
       {
-        COMMON_LOG_ERROR("iow::jsonrpc::process_response (error): json exception: " << e.what() << std::endl << holder.result_error_message(e) );
+        JSONRPC_LOG_ERROR("iow::jsonrpc::process_response (error): json exception: " << e.what() << std::endl << holder.result_error_message(e) );
         callback( nullptr, nullptr);
       }
       catch(std::exception& e)
       {
-        COMMON_LOG_ERROR("iow::jsonrpc::process_response (error): exception: " << e.what());
+        JSONRPC_LOG_ERROR("iow::jsonrpc::process_response (error): exception: " << e.what());
       }
       catch(...)
       {
-        COMMON_LOG_ERROR("iow::jsonrpc::process_response (error): unhandled exception");
+        JSONRPC_LOG_ERROR("iow::jsonrpc::process_response (error): unhandled exception");
       }
     }
     else

@@ -11,13 +11,13 @@ struct incoming_json
 {
   typedef incoming::pair_type pair_type;
   typedef json::raw_pair<pair_type> pair_json;
-  
+
   JSON_NAME(id)
   JSON_NAME(method)
   JSON_NAME(params)
   JSON_NAME(result)
   JSON_NAME(error)
-  
+
   typedef json::object<
     incoming, 
     json::member_list<

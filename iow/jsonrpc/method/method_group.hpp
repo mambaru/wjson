@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fas/aop.hpp>
+#include <iow/jsonrpc/method/aspect/tags.hpp>
 
 namespace iow{ namespace jsonrpc{
 

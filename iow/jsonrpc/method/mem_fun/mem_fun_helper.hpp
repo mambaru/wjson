@@ -2,7 +2,7 @@
 
 #include <iow/jsonrpc/errors.hpp>
 #include <iow/io/types.hpp>
-#include <memory>
+#include <iow/memory.hpp>
 #include <functional>
 
 namespace iow{ namespace jsonrpc{

@@ -10,10 +10,14 @@
 #include <array>
 #include <string>
 #include <set>
-#include <stdint.h>
-#include <unordered_map>
 #include <map>
 #include <memory>
+
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+#include <unordered_map>
+#endif
+
+#include <stdint.h>
 
 namespace iow{ namespace json{
 
@@ -67,9 +71,11 @@ template<typename N,
         >
 struct member_p;
 
-
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
 template<typename ...Args>
 using member_list = typename fas::type_list_n<Args...>::type;
+#endif
+
 
 
 /** Ахтунг! замороченые правила:
@@ -410,7 +416,6 @@ struct array_base< std::unordered_map<JK, JV>, R>
   static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
 };
 
-#endif
 
 template<typename J, size_t N, typename R>
 struct array_base< std::array<J, N>, R>
@@ -421,6 +426,8 @@ struct array_base< std::array<J, N>, R>
   typedef std::array<target, N> target_container;
   typedef serializerT< array_r< json_container, R> > serializer;
 };
+
+#endif
 
 template<typename JK, typename JV, typename R>
 struct array_base< std::map<JK, JV>, R >

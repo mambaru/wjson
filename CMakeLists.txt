@@ -24,3 +24,5 @@ if ( IOW_BUILD_ALL )
   #add_subdirectory(tutorial)
 endif()
 
+
+add_subdirectory(tests/jsonrpc)

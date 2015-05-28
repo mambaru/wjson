@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iow/jsonrpc/method/mem_fun/mem_fun_helper.hpp>
-
+#include <iow/logger/logger.hpp>
 namespace iow{ namespace jsonrpc{
 
 
@@ -53,7 +53,7 @@ struct mem_fun_handler2
           }
           else
           {
-            DAEMON_LOG_FATAL("mem_fun_handler2: pthis = nullptr");
+            JSONRPC_LOG_FATAL("mem_fun_handler2: pthis = nullptr");
             abort();
           }
         }
@@ -61,7 +61,7 @@ struct mem_fun_handler2
     }
     else 
     {
-      DAEMON_LOG_ERROR("mem_fun_handler2: Service Unavailable");
+      JSONRPC_LOG_ERROR("mem_fun_handler2: Service Unavailable");
       mem_fun_service_unavailable( std::move(cb) );
     }
   }

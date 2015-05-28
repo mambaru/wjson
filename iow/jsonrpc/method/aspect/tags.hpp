@@ -16,6 +16,7 @@ struct _process_response_;
 struct _result_handler_;
 struct _error_handler_;
 
+struct _method_;
 }} // iow
 
 

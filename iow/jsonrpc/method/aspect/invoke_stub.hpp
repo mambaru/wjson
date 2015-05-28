@@ -1,12 +1,11 @@
 #pragma once
 
 #include <iow/jsonrpc/errors.hpp>
-#include <iow/jsonrpc/handler/aspect/tags.hpp>
 #include <iow/jsonrpc/method/aspect/tags.hpp>
-#include <memory>
+#include <iow/memory.hpp>
 
 namespace iow{ namespace jsonrpc{
-  
+
 struct invoke_stub
 {
   typedef fas::metalist::advice metatype;

@@ -4,7 +4,7 @@
 #include <utility>
 
 namespace iow{ namespace jsonrpc{
-  
+
 struct incoming
 {
   typedef ::iow::jsonrpc::data_type data_type;

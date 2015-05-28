@@ -2,12 +2,22 @@
 
 namespace iow{ namespace jsonrpc{
 
-incoming_holder::incoming_holder(data_ptr d )
+incoming_holder::incoming_holder(data_ptr d, bool timepoint )
   : _parsed(false)
   , _data(std::move(d))
 {
-  _time_point = clock_t::now();
+  if ( timepoint )
+    _time_point = clock_t::now();
 }
+
+void incoming_holder::attach(data_ptr d, bool timepoint)
+{
+  _data = std::move(d);
+  _parsed = false;
+  if ( timepoint )
+    _time_point = clock_t::now();
+}
+
 
 incoming_holder::data_ptr incoming_holder::parse()
 {
@@ -26,6 +36,9 @@ incoming_holder::data_ptr incoming_holder::parse()
 
 bool incoming_holder::method_equal_to(const char* name)  const
 {
+  if ( !this->ready_() )
+    return false;
+
   incoming::iterator beg = _incoming.method.first;
   incoming::iterator end = _incoming.method.second;
   if (beg++==end) return false;
@@ -36,10 +49,11 @@ bool incoming_holder::method_equal_to(const char* name)  const
 
 std::string incoming_holder::method() const
 {
-  if ( std::distance(_incoming.method.first, _incoming.method.second ) > 2 )
+  if ( this->ready_() && std::distance(_incoming.method.first, _incoming.method.second ) > 2 )
+  {
     return std::string( _incoming.method.first+1, _incoming.method.second-1);
-  else
-    return std::string();
+  }
+  return std::string();
 }
 
 incoming_holder::raw_t incoming_holder::raw_method() const 
@@ -51,7 +65,6 @@ incoming_holder::raw_t incoming_holder::raw_id() const
 {
   return std::make_pair( _incoming.id.first, _incoming.id.second );
 }
-
 
 std::string incoming_holder::error_message(const json::json_error& e) const
 {
@@ -98,6 +111,9 @@ incoming_holder::data_ptr incoming_holder::detach()
 
 incoming_holder::data_ptr incoming_holder::acquire_params()
 {
+  if ( !this->ready_() )
+    return nullptr;
+
   std::move( _incoming.params.first, _incoming.params.second, _data->begin() );
   _data->resize( std::distance(_incoming.params.first, _incoming.params.second) );
   _incoming = incoming();
