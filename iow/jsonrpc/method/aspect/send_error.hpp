@@ -27,8 +27,12 @@ struct send_error
     
     error_message.error = std::move(err);
     auto id_range = holder.raw_id();
-    error_message.id = std::make_unique<data_type>( id_range.first, id_range.second );
+    if ( id_range.first != id_range.second )
+    {
+      error_message.id = std::make_unique<data_type>( id_range.first, id_range.second );
+    }
 
+    //std::cout << std::endl << "id[" << std::string(id_range.first, id_range.second) << "]" << std::endl;
     auto d = holder.detach();
     if ( d == nullptr )
       d = std::make_unique<data_type>();

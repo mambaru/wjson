@@ -2,7 +2,7 @@
 
 #include <fas/aop.hpp>
 #include <memory>
-#include <iow/logger.hpp>
+#include <iow/logger/logger.hpp>
 
 namespace iow{ namespace jsonrpc{
   
@@ -25,7 +25,7 @@ struct ad_send_request
     
     if ( t.send_request == nullptr )
     {
-      DAEMON_LOG_FATAL("/handler/aspect/ad_send_request t.send_request == nullptr" )
+      JSONRPC_LOG_FATAL("/handler/aspect/ad_send_request t.send_request == nullptr" )
       abort();
     }
     

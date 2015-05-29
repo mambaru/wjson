@@ -104,7 +104,7 @@ public:
   void call(
     ReqPtr req, 
     std::function<void(typename call_result_ptr<Tg>::type)> result_callback,
-    std::function<void(typename call_error_ptr<Tg>::type)> error_callback
+    std::function<void(typename call_error_ptr<Tg>::type)>  error_callback
   ) const
   {
     typedef std::function<void(

@@ -6,6 +6,7 @@ add_executable(
   test_jsonrpc
   test_jsonrpc.cpp
   method_suite.cpp
+  handler_suite.cpp
   ${FAS_TESTING_CPP}
 )
 

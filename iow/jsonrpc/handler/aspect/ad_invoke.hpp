@@ -44,17 +44,27 @@ struct f_invoke
 
 struct ad_invoke
 {
-  template<typename T>
+  template<typename T, typename HolderType, typename OutgoingHandler>
   void operator()(
     T& t,
-    typename T::holder_type holder,
-    typename T::outgoing_handler_t outgoing_handler
+    HolderType holder,
+    OutgoingHandler outgoing_handler
   ) 
   {
-    typedef typename T::holder_type holder_type;
-    typedef typename T::outgoing_handler_t outgoing_handler_t;
-
+    typedef HolderType holder_type;
+    typedef OutgoingHandler outgoing_handler_t;
     typedef f_invoke<holder_type, outgoing_handler_t> f;
+    
+    if ( !holder.has_method() )
+    {
+      T::aspect::template advice_cast<_send_error_>::type
+           ::template send<T, error_json>( 
+              std::move(holder), 
+              std::make_unique<invalid_request>(), 
+              std::move(outgoing_handler) 
+           );
+      return;
+    }
     
     if ( !fas::for_each_group<_method_>(t, f( holder, outgoing_handler ) ) )
     {
