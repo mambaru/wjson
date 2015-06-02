@@ -62,13 +62,30 @@ struct itest1
   virtual void method2(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback) = 0;
 };
 
+template<typename R, typename Callback>
+std::function<void()> check_method(const R& r, const Callback& call)
+{
+  if ( r!=nullptr && call!=nullptr )
+    return nullptr;
+  
+  return [call]()
+  {
+    if ( call!=nullptr )
+      call( nullptr );
+  };
+};
+
 class test1: public itest1
 {
 public:
   
   virtual void method1(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback)
   {
+    if ( auto bad = check_method(req, callback) )
+      return bad();
+    
     std::reverse(req->begin(), req->end());
+    
     if ( callback )
       callback(std::move(req));
   }
@@ -129,7 +146,6 @@ UNIT(handler2_unit, "")
   using namespace fas::testing;
   using namespace ::iow::jsonrpc;
 
- //  std::string unavailable = "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32003,\"message\":\"Service Unavailable.\"},\"id\":1}";
   auto t1 = std::make_shared<test1>();
   test_count = 0;
   handler1 h = handler1(t1);
