@@ -28,6 +28,7 @@ public:
   data_ptr parse();
 
   operator bool () const{ return ready_();}
+
   bool ready() const { return this->ready_();}
 
   bool has_method() const { return ready_() && _incoming.method.first!=_incoming.method.second; }
