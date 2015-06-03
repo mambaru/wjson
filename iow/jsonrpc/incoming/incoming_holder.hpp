@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iow/io/types.hpp>
+#include <iow/jsonrpc/types.hpp>
 #include <iow/jsonrpc/incoming/incoming.hpp>
 #include <iow/jsonrpc/incoming/incoming_json.hpp>
 #include <iow/memory.hpp>
@@ -15,8 +15,8 @@ namespace iow{ namespace jsonrpc{
 class incoming_holder
 {
 public:
-  typedef ::iow::io::data_type data_type;
-  typedef ::iow::io::data_ptr  data_ptr;
+  typedef ::iow::jsonrpc::data_type data_type;
+  typedef ::iow::jsonrpc::data_ptr  data_ptr;
   typedef data_type::iterator  iterator;
   typedef std::pair< iterator, iterator> raw_t;
   typedef std::chrono::high_resolution_clock clock_t;

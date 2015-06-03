@@ -323,7 +323,7 @@ BEGIN_SUITE(aux,"aux suite")
   ADD_ADVICE(_init_line_, init_line)
 END_SUITE(aux)
 
-::fas::testing::suite_counts my_suite_run(int , char*[])
+::fas::testing::suite_counts fas_my_suite_run(int , char*[])
 {
   data_line_test_options optlist[]={
   //       bufsize maxbuf minbuf first_as_is data_size data_count
@@ -336,7 +336,7 @@ END_SUITE(aux)
   };
   std::cout << sizeof(optlist) <<std::endl;
   ::fas::testing::suite_counts sc;
-  aux_suite as;
+  fas_aux_suite as;
   
   as.get_aspect().get<_test_options_>() 
     = std::make_shared<data_line_test_options>();

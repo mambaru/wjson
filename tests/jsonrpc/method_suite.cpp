@@ -5,6 +5,14 @@
 
 #include "req.hpp"
 
+
+UNIT(outgoing_unit, "")
+{
+  using namespace fas::testing;
+  using namespace ::iow::jsonrpc;
+}
+
+
 UNIT(incoming_unit, "")
 {
   using namespace fas::testing;
@@ -71,6 +79,7 @@ UNIT(method_unit, "")
 }
 
 BEGIN_SUITE(method_suite, "")
+  ADD_UNIT(outgoing_unit)
   ADD_UNIT(incoming_unit)
   ADD_UNIT(method_unit)
 END_SUITE(method_suite)

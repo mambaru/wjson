@@ -33,6 +33,10 @@ struct ad_response_handler
       {
         error_callback( std::move(err) );
       }
+      else if ( result_callback!=nullptr )
+      {
+        result_callback( nullptr );
+      }
     }
     else if (result_callback!=nullptr)
     {

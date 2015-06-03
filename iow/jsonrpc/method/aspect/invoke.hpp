@@ -74,8 +74,6 @@ struct invoke: Handler
         typedef std::shared_ptr<holder_type> holder_ptr;
         auto ph = std::make_shared<holder_type>( std::move(holder) );
         Handler::operator()( t, std::move(req), 
-          //std::bind(&self::callback_<T, TT, holder_ptr, outgoing_handler_type, result_ptr, error_ptr>, ph, outgoing_handler, _1, _2)
-          
           [ph, outgoing_handler, this]( result_ptr result, error_ptr err )
           {
             self::callback_<T, TT>(ph, outgoing_handler, std::move(result), std::move(err) );
@@ -114,35 +112,35 @@ private:
   template<typename T, typename TT, typename HolderPtr, typename OutgoingHandler, typename Result, typename Error>
   static void callback_( HolderPtr ph, OutgoingHandler outgoing_handler, Result result, Error err )
   {
-            try
-            {
-              if (err == nullptr )
-              {
-                TT::template send_result<T, result_json>( 
-                  std::move(*ph),
-                  std::move(result),
-                  std::move(outgoing_handler) 
-                );
-              }
-              else
-              {
-                TT::template send_error<T, error_json>( 
-                  std::move(*ph), 
-                  std::move(err), 
-                  std::move(outgoing_handler)
-                );
-              }
-            }
-            catch(const std::exception& e)
-            {
-              JSONRPC_LOG_FATAL("jsonrpc service exception: " << e.what() )
-              abort();
-            }
-            catch(...)
-            {
-              JSONRPC_LOG_FATAL("jsonrpc service unhandled exception")
-              abort();
-            }
+    try
+    {
+      if (err == nullptr )
+      {
+        TT::template send_result<T, result_json>( 
+          std::move(*ph),
+          std::move(result),
+          std::move(outgoing_handler) 
+        );
+      }
+      else
+      {
+        TT::template send_error<T, error_json>( 
+          std::move(*ph), 
+          std::move(err), 
+          std::move(outgoing_handler)
+        );
+      }
+    }
+    catch(const std::exception& e)
+    {
+      JSONRPC_LOG_FATAL("jsonrpc service exception: " << e.what() )
+      abort();
+    }
+    catch(...)
+    {
+      JSONRPC_LOG_FATAL("jsonrpc service unhandled exception")
+      abort();
+    }
   }
 
 };

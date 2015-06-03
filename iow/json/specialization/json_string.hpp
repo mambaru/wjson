@@ -243,7 +243,14 @@ public:
   P operator()( const T& v, P end)
   {
     if ( v.begin() != v.end() )
+    {
+      /*
+      for (const auto& i: v )
+      {
+        *(end++) = i;
+      }*/
       return std::copy(v.begin(), v.end(), end );
+    }
     else
     {
       *(end++)='"';

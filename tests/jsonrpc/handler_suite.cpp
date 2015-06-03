@@ -169,7 +169,43 @@ UNIT(handler2_unit, "")
   }
 }
 
+struct method_list2: iow::jsonrpc::method_list
+<
+  iow::jsonrpc::target<itest1>,
+  iow::jsonrpc::interface_<itest1>,
+  iow::jsonrpc::provider< itest1 >,
+  iow::jsonrpc::dual_method< _method1_, test1_json,      test1_json,      itest1, &itest1::method1>,
+  iow::jsonrpc::dual_method< _method2_, test1_json,      test1_json,      itest1, &itest1::method2>
+>
+{
+  virtual void method1(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback)
+  {
+    this->call<_method1_>(std::move(req), std::move(callback), nullptr);
+  }
+
+  virtual void method2(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback)
+  {
+    this->call<_method2_>(std::move(req), std::move(callback), nullptr);
+  }
+};
+
+typedef iow::jsonrpc::handler<method_list2> handler2;
+
+UNIT(handler4_unit, "")
+{
+  using namespace fas::testing;
+  using namespace ::iow::jsonrpc;
+  auto t1 = std::make_shared<test1>();
+  handler2 h2(nullptr, t1);
+  auto p1 = std::make_unique<test1_params>(test1_params{1,2,3,4,5});
+  h2.method1( std::move(p1), nullptr);
+}
+
+
+
+
 BEGIN_SUITE(handler_suite, "")
   ADD_UNIT(nohandler_unit)
   ADD_UNIT(handler2_unit)
+  ADD_UNIT(handler4_unit)
 END_SUITE(handler_suite)

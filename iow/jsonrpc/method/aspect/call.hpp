@@ -85,6 +85,7 @@ private:
   ) const
   {
     using namespace std::placeholders;
+
     t.send_notify( 
       tt.name(), 
       std::move(req),

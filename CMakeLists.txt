@@ -25,4 +25,4 @@ if ( IOW_BUILD_ALL )
 endif()
 
 
-add_subdirectory(tests/jsonrpc)
+#add_subdirectory(tests/jsonrpc)

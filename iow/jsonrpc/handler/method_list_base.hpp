@@ -2,6 +2,7 @@
 
 #include <iow/jsonrpc/handler/aspect/tags.hpp>
 #include <fas/aop.hpp>
+#include <functional>
 
 namespace iow{ namespace jsonrpc{
 
@@ -114,9 +115,7 @@ public:
     
     using namespace std::placeholders;
     callback_type callback = nullptr;
-    // !!! Птн Июл  4 19:30:24 MSK 2014  || -> && 
-    // Пн июл  7 17:11:01 MSK 2014  del && error_callback!=nullptr
-    if ( result_callback!=nullptr /*&& error_callback!=nullptr*/ )
+    if ( result_callback!=nullptr )
     {
       callback = std::bind( self::response_handler<Tg>, _1, _2, 
                             result_callback, error_callback);
