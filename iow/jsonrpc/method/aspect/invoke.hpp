@@ -77,8 +77,7 @@ struct invoke: Handler
           [ph, outgoing_handler, this]( result_ptr result, error_ptr err )
           {
             self::callback_<T, TT>(ph, outgoing_handler, std::move(result), std::move(err) );
-          } 
-          
+          }
         );
       }
     }
