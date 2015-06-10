@@ -73,7 +73,7 @@ std::function<void()> check_method(const R& r, const Callback& call)
     if ( call!=nullptr )
       call( nullptr );
   };
-};
+}
 
 class test1: public itest1
 {
@@ -90,7 +90,7 @@ public:
       callback(std::move(req));
   }
 
-  virtual void method2(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback)
+  virtual void method2(std::unique_ptr<test1_params> , std::function< void(std::unique_ptr<test1_params>) > callback)
   {
     if ( callback )
       callback(nullptr);
@@ -199,10 +199,8 @@ UNIT(handler4_unit, "")
   handler2 h2(nullptr, t1);
   auto p1 = std::make_unique<test1_params>(test1_params{1,2,3,4,5});
   h2.method1( std::move(p1), nullptr);
+  t << nothing;
 }
-
-
-
 
 BEGIN_SUITE(handler_suite, "")
   ADD_UNIT(nohandler_unit)
