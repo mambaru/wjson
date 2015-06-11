@@ -180,6 +180,7 @@ struct method_list2: iow::jsonrpc::method_list
 {
   virtual void method1(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback)
   {
+    
     this->call<_method1_>(std::move(req), std::move(callback), nullptr);
   }
 
@@ -196,9 +197,16 @@ UNIT(handler4_unit, "")
   using namespace fas::testing;
   using namespace ::iow::jsonrpc;
   auto t1 = std::make_shared<test1>();
-  handler2 h2(nullptr, t1);
+  auto h2 = std::make_shared<handler2>(nullptr, t1);
   auto p1 = std::make_unique<test1_params>(test1_params{1,2,3,4,5});
-  h2.method1( std::move(p1), nullptr);
+  std::shared_ptr<ihandler> ih = h2;
+  ih->send_notify = nullptr;
+  ih->send_notify = [&t]( const char* name, ihandler::notify_serializer_t ser ) -> void
+  {
+    auto d = ser(name);
+    t << message("send: ") << std::string(d->begin(), d->end() );
+  };
+  h2->method1( std::move(p1), nullptr);
   t << nothing;
 }
 

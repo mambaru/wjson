@@ -69,12 +69,14 @@ private:
       );
     }
       
+    
     t.send_request( 
       tt.name(), 
       std::move(req),
       std::bind( TT::template serialize_request<T, params_json>, _1, _2, _3),
       std::move(handler)
     );
+    
   }
   
   template<typename T, typename TT>
@@ -91,6 +93,7 @@ private:
       std::move(req),
       std::bind( TT::template serialize_notify<T, params_json>, _1, _2)
     );
+   
   }
 };
 

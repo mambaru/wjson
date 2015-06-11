@@ -1,3 +1,4 @@
+#include <iostream>
 #include <iow/jsonrpc/method.hpp>
 #include <iow/jsonrpc/noparams_json.hpp>
 
