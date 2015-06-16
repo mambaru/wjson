@@ -68,12 +68,13 @@ private:
         callback 
       );
     }
-      
+    
+    auto ser = std::bind( TT::template serialize_request<T, params_json>, _1, _2, _3);
     
     t.send_request( 
       tt.name(), 
       std::move(req),
-      std::bind( TT::template serialize_request<T, params_json>, _1, _2, _3),
+      std::move(ser),
       std::move(handler)
     );
     

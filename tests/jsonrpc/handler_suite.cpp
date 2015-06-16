@@ -4,6 +4,7 @@
 #include <fas/testing.hpp>
 #include "req.hpp"
 #include <algorithm>
+#include <memory>
 
 struct nomethod:
   ::iow::jsonrpc::method_list<>
@@ -146,9 +147,12 @@ UNIT(handler2_unit, "")
   using namespace fas::testing;
   using namespace ::iow::jsonrpc;
 
-  auto t1 = std::make_shared<test1>();
+  std::shared_ptr<itest1> t1 = std::make_shared<test1>();
   test_count = 0;
-  handler1 h = handler1(t1);
+  handler1::options_type opt;
+  opt.target = t1;
+  handler1 h;
+  h.start(opt);
   h.target() = t1;
   for (auto r: good_request)
   {
@@ -167,6 +171,7 @@ UNIT(handler2_unit, "")
       ++test_count;
     });
   }
+  
 }
 
 struct method_list2: iow::jsonrpc::method_list
@@ -180,7 +185,6 @@ struct method_list2: iow::jsonrpc::method_list
 {
   virtual void method1(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback)
   {
-    
     this->call<_method1_>(std::move(req), std::move(callback), nullptr);
   }
 
@@ -196,16 +200,37 @@ UNIT(handler4_unit, "")
 {
   using namespace fas::testing;
   using namespace ::iow::jsonrpc;
+  
   auto t1 = std::make_shared<test1>();
-  auto h2 = std::make_shared<handler2>(nullptr, t1);
+  handler2::options_type opt;
+  opt.provider = t1;
+  
+  std::string str_notify;
+  opt.send_notify = [&t, &str_notify]( const char* name, handler2::notify_serializer_t ser ) -> void
+  {
+    auto d = ser(name);
+    str_notify = std::string(d->begin(), d->end() );
+    t << message("send: ") << str_notify;
+  };
+
+  
+  auto h2 = std::make_shared<handler2>();
+  h2->start(opt);
+  //auto h2 = std::make_shared<handler2>(nullptr, t1);
   auto p1 = std::make_unique<test1_params>(test1_params{1,2,3,4,5});
-  std::shared_ptr<ihandler> ih = h2;
+  
+  
+
+  /*std::shared_ptr<ihandler> ih = h2;
   ih->send_notify = nullptr;
   ih->send_notify = [&t]( const char* name, ihandler::notify_serializer_t ser ) -> void
   {
     auto d = ser(name);
     t << message("send: ") << std::string(d->begin(), d->end() );
   };
+  */
+  
+  
   h2->method1( std::move(p1), nullptr);
   t << nothing;
 }

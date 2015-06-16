@@ -29,6 +29,7 @@ struct ad_send_notify
         return ser(name, std::move(*p));
       }
     );
+    
   }
 };
 

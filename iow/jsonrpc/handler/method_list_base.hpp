@@ -1,25 +1,29 @@
 #pragma once
 
 #include <iow/jsonrpc/handler/aspect/tags.hpp>
+#include <iow/io/io_base.hpp>
 #include <fas/aop.hpp>
 #include <functional>
 
 namespace iow{ namespace jsonrpc{
 
 template< 
-  typename A = fas::aspect<>, 
+  typename A = fas::aspect<>/*, 
   template<typename> class AspectClass = fas::aspect_class 
+  */
 >
 class method_list_base
-  : public AspectClass<A>
-  , public AspectClass<A>::aspect::template advice_cast<_ihandler_>::type
+  : public ::iow::io::io_base<A>
+  // : public AspectClass<A>
+  //, public AspectClass<A>::aspect::template advice_cast<_handler_types_>::type
 {
 public:
-  typedef method_list_base<A, AspectClass> self;
-  typedef AspectClass<A> super;
+  typedef ::iow::io::io_base<A> super;
+  typedef method_list_base<A> self;
+  //typedef AspectClass<A> super;
   
-  typedef typename super::aspect::template advice_cast<_ihandler_>
-                        ::type  handler_interface;
+  typedef typename super::aspect::template advice_cast<_handler_types_>
+                        ::type  handler_types;
   typedef typename super::aspect::template advice_cast<_target_>
                         ::type  target_type;
   typedef typename super::aspect::template advice_cast<_provider_>
@@ -29,12 +33,21 @@ public:
   typedef typename super::aspect::template advice_cast<_context_>
                         ::type  context_type;
   
-  typedef typename handler_interface::data_type data_type;
-  typedef typename handler_interface::data_ptr  data_ptr;
-  typedef typename handler_interface::result_handler_t result_handler_t;
-  typedef typename handler_interface::error_type error_type;
-  typedef typename handler_interface::error_json error_json;
-  typedef typename handler_interface::error_ptr  error_ptr;
+  typedef typename handler_types::call_id_t        call_id_t;
+  typedef typename handler_types::io_id_t          io_id_t;
+  typedef typename handler_types::holder_type      holder_type;
+  typedef typename handler_types::data_type        data_type;
+  typedef typename handler_types::data_ptr         data_ptr;
+  typedef typename handler_types::error_type       error_type;
+  typedef typename handler_types::error_json       error_json;
+  typedef typename handler_types::error_ptr        error_ptr;
+  
+  typedef typename handler_types::outgoing_handler_t    outgoing_handler_t;
+  typedef typename handler_types::request_serializer_t  request_serializer_t;
+  typedef typename handler_types::result_handler_t      result_handler_t;
+  typedef typename handler_types::notify_serializer_t   notify_serializer_t;
+  
+  typedef handler_options<target_type, provider_type> options_type;
   
   
   template<typename Params, typename Serializer>
@@ -44,8 +57,10 @@ public:
     Serializer ser,
     result_handler_t  result_handler) const
   {
+    
     super::get_aspect().template get<_send_request_>()(
-      static_cast<const handler_interface&>(*this), 
+      //static_cast<const handler_types&>(*this), 
+      *this,
       name, 
       std::move(params),
       std::move(ser),
@@ -53,15 +68,26 @@ public:
     );
   }
   
+  void send_request( const char* name, result_handler_t handler, request_serializer_t ser) const
+  {
+    this->_send_request( name, std::move(handler), std::move(ser) );
+  }
+  
   template<typename Params, typename Serializer>
   void send_notify( const char* name, Params params, Serializer ser) const
   {
     super::get_aspect().template get<_send_notify_>()(
-      static_cast<const handler_interface&>(*this), 
+      // static_cast<const handler_types&>(*this), 
+      *this,
       name, 
       std::move(params),
       std::move(ser)
     );
+  }
+
+  void send_notify( const char* name, notify_serializer_t ser) const
+  {
+    this->_send_notify( name, std::move(ser) );
   }
 
   template<typename Tg>
@@ -146,6 +172,14 @@ private:
             std::move(error_callback) 
         );
   }
+  
+private:
+  friend struct super::aspect::template advice_cast< ::iow::io::_initialize_ >::type;
+  typedef typename handler_types::send_request_t  send_request_t;
+  typedef typename handler_types::send_notify_t   send_notify_t;
+  send_request_t _send_request /* = nullptr*/;
+  send_notify_t  _send_notify /* = nullptr*/;  
+
 };
 
 }} // iow

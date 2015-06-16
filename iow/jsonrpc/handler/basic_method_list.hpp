@@ -9,7 +9,7 @@ namespace iow{ namespace jsonrpc{
   
 template<typename... Args >
 class basic_method_list
-  : public method_list_base< typename fas::merge_aspect< fas::aspect<Args...>, aspect_handler>::type, fas::aspect_class >
+  : public method_list_base< typename fas::merge_aspect< fas::aspect<Args...>, aspect_handler>::type/*, fas::aspect_class*/ >
 {
 };
 

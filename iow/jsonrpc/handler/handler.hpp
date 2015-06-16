@@ -9,6 +9,7 @@
 #include <iow/jsonrpc/types.hpp>
 #include <iow/jsonrpc/method/aspect/tags.hpp>
 #include <fas/aop.hpp>
+#include <mutex>
 
 namespace iow{ namespace jsonrpc{
 
@@ -32,7 +33,7 @@ class handler
 public:
   typedef handler<MethodList> self;
   typedef MethodList super;
-  typedef typename super::handler_interface handler_interface;
+  typedef typename super::handler_types handler_types;
   typedef typename super::target_type target_type;
   typedef typename super::provider_type provider_type;
   typedef typename super::context_type context_type;
@@ -41,13 +42,53 @@ public:
   typedef typename super::io_id_t io_id_t;
   typedef typename super::outgoing_handler_t outgoing_handler_t;
   
+  target_type target() const
+  {
+    return this->get_aspect().template get<_target_>();
+  }
+
+  provider_type provider() const
+  {
+    return this->get_aspect().template get<_provider_>();
+  }
+  
+  context_type& context()
+  {
+    return this->get_aspect().template get<_context_>();
+  }
+
+  const context_type& context() const
+  {
+    return this->get_aspect().template get<_context_>();
+  }
+  
+  std::vector<std::string> get_methods() const
+  {
+    // TODO: в аспект
+    return fas::for_each_group<_method_>(*this, f_get_methods() ).result;
+  }
+
+  void invoke(holder_type holder, outgoing_handler_t outgoing_handler) 
+  {
+    super::get_aspect().template get<_invoke_>()(*this, std::move(holder), std::move(outgoing_handler) );
+  }
+
+  template<typename O>
+  void start(O&& opt)
+  {
+    std::lock_guard< typename super::mutex_type > lk( super::mutex() );
+    super::start_(*this, std::forward<O>(opt));
+  }
+
+
+  /*
   handler(target_type trg = target_type(), provider_type prv = provider_type() )
   {
     this->get_aspect().template get<_target_>() = trg;
     this->get_aspect().template get<_provider_>() = prv;
   }
 
-  virtual std::shared_ptr<handler_interface> clone() const 
+  virtual std::shared_ptr<handler_types> clone() const 
   {
     return std::make_shared<self>(*this);
   }
@@ -102,6 +143,7 @@ public:
 private:
   
   io_id_t _io_id;
+  */
   
 };
 
