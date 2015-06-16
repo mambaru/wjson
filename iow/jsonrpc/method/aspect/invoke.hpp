@@ -40,7 +40,7 @@ struct invoke: Handler
     typename T::outgoing_handler_t outgoing_handler
   ) 
   {
-    typedef typename T::outgoing_handler_t outgoing_handler_type;  
+    //typedef typename T::outgoing_handler_t outgoing_handler_type;  
     typedef typename T::holder_type holder_type;
     params_ptr req = nullptr;
 
@@ -71,7 +71,7 @@ struct invoke: Handler
       else
       {
         using namespace std::placeholders;
-        typedef std::shared_ptr<holder_type> holder_ptr;
+        //typedef std::shared_ptr<holder_type> holder_ptr;
         auto ph = std::make_shared<holder_type>( std::move(holder) );
         Handler::operator()( t, std::move(req), 
           [ph, outgoing_handler, this]( result_ptr result, error_ptr err )

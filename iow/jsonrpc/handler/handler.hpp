@@ -37,6 +37,7 @@ public:
   typedef typename super::target_type target_type;
   typedef typename super::provider_type provider_type;
   typedef typename super::context_type context_type;
+  typedef typename super::options_type options_type;
   
   typedef typename super::holder_type holder_type;
   typedef typename super::io_id_t io_id_t;
