@@ -7,6 +7,9 @@
 #include <algorithm>
 #include <boost/concept_check.hpp>
 
+
+#include <iostream>
+#include <chrono>
 namespace iow{ namespace io{
   
 template<typename DataType>
@@ -296,10 +299,13 @@ public:
 
   data_ptr detach()
   {
+
     if ( _buffers.empty() )
       return nullptr;
 
     auto res = search_();
+
+
     if ( res.first== npos() )
     {
       if (_readbuf!=npos())
@@ -323,6 +329,8 @@ public:
     {
       resbuf->resize( bufsize - _sep_size);
     }
+
+
     return std::move(resbuf);
   }
 
@@ -534,6 +542,7 @@ private:
 
   search_pair search_() const
   {
+
     if ( _buffers.empty() || _parsebuf==npos() )
       return search_pair(-1, -1);
 
@@ -551,8 +560,10 @@ private:
     // Если последний буфер выделен полностью для чтения, то игнорируем его
     size_t toparse = _buffers.size() - (_readbuf!=npos() && _readpos==0);
 
+
     for (size_t i=_parsebuf; i < toparse; ++i)
     {
+
       const_iterator end = end_(i);
       const_iterator beg;
       if ( i==_parsebuf )
@@ -566,21 +577,25 @@ private:
 
       while ( beg!=end )
       {
-        auto itr = std::find(beg, end, _sep[_sep_size-1]);
-        if ( itr != end && check_sep_(i, itr) )
+        beg = std::find(beg, end, _sep[_sep_size-1]);
+
+        if ( beg == end )
+          break;
+
+        if ( check_sep_(i, beg) )
         {
-          return search_pair( i, std::distance(_buffers[i]->cbegin(), itr) + 1 );
+          return search_pair( i, std::distance(_buffers[i]->cbegin(), beg) + 1 );
         }
         ++beg;
       }
     }
     return search_pair(-1, -1);
   }
-  
-  
+
   // Удаляем отработанные буферы и настраиваем состояние
   void prepare_(const search_pair& p) 
   {
+#warning TODO: сократить список буфферов при разрастании 
     if ( p.first==0 )
     {
       if ( _buffers[0] == nullptr )
@@ -630,8 +645,9 @@ private:
   data_ptr make_result_(const search_pair& p)
   {
 #warning Здесь тормоза на больших запросах, сделать через memcpy
+
     data_ptr result = make_result_if_first_(p);
-    
+
     // Если блок готов в первом буфере
     if ( result != nullptr )
       return std::move(result);
@@ -641,16 +657,12 @@ private:
     for (size_t i=0; i < p.first + 1; ++i)
     {
       reserve+=_buffers[i]->size();
-     
-      /*
-      reserve+=_buffers[i]->size() + _buffers[i]->size()*(p.first + 1);
-      break;
-      */
     }
-    
+
     // reserve с небольшим оверхедом, поэтому очищаем и используем inserter
     result = create_(reserve, reserve*2 < _maxbuf ? reserve*2 : reserve);
     result->clear();
+
 
     // Копируем со всех буферов, что готовы
     for (size_t i=0; i < p.first + 1; ++i)
@@ -664,6 +676,7 @@ private:
         std::copy(begin_(i), _buffers[i]->cbegin() + p.second, std::inserter(*result, result->end()));
       }
     }
+
     return std::move(result);
   }
 
