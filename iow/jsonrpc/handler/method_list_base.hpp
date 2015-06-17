@@ -8,14 +8,10 @@
 namespace iow{ namespace jsonrpc{
 
 template< 
-  typename A = fas::aspect<>/*, 
-  template<typename> class AspectClass = fas::aspect_class 
-  */
+  typename A = fas::aspect<>
 >
 class method_list_base
   : public ::iow::io::io_base<A>
-  // : public AspectClass<A>
-  //, public AspectClass<A>::aspect::template advice_cast<_handler_types_>::type
 {
 public:
   typedef ::iow::io::io_base<A> super;

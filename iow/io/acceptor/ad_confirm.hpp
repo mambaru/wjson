@@ -16,7 +16,7 @@ struct ad_confirm
     typedef typename type_<T>::options_type options_type;
     options_type opt = t.get_aspect().template get<_context_>().connection_options;
     
-    std::cout << "acceptor::ad_confirm sep=[" << opt.reader.sep.size() << "]" << std::endl;
+    
     /*
     opt.incoming_handler = []( 
       typename options_type::data_ptr d, 
@@ -30,13 +30,13 @@ struct ad_confirm
     
     
     
-    std::cout << "DEBUG acceptor::ad_confirm" << std::endl;
+    
     
     
     std::weak_ptr<T> wthis = t.shared_from_this();
     opt.shutdown_handler = t.wrap([wthis](io_id_type id)
     {
-      std::cout << "DEBUG acceptor::ad_confirm shutdown_handler" << std::endl;
+      
       if ( auto pthis = wthis.lock() )
       {
         std::lock_guard<typename T::mutex_type> lk(pthis->mutex());

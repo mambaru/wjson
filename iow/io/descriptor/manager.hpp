@@ -21,7 +21,6 @@ public:
   void attach(io_id_type id, holder_ptr h)
   {
     _holders[id] = h;
-    std::cout << "holder_manager::attach size=" <<_holders.size() << std::endl;
   }
   
   holder_ptr create(io_service& io)
@@ -42,7 +41,6 @@ public:
     {
       //Сказать что-то в лог
     }
-    std::cout << "holder_manager::close size=" <<_holders.size() << std::endl;
   }
   
   void free(holder_ptr h)

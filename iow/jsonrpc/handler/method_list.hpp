@@ -7,7 +7,6 @@ namespace iow{ namespace jsonrpc{
 template<typename... Args >
 class method_list
   : public basic_method_list<Args...>
-  //, public basic_method_list<Args...>::interface_type
 {
 public:
   typedef basic_method_list<Args...> super;

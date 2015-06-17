@@ -80,7 +80,6 @@ struct ad_initialize
   template<typename T, typename O>
   void operator()(T& t, const O& opt)
   {
-    std::cout << "acceptor::ad_initialize sep=[" << opt.connection_options.reader.sep.size() << "]" << std::endl;
     t.get_aspect().template get<_context_>().connection_options = opt.connection_options;
     // TODO: убрать в TCP и сделать after_start
     typedef typename T::aspect::template advice_cast< _context_ >::type context_type;

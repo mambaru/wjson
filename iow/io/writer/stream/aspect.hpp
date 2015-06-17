@@ -18,8 +18,6 @@ struct ad_can_write
   template<typename T, typename P>
   bool operator()(T& , P p)
   {
-    std::cout << "can write: " << p.second << " " << (p.first!=nullptr) << std::endl;
-
     return p.second!=0 && p.first!=nullptr;
   }
 };

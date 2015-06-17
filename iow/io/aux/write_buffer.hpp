@@ -6,6 +6,9 @@
 #include <string>
 
 
+
+#include <iostream>
+
 namespace iow{ namespace io{
 
 
@@ -281,8 +284,8 @@ public:
     if (reserve)
       d.reserve( d.size() + _sep_size );
     
-    std::copy( _sep.get(), _sep.get() + _sep_size, std::inserter(d, d.begin()) );
-    
+    std::copy( _sep.get(), _sep.get() + _sep_size, std::inserter(d, d.end()) );
+    _size += _sep_size;
   }
 
   void attach(data_ptr d)
@@ -290,18 +293,7 @@ public:
     if ( d==nullptr || ( d->empty() && _sep_size==0 ) )
       return;
     
-    
-    /*
-    if ( !check(*d) )
-    {
-      return std::move(d);
-    }
-    */
-    
-    
-
     _size += d->size();
-
     if ( _list.empty() )
     {
       addsep_(*d, true);
@@ -309,27 +301,6 @@ public:
     }
     else
     {
-      /*
-      if ( _options!=nullptr )
-      {
-        data_ptr& last = _list!=nullptr && !_list->empty()
-          ? _list->back()
-          : _cur;
-        size_t sumsize = last->size() + d->size();
-        if ( sumsize < _options->minbuf )
-        {
-          last->reserve(sumsize);
-          std::copy( d->begin(), d->end(), std::inserter(*last, last->end() ) );
-          return std::move(d);
-        }
-      }
-      
-
-      if ( _list==nullptr )
-      {
-        _list = std::make_unique<deque_list>();
-      }
-      */
       data_ptr& last = _list.back();
       size_t sumsize = last->size() + d->size() + _sep_size;
       if ( last->size() < _minbuf && sumsize < _maxbuf )

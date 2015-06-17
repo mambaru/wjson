@@ -35,6 +35,7 @@ struct ad_initialize
     t._send_request = opt.send_request;
     t.get_aspect().template get<_target_>() = opt.target;
     t.get_aspect().template get<_provider_>() = opt.provider;
+    //t.get_aspect().template get<_context_>().allow_callback = opt.allow_callback;
   }
 };
 

@@ -112,7 +112,6 @@ public:
   template<typename O>
   void set_options(const O& opt) noexcept
   {
-    std::cout << "read_buffer::set_options sep=[" << opt.sep << "]" << std::endl;
     if ( opt.sep.empty() )
     {
       _sep = nullptr;
@@ -219,14 +218,16 @@ public:
 
   data_pair next()
   {
+    /*
     if ( _sep!=nullptr )
     {
-      std::cout << "read buffer next sep=" << std::string( _sep.get(), _sep.get() + _sep_size ) << std::endl;
+      std::c1out << "read buffer next sep=" << std::string( _sep.get(), _sep.get() + _sep_size ) << std::endl;
     }
     else
     {
-      std::cout << "_sep==nullptr" << std::endl;
+      std::c1out << "_sep==nullptr" << std::endl;
     }
+    */
     data_pair result(0,0);
 
     if ( waiting() )
@@ -311,19 +312,17 @@ public:
         _parsebuf = _buffers.size()-1;
         _parsepos = _buffers.back()->size();
       }
-      /*
-      _parsebuf = last_buff_();
-      if ( _parsebuf == -1)
-        _parsebuf = 0;
-      // Если есть ожидания чтения
-      _parsepos = _readpos!=-1 ? _readpos : _buffers[_parsebuf]->size();
-      */
       return nullptr;
     }
 
     auto resbuf = make_result_(res);
     prepare_(res);
-    _size -= resbuf->size();
+    size_t bufsize = resbuf->size();
+    _size -= bufsize;
+    if ( _trimsep && bufsize >= _sep_size )
+    {
+      resbuf->resize( bufsize - _sep_size);
+    }
     return std::move(resbuf);
   }
 
@@ -551,14 +550,8 @@ private:
 
     // Если последний буфер выделен полностью для чтения, то игнорируем его
     size_t toparse = _buffers.size() - (_readbuf!=npos() && _readpos==0);
-    /*
-    size_t last = last_buff_();
 
-    if ( last==-1)
-      return search_pair(-1, -1);
-    */
-
-    for (size_t i=_parsebuf; i < /*last + 1*/toparse; ++i)
+    for (size_t i=_parsebuf; i < toparse; ++i)
     {
       const_iterator end = end_(i);
       const_iterator beg;
@@ -568,7 +561,6 @@ private:
       }
       else
       {
-        // TODO: _buffers[i]->begin(), begin_ не имеет смысла
         beg = begin_(i);
       }
 
@@ -637,6 +629,7 @@ private:
 
   data_ptr make_result_(const search_pair& p)
   {
+#warning Здесь тормоза на больших запросах, сделать через memcpy
     data_ptr result = make_result_if_first_(p);
     
     // Если блок готов в первом буфере
@@ -648,6 +641,11 @@ private:
     for (size_t i=0; i < p.first + 1; ++i)
     {
       reserve+=_buffers[i]->size();
+     
+      /*
+      reserve+=_buffers[i]->size() + _buffers[i]->size()*(p.first + 1);
+      break;
+      */
     }
     
     // reserve с небольшим оверхедом, поэтому очищаем и используем inserter

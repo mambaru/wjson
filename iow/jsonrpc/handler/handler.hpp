@@ -33,7 +33,7 @@ class handler
 public:
   typedef handler<MethodList> self;
   typedef MethodList super;
-  typedef typename super::handler_types handler_types;
+  //typedef typename super::handler_types handler_types;
   typedef typename super::target_type target_type;
   typedef typename super::provider_type provider_type;
   typedef typename super::context_type context_type;
@@ -79,6 +79,13 @@ public:
   {
     std::lock_guard< typename super::mutex_type > lk( super::mutex() );
     super::start_(*this, std::forward<O>(opt));
+  }
+  
+  template<typename O>
+  void initialize(O&& opt)
+  {
+    std::lock_guard< typename super::mutex_type > lk( super::mutex() );
+    super::initialize_(*this, std::forward<O>(opt));
   }
 
 

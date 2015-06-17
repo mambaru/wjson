@@ -16,7 +16,7 @@ struct ad_make_handler
   template<typename T, typename P>
   handler_type operator()(T& t, const P& p) 
   {
-    std::cout << "DEBUG acceptor::ad_make_handler" << std::endl;
+    
     std::weak_ptr<T> wthis = t.shared_from_this();
     return t.wrap([wthis, p]( ::iow::system::error_code ec )
     {
