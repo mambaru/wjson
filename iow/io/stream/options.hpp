@@ -34,8 +34,10 @@ struct writer_options:
 template<typename DataType>
 struct options
 {
-  ::iow::io::reader::stream::options<DataType> reader;
-  ::iow::io::writer::stream::options<DataType> writer;
+  typedef ::iow::io::reader::stream::options<DataType> reader_options;
+  typedef ::iow::io::writer::stream::options<DataType> writer_options;
+  reader_options reader;
+  writer_options writer;
 };
 
 }}}

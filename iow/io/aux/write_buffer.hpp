@@ -1,65 +1,14 @@
 #pragma once
 
+#include <iow/io/aux/write_buffer_options.hpp>
+
 #include <iow/memory.hpp>
 #include <queue>
 #include <memory>
 #include <string>
 
 
-
-#include <iostream>
-
 namespace iow{ namespace io{
-
-
-template<typename DataType>
-struct write_buffer_options
-{
-  typedef std::unique_ptr<DataType> data_ptr;
-  typedef std::function< data_ptr(size_t, size_t) > create_fun;
-  typedef std::function< void(data_ptr) > free_fun;
-  std::string sep;
-
-  size_t bufsize = 8*1024;
-  size_t maxbuf  = 8*1024; 
-  size_t minbuf  = 0; 
-  // Пул буфферов, для размещения 
-  //size_t poolsize = 0;
-  // Наверное убрать отсюда
-  //size_t wrnsize = 1024*1024;
-  //size_t maxsize = 1024*1024*1024;
-
-  bool first_as_is = true; // Если maxbuff или minbuff != 0 и bufsize!=0
-  
-  create_fun create;
-  free_fun free;
-
-  /*
-  
-  void fix()
-  {
-    if ( bufsize == 0 )
-    {
-      bufsize = 1024 * 8;
-    }
-    
-    if ( minbuf > bufsize )
-    {
-      minbuf = bufsize;
-    }
-    
-    if ( maxbuf < bufsize )
-    {
-      maxbuf = bufsize;
-    }
-    
-    if ( maxsize == 0 )
-    {
-      maxsize = 1024*1024*1024;
-    }
-  }
-  */
-};
 
 
 template<typename DataType>

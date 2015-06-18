@@ -32,14 +32,14 @@ public:
   }
 
   template<typename O>
-  void start(O&& opt)
+  void start(O opt)
   {
     std::lock_guard< typename super::mutex_type > lk( super::mutex());
-    this->start_(*this, std::forward<O>(opt));
+    opt.acceptor.connection_options = opt.connection;
+    this->start_(*this, opt.acceptor /*std::forward<O>(opt)*/);
   }
 
 public:
-
   io_service_type& _io_service;
 };
 

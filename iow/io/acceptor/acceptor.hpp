@@ -6,9 +6,7 @@
 
 namespace iow{ namespace io{ namespace acceptor{
 
-// НАфиг не нужен, есть в ip::tcp::acceptor
 template <typename ConnectionType, typename A = fas::empty_type>
 using acceptor = ::iow::io::descriptor::holder< typename fas::merge_aspect<A, aspect<ConnectionType> >::type >;
 
 }}}
-

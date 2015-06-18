@@ -1,6 +1,6 @@
 #pragma once
+#include <iow/logger/logger.hpp>
 
-struct s;
 namespace iow{ namespace jsonrpc{
   
 template<typename HandlerOptions>
@@ -61,9 +61,48 @@ public:
   
   void invoke(data_ptr d, io_id_t io_id, outgoing_handler_t handler)
   {
+    try
+    {
+      while (d != nullptr)
+      {
+        incoming_holder holder(std::move(d));
+        d = holder.parse();
+        if ( holder.is_notify() || holder.is_request() )
+        {
+          this->invoke( std::move(holder), io_id, std::move(handler) );
+        }
+        else
+        {
+          if ( handler!=nullptr )
+          {
+            handler(nullptr);
+          }
+        }
+          
+        //t.get_aspect().template get<_verify_>()( t,  std::move(hold), io_id, outgoing_handler );
+      }
+    }
+    catch(const json::json_error& er)
+    {
+      JSONRPC_LOG_WARNING( "jsonrpc::service parse error: " << er.what() )
+      //! t.get_aspect().template get<_callback_error_>()(t, parse_error(), outgoing_handler );
+    }
+    catch(const std::exception& ex)
+    {
+      JSONRPC_LOG_ERROR( "jsonrpc::service parse error: " << ex.what() )
+      //! t.get_aspect().template get<_callback_error_>()(t, server_error(ex.what() ), outgoing_handler);
+    }
+    catch(...)
+    {
+      JSONRPC_LOG_ERROR( "jsonrpc::service server error: " << "unhandler exception" )
+      //! t.get_aspect().template get<_callback_error_>()(t, server_error(), outgoing_handler);
+    }
+    
+    /*
     incoming_holder holder( std::move(d) );
     holder.parse();
     this->invoke( std::move(holder), io_id, std::move(handler) );
+    */
   }
 
 private:

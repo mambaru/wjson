@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iow/io/stream/stream_options.hpp>
+#include <iow/io/stream/options.hpp>
 #include <iow/io/stream/tags.hpp>
 #include <iow/io/reader/stream/tags.hpp>
 #include <iow/io/reader/tags.hpp>

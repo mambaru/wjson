@@ -46,7 +46,7 @@ struct ad_initialize
       cntx.acceptor = std::make_shared<acceptor_type>( std::move( descriptor_type( t.get_io_service() ) ) );
     }
     //cntx.acceptor->initialize(opt); 
-    std::cout << "server::ad_initialize sep=[" << opt.connection_options.reader.sep.size() << "]" << std::endl;
+    //std::cout << "server::ad_initialize sep=[" << opt.connection_options.reader.sep.size() << "]" << std::endl;
     cntx.acceptor->start(opt);
   }
 };
