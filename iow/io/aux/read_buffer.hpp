@@ -34,14 +34,12 @@ public:
     : _sep(nullptr)
     , _sep_size(0)
     , _bufsize(4096)
-    //, _maxsize(4096*1024)
     , _maxbuf(4096*4)
     , _minbuf(512)
     , _fast_mode(false)
     , _trimsep(false)
     , _create(nullptr)
     , _free(nullptr)
-    
     , _size(0)
     , _offset(0)
     , _readbuf(-1)
@@ -53,43 +51,8 @@ public:
   }
 
   read_buffer(const read_buffer& other) = delete;
-  // Копируются только настройки
-  /*
-  read_buffer(const read_buffer& other)
-    : _size(0)
-    , _offset(0)
-    , _readbuf(-1)
-    , _readpos(-1)
-    , _parsebuf(0)
-    , _parsepos(0)
-  {
-    if ( other._sep != nullptr)
-    {
-      _sep_size = other._sep_size;
-      _sep=sep_ptr(new value_type[_sep_size]);
-      std::copy(other._sep.get(), other._sep.get() + _sep_size, _sep.get() );
-    }
-    else
-    {
-      _sep = nullptr;
-      _sep_size=0;
-    }
-    
-    _bufsize = other._bufsize;
-    _maxsize = other._maxsize;
-    _maxbuf = other._maxbuf;
-    _minbuf = other._minbuf;
-    _create = other._create;
-    _free = other._free;
-
-    _buffers.reserve(2);
-  }
-  */
-  
   read_buffer(read_buffer&&) = delete;
-  
   read_buffer& operator=(const read_buffer& other) = delete;
-
   read_buffer& operator=(read_buffer&& other) = delete;
 
   template<typename O>
@@ -108,7 +71,6 @@ public:
     }
 
     _bufsize = opt.bufsize;
-    //_maxsize = opt.maxsize;
     _maxbuf = opt.maxbuf;
     _minbuf = opt.minbuf;
     _fast_mode = opt.fast_mode;
@@ -135,13 +97,6 @@ public:
     {
       _maxbuf = _bufsize;
     }
-
-    /*
-    if ( _maxsize == 0 )
-    {
-      _maxsize = 4096*1024;
-    }
-    */
   }
 
   template<typename O>
@@ -155,7 +110,7 @@ public:
     {
       opt.sep.clear();
     }
-    
+
     opt.bufsize = _bufsize;
     opt.maxbuf  = _maxbuf;
     opt.minbuf  = _minbuf;
@@ -164,7 +119,7 @@ public:
     opt.create  = _create;
     opt.free    = _free;
   }
-  
+
   void clear() noexcept
   {
     _size = 0;
@@ -180,12 +135,12 @@ public:
   {
     return _buffers.size();
   }
-  
+
   size_t size() const noexcept
   {
     return _size;
   }
-  
+
   size_t capacity() const noexcept
   {
     size_t result = 0;
@@ -193,7 +148,7 @@ public:
       result += _buffers.capacity();
     return result;
   }
-  
+
   bool waiting() const noexcept
   {
     return _readbuf!=npos();
@@ -201,19 +156,9 @@ public:
 
   data_pair next()
   {
-    /*
-    if ( _sep!=nullptr )
-    {
-      std::c1out << "read buffer next sep=" << std::string( _sep.get(), _sep.get() + _sep_size ) << std::endl;
-    }
-    else
-    {
-      std::c1out << "_sep==nullptr" << std::endl;
-    }
-    */
     data_pair result(0,0);
 
-    if ( waiting() )
+    if ( this->waiting() )
       return result;
 
     if ( _buffers.empty() )
@@ -224,7 +169,6 @@ public:
     size_t reserve = last->capacity() - last->size();
     if ( reserve > _minbuf && _minbuf!=0)
     {
-      // abort();
       size_t nextsize = _bufsize < reserve ? _bufsize : reserve;
       _readbuf = _buffers.size() - 1;
       _readpos = last->size();
@@ -236,21 +180,21 @@ public:
     {
       result = create_for_next_();
     }
-    
+
     return result;
   }
-  
+
   bool rollback(data_pair d)
   {
     d.second = 0;
     return this->confirm(d);
   }
-  
+
   bool confirm(data_pair d)
   {
     if ( !waiting() )
       return false;
-    
+
     if ( _readbuf >= _buffers.size() )
       return false;
 
@@ -263,9 +207,10 @@ public:
 
       if ( buf->size() < _readpos + d.second )
         return false;
-      
+
       _size += d.second;
     }
+
     buf->resize( _readpos + d.second );
     if ( buf->empty() )
     {
@@ -279,16 +224,14 @@ public:
 
   data_ptr detach()
   {
-
     if ( _buffers.empty() )
       return nullptr;
 
     auto res = search_();
 
-
-    if ( res.first== npos() )
+    if ( res.first == this->npos() )
     {
-      if (_readbuf!=npos())
+      if ( _readbuf != this->npos() )
       {
         _parsebuf = _readbuf;
         _parsepos = _readpos;
@@ -301,8 +244,8 @@ public:
       return nullptr;
     }
 
-    auto resbuf = make_result_(res);
-    prepare_(res);
+    auto resbuf = this->make_result_(res);
+    this->prepare_(res);
     size_t bufsize = resbuf->size();
     _size -= bufsize;
     if ( _trimsep && bufsize >= _sep_size )
@@ -310,21 +253,18 @@ public:
       resbuf->resize( bufsize - _sep_size);
     }
 
-
     return std::move(resbuf);
   }
 
 private:
+
   typedef std::vector<data_ptr> buffer_list;
-  
-private:
-  
+
   constexpr size_t npos() const
   {
     return ~0;
   }
 
-  
   data_ptr create_(size_t size, size_t maxbuf) const noexcept
   {
     if ( _create!=nullptr )
@@ -364,10 +304,10 @@ private:
   /***************************** next helper ******************************/
   /**************************************************************************/
 
-  
   data_pair create_for_next_()
   {
     auto ptr = create_();
+    
     if ( ptr==nullptr )
       return data_pair(nullptr, -1);
 
@@ -387,13 +327,11 @@ private:
     return data_pair( &((*last)[0]), last->size());
   }
 
-  
   /**************************************************************************/
   /***************************** detach helper ******************************/
   /**************************************************************************/
 
-  
-  size_t last_buff_() const 
+  size_t last_buff_() const
   {
     if ( _readbuf==-1 || (_readpos > 0 && _readpos!=-1) )
     {
@@ -422,15 +360,22 @@ private:
     }
     return _buffers[pos]->end();
   }
-  
 
   const_iterator last_(size_t pos) const
   {
-    // Если _readpos==0?
     auto& buf = *(_buffers[pos]);
     if ( pos == _readbuf )
     {
+      if (_readpos==0)
+      {
+        abort();
+      }
       return buf.begin() + _readpos - 1;
+    }
+
+    if ( buf.empty() )
+    {
+      abort();
     }
     return buf.begin() + buf.size() - 1;
   }
@@ -498,7 +443,7 @@ private:
     {
       return search_pair(-1, -1);
     }
-      
+
     if ( _readbuf==npos() )
     {
       // Если последний буфер не выделен под чтение
@@ -519,10 +464,8 @@ private:
     return search_pair(-1, -1);
   }
 
-
   search_pair search_() const
   {
-
     if ( _buffers.empty() || _parsebuf==npos() )
       return search_pair(-1, -1);
 
@@ -540,10 +483,8 @@ private:
     // Если последний буфер выделен полностью для чтения, то игнорируем его
     size_t toparse = _buffers.size() - (_readbuf!=npos() && _readpos==0);
 
-
     for (size_t i=_parsebuf; i < toparse; ++i)
     {
-
       const_iterator end = end_(i);
       const_iterator beg;
       if ( i==_parsebuf )
@@ -624,8 +565,6 @@ private:
 
   data_ptr make_result_(const search_pair& p)
   {
-#warning Здесь тормоза на больших запросах, сделать через memcpy
-
     data_ptr result = make_result_if_first_(p);
 
     // Если блок готов в первом буфере
@@ -642,7 +581,6 @@ private:
     // reserve с небольшим оверхедом, поэтому очищаем и используем inserter
     result = create_(reserve, reserve*2 < _maxbuf ? reserve*2 : reserve);
     result->clear();
-
 
     // Копируем со всех буферов, что готовы
     for (size_t i=0; i < p.first + 1; ++i)
@@ -666,6 +604,7 @@ private:
       return nullptr;
 
     data_ptr result = nullptr;
+
     // Если можем полностью захватить буфер
      size_t tmp = _buffers[0]->size();
     if ( tmp == p.second )
@@ -675,11 +614,6 @@ private:
       if (_offset!=0)
       {
         result->erase(result->begin(), result->begin() + _offset);
-
-        /*
-        std::copy( result->begin() + _offset, result->end(), result->begin() );
-        result->resize( result->size() - _offset);
-        */
       }
     }
     else
@@ -691,22 +625,18 @@ private:
     return std::move(result);
   }
 
-
 private:
 
 // options
   sep_ptr _sep;
   size_t _sep_size;
   size_t _bufsize;
-  //size_t _maxsize;
   size_t _maxbuf;
   size_t _minbuf;
-  bool _fast_mode;
-  bool _trimsep; // Отрезать сепаратор 
+  bool   _trimsep;
 
   create_fun _create;
   free_fun _free;
-
 
   size_t  _size;
   size_t  _offset;  // Смещение в первом буфере
