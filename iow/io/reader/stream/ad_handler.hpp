@@ -15,7 +15,7 @@ struct ad_handler
     {
       if (d->empty() )
       {
-        abort();
+        continue;
         // Кривая ошибка
         // t.get_aspect().template get<_aaaa_>()(t, "");
       }

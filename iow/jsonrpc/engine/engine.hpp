@@ -47,7 +47,7 @@ public:
     super::stop_(*this);
   }
 
-  void invoke(holder_type holder, io_id_t io_id, outgoing_handler_t outgoing_handler) 
+  void invoke(holder_type holder, io_id_t /*io_id*/, outgoing_handler_t outgoing_handler) 
   {
     if ( _direct_mode )
     {
