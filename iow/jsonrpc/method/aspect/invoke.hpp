@@ -119,13 +119,11 @@ struct invoke: Handler
       else
       {
         using namespace std::placeholders;
-        //typedef std::shared_ptr<holder_type> holder_ptr;
         auto ph = std::make_shared<holder_type>( std::move(holder) );
         Handler::operator()( t, std::move(req), 
-          [/*this,*/ ph, outgoing_handler]( result_ptr result, error_ptr err )
+          [ph, outgoing_handler]( result_ptr result, error_ptr err )
           {
             invoke_callback_<T, TT, result_json, error_json>(ph, outgoing_handler, std::move(result), std::move(err) );
-            // self::callback_<T, TT>(ph, outgoing_handler, std::move(result), std::move(err) );
           }
         );
       }
