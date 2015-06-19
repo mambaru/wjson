@@ -8,6 +8,54 @@
 #include <functional>
 
 namespace iow{ namespace jsonrpc{
+  
+namespace{
+  
+  template<
+    typename T, 
+    typename TT,
+    typename ResultJson,
+    typename ErrorJson, 
+    typename HolderPtr, 
+    typename OutgoingHandler, 
+    typename Result, 
+    typename Error
+  >
+  inline void invoke_callback_( HolderPtr ph, OutgoingHandler outgoing_handler, Result result, Error err )
+  {
+    // на 4.7. 
+    try
+    {
+      if (err == nullptr )
+      {
+        TT::template send_result<T, ResultJson>( 
+          std::move(*ph),
+          std::move(result),
+          std::move(outgoing_handler) 
+        );
+      }
+      else
+      {
+        TT::template send_error<T, ErrorJson>( 
+          std::move(*ph), 
+          std::move(err), 
+          std::move(outgoing_handler)
+        );
+      }
+    }
+    catch(const std::exception& e)
+    {
+      JSONRPC_LOG_FATAL("jsonrpc service exception: " << e.what() )
+      abort();
+    }
+    catch(...)
+    {
+      JSONRPC_LOG_FATAL("jsonrpc service unhandled exception")
+      abort();
+    }
+  }
+}
+
 
 template<typename JParams, typename JResult, typename Handler, typename JError = error_json>
 struct invoke: Handler
@@ -74,9 +122,10 @@ struct invoke: Handler
         //typedef std::shared_ptr<holder_type> holder_ptr;
         auto ph = std::make_shared<holder_type>( std::move(holder) );
         Handler::operator()( t, std::move(req), 
-          [ph, outgoing_handler, this]( result_ptr result, error_ptr err )
+          [/*this,*/ ph, outgoing_handler]( result_ptr result, error_ptr err )
           {
-            self::callback_<T, TT>(ph, outgoing_handler, std::move(result), std::move(err) );
+            invoke_callback_<T, TT, result_json, error_json>(ph, outgoing_handler, std::move(result), std::move(err) );
+            // self::callback_<T, TT>(ph, outgoing_handler, std::move(result), std::move(err) );
           }
         );
       }
