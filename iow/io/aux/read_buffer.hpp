@@ -36,7 +36,6 @@ public:
     , _bufsize(4096)
     , _maxbuf(4096*4)
     , _minbuf(512)
-    , _fast_mode(false)
     , _trimsep(false)
     , _create(nullptr)
     , _free(nullptr)
@@ -73,7 +72,6 @@ public:
     _bufsize = opt.bufsize;
     _maxbuf = opt.maxbuf;
     _minbuf = opt.minbuf;
-    _fast_mode = opt.fast_mode;
     _trimsep = opt.trimsep;
     _create = opt.create;
     _free = opt.free;
@@ -114,7 +112,6 @@ public:
     opt.bufsize = _bufsize;
     opt.maxbuf  = _maxbuf;
     opt.minbuf  = _minbuf;
-    opt.fast_mode = _fast_mode;
     opt.trimsep = _trimsep;
     opt.create  = _create;
     opt.free    = _free;
