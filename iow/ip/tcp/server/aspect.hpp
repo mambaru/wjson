@@ -35,7 +35,6 @@ struct ad_initialize
   template<typename T, typename O>
   void operator()( T& t, O&& opt )
   {
-    std::cout << "server::ad_initialize" << std::endl;
     typedef typename T::aspect::template advice_cast<_context_>::type context_type;
     typedef typename context_type::acceptor_type acceptor_type;
     typedef typename acceptor_type::descriptor_type descriptor_type;
