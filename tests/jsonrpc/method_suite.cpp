@@ -76,7 +76,7 @@ UNIT(method_unit, "")
   using namespace ::iow::jsonrpc;
   method< name<_method1_> > m;
   incoming_holder ih(nullptr, false);
-  //m(std::move(ih));
+  m(std::move(ih));
 }
 
 BEGIN_SUITE(method_suite, "")

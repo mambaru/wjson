@@ -7,7 +7,7 @@
 namespace iow{ namespace ip{ namespace tcp{ namespace client{
 
 template<typename A = fas::aspect<> >
-using connection = ::iow::io::descriptor::holder<
+using client = ::iow::io::descriptor::holder<
   typename fas::merge_aspect<
     A,
     aspect

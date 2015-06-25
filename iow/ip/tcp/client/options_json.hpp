@@ -7,6 +7,9 @@ namespace iow{ namespace ip{ namespace tcp{ namespace client{
   
 struct options_json
 {
+  JSON_NAME(host)
+  JSON_NAME(port)
+  
   typedef json::object<
     options,
     json::member_list<
