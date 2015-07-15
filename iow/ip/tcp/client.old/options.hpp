@@ -1,14 +1,16 @@
 #pragma once
-#include <iow/io/client/options.hpp>
+
 #include <iow/ip/tcp/connection/options.hpp>
 
 namespace iow{ namespace ip{ namespace tcp{ namespace client{
   
-struct options:
-  ::iow::io::client::options< ::iow::ip::tcp::connection::options >
+struct options
 {
+  ::iow::ip::tcp::connection::options connection;
+  std::string host;
   std::string port;
-  int backlog = 1024;
+  int count_per_thread = 1;
+  int threads = 0;
 };
 
 }}}}
