@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include <iow/ip/tcp/acceptor/acceptor.hpp>
-#include <iow/ip/tcp/client/client.hpp>
+//#include <iow/ip/tcp/client/client.hpp>
 #include <thread>
 #include <mutex>
 void server()
@@ -24,7 +24,7 @@ int main()
 {
   std::thread t(server);
 
-  
+  /*
   typedef ::iow::ip::tcp::client::client<> tcp_client;
   typedef tcp_client::descriptor_type accept_descriptor;
   typedef tcp_client::options_type options;
@@ -38,4 +38,5 @@ int main()
   io_service.run();
  
   t.join();
+  */
 }

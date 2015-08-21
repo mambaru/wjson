@@ -3,6 +3,7 @@
 #include <iow/jsonrpc/method/aspect/tags.hpp>
 #include <iow/jsonrpc/outgoing/outgoing_result_json.hpp>
 #include <iow/jsonrpc/outgoing/outgoing_result.hpp>
+#include <iow/memory.hpp>
 #include <fas/aop.hpp>
 
 namespace iow{ namespace jsonrpc{

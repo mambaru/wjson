@@ -74,9 +74,9 @@ UNIT(method_unit, "")
 {
   using namespace fas::testing;
   using namespace ::iow::jsonrpc;
-  method< name<_method1_> > m;
+  basic_method< name<_method1_> > m;
   incoming_holder ih(nullptr, false);
-  m(std::move(ih));
+  // m(m, std::move(ih), nullptr);
 }
 
 BEGIN_SUITE(method_suite, "")
