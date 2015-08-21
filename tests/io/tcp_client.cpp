@@ -25,6 +25,7 @@ int main()
   std::thread t(server);
 
   
+  /*
   typedef ::iow::ip::tcp::client::client<> tcp_client;
   typedef tcp_client::descriptor_type accept_descriptor;
   typedef tcp_client::options_type options;
@@ -36,6 +37,7 @@ int main()
   opt.port = "12345";
   client->start(opt);
   io_service.run();
+  */
  
   t.join();
 }

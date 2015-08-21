@@ -15,8 +15,8 @@ struct options_json
   typedef json::object<
     options,
     json::member_list<
-      json::member< n_port,       options, std::string, &options::port >,
-      json::member< n_connection, options, connection_options, &options::backlog >
+      json::member< n_port,       options, std::string, &options::port >/*,
+      json::member< n_connection, options, connection_options, &options::backlog >*/
     >
   > type;
   typedef type::target target;

@@ -9,8 +9,8 @@
 namespace iow{ namespace ip{ namespace tcp{ namespace client{
 
 struct aspect : fas::aspect<
-  fas::type< ::iow::io::_options_type_, options >,
-  fas::type< ::iow::io::descriptor::_descriptor_type_, iow::asio::ip::tcp::client >
+  fas::type< ::iow::io::_options_type_, options >/*,
+  fas::type< ::iow::io::descriptor::_descriptor_type_, iow::asio::ip::tcp::client >*/
 >{};
   
 }}}}

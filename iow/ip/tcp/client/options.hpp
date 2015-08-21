@@ -3,8 +3,9 @@
 
 namespace iow{ namespace ip{ namespace tcp{ namespace client{
   
-struct options:
+struct options/*:
   ::iow::io::client::options< ::iow::ip::tcp::connection::options >
+  */
 {
   std::string port;
   int backlog = 1024;

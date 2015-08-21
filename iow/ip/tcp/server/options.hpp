@@ -6,9 +6,10 @@
 namespace iow{ namespace ip{ namespace tcp{ namespace server{
   
 struct options
+  : public ::iow::ip::tcp::acceptor::options
 {
-  ::iow::ip::tcp::acceptor::options acceptor;
-  ::iow::ip::tcp::connection::options connection;
+  //::iow::ip::tcp::acceptor::options acceptor;
+  //::iow::ip::tcp::connection::options connection;
   int threads = 0;
 };
 

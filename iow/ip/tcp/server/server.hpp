@@ -25,13 +25,15 @@ public:
     return _io_service;
   }
 
+  
   template<typename O>
   void start(O opt)
   {
     std::lock_guard< typename super::mutex_type > lk( super::mutex());
-    opt.acceptor.connection_options = opt.connection;
-    this->start_(*this, opt.acceptor);
+    //opt.acceptor.connection_options = opt.connection;
+    this->start_(*this, opt);
   }
+  
 
 public:
   io_service_type& _io_service;
