@@ -16,14 +16,17 @@ struct ad_initialize
   {
     typedef typename T::aspect::template advice_cast< _context_>::type context_type;
     context_type& cntx = t.get_aspect().template get<_context_>();
-    if (  opt.incoming_handler != nullptr )
-    {
-      make_outgoing(t, cntx, fas::bool_<MakeOutgoingHandler>() );
-    }
 
+    cntx.outgoing_handler  = opt.outgoing_handler;
     cntx.incoming_handler  = opt.incoming_handler;
     cntx.startup_handler   = opt.startup_handler;
     cntx.shutdown_handler  = opt.shutdown_handler;
+
+    if (  opt.incoming_handler != nullptr )
+    {
+      this->make_outgoing_(t, cntx, fas::bool_<MakeOutgoingHandler>() );
+    }
+
 
     t.get_aspect().template get< TgInitialize >()( t, std::forward<O>(opt) );
   }
@@ -31,7 +34,7 @@ struct ad_initialize
 private:
 
   template<typename T, typename Cntx> 
-  void make_outgoing(T& t, Cntx& cntx, fas::true_ )
+  void make_outgoing_(T& t, Cntx& cntx, fas::true_ )
   {
     typedef Cntx context_type;
     auto callback = cntx.outgoing_handler;
@@ -54,9 +57,10 @@ private:
   }
 
   template<typename T, typename Cntx>
-  void make_outgoing(T& t, Cntx& cntx, fas::false_ )
+  void make_outgoing_(T& t, Cntx& cntx, fas::false_ )
   {
-    cntx.outgoing_handler = nullptr;
+    /// ??? почему не cntx.outgoing_handler = opt.outgoing_handler
+    //cntx.outgoing_handler = nullptr;
   }
 
 };

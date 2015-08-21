@@ -8,7 +8,7 @@
 
 namespace iow{ namespace ip{ namespace tcp{ namespace client{
 
-  /*
+/*
 template<
   typename ConnectionType = connection, 
   typename A = fas::aspect<> 

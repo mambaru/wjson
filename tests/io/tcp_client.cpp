@@ -36,7 +36,7 @@ int main()
   opt.port = "12345";
   client->start(opt);
   io_service.run();
+  */
  
   t.join();
-  */
 }

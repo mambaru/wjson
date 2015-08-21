@@ -66,6 +66,14 @@ incoming_holder::raw_t incoming_holder::raw_id() const
   return std::make_pair( _incoming.id.first, _incoming.id.second );
 }
 
+std::string incoming_holder::str() const
+{
+  if ( _data != nullptr   )
+    return std::string(_data->begin(), _data->end());
+  return std::string();
+}
+
+
 std::string incoming_holder::error_message(const json::json_error& e) const
 {
   if ( _data != nullptr   )

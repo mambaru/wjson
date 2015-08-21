@@ -1,11 +1,11 @@
 #pragma once
 
-#include <iow/io/descriptor/stream/aspect.hpp>
+#include <iow/io/connection/options.hpp>
 
 namespace iow{ namespace ip{ namespace tcp{ namespace connection{
   
 struct options:
-  ::iow::io::descriptor::stream::options
+  ::iow::io::connection::options
 {
   
 };

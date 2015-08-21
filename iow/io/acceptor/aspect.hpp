@@ -17,7 +17,7 @@
 #include <iow/io/reader/asio/aspect.hpp>
 #include <iow/io/writer/asio/aspect.hpp>
 #include <iow/io/stream/aspect.hpp>
-#include <iow/io/descriptor/stream/aspect.hpp>
+//#include <iow/io/descriptor/stream/aspect.hpp>
 #include <iow/io/descriptor/manager.hpp>
 #include <iow/asio.hpp>
 #include <iow/system.hpp>
@@ -80,13 +80,14 @@ struct ad_initialize
   template<typename T, typename O>
   void operator()(T& t, const O& opt)
   {
-    t.get_aspect().template get<_context_>().connection_options = opt.connection_options;
+    
+    t.get_aspect().template get<_context_>().connection_options = opt.connection;
     // TODO: убрать в TCP и сделать after_start
     typedef typename T::aspect::template advice_cast< _context_ >::type context_type;
     t.get_aspect().template get<_context_>().manager 
       = std::make_shared<typename context_type::manager_type>();
     
-    // t.descriptor().listen();
+    
     iow::asio::ip::tcp::resolver resolver( t.descriptor().get_io_service() );
     iow::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
       opt.host, 
@@ -97,6 +98,7 @@ struct ad_initialize
     t.descriptor().set_option( iow::asio::ip::tcp::acceptor::reuse_address(true) );
     t.descriptor().bind(endpoint);
     t.descriptor().listen( opt.backlog );
+    
   }
 };
 

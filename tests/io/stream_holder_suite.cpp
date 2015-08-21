@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iow/io/descriptor/holder.hpp>
-#include <iow/io/descriptor/stream/aspect.hpp>
+#include <iow/io/connection/aspect.hpp>
+#include <iow/io/connection/options.hpp>
 #include <iow/io/reader/asio/aspect.hpp>
 #include <iow/io/writer/asio/aspect.hpp>
 #include <iow/io/stream/aspect.hpp>
@@ -10,19 +11,18 @@
 
 typedef std::vector<char> data_type;
 typedef iow::asio::posix::stream_descriptor descriptor_type;
-typedef iow::io::descriptor::stream::options options_type;
+typedef iow::io::connection::options options_type;
 
 struct aspect_stream: fas::aspect<
   fas::alias< ::iow::io::descriptor::_outgoing_, ::iow::io::writer::_output_>,
   fas::type< ::iow::io::descriptor::_descriptor_type_, iow::asio::posix::stream_descriptor>,
-  ::iow::io::descriptor::stream::aspect,
+  ::iow::io::connection::aspect,
   ::iow::io::reader::asio::aspect::advice_list,
   ::iow::io::writer::asio::aspect::advice_list,
   ::iow::io::stream::aspect< data_type >::advice_list, 
   ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
   fas::stub< ::iow::io::_initialize_ >,
   fas::type< ::iow::io::_options_type_, fas::empty_type >
-  
 >{};
 
 typedef ::iow::io::descriptor::holder<aspect_stream> stream_holder;

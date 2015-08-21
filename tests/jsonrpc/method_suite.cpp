@@ -11,6 +11,12 @@ UNIT(outgoing_unit, "")
 {
   using namespace fas::testing;
   using namespace ::iow::jsonrpc;
+  
+  // int a[6] = { 0, 0, 15, 0, 29, 0 };
+
+  // int a[6] = { [4] = 29, [2] = 15 };
+  //t << message("bad parse: ") << a[0];
+  t << nothing;
 }
 
 
@@ -74,9 +80,13 @@ UNIT(method_unit, "")
 {
   using namespace fas::testing;
   using namespace ::iow::jsonrpc;
+
   basic_method< name<_method1_> > m;
   incoming_holder ih(nullptr, false);
   // m(m, std::move(ih), nullptr);
+  //method< name<_method1_> > m;
+  //m(std::move(ih));
+  t << nothing;
 }
 
 BEGIN_SUITE(method_suite, "")

@@ -8,14 +8,21 @@ namespace iow{ namespace io{ namespace descriptor{
 template<typename ID, typename DataType, typename DataPtr>
 struct context
 {
-  typedef ::iow::io::io_id_t   io_id_type;
-  typedef ::iow::io::data_type data_type;
-  typedef ::iow::io::data_ptr  data_ptr;
+  typedef ID       io_id_type;
+  typedef DataType data_type;
+  typedef DataPtr  data_ptr;
 
+  typedef std::function< void(data_ptr) > outgoing_handler_type;
+  typedef std::function< void(data_ptr, io_id_type, outgoing_handler_type )> incoming_handler_type;
+  typedef std::function< void(io_id_type, outgoing_handler_type) > startup_handler_type;
+  typedef std::function< void(io_id_type) > shutdown_handler_type;
+
+  /*
   typedef ::iow::io::outgoing_handler_t outgoing_handler_type;
   typedef ::iow::io::incoming_handler_t incoming_handler_type;
   typedef ::iow::io::startup_handler_t  startup_handler_type;
   typedef ::iow::io::shutdown_handler_t shutdown_handler_type;
+  */
 
   outgoing_handler_type outgoing_handler;
   incoming_handler_type incoming_handler;

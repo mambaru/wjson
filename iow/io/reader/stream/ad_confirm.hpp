@@ -24,6 +24,8 @@ struct ad_confirm
   template<typename T, typename P>
   void operator()(T& t, P p)
   {
+    std::cout << "reader::ad_confirm" << std::endl;
+
     bool result = t.get_aspect().template get<_read_buffer_>().confirm( std::move(p) );
     if ( !result )
     {

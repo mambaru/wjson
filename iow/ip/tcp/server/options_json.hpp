@@ -21,8 +21,10 @@ struct options_json
   typedef json::object<
     options,
     json::member_list<
-      json::member<n_acceptor,   options, acceptor_options, &options::acceptor, acceptor_option_json>,
+      json::base< acceptor_option_json >
+      /*json::member<n_acceptor,   options, acceptor_options, &options::acceptor, acceptor_option_json>,
       json::member<n_connection, options, connection_options, &options::connection, connection_option_json>
+      */
     >
   > type;
   typedef type::target target;

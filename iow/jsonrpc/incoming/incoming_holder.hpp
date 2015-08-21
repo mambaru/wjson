@@ -111,6 +111,8 @@ public:
     return std::move(result);
   }
 
+  std::string str() const;
+  
   std::string error_message(const json::json_error& e) const;
 
   std::string params_error_message(const json::json_error& e) const;

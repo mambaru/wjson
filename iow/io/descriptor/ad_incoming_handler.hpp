@@ -3,7 +3,7 @@
 #include <iow/io/descriptor/tags.hpp>
 #include <memory>
 
-namespace iow{ namespace io{ namespace descriptor{ 
+namespace iow{ namespace io{ namespace descriptor{
 
 struct ad_incoming_handler
 {

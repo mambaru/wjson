@@ -10,6 +10,7 @@ struct ad_accept_handler
   template<typename T, typename P>
   void operator()(T& t, P p, ::iow::system::error_code ec)
   {
+
     if ( !ec )
     {
       t.get_aspect().template get< ::iow::io::reader::_complete_ >()(t, std::move(p));
