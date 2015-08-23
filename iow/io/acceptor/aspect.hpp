@@ -19,6 +19,7 @@
 #include <iow/io/stream/aspect.hpp>
 //#include <iow/io/descriptor/stream/aspect.hpp>
 #include <iow/io/descriptor/manager.hpp>
+#include <iow/io/descriptor/ad_initialize.hpp>
 #include <iow/asio.hpp>
 #include <iow/system.hpp>
 #include <fas/aop.hpp>
@@ -29,101 +30,119 @@
 
 namespace iow{ namespace io{ namespace acceptor{
 
-  /*
-struct ad_confirm
-{
-  
-  template<typename T, typename P>
-  void operator()(T& t, P p)
-  {
-    typedef typename T::io_id_type io_id_type;
-    typedef typename type_<T>::options_type options_type;
-    options_type opt;
-    
-    opt.incoming_handler = []( 
-      typename options_type::data_ptr d, 
-      io_id_type, 
-      typename options_type::outgoing_handler_t callback
-    )
-    {
-      callback( std::move(d) );
-    };
-    
-    std::weak_ptr<T> wthis = t.shared_from_this();
-    opt.shutdown_handler = t.wrap([wthis](io_id_type id)
-    {
-      if ( auto pthis = wthis.lock() )
-      {
-        std::cout << "shutdown !" << std::endl;
-        std::lock_guard<typename T::mutex_type> lk(pthis->mutex());
-        pthis->get_aspect().template get<_context_>().manager->close(id);
-      }
-    });
-
-    p->start(opt);
-    t.get_aspect().template get<_context_>().manager->attach(p->get_id(), p);
-  }
-
-private:
-  template<typename T>
-  struct type_
-  {
-    typedef typename T::aspect::template  advice_cast<_context_>::type context_type;
-    typedef typename context_type::connection_type connection_type;
-    typedef typename connection_type::options_type options_type;
-  };
-};
-*/
-
 struct ad_initialize
 {
   template<typename T, typename O>
   void operator()(T& t, const O& opt)
   {
-    
     t.get_aspect().template get<_context_>().connection_options = opt.connection;
     // TODO: убрать в TCP и сделать after_start
     typedef typename T::aspect::template advice_cast< _context_ >::type context_type;
-    t.get_aspect().template get<_context_>().manager 
-      = std::make_shared<typename context_type::manager_type>();
-    
-    
+    context_type& context = t.get_aspect().template get<_context_>();
+    context.manager = std::make_shared<typename context_type::manager_type>();
+    context.addr = opt.host;
+    context.port = opt.port;
+    context.backlog = opt.backlog;
+
+    /*
     iow::asio::ip::tcp::resolver resolver( t.descriptor().get_io_service() );
     iow::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
-      opt.host, 
-      opt.port
+      context.addr, 
+      context.port
     });
 
+    // такая же последовательность для local::stream_protocol::acceptor
     t.descriptor().open(endpoint.protocol());
     t.descriptor().set_option( iow::asio::ip::tcp::acceptor::reuse_address(true) );
     t.descriptor().bind(endpoint);
     t.descriptor().listen( opt.backlog );
-    
+    */
   }
 };
 
-/*
-struct ad_listen
+struct _resolve_and_start_;
+struct _acceptor_start_;
+struct _set_acceptor_options_;
+struct _set_reuse_address_;
+struct _sync_resover_;
+
+struct ad_sync_resover
 {
-  template<typename T, typename O>
-  void operator()(T& t, const O& opt)
+  template<typename T>
+  iow::asio::ip::tcp::endpoint operator()(T& t)
   {
+    const auto& context = t.get_aspect().template get<_context_>();
+    iow::asio::ip::tcp::resolver resolver( t.descriptor().get_io_service() );
+    iow::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
+      context.addr, 
+      context.port
+    });
+    return endpoint;
   }
 };
-*/
 
+
+struct ad_resolve_and_start
+{
+  template<typename T>
+  void operator()(T& t)
+  {
+    /*
+    const auto& context = t.get_aspect().template get<_context_>();
+    iow::asio::ip::tcp::resolver resolver( t.descriptor().get_io_service() );
+    iow::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
+      context.addr, 
+      context.port
+    });*/
+    auto endpoint = t.get_aspect().template get<_sync_resover_>()(t);
+    t.get_aspect().template get<_acceptor_start_>()(t, endpoint);
+  }
+};
+
+struct ad_acceptor_start
+{
+  template<typename T, typename Endpoint>
+  void operator()(T& t, Endpoint endpoint)
+  {
+    const auto& context = t.get_aspect().template get<_context_>();
+    // такая же последовательность для local::stream_protocol::acceptor
+    t.descriptor().open(endpoint.protocol());
+    t.get_aspect().template gete<_set_acceptor_options_>()(t);
+    t.descriptor().bind(endpoint);
+    t.descriptor().listen( context.backlog );
+  }
+};
+
+// в tcp
+struct ad_set_reuse_address
+{
+  template<typename T>
+  void operator()(T& t)
+  {
+    // такая же для local::stream_protocol::acceptor
+    t.descriptor().set_option( iow::asio::ip::tcp::acceptor::reuse_address(true) );
+  }
+};
 
 struct aspect_base: fas::aspect<
   ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
   ::iow::io::reader::aspect,
+  
   fas::advice< ::iow::io::reader::_next_, ad_next>,
-  //fas::advice<_listen_, ad_listen>,
-  fas::advice<_initialize_, ad_initialize>,
+  fas::advice< ::iow::io::_initialize_, ad_initialize>,
   fas::advice< ::iow::io::reader::_make_handler_, ad_make_handler>,
   fas::advice< ::iow::io::reader::_read_some_, ad_async_accept>,
   fas::advice< ::iow::io::reader::_confirm_,  ad_confirm>,
-  fas::stub< ::iow::io::reader::_handler_>,
-  fas::advice< _accept_handler_, ad_accept_handler>
+  fas::stub<   ::iow::io::reader::_handler_>,
+  fas::advice< _accept_handler_, ad_accept_handler>,
+
+#warning TODO: часть в tcp 
+  fas::advice< _sync_resover_, ad_sync_resover>,
+  fas::group<  ::iow::io::_after_start_, _resolve_and_start_>,
+  fas::advice< _resolve_and_start_, ad_resolve_and_start>,
+  fas::advice< _acceptor_start_, ad_acceptor_start>,
+  fas::group< _set_acceptor_options_, _set_reuse_address_>,
+  fas::advice< _set_reuse_address_, ad_set_reuse_address>
 >{};
 
 template<typename ConnectionType>
@@ -132,26 +151,5 @@ struct aspect: fas::aspect<
   fas::value< _context_, context<ConnectionType> >
 >{};
 
-/*template<typename ConnectionType, typename A = fas::empty_type>
-class acceptor: 
-  public ::iow::io::descriptor::holder< 
-    typename fas::merge_aspect<A, aspect<ConnectionType> >::type 
-  >
-{
-};
-*/
 
-/*
-template <typename ConnectionType, typename A = fas::empty_type>
-using acceptor = ::iow::io::descriptor::holder< typename fas::merge_aspect<A, aspect<ConnectionType> >::type >;
-*/
-
-/*typedef ::iow::io::descriptor::holder< fas::aspect<
-  fas::type< ::iow::io::_options_type_, fas::empty_type >,
-  ::iow::io::acceptor::aspect::advice_list,
-  fas::type< ::iow::io::descriptor::_descriptor_type_, iow::asio::ip::tcp::acceptor >
-> > tcp_acceptror;
-*/
-
-  
 }}}
