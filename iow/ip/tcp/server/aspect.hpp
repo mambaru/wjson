@@ -54,7 +54,7 @@ struct ad_initialize
 typedef ::iow::ip::tcp::acceptor::acceptor<> acceptor;
 
 template<typename AcceptorType = acceptor>
-struct aspect: fas::aspect<
+struct aspect1: fas::aspect<
   fas::type< _io_service_type_, ::iow::asio::io_service>,
   fas::type< ::iow::io::_options_type_, options>,
   fas::value< _context_, context<AcceptorType> >,

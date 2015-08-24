@@ -9,11 +9,14 @@ namespace iow{ namespace ip{ namespace tcp{ namespace server{
 
 template< typename AcceptorType = acceptor, typename A = fas::aspect<> >
 class server
-  : public ::iow::io::basic_io< typename fas::merge_aspect< A, aspect<AcceptorType> >::type >
+  : private ::iow::io::basic_io< typename fas::merge_aspect< A, aspect1<AcceptorType> >::type >
 {
 public:
-  typedef ::iow::io::basic_io< typename fas::merge_aspect< A, aspect<AcceptorType> >::type > super;
+  typedef ::iow::io::basic_io< typename fas::merge_aspect< A, aspect1<AcceptorType> >::type > super;
   typedef typename super::aspect::template advice_cast<_io_service_type_>::type io_service_type;
+  
+  typedef typename super::aspect aspect;
+  using super::get_aspect;
 
   server( io_service_type& io)
     : _io_service(io)
@@ -33,7 +36,6 @@ public:
     //opt.acceptor.connection_options = opt.connection;
     this->start_(*this, opt);
   }
-  
 
 public:
   io_service_type& _io_service;

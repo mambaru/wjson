@@ -7,8 +7,8 @@ namespace iow{ namespace ip{ namespace tcp{ namespace acceptor{
 struct options:
   ::iow::io::acceptor::options< ::iow::ip::tcp::connection::options >
 {
-  std::string port;
-  int backlog = 1024;
+  //std::string port;
+  // int backlog = 1024;
 };
 
 }}}}

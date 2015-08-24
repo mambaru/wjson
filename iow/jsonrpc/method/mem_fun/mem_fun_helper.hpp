@@ -13,10 +13,17 @@ inline auto mem_fun_make_callback( std::function< void(std::unique_ptr<Result>, 
 {
   if (cb==nullptr)
     return nullptr;
-    
+
   return [cb]( std::unique_ptr<Result> resp)
   {
-    cb( std::move(resp), nullptr);
+    if ( resp != nullptr )
+    {
+      cb( std::move(resp), nullptr);
+    }
+    else
+    {
+      cb( nullptr, std::make_unique< ::iow::jsonrpc::error >( ::iow::jsonrpc::bad_gateway() ) );
+    }
   };
 }
 

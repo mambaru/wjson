@@ -13,7 +13,7 @@ void server()
   accept_descriptor desc = accept_descriptor(io_service);
   auto acceptor = std::make_shared<tcp_acceptor>( std::move(desc)  );
   options opt;
-  opt.host = "0.0.0.0";
+  opt.addr = "0.0.0.0";
   opt.port = "12345";
   acceptor->start(opt);
   io_service.run();

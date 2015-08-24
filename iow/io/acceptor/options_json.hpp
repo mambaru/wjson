@@ -14,15 +14,19 @@ struct options_json
   typedef options<connection_options_type> options_type;
   
   JSON_NAME(max_connections)
-  JSON_NAME(host)
   JSON_NAME(connection)
+  JSON_NAME(addr)
+  JSON_NAME(port)
+  JSON_NAME(backlog)
   
   typedef json::object<
     options_type,
     json::member_list<
       json::member< n_connection, options_type, connection_options_type, &options_type::connection, connection_options_json>,
       json::member< n_max_connections, options_type, int, &options_type::max_connections >,
-      json::member< n_host, options_type, std::string, &options_type::host >
+      json::member< n_addr, options_type, std::string, &options_type::addr>,
+      json::member< n_port, options_type, std::string, &options_type::port>,
+      json::member< n_backlog, options_type, int, &options_type::backlog >
     >
   > type;
   typedef typename type::target target;

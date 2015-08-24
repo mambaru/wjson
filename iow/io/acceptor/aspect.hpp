@@ -40,7 +40,7 @@ struct ad_initialize
     typedef typename T::aspect::template advice_cast< _context_ >::type context_type;
     context_type& context = t.get_aspect().template get<_context_>();
     context.manager = std::make_shared<typename context_type::manager_type>();
-    context.addr = opt.host;
+    context.addr = opt.addr;
     context.port = opt.port;
     context.backlog = opt.backlog;
 
@@ -60,9 +60,7 @@ struct ad_initialize
   }
 };
 
-struct _resolve_and_start_;
-struct _acceptor_start_;
-struct _set_acceptor_options_;
+/*
 struct _set_reuse_address_;
 struct _sync_resover_;
 
@@ -80,7 +78,7 @@ struct ad_sync_resover
     return endpoint;
   }
 };
-
+*/
 
 struct ad_resolve_and_start
 {
@@ -114,6 +112,7 @@ struct ad_acceptor_start
 };
 
 // в tcp
+/*
 struct ad_set_reuse_address
 {
   template<typename T>
@@ -123,6 +122,7 @@ struct ad_set_reuse_address
     t.descriptor().set_option( iow::asio::ip::tcp::acceptor::reuse_address(true) );
   }
 };
+*/
 
 struct aspect_base: fas::aspect<
   ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
@@ -137,12 +137,12 @@ struct aspect_base: fas::aspect<
   fas::advice< _accept_handler_, ad_accept_handler>,
 
 #warning TODO: часть в tcp 
-  fas::advice< _sync_resover_, ad_sync_resover>,
+  //fas::advice< _sync_resover_, ad_sync_resover>,
   fas::group<  ::iow::io::_after_start_, _resolve_and_start_>,
   fas::advice< _resolve_and_start_, ad_resolve_and_start>,
-  fas::advice< _acceptor_start_, ad_acceptor_start>,
-  fas::group< _set_acceptor_options_, _set_reuse_address_>,
-  fas::advice< _set_reuse_address_, ad_set_reuse_address>
+  fas::advice< _acceptor_start_, ad_acceptor_start>// ,
+  //fas::group< _set_acceptor_options_, _set_reuse_address_>,
+  //fas::advice< _set_reuse_address_, ad_set_reuse_address>
 >{};
 
 template<typename ConnectionType>
