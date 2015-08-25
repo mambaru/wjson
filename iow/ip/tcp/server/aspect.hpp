@@ -46,6 +46,7 @@ struct ad_initialize
     }
     //cntx.acceptor->initialize(opt); 
     //std::cout << "server::ad_initialize sep=[" << opt.connection_options.reader.sep.size() << "]" << std::endl;
+    cntx.acceptor->listen(opt);
     cntx.acceptor->start(opt);
   }
 };

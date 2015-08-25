@@ -60,7 +60,7 @@ UNIT(stream_holder_unit, "")
   t << message("start1");
   h1->start(opt);
   t << message("start2");
-  h2->initialize(opt);
+  h2->reconfigure(opt);
   t << message("service.run()...");
   service.run();
   t << message("...service.run()");

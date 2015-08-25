@@ -82,10 +82,10 @@ public:
   }
   
   template<typename O>
-  void initialize(O&& opt)
+  void reconfigure(O&& opt)
   {
     std::lock_guard< typename super::mutex_type > lk( super::mutex() );
-    super::initialize_(*this, std::forward<O>(opt));
+    super::reconfigure_(*this, std::forward<O>(opt));
   }
 
 

@@ -70,12 +70,11 @@ public:
     this->start_(*this, std::forward<O>(opt));
   }
 
-  // TODO: reconfigure ???
   template<typename O>
-  void initialize(O&& opt)
+  void reconfigure(O&& opt)
   {
     std::lock_guard< mutex_type > lk(_mutex);
-    this->initialize_(*this, std::forward<O>(opt));
+    this->reconfigure_(*this, std::forward<O>(opt));
   }
 
   void stop()
@@ -142,7 +141,7 @@ public:
   }
 
   template<typename T, typename O>
-  void initialize_(T& t, O&& opt )
+  void reconfigure_(T& t, O&& opt )
   {
     //!!! t.get_aspect().template gete<_initialize_>()(t, std::forward<O>(opt) );
     // Определяет пользователь

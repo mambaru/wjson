@@ -2,6 +2,7 @@
 
 #include <iow/ip/tcp/server/aspect.hpp>
 #include <iow/io/basic_io.hpp>
+#include <iow/io/descriptor/mtdup.hpp>
 #include <iow/asio.hpp>
 #include <fas/aop.hpp>
 

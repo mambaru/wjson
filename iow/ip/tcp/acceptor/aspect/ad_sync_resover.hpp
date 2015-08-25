@@ -7,15 +7,13 @@ namespace iow{ namespace ip{ namespace tcp{ namespace acceptor{
 
 struct ad_sync_resover
 {
-  template<typename T>
-  ::iow::asio::ip::tcp::endpoint operator()(T& t)
+  template<typename T, typename Opt>
+  ::iow::asio::ip::tcp::endpoint operator()(T& t, const Opt& opt)
   {
-    using ::iow::io::acceptor::_context_;
-    const auto& context = t.get_aspect().template get<_context_>();
     ::iow::asio::ip::tcp::resolver resolver( t.descriptor().get_io_service() );
     ::iow::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
-      context.addr, 
-      context.port
+      opt.addr, 
+      opt.port
     });
     return endpoint;
   }

@@ -1,6 +1,7 @@
 #pragma once
 #include <iow/io/io_base.hpp>
 #include <iow/io/descriptor/tags.hpp>
+#include <unistd.h>
 
 namespace iow{ namespace io{ namespace descriptor{
 
@@ -13,24 +14,25 @@ public:
   typedef holder<A> self;
   typedef io_base<A> super;
 
+  /*
 private:
   using super::reset;
   using super::start;
-  using super::initialize;
+  using super::reconfigure;
   using super::stop;
   using super::shutdown;
-
-public:  
+*/
+public:
   typedef typename super::mutex_type mutex_type;
   typedef typename super::aspect::template advice_cast<_descriptor_type_>::type descriptor_type;
 
 public:
-  
+
   holder(descriptor_type&& desc)
     : super()
     , _descriptor( std::forward<descriptor_type>(desc))
   {}
-  
+
   void attach(descriptor_type&& desc)
   {
     _descriptor = std::forward<descriptor_type>(desc);
@@ -42,9 +44,9 @@ public:
   }
 
   const descriptor_type& descriptor() const { return _descriptor;}
-  
+
   descriptor_type& descriptor() { return _descriptor;}
-  
+
   void reset()
   {
     std::lock_guard< mutex_type > lk( super::mutex() );
@@ -59,10 +61,10 @@ public:
   }
 
   template<typename O>
-  void initialize(O&& opt)
+  void reconfigure(O&& opt)
   {
     std::lock_guard< mutex_type > lk( super::mutex() );
-    super::initialize_(*this, std::forward<O>(opt));
+    super::reconfigure_(*this, std::forward<O>(opt));
   }
 
   void stop()
@@ -78,6 +80,38 @@ public:
     super::shutdown_(*this, std::forward<Handler>(handler));
   }
 
+  template<typename Descriptor, typename IOServiceType, typename ProtocolType>
+  Descriptor dup(IOServiceType& io, const ProtocolType& protocol)
+  {
+    std::lock_guard< mutex_type > lk( super::mutex() );
+    return std::move(this->dup_<Descriptor>(io, protocol));
+  }
+
+  template<typename Descriptor, typename IOServiceType>
+  Descriptor dup(IOServiceType& io)
+  {
+    typedef Descriptor dup_descriptor_type;
+    typedef typename dup_descriptor_type::protocol_type dup_protocol_type;
+    return std::move( this->dup<Descriptor>(io, dup_protocol_type()) );
+  }
+
+  template<typename Descriptor>
+  Descriptor dup()
+  {
+    return std::move( this->dup<Descriptor>(this->get_io_service()) );
+  }
+
+protected:
+
+  template<typename Descriptor, typename IOServiceType, typename ProtocolType>
+  Descriptor dup_(IOServiceType& io, const ProtocolType& protocol)
+  {
+    typedef Descriptor dup_descriptor_type;
+    typedef typename dup_descriptor_type::native_handle_type dup_native_type;
+    dup_native_type d = ::dup( this->descriptor().native_handle() );
+    dup_descriptor_type dup_descriptor(io, protocol, d);
+    return std::move(dup_descriptor);
+  }
 private:
   descriptor_type _descriptor;
 };

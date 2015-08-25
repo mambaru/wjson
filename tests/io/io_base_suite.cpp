@@ -69,7 +69,7 @@ public:
   void start(int val) { this->start_(*this, val ); }
   void stop() { this->stop_(*this); }
   void reset() { this->reset_(*this); }
-  void initialize(int val) { this->initialize_(*this, val ); }
+  void reconfigure(int val) { this->reconfigure_(*this, val ); }
   virtual void virt() { ++virtval ;};
   int  value = -1;
   int  resetval = 0;
@@ -82,7 +82,7 @@ UNIT(init, "")
 {
   using namespace fas::testing;
   iobase io;
-  io.initialize( 10 );
+  io.reconfigure( 10 );
   t << is_true< assert >(io.virtval==1) << FAS_TESTING_FILE_LINE;
   t << is_true< assert >(io.resetval==0) << FAS_TESTING_FILE_LINE;
   t << is_false< assert >(io.started) << FAS_TESTING_FILE_LINE;

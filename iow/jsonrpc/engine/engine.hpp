@@ -34,11 +34,11 @@ public:
   }
   
   template<typename O>
-  void initialize(O&& opt)
+  void reconfigure(O&& opt)
   {
     std::lock_guard< typename super::mutex_type > lk( super::mutex() );
     _direct_mode = !opt.allow_callback;
-    super::initialize_(*this, std::forward<O>(opt));
+    super::reconfigure_(*this, std::forward<O>(opt));
   }
   
   void stop()
