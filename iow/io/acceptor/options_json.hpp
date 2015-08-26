@@ -6,12 +6,12 @@
 
 namespace iow{ namespace io{ namespace acceptor{
 
-template<typename ConnectionsOptionsJson>
+template<typename ConnectionType, typename ConnectionsOptionsJson>
 struct options_json
 {
   typedef ConnectionsOptionsJson connection_options_json;
   typedef typename connection_options_json::target connection_options_type;
-  typedef options<connection_options_type> options_type;
+  typedef options<ConnectionType, connection_options_type> options_type;
   
   JSON_NAME(max_connections)
   JSON_NAME(connection)

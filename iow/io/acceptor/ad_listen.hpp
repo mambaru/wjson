@@ -10,7 +10,7 @@ struct ad_listen
   template<typename T, typename Opt>
   void operator()(T& t, const Opt& opt)
   {
-    const auto endpoint = t.get_aspect().template get<_sync_resover_>()(t, opt);
+    const auto endpoint = t.get_aspect().template get<_sync_resolver_>()(t, opt);
 
     // такая же последовательность для local::stream_protocol::acceptor
     t.descriptor().open(endpoint.protocol());

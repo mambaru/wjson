@@ -1,40 +1,37 @@
 #pragma once
 
-#include <fas/aop.hpp>
-#include <iow/io/basic/aspect.hpp>
-#include <ucommon/socket.h>
+#include <iow/io/descriptor/mtdup.hpp>
 
 namespace iow{ namespace io{ namespace server{
   
-// server{ stream{ manager??? } } или в acceptors или manager??? (descriptor::manager???? - да!!!)
-struct options
+template<typename Acceptor>
+class server
+  : private ::iow::io::descriptor::mtdup<Acceptor>
 {
-  std::string host;
-  std::string port;
-  int threads;
-  // TODO: incoming_handler;
-};
-
-struct ad_start_server
-{
-  template<typename T, typename O>
-  void operator()(T& t, const O& opt)
-  {
-    
-  }
-};
-
-
-struct aspect: fas::aspect<
-  ::iow::io::basic::aspect<>::advice_list
->{};
-
-template<typename A = ::fas::aspect<> >
-class server:
-{
+  typedef ::iow::io::descriptor::mtdup<Acceptor> super;
   
+public: 
+  typedef typename super::io_service_type io_service_type;
+  typedef Acceptor acceptor_type;
+  typedef std::shared_ptr<acceptor_type> acceptor_ptr;
+  typedef typename acceptor_type::descriptor_type descriptor_type;
+  
+  server(io_service_type& io)
+    : super( std::move( descriptor_type(io) ) )
+  {}
+  
+  template<typename Opt>
+  void start(Opt&& opt)
+  {
+    super::origin()->listen(opt);
+    super::start(opt);
+  }
+
+  void stop()
+  {
+    super::stop();
+  }
+
 };
-
-
   
 }}}

@@ -1,12 +1,18 @@
 #pragma once
 
 #include <iow/io/descriptor/manager.hpp>
+#include <iow/io/descriptor/context.hpp>
 #include <memory>
 
 namespace iow{ namespace io{ namespace acceptor{
 
 template<typename ConnectionType>
 struct context
+  : public ::iow::io::descriptor::context<
+      size_t,
+      ConnectionType,
+      std::shared_ptr<ConnectionType>
+    >
 {
   typedef ConnectionType connection_type;
   typedef typename connection_type::options_type connection_options_type;

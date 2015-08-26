@@ -2,6 +2,7 @@
 
 #include <iow/ip/tcp/acceptor/options.hpp>
 #include <iow/ip/tcp/connection/options_json.hpp>
+#include <iow/ip/tcp/connection/connection.hpp>
 #include <iow/io/acceptor/options_json.hpp>
 #include <iow/json/json.hpp>
 
@@ -15,7 +16,12 @@ struct options_json
   typedef json::object<
     options,
     json::member_list<
-      json::base< ::iow::io::acceptor::options_json< ::iow::ip::tcp::connection::options_json > >/*,
+      json::base< 
+        ::iow::io::acceptor::options_json< 
+          ::iow::ip::tcp::acceptor::connection, 
+          ::iow::ip::tcp::connection::options_json 
+        > 
+      >/*,
       json::member< n_port, options, std::string, &options::port >,
       json::member< n_backlog, options, int, &options::backlog >*/
     >

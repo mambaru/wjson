@@ -27,9 +27,10 @@ struct aspect: fas::aspect<
   fas::advice< ::iow::io::reader::stream::_incoming_, ::iow::io::descriptor::ad_incoming_handler>,
   fas::alias< ::iow::io::descriptor::_outgoing_, ::iow::io::writer::_output_>,
   ::iow::io::connection::asio::aspect,
-  fas::advice< _initialize_, ::iow::io::descriptor::ad_initialize<true, ::iow::io::stream::_initialize_> >,
+  /*fas::advice< _initialize_, ::iow::io::descriptor::ad_initialize<true, ::iow::io::stream::_initialize_> >,
   fas::group< ::iow::io::_initialize_, _initialize_>,
-  ::iow::io::descriptor::aspect< context >
+  */
+  ::iow::io::descriptor::aspect< context, ::iow::io::stream::_initialize_, true >
 >{};
   
 }}}

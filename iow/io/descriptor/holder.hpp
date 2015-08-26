@@ -67,6 +67,13 @@ public:
     super::reconfigure_(*this, std::forward<O>(opt));
   }
 
+  void close()
+  {
+    std::lock_guard< mutex_type > lk( super::mutex() );
+    this->close_(*this);
+  }
+
+  
   void stop()
   {
     std::lock_guard< mutex_type > lk( super::mutex() );
@@ -92,7 +99,7 @@ public:
   {
     typedef Descriptor dup_descriptor_type;
     typedef typename dup_descriptor_type::protocol_type dup_protocol_type;
-    return std::move( this->dup<Descriptor>(io, dup_protocol_type()) );
+    return std::move( this->dup<Descriptor>(io, dup_protocol_type::v4()) );
   }
 
   template<typename Descriptor>
@@ -102,6 +109,12 @@ public:
   }
 
 protected:
+  
+  template<typename T>
+  void close_(T& t)
+  {
+    t.get_aspect().template get<_close_>()(t);
+  }
 
   template<typename Descriptor, typename IOServiceType, typename ProtocolType>
   Descriptor dup_(IOServiceType& io, const ProtocolType& protocol)

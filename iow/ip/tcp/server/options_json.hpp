@@ -15,16 +15,13 @@ struct options_json
   typedef ::iow::ip::tcp::connection::options_json connection_option_json;
   typedef ::iow::ip::tcp::connection::options connection_options;
   
+  JSON_NAME(threads)
   
-  JSON_NAME(connection)
-  JSON_NAME(acceptor)
   typedef json::object<
     options,
     json::member_list<
-      json::base< acceptor_option_json >
-      /*json::member<n_acceptor,   options, acceptor_options, &options::acceptor, acceptor_option_json>,
-      json::member<n_connection, options, connection_options, &options::connection, connection_option_json>
-      */
+      json::base< acceptor_option_json >,
+      json::member<n_threads, options, int, &options::threads>
     >
   > type;
   typedef type::target target;

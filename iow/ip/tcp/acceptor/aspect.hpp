@@ -14,8 +14,8 @@ namespace iow{ namespace ip{ namespace tcp{ namespace acceptor{
 
 struct aspect : fas::aspect<
   fas::advice< _set_reuse_address_, ad_set_reuse_address>,
-  fas::advice< _sync_resover_, ad_sync_resover>,
-  fas::alias< ::iow::io::acceptor::_sync_resover_, _sync_resover_>,
+  fas::advice< _sync_resolver_, ad_sync_resolver>,
+  fas::alias< ::iow::io::acceptor::_sync_resolver_, _sync_resolver_>,
   fas::group< ::iow::io::acceptor::_set_acceptor_options_, _set_reuse_address_>,
   fas::type< ::iow::io::_options_type_, options >,
   fas::type< ::iow::io::descriptor::_descriptor_type_, iow::asio::ip::tcp::acceptor >

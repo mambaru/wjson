@@ -18,6 +18,7 @@
 #include <iow/io/writer/asio/aspect.hpp>
 #include <iow/io/stream/aspect.hpp>
 #include <iow/io/descriptor/manager.hpp>
+#include <iow/io/descriptor/aspect.hpp>
 #include <iow/io/descriptor/ad_initialize.hpp>
 #include <iow/asio.hpp>
 #include <iow/system.hpp>
@@ -31,8 +32,9 @@ namespace iow{ namespace io{ namespace acceptor{
 struct aspect_base: fas::aspect<
   ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
   ::iow::io::reader::aspect,
+  
   fas::advice< ::iow::io::reader::_next_, ad_next>,
-  fas::advice< ::iow::io::_initialize_, ad_initialize>,
+  //fas::advice< ::iow::io::_initialize_, ad_initialize>,
   fas::advice< ::iow::io::reader::_make_handler_, ad_make_handler>,
   fas::advice< ::iow::io::reader::_read_some_, ad_async_accept>,
   fas::advice< ::iow::io::reader::_confirm_,  ad_confirm>,
@@ -47,7 +49,10 @@ struct aspect_base: fas::aspect<
 template<typename ConnectionType>
 struct aspect: fas::aspect<
   aspect_base::advice_list,
-  fas::value< _context_, context<ConnectionType> >
+  fas::advice<_initialize_, ad_initialize>,
+  ::iow::io::descriptor::aspect< context<ConnectionType>, _initialize_, false>,
+  ::fas::alias<_context_, ::iow::io::descriptor::_context_>
+  // fas::value< _context_, context<ConnectionType> >
 >{};
 
 }}}

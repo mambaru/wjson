@@ -8,7 +8,7 @@
 namespace iow{ namespace io{ namespace descriptor{ 
 
 // Универсальный для всех
-template<bool MakeOutgoingHandler, typename TgInitialize>
+template<typename TgInitialize, bool MakeOutgoingHandler>
 struct ad_initialize
 {
   template<typename T, typename O>

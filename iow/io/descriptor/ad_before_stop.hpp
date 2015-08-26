@@ -4,6 +4,15 @@
 
 namespace iow{ namespace io{ namespace descriptor{ 
 
+struct ad_close
+{
+  template<typename T>
+  void operator()(T& t)
+  {
+    t.descriptor().close();
+  }
+};
+
 struct ad_before_stop
 {
   template<typename T>
@@ -14,7 +23,7 @@ struct ad_before_stop
     {
       cntx.shutdown_handler( t.get_id_(t) );
     }
-    t.descriptor().close();
+    t.get_aspect().template get<_close_>()(t);
   }
 };
 

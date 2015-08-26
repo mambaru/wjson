@@ -10,7 +10,7 @@ struct ad_resolve_and_start
   template<typename T>
   void operator()(T& t)
   {
-    auto endpoint = t.get_aspect().template get<_sync_resover_>()(t);
+    auto endpoint = t.get_aspect().template get<_sync_resolver_>()(t);
     t.get_aspect().template get<_acceptor_start_>()(t, endpoint);
   }
 };
