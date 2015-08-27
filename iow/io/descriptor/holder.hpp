@@ -6,12 +6,12 @@
 namespace iow{ namespace io{ namespace descriptor{
 
 template<typename A>
-class holder
+class holder_base
   : public io_base<A>
-  , public std::enable_shared_from_this< holder<A> >
+//  , public std::enable_shared_from_this< holder<A> >
 {
 public:
-  typedef holder<A> self;
+  typedef holder_base<A> self;
   typedef io_base<A> super;
 
   /*
@@ -28,7 +28,7 @@ public:
 
 public:
 
-  holder(descriptor_type&& desc)
+  holder_base(descriptor_type&& desc)
     : super()
     , _descriptor( std::forward<descriptor_type>(desc))
   {}
@@ -47,45 +47,7 @@ public:
 
   descriptor_type& descriptor() { return _descriptor;}
 
-  void reset()
-  {
-    std::lock_guard< mutex_type > lk( super::mutex() );
-    super::reset_(*this);
-  }
 
-  template<typename O>
-  void start(O&& opt)
-  {
-    std::lock_guard< mutex_type > lk( super::mutex() );
-    super::start_(*this, std::forward<O>(opt));
-  }
-
-  template<typename O>
-  void reconfigure(O&& opt)
-  {
-    std::lock_guard< mutex_type > lk( super::mutex() );
-    super::reconfigure_(*this, std::forward<O>(opt));
-  }
-
-  void close()
-  {
-    std::lock_guard< mutex_type > lk( super::mutex() );
-    this->close_(*this);
-  }
-
-  
-  void stop()
-  {
-    std::lock_guard< mutex_type > lk( super::mutex() );
-    super::stop_(*this);
-  }
-
-  template<typename Handler>
-  void shutdown(Handler&& handler)
-  {
-    std::lock_guard< mutex_type > lk( super::mutex() );
-    super::shutdown_(*this, std::forward<Handler>(handler));
-  }
 
   template<typename Descriptor, typename IOServiceType, typename ProtocolType>
   Descriptor dup(IOServiceType& io, const ProtocolType& protocol)
@@ -127,6 +89,64 @@ protected:
   }
 private:
   descriptor_type _descriptor;
+};
+
+
+template<typename A>
+class holder
+  : public holder_base<A>
+  , public std::enable_shared_from_this< holder<A> >
+{
+  typedef holder_base<A> super;
+public:
+  typedef typename super::mutex_type mutex_type;
+  typedef typename super::descriptor_type descriptor_type;
+  
+  holder(descriptor_type&& desc)
+    : super(std::move(desc) )
+  {}
+
+  void reset()
+  {
+    std::lock_guard< mutex_type > lk( super::mutex() );
+    super::reset_(*this);
+  }
+
+  template<typename O>
+  void start(O&& opt)
+  {
+    std::lock_guard< mutex_type > lk( super::mutex() );
+    super::start_(*this, std::forward<O>(opt));
+  }
+
+  template<typename O>
+  void reconfigure(O&& opt)
+  {
+    std::lock_guard< mutex_type > lk( super::mutex() );
+    super::reconfigure_(*this, std::forward<O>(opt));
+  }
+
+  void close()
+  {
+    std::lock_guard< mutex_type > lk( super::mutex() );
+    this->close_(*this);
+  }
+
+  
+  void stop()
+  {
+    std::lock_guard< mutex_type > lk( super::mutex() );
+    super::stop_(*this);
+  }
+
+    template<typename Handler>
+  void shutdown(Handler&& handler)
+  {
+    std::lock_guard< mutex_type > lk( super::mutex() );
+    super::shutdown_(*this, std::forward<Handler>(handler));
+  }
+
+  
 };
 
 }}}

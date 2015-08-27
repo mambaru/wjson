@@ -17,6 +17,7 @@ struct options_json
   JSON_NAME(port)
   JSON_NAME(threads)
   JSON_NAME(connection)
+  JSON_NAME(reconnect_timeout_ms)
   
   typedef json::object<
     option_type,
@@ -24,7 +25,8 @@ struct options_json
       json::member< n_connection, option_type, connection_options, &option_type::connection, connection_json>,
       json::member< n_addr, option_type, std::string, &option_type::addr>,
       json::member< n_port, option_type, std::string, &option_type::port>,
-      json::member< n_threads, option_type, int, &option_type::threads>
+      json::member< n_threads, option_type, int, &option_type::threads>,
+      json::member< n_reconnect_timeout_ms, option_type, time_t, &option_type::reconnect_timeout_ms>
     >
   > type;
   typedef typename type::target target;
