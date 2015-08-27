@@ -15,15 +15,37 @@ struct ad_connect
   void operator()(T& t, const Opt& opt)
   {
     const auto endpoint = t.get_aspect().template get<_sync_resolver_>()(t, opt);
-    auto h = opt.connect_handler;
+    auto ch = opt.connect_handler;
+    auto er = opt.error_handler;
     std::weak_ptr<T> wthis = t.shared_from_this();
-    t.descriptor().async_connect( endpoint, t.wrap([wthis, h](const ::iow::system::error_code& /*ec*/)
+    
+    auto tmp = t.wrap([wthis, opt](const ::iow::system::error_code& ec)
     {
       if ( auto p = wthis.lock() )
       {
-        
+        if (!ec)
+        {
+          if ( opt.connect_handler )
+          {
+            std::cout << "OK MAN " << opt.addr <<":"<< opt.port << ":" << ec.message() << std::endl;
+            opt.connect_handler();
+          }
+        }
+        else
+        {
+          if ( opt.error_handler )
+          {
+            std::cout << "FUCK MAN " << ec.message() << std::endl;
+            opt.error_handler(ec);
+          }
+        }
       }
-    }));
+    });
+#warning async_connect всегда возвращает OK. Поймать можно только при попытке прочитать
+    ::iow::system::error_code ec;
+    t.descriptor().connect( endpoint, ec);
+    tmp(ec);
+    //::iow::asio::async_connect(t.descriptor(), endpoint, tmp);
   }
 };
 

@@ -13,7 +13,7 @@ struct ad_error_handler
   template<typename T, typename P>
   void operator()(T& t, P p, ::iow::system::error_code ec)
   {
-    std::cout << "_error_handler_" << std::endl;
+    std::cout << "_error_handler_ " << ec.message() << std::endl;
     t.get_aspect().template get< ::iow::io::reader::_rollback_>()(t, std::move(p));
     t.get_aspect().template gete< ::iow::io::_on_error_ >()(t, ec);
     t.get_aspect().template get< ::iow::io::_stop_>()(t);
