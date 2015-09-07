@@ -4,15 +4,6 @@
 
 namespace iow{ namespace io{ namespace descriptor{ 
 
-struct ad_close
-{
-  template<typename T>
-  void operator()(T& t)
-  {
-    t.descriptor().close();
-  }
-};
-
 struct ad_before_stop
 {
   template<typename T>

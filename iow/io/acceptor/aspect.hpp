@@ -32,17 +32,12 @@ namespace iow{ namespace io{ namespace acceptor{
 struct aspect_base: fas::aspect<
   ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
   ::iow::io::reader::aspect,
-  
   fas::advice< ::iow::io::reader::_next_, ad_next>,
-  //fas::advice< ::iow::io::_initialize_, ad_initialize>,
   fas::advice< ::iow::io::reader::_make_handler_, ad_make_handler>,
   fas::advice< ::iow::io::reader::_read_some_, ad_async_accept>,
   fas::advice< ::iow::io::reader::_confirm_,  ad_confirm>,
   fas::stub<   ::iow::io::reader::_handler_>,
   fas::advice< _accept_handler_, ad_accept_handler>,
-//  fas::group<  ::iow::io::_after_start_, _resolve_and_start_>,
-//  fas::advice< _resolve_and_start_, ad_resolve_and_start>,
-//  fas::advice< _acceptor_start_, ad_acceptor_start>
   fas::advice< _listen_, ad_listen>
 >{};
 
@@ -52,7 +47,6 @@ struct aspect: fas::aspect<
   fas::advice<_initialize_, ad_initialize>,
   ::iow::io::descriptor::aspect< context<ConnectionType>, _initialize_, false>,
   ::fas::alias<_context_, ::iow::io::descriptor::_context_>
-  // fas::value< _context_, context<ConnectionType> >
 >{};
 
 }}}

@@ -9,8 +9,17 @@
 #include <iow/logger/log_writer.hpp>
 #include <sstream>
 #include <string>
+#include <vector>
 #include <memory>
 #include <iostream>
+
+namespace std{
+  inline std::ostream& operator << (std::ostream& os, std::unique_ptr< std::vector<char> >& d)
+  {
+    os << std::string( d->begin(), d->end() );
+    return os;
+  }
+}
 
 namespace iow{
 

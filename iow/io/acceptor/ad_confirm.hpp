@@ -22,7 +22,7 @@ struct ad_confirm
       if ( auto pthis = wthis.lock() )
       {
         std::lock_guard<typename T::mutex_type> lk(pthis->mutex());
-        pthis->get_aspect().template get<_context_>().manager->close(id);
+        pthis->get_aspect().template get<_context_>().manager->erase(id);
       }
     });
 

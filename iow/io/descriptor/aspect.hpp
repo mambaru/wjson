@@ -3,6 +3,7 @@
 #include <iow/io/basic/aspect.hpp>
 #include <iow/io/descriptor/tags.hpp>
 #include <iow/io/descriptor/ad_before_stop.hpp>
+#include <iow/io/descriptor/ad_close.hpp>
 #include <iow/io/descriptor/ad_after_start.hpp>
 #include <iow/io/descriptor/ad_incoming_handler.hpp>
 #include <iow/io/descriptor/ad_initialize.hpp>

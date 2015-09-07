@@ -8,20 +8,11 @@ namespace iow{ namespace io{ namespace descriptor{
 template<typename A>
 class holder_base
   : public io_base<A>
-//  , public std::enable_shared_from_this< holder<A> >
 {
 public:
   typedef holder_base<A> self;
   typedef io_base<A> super;
 
-  /*
-private:
-  using super::reset;
-  using super::start;
-  using super::reconfigure;
-  using super::stop;
-  using super::shutdown;
-*/
 public:
   typedef typename super::mutex_type mutex_type;
   typedef typename super::aspect::template advice_cast<_descriptor_type_>::type descriptor_type;
@@ -35,19 +26,19 @@ public:
 
   void attach(descriptor_type&& desc)
   {
+    std::lock_guard< mutex_type > lk( super::mutex() );
     _descriptor = std::forward<descriptor_type>(desc);
   }
 
   descriptor_type&& detach()
   {
+    std::lock_guard< mutex_type > lk( super::mutex() );
     return std::move(_descriptor);
   }
 
   const descriptor_type& descriptor() const { return _descriptor;}
 
   descriptor_type& descriptor() { return _descriptor;}
-
-
 
   template<typename Descriptor, typename IOServiceType, typename ProtocolType>
   Descriptor dup(IOServiceType& io, const ProtocolType& protocol)
