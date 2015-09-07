@@ -42,10 +42,10 @@ inline void only_for_log( Args&& ... ){}
 #else
 # ifdef IOW_DISABLE_DEBUG_LOG         // отключить в Debug режиме
 #   define IOW_WRITE_LOG_DEBUG( name, X )
-#   define IOW_WRITE_LOG_TRACE( X )         
+#   define IOW_WRITE_LOG_TRACE( name, X )         
 # else
 #   define IOW_WRITE_LOG_DEBUG( name, X )      IOW_WRITE_LOG(name, "DEBUG",   X )
-#   define IOW_WRITE_LOG_TRACE( X )            IOW_WRITE_LOG(name, "TRACE",   X )
+#   define IOW_WRITE_LOG_TRACE( name, X )      IOW_WRITE_LOG(name, "TRACE",   X )
 # endif
 #endif
 

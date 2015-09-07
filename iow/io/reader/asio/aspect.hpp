@@ -2,6 +2,7 @@
 
 #include <iow/io/reader/asio/ad_read_handler.hpp>
 #include <iow/io/reader/asio/ad_make_handler.hpp>
+#include <iow/io/reader/asio/ad_error_handler.hpp>
 #include <iow/io/reader/tags.hpp>
 #include <iow/io/reader/asio/tags.hpp>
 

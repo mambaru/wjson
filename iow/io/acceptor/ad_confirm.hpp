@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iow/io/acceptor/tags.hpp>
+#include <iow/logger/logger.hpp>
 #include <memory>
 #include <iostream>
 
@@ -27,6 +28,7 @@ struct ad_confirm
 
     p->start(opt);
     t.get_aspect().template get<_context_>().manager->attach(p->get_id(), p);
+    IOW_LOG_TRACE("iow::io::acceptor::ad_confirm " )
   }
 
 private:

@@ -2,6 +2,9 @@
 
 #include <iow/io/descriptor/mtdup.hpp>
 #include <iow/logger/logger.hpp>
+
+#include <memory>
+
 namespace iow{ namespace io{ namespace client{
   
 template<typename Connection>
@@ -14,6 +17,7 @@ class client
   typedef boost::asio::deadline_timer reconnect_timer;
 public:
   typedef typename super::io_service_type io_service_type;
+  typedef typename super::mutex_type mutex_type;
   typedef Connection connection_type;
   typedef std::shared_ptr<connection_type> acceptor_ptr;
   typedef typename connection_type::descriptor_type descriptor_type;
@@ -51,6 +55,15 @@ public:
   {
     super::stop();
   }
+  
+  /*
+  template<typename D>
+  void write(D d)
+  {
+    std::lock_guard<mutex_type> lk(super::mutex());
+    this->get_aspect().template get< ::iow::io::descriptor::_outgoing_ >()(*this, std::move(d) );
+  }
+  */
 
 private:
   

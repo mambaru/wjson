@@ -95,9 +95,14 @@ public:
     _services.clear();
   }
 
+  mutex_type& mutex() const
+  {
+    return _mutex;
+  }
+  
 private:
   
-  mutex_type _mutex;
+  mutable mutex_type _mutex;
   holder_ptr _origin;
   holder_list _dup_list;
   thread_list _threads;
