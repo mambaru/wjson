@@ -37,7 +37,7 @@ public:
   auto wrap(Handler&& h)
     -> typename holder_type::template result_of<_wrap_, Handler>::type
   {
-    return std::move( super::wrap( std::forward<Handler>(h)) );
+    return std::move( _origin->wrap( std::forward<Handler>(h)) );
   }
 
 
