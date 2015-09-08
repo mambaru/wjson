@@ -15,7 +15,9 @@ class client
   typedef ::iow::io::descriptor::mtdup<Connection> super;
   typedef client<Connection> self;
   typedef boost::asio::deadline_timer reconnect_timer;
+ 
 public:
+
   typedef typename super::io_service_type io_service_type;
   typedef typename super::mutex_type mutex_type;
   typedef Connection connection_type;
@@ -30,6 +32,8 @@ public:
   template<typename Opt>
   void start(Opt&& opt)
   {
+    this->update_options_(opt);
+    
     _reconnect_timeout_ms = opt.reconnect_timeout_ms;
     auto connect_handler = opt.connect_handler;
     auto error_handler = opt.error_handler;
@@ -56,16 +60,22 @@ public:
     super::stop();
   }
   
-  /*
-  template<typename D>
-  void write(D d)
-  {
-    std::lock_guard<mutex_type> lk(super::mutex());
-    this->get_aspect().template get< ::iow::io::descriptor::_outgoing_ >()(*this, std::move(d) );
-  }
-  */
-
 private:
+  
+  template<typename Opt>
+  void update_options_(Opt& opt)
+  {
+    std::weak_ptr<self> wthis = this->shared_from_this();
+    auto startup_handler = opt.startup_handler;
+    opt.startup_handler = [wthis]
+    
+  }
+  
+  // Вызываеться при коннеекте 
+  void startup_handler_()
+  {
+    
+  }
   
   template<typename Opt>
   void start_connection_(Opt&& opt)

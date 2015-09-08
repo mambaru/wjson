@@ -7,6 +7,8 @@
 
 namespace iow{ namespace io{ namespace descriptor{
 
+
+
 template<typename Holder>
 class mtdup
 {
@@ -26,7 +28,18 @@ public:
   {
   }
 
-  holder_ptr origin() const { return _origin;}
+  holder_ptr origin() const 
+  { 
+    return _origin;
+  }
+  
+  template<typename Handler>
+  auto wrap(Handler&& h)
+    -> typename holder_type::template result_of<_wrap_, Handler>::type
+  {
+    return std::move( super::wrap( std::forward<Handler>(h)) );
+  }
+
 
   template<typename Opt>
   void start(Opt&& opt)
