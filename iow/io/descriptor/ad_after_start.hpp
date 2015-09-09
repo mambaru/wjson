@@ -4,6 +4,7 @@
 
 #include <fas/aop.hpp>
 #include <fas/integral/bool_.hpp>
+#include <iostream>
 
 namespace iow{ namespace io{ namespace descriptor{ 
 
