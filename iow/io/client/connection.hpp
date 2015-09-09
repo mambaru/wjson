@@ -25,9 +25,9 @@ struct ad_connect
       {
         if (!ec)
         {
+          std::cout << "OK MAN " << opt.addr <<":"<< opt.port << ":" << ec.message() << std::endl;
           if ( opt.connect_handler )
           {
-            std::cout << "OK MAN " << opt.addr <<":"<< opt.port << ":" << ec.message() << std::endl;
             opt.connect_handler();
           }
         }

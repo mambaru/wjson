@@ -2,7 +2,6 @@
 
 #include <iow/io/descriptor/mtdup.hpp>
 #include <iow/logger/logger.hpp>
-#include <../../cdaemon/geoip_converter/types.h>
 
 #include <memory>
 #include <cassert>
@@ -32,10 +31,9 @@ public:
   void set( io_id_t io_id, outgoing_handler_t handler)
   {
     assert(handler!=nullptr);
-    
     _handlers[io_id]=handler;
   }
-  
+
   bool has( io_id_t io_id )
   {
     return _handlers.find(io_id)!=_handlers.end();
@@ -48,10 +46,10 @@ public:
     {
       return nullptr;
     }
-    
+
     return itr->second;
   }
-  
+
   void erase( io_id_t io_id )
   {
     _handlers.erase(io_id);
@@ -59,23 +57,18 @@ public:
 
   data_ptr send(data_ptr d)
   {
-    IOW_LOG_MESSAGE("outgoing_map::send -1-")
     if ( _handlers.empty() )
     {
       return std::move(d);
     }
-    
-    IOW_LOG_MESSAGE("outgoing_map::send -2-")
+
     if ( _iterator == _handlers.end() )
     {
       _iterator = _handlers.begin();
     }
 
-    IOW_LOG_MESSAGE("outgoing_map::send -3- _iterator->second!=nullptr ?  "  << (_iterator->second!=nullptr) )
     _iterator->second( std::move(d) );
-    IOW_LOG_MESSAGE("outgoing_map::send -4-")
     ++_iterator;
-    
     return nullptr;
   }
 
@@ -97,20 +90,21 @@ public:
   typedef outgoing_map::outgoing_handler_t outgoing_handler_t;
   typedef ::iow::io::incoming_handler_t incoming_handler_t;
   typedef std::vector< data_ptr > wait_data_t;
-  
-  source(io_id_t io_id, incoming_handler_t handler, size_t wait_limit)
+
+  source(io_id_t io_id, incoming_handler_t handler, size_t outgoing_limit)
     : _source_id(io_id)
     , _source_handler(handler)
+    , _outgoing_limit(outgoing_limit)
   {
     assert(_source_handler!=nullptr);
   }
-  
+
   void reg(io_id_t io_id, outgoing_handler_t handler)
   {
     assert(handler!=nullptr);
-    
+
     _remotes.set(io_id, std::move(handler));
-    
+
     auto itr = _wait_data.begin();
     auto end = _wait_data.end();
     for ( ; itr!=end; ++itr )
@@ -121,50 +115,47 @@ public:
         break;
       }
     }
-    
+
     _wait_data.erase( _wait_data.begin(), itr );
-      
   }
 
   void unreg( io_id_t io_id )
   {
     _remotes.erase(io_id);
   }
-  
+
   data_ptr send(data_ptr d)
   {
     IOW_LOG_MESSAGE("source::send -1-")
     if ( auto dd = _remotes.send(std::move(d) ) )
     {
-      if ( _wait_data.size() < _wait_limit )
+      if ( _wait_data.size() < _outgoing_limit )
       {
-        IOW_LOG_MESSAGE("source::send -1.1- push back size=" << _wait_data.size())
         _wait_data.push_back( std::move(dd) );
       }
       else
       {
-        IOW_LOG_MESSAGE("source::send -1.1- push back FAIL size=" << _wait_data.size())
         return std::move(dd);
       }
     }
-    IOW_LOG_MESSAGE("source::send -2-")
     return nullptr;
   }
-  
+
   void recv(data_ptr d, io_id_t io_id, outgoing_handler_t outgoing)
   {
     _source_handler(std::move(d), io_id, outgoing );
-    
+    /*
     // Иногда падает на брокен пайп или подвисает и не убивается 
     std::string kuka = "Кукарача";
     outgoing( std::make_unique<data_type>(kuka.begin(), kuka.end() ) );
+    */
   }
 
 private:
   
   io_id_t _source_id;
   incoming_handler_t _source_handler;
-  size_t _wait_limit;
+  size_t _outgoing_limit;
   outgoing_map _remotes;
   wait_data_t _wait_data;
 };
@@ -198,14 +189,14 @@ public:
   void start(Opt opt)
   {
     this->update_options_(opt);
-    
+
     _reconnect_timeout_ms = opt.reconnect_timeout_ms;
-    
+
     auto connect_handler = opt.connect_handler;
     auto error_handler = opt.error_handler;
-    
+
     std::weak_ptr<self> wthis = this->shared_from_this();
-    
+
     opt.connect_handler = [connect_handler, wthis, opt](){
       IOW_LOG_MESSAGE("Client CONNECTED!!! ????")
       if ( connect_handler ) connect_handler();
@@ -255,27 +246,21 @@ private:
   {
     std::weak_ptr<self> wthis = this->shared_from_this();
     auto startup_handler = opt.connection.startup_handler;
-    
-    
+
     opt.connection.startup_handler = super::origin()->wrap([wthis, startup_handler]( io_id_t io_id, outgoing_handler_t outgoing)
     {
-      IOW_LOG_MESSAGE("Connected!!! -1-");
       assert(outgoing!=nullptr);
       if ( auto pthis = wthis.lock() )
       {
-        IOW_LOG_MESSAGE("Connected!!! -2-");
         pthis->_source->reg(io_id, outgoing );
-        IOW_LOG_MESSAGE("Connected!!! -3-");
       }
 
       if ( startup_handler != nullptr )
       {
-        IOW_LOG_MESSAGE("Connected!!! -4-");
         startup_handler( io_id, outgoing);
-        IOW_LOG_MESSAGE("Connected!!! -5-");
       }
     });
-    
+
     if ( opt.connection.incoming_handler == nullptr )
     {
       opt.connection.incoming_handler = super::origin()->wrap([wthis]( data_ptr d, io_id_t io_id, outgoing_handler_t outgoing)
@@ -303,11 +288,10 @@ class client
 {
   typedef mtconn<Connection> mtconn_t;
   typedef std::shared_ptr<mtconn_t> mtconn_ptr;
-  
   typedef typename mtconn_t::mutex_type mutex_type;
-  
+
 public:
-  
+
   typedef ::iow::io::incoming_handler_t incoming_handler_t;
   typedef typename mtconn_t::io_service_type io_service_type;
   typedef typename mtconn_t::io_id_t io_id_t;
@@ -335,13 +319,13 @@ public:
   {
     // TODO:
   }
-  
+
   // TODO: переименовать
   void reg(io_id_t io_id, incoming_handler_t handler)
   {
     this->reg_(io_id, handler);
   }
-  
+
   void send( data_ptr d, io_id_t io_id, outgoing_handler_t handler)
   {
     mtconn_ptr pconn = nullptr;
@@ -360,9 +344,9 @@ public:
     pconn->send( std::move(d), handler );
     IOW_LOG_MESSAGE("client send -2-");
   }
-  
+
 private:
-  
+
   mtconn_ptr reg_(io_id_t io_id, incoming_handler_t handler)
   {
     auto itr = _connects.find(io_id);
@@ -370,23 +354,21 @@ private:
     {
       return itr->second;
     }
-    
+
     auto pconn = _create_and_start( io_id, handler);
 
     _connects.insert( std::make_pair(io_id, pconn) );
-    
+
     return pconn;
   }
-  
+
 private:
-  
+
   std::function<mtconn_ptr(io_id_t, incoming_handler_t)> _create_and_start;
   io_service_type& _io_service;
-  
+
   typedef std::map<io_id_t, mtconn_ptr > connect_map;
   connect_map _connects;
-  
-
 };
 
 }}}
