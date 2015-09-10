@@ -68,7 +68,7 @@ incoming_holder::raw_t incoming_holder::raw_id() const
 
 std::string incoming_holder::str() const
 {
-  if ( _data != nullptr   )
+  if ( _data != nullptr )
     return std::string(_data->begin(), _data->end());
   return std::string();
 }

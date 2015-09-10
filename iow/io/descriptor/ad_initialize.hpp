@@ -43,13 +43,13 @@ private:
     {
       if ( auto pthis = wthis.lock() )
       {
-        std::lock_guard<typename T::mutex_type> lk( pthis->mutex() );
         if ( callback != nullptr )
         {
           callback(std::move(d));
         }
         else
         {
+          std::lock_guard<typename T::mutex_type> lk( pthis->mutex() );
           pthis->get_aspect().template get<_outgoing_>()( *pthis, std::move(d) );
         }
       }

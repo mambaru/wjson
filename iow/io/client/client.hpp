@@ -22,6 +22,7 @@ public:
   typedef ::iow::io::io_id_t io_id_t;
   typedef ::iow::io::outgoing_handler_t outgoing_handler_t;
   typedef ::iow::io::data_ptr data_ptr;
+  typedef std::mutex mutex_type;
 
   outgoing_map()
   {
@@ -30,45 +31,61 @@ public:
 
   void set( io_id_t io_id, outgoing_handler_t handler)
   {
+    std::lock_guard<mutex_type> lk(_mutex);
     assert(handler!=nullptr);
     _handlers[io_id]=handler;
+    IOW_LOG_DEBUG("outgoing_map::set io_id=" << io_id << " size=" << _handlers.size() )
   }
 
   bool has( io_id_t io_id )
   {
+    std::lock_guard<mutex_type> lk(_mutex);
     return _handlers.find(io_id)!=_handlers.end();
   }
 
   outgoing_handler_t get(io_id_t io_id) const
   {
+    std::lock_guard<mutex_type> lk(_mutex);
+    
     auto itr = _handlers.find(io_id);
     if ( itr == _handlers.end() )
     {
       return nullptr;
     }
-
     return itr->second;
   }
 
   void erase( io_id_t io_id )
   {
+    std::lock_guard<mutex_type> lk(_mutex);
+    
     _handlers.erase(io_id);
+    _iterator = _handlers.end();
+    IOW_LOG_DEBUG("outgoing_map::erase io_id=" << io_id << " size=" << _handlers.size() )
   }
 
   data_ptr send(data_ptr d)
   {
-    if ( _handlers.empty() )
+    outgoing_handler_t handler;
     {
-      return std::move(d);
-    }
+      std::lock_guard<mutex_type> lk(_mutex);
+      
+      if ( _handlers.empty() )
+      {
+        return std::move(d);
+      }
 
-    if ( _iterator == _handlers.end() )
-    {
-      _iterator = _handlers.begin();
-    }
+      if ( _iterator == _handlers.end() )
+      {
+        _iterator = _handlers.begin();
+      }
 
-    _iterator->second( std::move(d) );
-    ++_iterator;
+      handler = _iterator->second;
+      ++_iterator;
+    }
+    
+    handler( std::move(d) );
+    
     return nullptr;
   }
 
@@ -78,6 +95,7 @@ private:
   typedef handler_map::const_iterator const_iterator;
   handler_map _handlers;
   const_iterator _iterator;
+  mutable mutex_type _mutex;
 };
 
 
@@ -90,6 +108,7 @@ public:
   typedef outgoing_map::outgoing_handler_t outgoing_handler_t;
   typedef ::iow::io::incoming_handler_t incoming_handler_t;
   typedef std::vector< data_ptr > wait_data_t;
+  typedef std::mutex mutex_type;
 
   source(io_id_t io_id, incoming_handler_t handler, size_t outgoing_limit)
     : _source_id(io_id)
@@ -104,9 +123,16 @@ public:
     assert(handler!=nullptr);
 
     _remotes.set(io_id, std::move(handler));
+    
+    wait_data_t wd;
 
-    auto itr = _wait_data.begin();
-    auto end = _wait_data.end();
+    {
+      std::lock_guard<mutex_type> lk(_mutex);
+      wd.swap(_wait_data);
+    }
+    
+    auto itr = wd.begin();
+    auto end = wd.end();
     for ( ; itr!=end; ++itr )
     {
       if ( auto d = _remotes.send(std::move(*itr) ) )
@@ -114,9 +140,17 @@ public:
         *itr = std::move(d);
         break;
       }
+      
+      
+      // DEBUG itr++; break;
     }
-
-    _wait_data.erase( _wait_data.begin(), itr );
+    
+    if ( itr != end )
+    {
+      std::lock_guard<mutex_type> lk(_mutex);
+      //_wait_data.insert( _wait_data.begin(), itr, end );
+      std::move( itr, end, std::inserter(_wait_data, _wait_data.begin() ) );
+    }
   }
 
   void unreg( io_id_t io_id )
@@ -126,15 +160,17 @@ public:
 
   data_ptr send(data_ptr d)
   {
-    IOW_LOG_MESSAGE("source::send -1-")
     if ( auto dd = _remotes.send(std::move(d) ) )
     {
+      std::lock_guard<mutex_type> lk(_mutex);
+      
       if ( _wait_data.size() < _outgoing_limit )
       {
         _wait_data.push_back( std::move(dd) );
       }
       else
       {
+        IOW_LOG_ERROR("Drop message [" << d << "]")
         return std::move(dd);
       }
     }
@@ -144,11 +180,6 @@ public:
   void recv(data_ptr d, io_id_t io_id, outgoing_handler_t outgoing)
   {
     _source_handler(std::move(d), io_id, outgoing );
-    /*
-    // Иногда падает на брокен пайп или подвисает и не убивается 
-    std::string kuka = "Кукарача";
-    outgoing( std::make_unique<data_type>(kuka.begin(), kuka.end() ) );
-    */
   }
 
 private:
@@ -158,6 +189,7 @@ private:
   size_t _outgoing_limit;
   outgoing_map _remotes;
   wait_data_t _wait_data;
+  mutable mutex_type _mutex;
 };
 
 template<typename Connection>
@@ -182,36 +214,19 @@ public:
     : super( std::move( descriptor_type(io) ) )
     , _reconnect_timer(io)
     , _source(source)
+    , _reconnect_timeout_ms(0)
+    , _connect_time(0)
   {
   }
   
   template<typename Opt>
   void start(Opt opt)
   {
-    this->update_options_(opt);
-
     _reconnect_timeout_ms = opt.reconnect_timeout_ms;
-
-    auto connect_handler = opt.connect_handler;
-    auto error_handler = opt.error_handler;
-
-    std::weak_ptr<self> wthis = this->shared_from_this();
-
-    opt.connect_handler = [connect_handler, wthis, opt](){
-      IOW_LOG_MESSAGE("Client CONNECTED!!! ????")
-      if ( connect_handler ) connect_handler();
-      if ( auto pthis = wthis.lock() )
-      {
-        pthis->start_connection_(opt);
-      }
-    };
-
-    opt.error_handler = [error_handler](::iow::system::error_code ec){
-      IOW_LOG_MESSAGE("Client CONNECT ERROR!!! " << ec.message())
-      error_handler(ec);
-    };
-
-    super::origin()->connect(opt);
+    this->update_options_(opt);
+    
+    //super::origin()->connect(opt);
+    this->reconnect_(opt);
   }
 
   void stop()
@@ -221,37 +236,96 @@ public:
   
   void send(data_ptr d, outgoing_handler_t handler)
   {
-    IOW_LOG_MESSAGE("mtconn::send -1-")
     if ( auto dd = _source->send( std::move(d) ) )
     {
-      IOW_LOG_MESSAGE("mtconn::send -fail-")
+      IOW_LOG_DEBUG("client send fail [" << dd << "]")
       if ( handler != nullptr )
       {
         handler( nullptr );
       }
     }
-    IOW_LOG_MESSAGE("mtconn::send -2-")
   }
   
 private:
   
   template<typename Opt>
-  void start_connection_(Opt&& opt)
+  void reconnect_(const Opt& opt)
   {
-    super::start(opt);
+    super::origin()->connect(opt);
   }
   
   template<typename Opt>
-  void update_options_(Opt& opt)
+  void start_connection_(Opt&& opt)
   {
+    IOW_LOG_MESSAGE("client::start_connection_")
+    super::start(opt);
+  }
+  
+  time_t now_ms()
+  {
+    using namespace ::boost::posix_time;
+    ptime time_t_epoch( ::boost::gregorian::date(1970,1,1)); 
+    ptime now = microsec_clock::local_time();
+    time_duration diff = now - time_t_epoch;
+    return diff.total_milliseconds();
+  }
+  
+  template<typename Opt>
+  void update_options_(Opt& opt_orig)
+  {
+    auto popt = std::make_shared<Opt>(opt_orig);
+    
     std::weak_ptr<self> wthis = this->shared_from_this();
-    auto startup_handler = opt.connection.startup_handler;
-
-    opt.connection.startup_handler = super::origin()->wrap([wthis, startup_handler]( io_id_t io_id, outgoing_handler_t outgoing)
-    {
-      assert(outgoing!=nullptr);
+    auto startup_handler = popt->connection.startup_handler;
+    auto shutdown_handler = popt->connection.shutdown_handler;
+    auto connect_handler = popt->connect_handler;
+    auto error_handler = popt->error_handler;
+    
+    popt->connect_handler = [wthis, connect_handler, popt](){
+      IOW_LOG_MESSAGE("Client CONNECTED!!! ????")
+      if ( connect_handler ) connect_handler();
       if ( auto pthis = wthis.lock() )
       {
+        pthis->start_connection_(*popt);
+      }
+    };
+
+    popt->error_handler = [wthis, error_handler, popt](::iow::system::error_code ec)
+    {
+      IOW_LOG_MESSAGE("Client CONNECT ERROR!!! " << ec.message())
+      
+      if ( error_handler!=nullptr ) error_handler(ec);
+      
+      if ( auto pthis = wthis.lock() )
+      {
+        time_t now = pthis->now_ms();
+        time_t diff = now - pthis->_connect_time;
+        time_t reconnect_time = diff > pthis->_reconnect_timeout_ms ? 0 : pthis->_reconnect_timeout_ms - diff ;
+        pthis->_reconnect_timer.expires_from_now( ::boost::posix_time::milliseconds( reconnect_time ) );
+        pthis->_connect_time = now;
+        
+        
+        pthis->_reconnect_timer.async_wait( [wthis, popt](const boost::system::error_code& ec) 
+        {
+          if ( auto pthis = wthis.lock() )
+          {
+            if ( ec == boost::asio::error::operation_aborted )
+              return;
+            // this->connect();
+            pthis->reconnect_(*popt);
+          }
+        });
+      }
+    };
+
+
+    popt->connection.startup_handler 
+      = [wthis, startup_handler]( io_id_t io_id, outgoing_handler_t outgoing)
+    {
+      IOW_LOG_MESSAGE( "Client connection.startup_handler io_id=" << io_id )
+      if ( auto pthis = wthis.lock() )
+      {
+        std::lock_guard<mutex_type> lk( pthis->mutex() );
         pthis->_source->reg(io_id, outgoing );
       }
 
@@ -259,25 +333,43 @@ private:
       {
         startup_handler( io_id, outgoing);
       }
-    });
-
-    if ( opt.connection.incoming_handler == nullptr )
+    };
+      
+    popt->connection.shutdown_handler 
+      = [wthis, shutdown_handler, popt]( io_id_t io_id) 
     {
-      opt.connection.incoming_handler = super::origin()->wrap([wthis]( data_ptr d, io_id_t io_id, outgoing_handler_t outgoing)
+      IOW_LOG_MESSAGE("Client shutdown")
+      if ( shutdown_handler ) shutdown_handler(io_id);
+      if ( auto pthis = wthis.lock() )
+      {
+        pthis->stop();
+        std::lock_guard<mutex_type> lk( pthis->mutex() );
+        pthis->_source->unreg(io_id);
+      }
+      popt->error_handler( ::boost::system::error_code() );
+        
+    };
+
+    if ( popt->connection.incoming_handler == nullptr )
+    {
+      popt->connection.incoming_handler
+        = [wthis]( data_ptr d, io_id_t io_id, outgoing_handler_t outgoing)
       {
         if ( auto pthis = wthis.lock() )
         {
-          // TODO: убрать! 
-          assert(outgoing!=nullptr);
+          std::lock_guard<mutex_type> lk( pthis->mutex() );
           pthis->_source->recv( std::move(d), io_id, outgoing );
         }
-      }); 
+      }; 
     }
+    
+    opt_orig = *popt;
   }
 
   reconnect_timer _reconnect_timer;
 
   time_t _reconnect_timeout_ms;
+  time_t _connect_time;
 
   source_ptr _source;
 };
@@ -342,7 +434,6 @@ public:
       });
     }
     pconn->send( std::move(d), handler );
-    IOW_LOG_MESSAGE("client send -2-");
   }
 
 private:
