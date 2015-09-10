@@ -10,7 +10,6 @@ struct ad_handler
   template<typename T>
   void operator()(T& t)
   {
-    std::cout << "reader::ad_handler 1" << std::endl;
     auto& buf = t.get_aspect().template get<_read_buffer_>();
     while (auto d = buf.detach() )
     {
@@ -21,7 +20,6 @@ struct ad_handler
         // Кривая ошибка
         // t.get_aspect().template get<_aaaa_>()(t, "");
       }
-      std::cout << "reader::ad_handler 2" << std::endl;
       t.get_aspect().template get<_incoming_>()(t, std::move(d) );
     }
   }

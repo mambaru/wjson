@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iow/io/writer/tags.hpp>
-
+#include <iow/logger/logger.hpp>
 namespace iow{ namespace io{ namespace writer{
 
 struct ad_output

@@ -34,7 +34,6 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     assert(handler!=nullptr);
     _handlers[io_id]=handler;
-    IOW_LOG_DEBUG("outgoing_map::set io_id=" << io_id << " size=" << _handlers.size() )
   }
 
   bool has( io_id_t io_id )
@@ -58,10 +57,8 @@ public:
   void erase( io_id_t io_id )
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    
     _handlers.erase(io_id);
     _iterator = _handlers.end();
-    IOW_LOG_DEBUG("outgoing_map::erase io_id=" << io_id << " size=" << _handlers.size() )
   }
 
   data_ptr send(data_ptr d)
@@ -69,7 +66,7 @@ public:
     outgoing_handler_t handler;
     {
       std::lock_guard<mutex_type> lk(_mutex);
-      
+
       if ( _handlers.empty() )
       {
         return std::move(d);
@@ -83,9 +80,8 @@ public:
       handler = _iterator->second;
       ++_iterator;
     }
-    
+
     handler( std::move(d) );
-    
     return nullptr;
   }
 
@@ -140,15 +136,11 @@ public:
         *itr = std::move(d);
         break;
       }
-      
-      
-      // DEBUG itr++; break;
     }
-    
+
     if ( itr != end )
     {
       std::lock_guard<mutex_type> lk(_mutex);
-      //_wait_data.insert( _wait_data.begin(), itr, end );
       std::move( itr, end, std::inserter(_wait_data, _wait_data.begin() ) );
     }
   }
@@ -216,12 +208,14 @@ public:
     , _source(source)
     , _reconnect_timeout_ms(0)
     , _connect_time(0)
+    , _started(false)
   {
   }
   
   template<typename Opt>
   void start(Opt opt)
   {
+    _started = true;
     _reconnect_timeout_ms = opt.reconnect_timeout_ms;
     this->update_options_(opt);
     
@@ -231,14 +225,18 @@ public:
 
   void stop()
   {
-    super::stop();
+    if ( _started )
+    {
+      _started = false;
+      IOW_LOG_DEBUG("mtconn::stop")
+      super::stop();
+    }
   }
   
   void send(data_ptr d, outgoing_handler_t handler)
   {
     if ( auto dd = _source->send( std::move(d) ) )
     {
-      IOW_LOG_DEBUG("client send fail [" << dd << "]")
       if ( handler != nullptr )
       {
         handler( nullptr );
@@ -257,7 +255,6 @@ private:
   template<typename Opt>
   void start_connection_(Opt&& opt)
   {
-    IOW_LOG_MESSAGE("client::start_connection_")
     super::start(opt);
   }
   
@@ -282,7 +279,6 @@ private:
     auto error_handler = popt->error_handler;
     
     popt->connect_handler = [wthis, connect_handler, popt](){
-      IOW_LOG_MESSAGE("Client CONNECTED!!! ????")
       if ( connect_handler ) connect_handler();
       if ( auto pthis = wthis.lock() )
       {
@@ -292,7 +288,6 @@ private:
 
     popt->error_handler = [wthis, error_handler, popt](::iow::system::error_code ec)
     {
-      IOW_LOG_MESSAGE("Client CONNECT ERROR!!! " << ec.message())
       
       if ( error_handler!=nullptr ) error_handler(ec);
       
@@ -322,10 +317,9 @@ private:
     popt->connection.startup_handler 
       = [wthis, startup_handler]( io_id_t io_id, outgoing_handler_t outgoing)
     {
-      IOW_LOG_MESSAGE( "Client connection.startup_handler io_id=" << io_id )
       if ( auto pthis = wthis.lock() )
       {
-        std::lock_guard<mutex_type> lk( pthis->mutex() );
+        // std::lock_guard<mutex_type> lk( pthis->mutex() );
         pthis->_source->reg(io_id, outgoing );
       }
 
@@ -343,7 +337,7 @@ private:
       if ( auto pthis = wthis.lock() )
       {
         pthis->stop();
-        std::lock_guard<mutex_type> lk( pthis->mutex() );
+        //std::lock_guard<mutex_type> lk( pthis->mutex() );
         pthis->_source->unreg(io_id);
       }
       popt->error_handler( ::boost::system::error_code() );
@@ -357,7 +351,6 @@ private:
       {
         if ( auto pthis = wthis.lock() )
         {
-          std::lock_guard<mutex_type> lk( pthis->mutex() );
           pthis->_source->recv( std::move(d), io_id, outgoing );
         }
       }; 
@@ -366,6 +359,7 @@ private:
     opt_orig = *popt;
   }
 
+  std::atomic<bool> _started;
   reconnect_timer _reconnect_timer;
 
   time_t _reconnect_timeout_ms;
@@ -409,7 +403,10 @@ public:
 
   void stop()
   {
-    // TODO:
+    for ( auto& conn : _connects )
+    {
+      conn.second->stop();
+    }
   }
 
   // TODO: переименовать

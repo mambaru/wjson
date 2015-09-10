@@ -5,6 +5,7 @@
 #include <thread>
 #include <cstdlib>
 
+#include <iow/logger/logger.hpp>
 namespace iow{ namespace io{ namespace descriptor{
 
 
@@ -80,32 +81,41 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
 
+    IOW_LOG_DEBUG("mtdup::stop: _origin->close()")
     _origin->close();
     for (auto h : _dup_list)
     {
       // сначала закрываем, чтоб реконнект на другой ассептор не прошел 
+      IOW_LOG_DEBUG("mtdup::stop: dup->close()")
       h->close();
     }
 
+    IOW_LOG_DEBUG("mtdup::stop: _origin->stop()")
     _origin->stop();
     for (auto h : _dup_list)
     {
+      IOW_LOG_DEBUG("mtdup::stop: dup->stop()")
       h->stop();
     }
 
     for (auto s : _services)
     {
+      IOW_LOG_DEBUG("mtdup::stop: service->stop()")
       s->stop();
     }
 
     for (auto& t : _threads)
     {
+      IOW_LOG_DEBUG("mtdup::stop: thread.join()")
       t.join();
     }
+
+    IOW_LOG_DEBUG("mtdup::stop: clear all")
 
     _dup_list.clear();
     _threads.clear();
     _services.clear();
+    IOW_LOG_DEBUG("mtdup::stop: DONE")
   }
 
   mutex_type& mutex() const

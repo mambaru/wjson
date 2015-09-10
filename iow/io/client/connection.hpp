@@ -25,7 +25,6 @@ struct ad_connect
       {
         if (!ec)
         {
-          // std::cout << "OK MAN " << opt.addr <<":"<< opt.port << ":" << ec.message() << std::endl;
           IOW_LOG_END("Client connected to " << opt.addr << ":" << opt.port )
           if ( opt.connect_handler )
           {
@@ -39,7 +38,6 @@ struct ad_connect
           
           if ( opt.error_handler )
           {
-            //std::cout << "FUCK MAN " << ec.message() << std::endl;
             opt.error_handler(ec);
           }
         }

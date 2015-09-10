@@ -15,7 +15,7 @@ struct ad_write_handler
     if ( !ec )
     {
       p.second = bytes_transferred;
-      IOW_LOG_TRACE("WRITE[" << std::string(p.first, p.first + p.second) << "]" )
+      IOW_LOG_TRACE("WRITED[" << std::string(p.first, p.first + p.second) << "]" )
       t.get_aspect().template get< ::iow::io::writer::_complete_>()(t, std::move(p));
     }
     else

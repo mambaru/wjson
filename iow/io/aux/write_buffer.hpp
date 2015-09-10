@@ -44,45 +44,14 @@ public:
     , _size(0)
     , _offset(0)
     , _wait(0)
-    
   {
     _list.reserve(2);
   }
-  
-  /*
-  explicit write_buffer(options_ptr options) noexcept
-    : _size(0)
-    , _offset(0)
-    , _wait(0)
-    , _options(options )
-  {
-  }
-
-  write_buffer(const write_buffer& other) noexcept
-    : _size(0)
-    , _offset(0)
-    , _wait(0)
-    , _options(other._options)
-  {
-  }
-
-  write_buffer(write_buffer&& other) noexcept
-    : _size( other._size)
-    , _offset( other._offset)
-    , _cur( std::move(other._cur))
-    , _list( std::move(other._list))
-    , _wait( other._wait)
-    , _options( other._options)
-  {
-  }
-  */
 
   void clear()
   {
     _size = 0;
     _offset = 0;
-    //_cur = nullptr;
-    //_list = nullptr;
     _list.clear();
     _wait = 0;
   }
@@ -132,12 +101,6 @@ public:
     }
 
     _list.reserve(2);
-    /*
-    if ( _maxsize == 0 )
-    {
-      _maxsize = 4096*1024;
-    }
-    */
   }
 
   template<typename O>
@@ -160,18 +123,6 @@ public:
     opt.create  = _create;
     opt.free    = _free;
   }
-  
-  /*
-  void set_options(options_ptr options) noexcept
-  {
-    _options = options;
-  }
-
-  options_ptr get_options() const noexcept
-  {
-    return _options;
-  }
-  */
 
   size_t size() const noexcept
   {
@@ -180,7 +131,6 @@ public:
 
   size_t count() const noexcept
   {
-    //return ( _list!=nullptr ? _list->size() : 0) + static_cast<size_t>( _cur!=nullptr );
     return _list.size();
   }
   
@@ -195,20 +145,11 @@ public:
     for ( auto& d : _list )
       result += _list->capacity();
 
-       /*
-    size_t result = _cur!=nullptr ? _cur->capacity() : 0;
-    if ( _list!=nullptr )
-    {
-      for ( auto& d : _list )
-        result += _list->capacity();
-    }
-    */
     return result;
   }
 
   bool ready() const
   {
-    //return _wait == 0 && _cur!=nullptr;
     return _wait == 0 && !_list.empty();
   }
 
@@ -241,7 +182,8 @@ public:
   {
     if ( d==nullptr || ( d->empty() && _sep_size==0 ) )
       return;
-    
+
+    //std::cout << "attach [" << std::string(d->begin(), d->end()) << "]"<< std::endl;
     _size += d->size();
     if ( _list.empty() )
     {
@@ -265,7 +207,6 @@ public:
         _list.push_back( std::move(d) );
       }
     }
-    
   }
 
   data_pair next()
@@ -276,6 +217,9 @@ public:
     auto size = this->cur_size_();
     auto ptr  = this->cur_ptr_();
     _wait = size;
+    
+    //std::cout << "next [" << std::string(ptr, ptr+size) << "]"<< std::endl;
+
 
     return data_pair( ptr, size );
   }
@@ -287,6 +231,7 @@ public:
     if ( _wait == 0 || _size < p.second ) 
       return result;
 
+    // std::cout << "confirm [" << std::string(p.first, p.first+p.second) << "]"<< std::endl;
     _wait = 0;
     _offset += p.second;
     _size -= p.second;
@@ -319,7 +264,6 @@ private:
     return std::make_unique<data_type>(size);
   }
 
-  
   data_ptr create_(size_t size) const
   {
     return this->create_(size, _bufsize);
@@ -329,18 +273,16 @@ private:
   {
     return this->create_(_bufsize);
   }
-  
+
   void free_(data_ptr d) const
   {
     if ( _free != nullptr)
       _free( std::move(d) );
   }
 
-  
   value_ptr cur_ptr_() const
   {
     return &(_list.front()->operator[](0)) + _offset;
-    //return &(_cur->operator[](0)) + _offset;
   }
 
   size_t cur_size_() const
@@ -352,17 +294,6 @@ private:
       size = _maxbuf;
     }
     return size;
-    /*
-    size_t size = _cur->size() - _offset;
-    
-    if ( _options!=nullptr )
-    {
-      bool first_as_is = _options->first_as_is && _offset==0 && ( _list == nullptr || _list->empty() );
-      if ( !first_as_is && size > _options->maxbuf )
-        size = _options->bufsize;
-    }
-    return size;
-    */
   }
 
 private:
@@ -381,10 +312,7 @@ private:
   size_t _size;
   size_t _offset;
   size_t _wait; // в байтах
-  /* options_ptr _options;
-     data_ptr    _cur;
-  */
-  //deque_ptr   _list;
+
   data_list _list;
 };
 

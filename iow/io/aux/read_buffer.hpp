@@ -216,14 +216,12 @@ public:
     }
     _readpos = -1;
     _readbuf = -1;
-    std::cout << "reader_beffer::confirm READY" << std::endl;
 
     return true;
   }
 
   data_ptr detach()
   {
-    std::cout << "reader_beffer::detach 1" << std::endl;
     if ( _buffers.empty() )
       return nullptr;
 
@@ -241,7 +239,6 @@ public:
         _parsebuf = _buffers.size()-1;
         _parsepos = _buffers.back()->size();
       }
-    std::cout << "reader_beffer::detach 2" << std::endl;
       return nullptr;
     }
 
@@ -253,7 +250,6 @@ public:
     {
       resbuf->resize( bufsize - _sep_size);
     }
-    std::cout << "reader_beffer::detach 3" << std::endl;
 
     return std::move(resbuf);
   }
