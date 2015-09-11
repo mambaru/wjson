@@ -1,10 +1,13 @@
 #pragma once
 
-#include <iow/io/descriptor/mtdup.hpp>
+#include <fas/aop.hpp>
+#include <iow/io/descriptor/mtholder.hpp>
 #include <iow/logger/logger.hpp>
+#include <iow/io/client/connection.hpp>
 
 #include <memory>
 #include <cassert>
+#include <boost/concept_check.hpp>
 
 namespace iow{ namespace io{ namespace client{
 
@@ -94,9 +97,9 @@ private:
   mutable mutex_type _mutex;
 };
 
-
+/*
 // На каждый объект несколько коннектов может быть
-class source
+class producer
 {
 public:
   typedef outgoing_map::data_ptr data_ptr;
@@ -106,7 +109,7 @@ public:
   typedef std::vector< data_ptr > wait_data_t;
   typedef std::mutex mutex_type;
 
-  source(io_id_t io_id, incoming_handler_t handler, size_t outgoing_limit)
+  producer(io_id_t io_id, incoming_handler_t handler, size_t outgoing_limit)
     : _source_id(io_id)
     , _source_handler(handler)
     , _outgoing_limit(outgoing_limit)
@@ -183,6 +186,343 @@ private:
   wait_data_t _wait_data;
   mutable mutex_type _mutex;
 };
+*/
+
+template<typename Connection, typename A = fas::aspect<> >
+class client 
+  : public Connection
+  , public std::enable_shared_from_this< client<Connection, A> >
+{
+public:
+  typedef Connection super;
+  typedef client<Connection> self;
+  typedef typename super::descriptor_type descriptor_type;
+  typedef ::iow::asio::io_service io_service_type;
+  typedef typename super::mutex_type mutex_type;
+  typedef typename super::outgoing_handler_type outgoing_handler_t;
+  typedef boost::asio::deadline_timer reconnect_timer;
+  typedef std::vector< data_ptr > wait_data_t;
+  
+  client( io_service_type& io)
+    : super(std::move(descriptor_type(io)) )
+    , _started(false)
+    , _ready_for_write(false)
+    , _reconnect_timeout_ms(0)
+    , _connect_time_ms(0)
+    , _reconnect_timer(io)
+    , _wait_cursize(0)
+    , _wait_maxsize(0)
+    , _wait_wrnsize(0)
+  {}
+  
+  client( io_service_type& io, descriptor_type&& desc)
+    : super(std::move(desc) )
+    , _started(false)
+    , _ready_for_write(false)
+    , _reconnect_timeout_ms(0)
+    , _connect_time_ms(0)
+    , _reconnect_timer(io)
+    , _wait_cursize(0)
+    , _wait_maxsize(0)
+    , _wait_wrnsize(0)
+  {}
+  
+  template<typename Opt>
+  void start(Opt opt)
+  {
+    IOW_LOG_DEBUG( "Client start " << opt.addr << ":" << opt.port)
+    std::lock_guard<mutex_type> lk( super::mutex() );
+    if ( _started ) return;
+    _started = true;
+    _ready_for_write = false;
+    _reconnect_timeout_ms = opt.reconnect_timeout_ms;
+    _wait_maxsize = opt.wait_maxsize;
+    _wait_wrnsize = opt.wait_wrnsize;
+
+    this->initialize_(opt);
+    super::connect_( *this, std::forward<Opt>(opt) );
+  }
+
+  template<typename Opt>
+  void connect(Opt&& opt)
+  {
+    std::lock_guard<mutex_type> lk( super::mutex() );
+    super::connect_( *this, std::forward<Opt>(opt) );
+  }
+
+  void stop()
+  {
+    std::lock_guard<mutex_type> lk( super::mutex() );
+    if ( _started ) 
+      return;
+    _ready_for_write = false;
+    super::stop_(*this);
+  }
+
+  void close()
+  {
+    std::lock_guard<mutex_type> lk( super::mutex() );
+    _ready_for_write = false;
+    super::close_(*this);
+  }
+
+  void send(data_ptr d)
+  {
+    std::lock_guard<mutex_type> lk( super::mutex() );
+    
+    if ( d==nullptr )
+      return;
+
+    IOW_LOG_DEBUG( "Client::send " << _ready_for_write << ", " << (_outgoing_handler!=nullptr) )
+    if ( _ready_for_write && _outgoing_handler!=nullptr )
+    {
+      _outgoing_handler( std::move(d) );
+    }
+    else
+    {
+      if ( _wait_cursize >= _wait_maxsize )
+      {
+        IOW_LOG_ERROR("Client limit wait data size " << _wait_cursize << "( max: " << _wait_maxsize << ")" 
+                      << " dropped: [" << d << "]")
+      }
+      else
+      {
+        if ( _wait_cursize >= _wait_wrnsize )
+        {
+          IOW_LOG_WARNING("Client limit wait data size " << _wait_cursize << "( max: " << _wait_maxsize << ")")
+        }
+        _wait_cursize += d->size();
+        _wait_data.push_back( std::move(d) );
+      }
+    }
+  }
+  
+private:
+  
+  template<typename Opt>
+  void client_start_(Opt&& opt)
+  {
+    super::start_(*this, opt.connection);
+  }
+  
+  void startup_handler_(io_id_t, outgoing_handler_t outgoing)
+  {
+    _ready_for_write = true;
+    _outgoing_handler = outgoing;
+    _wait_cursize = 0;
+    IOW_LOG_DEBUG("startup_handler_" << (outgoing!=nullptr) )
+    std::for_each(_wait_data.begin(), _wait_data.end(), [outgoing](data_ptr& d) 
+    {
+      IOW_LOG_DEBUG("startup_handler_" << d )
+      outgoing(std::move(d));
+    });
+    _wait_data.clear();
+  }
+  
+  template<typename H>
+  void delayed_handler_(H handler)
+  {
+    time_t now = this->now_ms();
+    time_t diff = now - this->_connect_time_ms;
+    time_t reconnect_time = diff > this->_reconnect_timeout_ms ? 0 : this->_reconnect_timeout_ms - diff ;
+    this->_reconnect_timer.expires_from_now( ::boost::posix_time::milliseconds( reconnect_time ) );
+    this->_connect_time_ms = now;
+    this->_reconnect_timer.async_wait( std::move(handler) );
+  }
+  
+  template<typename OptPtr>
+  void delayed_reconnect_(OptPtr popt)
+  {
+    std::weak_ptr<self> wthis = this->shared_from_this();
+   
+    this->delayed_handler_(
+      [wthis, popt](const boost::system::error_code& ec) 
+      {
+        if ( auto pthis = wthis.lock() )
+        {
+          if ( ec == boost::asio::error::operation_aborted )
+            return;
+          // this->connect();
+          pthis->connect(*popt);
+        }
+      } 
+    );
+  }
+
+  template<typename Opt>
+  void initialize_(Opt& opt)
+  {
+    auto popt = std::make_shared<Opt>(opt);
+    std::weak_ptr<self> wthis = this->shared_from_this();
+    
+    auto startup_handler  = popt->connection.startup_handler;
+    auto shutdown_handler = popt->connection.shutdown_handler;
+    auto connect_handler  = popt->connect_handler;
+    auto error_handler    = popt->error_handler;
+
+
+    popt->connect_handler = [wthis, connect_handler, popt]()
+    {
+      if ( connect_handler ) connect_handler();
+      
+      if ( auto pthis = wthis.lock() )
+      {
+        std::lock_guard<mutex_type> lk( pthis->mutex() );
+        pthis->client_start_(*popt);
+      }
+    };
+    
+    popt->error_handler = [wthis, error_handler, popt](::iow::system::error_code ec)
+    {
+      if ( error_handler!=nullptr ) error_handler(ec);
+      
+      if ( auto pthis = wthis.lock() )
+      {
+        std::lock_guard<mutex_type> lk( pthis->mutex() );
+        pthis->delayed_reconnect_(popt);
+      }
+    };
+    
+    popt->connection.shutdown_handler 
+      = [wthis, shutdown_handler, popt]( io_id_t io_id) 
+    {
+      if ( shutdown_handler ) shutdown_handler(io_id);
+      
+      if ( auto pthis = wthis.lock() )
+      {
+        pthis->stop();
+        
+        std::lock_guard<mutex_type> lk( pthis->mutex() );
+        pthis->delayed_reconnect_(popt);
+      }
+    };
+    
+    popt->connection.startup_handler 
+      = [wthis, startup_handler]( io_id_t io_id, outgoing_handler_t outgoing)
+    {
+      IOW_LOG_DEBUG("client startup_handler " << (outgoing!=nullptr) )
+
+      if ( auto pthis = wthis.lock() )
+      {
+        std::lock_guard<mutex_type> lk( pthis->mutex() );
+        pthis->startup_handler_(io_id, outgoing);
+      }
+
+      if ( startup_handler != nullptr )
+      {
+        startup_handler( io_id, outgoing);
+      }
+    };
+      
+    if ( popt->connection.incoming_handler == nullptr )
+    {
+      popt->connection.incoming_handler
+        = [wthis]( data_ptr d, io_id_t /*io_id*/, outgoing_handler_t /*outgoing*/)
+      {
+        IOW_LOG_ERROR("Client incoming_handler not set [" << d << "]" )
+      }; 
+    }
+
+    opt = *popt;
+  }
+
+
+  time_t now_ms()
+  {
+    using namespace ::boost::posix_time;
+    ptime time_t_epoch( ::boost::gregorian::date(1970,1,1)); 
+    ptime now = microsec_clock::local_time();
+    time_duration diff = now - time_t_epoch;
+    return diff.total_milliseconds();
+  }
+
+
+private:
+  bool _started;
+  bool _ready_for_write;
+  time_t _reconnect_timeout_ms;
+  time_t _connect_time_ms;
+  reconnect_timer _reconnect_timer;
+  outgoing_handler_t _outgoing_handler;
+
+  size_t      _wait_cursize;  
+  size_t      _wait_maxsize;
+  size_t      _wait_wrnsize;
+  wait_data_t _wait_data;
+};
+
+
+template<typename Client >
+class mtclient
+  : public std::enable_shared_from_this< mtclient<Client> >
+{
+  typedef mtclient<Client> self;
+  typedef ::iow::io::descriptor::mtholder<Client> clients_type;
+public:
+
+  typedef typename clients_type::io_service_type io_service_type;
+  typedef std::mutex mutex_type;
+  
+  mtclient(io_service_type& io)
+    : _clients(io)
+  {
+  }
+  
+  template<typename Opt>
+  void start(Opt opt)
+  {
+    auto startup_handler = opt.connection.startup_handler;
+    auto shutdown_handler = opt.connection.shutdown_handler;
+    std::weak_ptr<self> wthis = this->shared_from_this();
+    
+    opt.connection.startup_handler = [wthis, startup_handler]( io_id_t io_id, outgoing_handler_t outgoing)
+    {
+      if (auto pthis = wthis.lock() )
+      {
+        std::lock_guard<mutex_type> lk(pthis->_mutex);
+        pthis->_handlers.set(io_id, outgoing);
+      }
+      if ( startup_handler ) startup_handler(io_id, outgoing);
+    };
+    
+    opt.connection.shutdown_handler 
+      = [wthis, shutdown_handler]( io_id_t io_id) 
+    {
+      if ( auto pthis = wthis.lock() )
+      {
+        std::lock_guard<mutex_type> lk(pthis->_mutex);
+        pthis->_handlers.erase(io_id);
+      }
+      if ( shutdown_handler ) shutdown_handler(io_id);
+    };
+    
+    _clients.start( opt );
+  }
+  
+  template<typename Opt>
+  void reconfigure(Opt&& opt)
+  {
+    _clients.reconfigure( std::forward<Opt>(opt) );
+  }
+  
+  void stop()
+  {
+    _clients.stop( );
+  }
+  
+  data_ptr send(data_ptr d)
+  {
+    return _handlers.send( std::move(d) );
+  }
+
+private:
+  
+  clients_type _clients;
+  outgoing_map _handlers;
+  mutable mutex_type _mutex;
+};
+
+/*
 
 template<typename Connection>
 class mtconn
@@ -313,7 +653,6 @@ private:
       }
     };
 
-
     popt->connection.startup_handler 
       = [wthis, startup_handler]( io_id_t io_id, outgoing_handler_t outgoing)
     {
@@ -341,7 +680,6 @@ private:
         pthis->_source->unreg(io_id);
       }
       popt->error_handler( ::boost::system::error_code() );
-        
     };
 
     if ( popt->connection.incoming_handler == nullptr )
@@ -457,6 +795,81 @@ private:
 
   typedef std::map<io_id_t, mtconn_ptr > connect_map;
   connect_map _connects;
+};
+
+*/
+
+template<typename Client>
+class auto_client
+{
+public:
+  typedef Client client_type;
+  typedef ::iow::io::io_id_t io_id_t;
+  typedef ::iow::io::incoming_handler_t incoming_handler_t;
+  typedef ::iow::io::outgoing_handler_t outgoing_handler_t;
+  typedef std::shared_ptr<client_type> client_ptr;
+  typedef std::map<io_id_t, client_ptr> client_map;
+  typedef ::iow::asio::io_service io_service_type;
+  
+  // TODO MUTEX!!!!!!!!!!! 
+  
+  auto_client(io_service_type& io)
+    : _io_service(io)
+  {}
+  
+  template<typename Opt>
+  void start(Opt opt)
+  {
+    _create_and_start = [this, opt](io_id_t io_id, incoming_handler_t handler) -> client_ptr
+    {
+      opt.connection.incoming_handler = handler;
+      auto pconn = std::make_shared<client_type>(this->_io_service);
+      pconn->start(opt);
+      return pconn;
+    };
+  }
+
+  template<typename Opt>
+  void reconfigure(Opt&& opt)
+  {
+    for ( auto& conn : _clients )
+    {
+      conn.second->reconfigure();
+    }
+  }
+
+  void stop()
+  {
+    for ( auto& conn : _clients )
+    {
+      conn.second->stop();
+    }
+  }
+
+  
+  void send( data_ptr d, io_id_t io_id, outgoing_handler_t handler)
+  {
+    auto itr = _clients.find(io_id);
+    if (itr != _clients.end()) 
+    {
+      itr->second->send( std::move(d) );
+    }
+    else
+    {
+      auto pconn = _create_and_start(io_id, [handler](data_ptr d, io_id_t, outgoing_handler_t)
+      {
+        handler(std::move(d));
+      });
+      
+      _clients[io_id] = pconn;
+      pconn->send( std::move(d) );
+    }
+  }
+  
+public:
+  io_service_type& _io_service;
+  std::function<client_ptr(io_id_t, incoming_handler_t)> _create_and_start;
+  client_map _clients;
 };
 
 }}}

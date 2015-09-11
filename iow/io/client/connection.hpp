@@ -56,13 +56,36 @@ typedef fas::aspect<
   fas::advice<_connect_, ad_connect>
 > aspect;
 
-template<typename A>
+/*template<typename A>
 using connection_base = ::iow::io::connection::connection_base< typename fas::merge_aspect<A, aspect>::type >;
+*/
+
+template<typename A = fas::aspect<> >
+class connection_base
+  : public ::iow::io::connection::connection_base< typename fas::merge_aspect<A, aspect>::type >
+{
+public:
+  typedef connection_base<A> self;
+  typedef ::iow::io::connection::connection_base< typename fas::merge_aspect<A, aspect>::type > super;
+  typedef typename super::descriptor_type descriptor_type;
+
+  connection_base(descriptor_type&& desc)
+    : super( std::move( desc ) )
+  {}
+  
+  template<typename T, typename Opt>
+  void connect_(T& t, Opt&& opt)
+  {
+    this->get_aspect().template get<_connect_>()(t, std::forward<Opt>(opt) );
+  }
+
+};
+
 
 template<typename A = fas::aspect<> >
 class connection
   : public connection_base<A>
-  , public std::enable_shared_from_this< connection<A> >
+  // , public std::enable_shared_from_this< connection<A> >
 {
 public: 
    typedef connection_base<A> super;
@@ -78,7 +101,7 @@ public:
   void connect(Opt&& opt)
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
-    this->get_aspect().template get<_connect_>()(*this, std::forward<Opt>(opt) );
+    super::connect_( *this, std::forward<Opt>(opt) );
   }
 
   

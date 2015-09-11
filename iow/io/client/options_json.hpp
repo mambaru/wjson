@@ -18,6 +18,8 @@ struct options_json
   JSON_NAME(threads)
   JSON_NAME(connection)
   JSON_NAME(reconnect_timeout_ms)
+  JSON_NAME(wait_maxsize)
+  JSON_NAME(wait_wrnsize)
   
   typedef json::object<
     option_type,
@@ -26,7 +28,9 @@ struct options_json
       json::member< n_addr, option_type, std::string, &option_type::addr>,
       json::member< n_port, option_type, std::string, &option_type::port>,
       json::member< n_threads, option_type, int, &option_type::threads>,
-      json::member< n_reconnect_timeout_ms, option_type, time_t, &option_type::reconnect_timeout_ms>
+      json::member< n_reconnect_timeout_ms, option_type, time_t, &option_type::reconnect_timeout_ms>,
+      json::member< n_wait_maxsize, option_type, size_t, &option_type::wait_maxsize>,
+      json::member< n_wait_wrnsize, option_type, size_t, &option_type::wait_wrnsize>
     >
   > type;
   typedef typename type::target target;
