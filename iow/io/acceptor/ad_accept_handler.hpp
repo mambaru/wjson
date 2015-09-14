@@ -17,6 +17,9 @@ struct ad_accept_handler
     }
     else
     {
+      
+      abort();
+#warning abort();
       ///!! t.get_aspect().template get<_read_error_>()( t, std::move(d), ec );
       //
     }

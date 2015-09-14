@@ -18,7 +18,7 @@ namespace iow{ namespace io{ namespace client{
  *
  */
 
-
+/*
 class outgoing_map
 {
 public:
@@ -66,6 +66,8 @@ public:
 
   data_ptr send(data_ptr d)
   {
+    IOW_LOG_DEBUG( "outgoing_map::send [" << d << "]" )
+    
     outgoing_handler_t handler;
     {
       std::lock_guard<mutex_type> lk(_mutex);
@@ -96,6 +98,7 @@ private:
   const_iterator _iterator;
   mutable mutex_type _mutex;
 };
+*/
 
 /*
 // На каждый объект несколько коннектов может быть
@@ -230,7 +233,7 @@ public:
   template<typename Opt>
   void start(Opt opt)
   {
-    IOW_LOG_DEBUG( "Client start " << opt.addr << ":" << opt.port)
+    IOW_LOG_DEBUG( "Client start " << opt.addr << ":" << opt.port << " opt.wait_maxsize =" << opt.wait_maxsize )
     std::lock_guard<mutex_type> lk( super::mutex() );
     if ( _started ) return;
     _started = true;
@@ -240,7 +243,7 @@ public:
     _wait_wrnsize = opt.wait_wrnsize;
 
     this->initialize_(opt);
-    super::connect_( *this, std::forward<Opt>(opt) );
+    super::connect_( *this, opt );
   }
 
   template<typename Opt>
@@ -253,7 +256,7 @@ public:
   void stop()
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
-    if ( _started ) 
+    if ( !_started ) 
       return;
     _ready_for_write = false;
     super::stop_(*this);
@@ -266,24 +269,29 @@ public:
     super::close_(*this);
   }
 
-  void send(data_ptr d)
+  data_ptr send(data_ptr d)
   {
+    IOW_LOG_DEBUG( "client::send [" << d << "]" )
+    
     std::lock_guard<mutex_type> lk( super::mutex() );
     
+    IOW_LOG_DEBUG( "Client::send " << _ready_for_write << ", " << (_outgoing_handler!=nullptr) << ", d==nullptr(" << (d==nullptr) << ")" )
     if ( d==nullptr )
-      return;
-
-    IOW_LOG_DEBUG( "Client::send " << _ready_for_write << ", " << (_outgoing_handler!=nullptr) )
+      return nullptr;
+    
     if ( _ready_for_write && _outgoing_handler!=nullptr )
     {
+      IOW_LOG_DEBUG( "Client::send write [" << d << "]")
       _outgoing_handler( std::move(d) );
     }
     else
     {
+      IOW_LOG_DEBUG( "Client::send wait [" << d << "]")
       if ( _wait_cursize >= _wait_maxsize )
       {
         IOW_LOG_ERROR("Client limit wait data size " << _wait_cursize << "( max: " << _wait_maxsize << ")" 
                       << " dropped: [" << d << "]")
+        return std::move(d);
       }
       else
       {
@@ -295,6 +303,7 @@ public:
         _wait_data.push_back( std::move(d) );
       }
     }
+    return nullptr;
   }
   
 private:
@@ -307,13 +316,13 @@ private:
   
   void startup_handler_(io_id_t, outgoing_handler_t outgoing)
   {
+    IOW_LOG_DEBUG("client::startup_handler_ _wait_data.size()=" << _wait_data.size() )
     _ready_for_write = true;
     _outgoing_handler = outgoing;
     _wait_cursize = 0;
-    IOW_LOG_DEBUG("startup_handler_" << (outgoing!=nullptr) )
     std::for_each(_wait_data.begin(), _wait_data.end(), [outgoing](data_ptr& d) 
     {
-      IOW_LOG_DEBUG("startup_handler_" << d )
+      IOW_LOG_DEBUG("client startup push [" << d << "]" << (d!=nullptr) )
       outgoing(std::move(d));
     });
     _wait_data.clear();
@@ -469,8 +478,9 @@ public:
   }
   
   template<typename Opt>
-  void start(Opt opt)
+  void start(Opt&& opt)
   {
+    /*
     auto startup_handler = opt.connection.startup_handler;
     auto shutdown_handler = opt.connection.shutdown_handler;
     std::weak_ptr<self> wthis = this->shared_from_this();
@@ -495,8 +505,9 @@ public:
       }
       if ( shutdown_handler ) shutdown_handler(io_id);
     };
+    */
     
-    _clients.start( opt );
+    _clients.start( std::forward<Opt>(opt) );
   }
   
   template<typename Opt>
@@ -512,13 +523,22 @@ public:
   
   data_ptr send(data_ptr d)
   {
-    return _handlers.send( std::move(d) );
+    IOW_LOG_DEBUG( "mtclient::send [" << d << "]" )
+    if ( auto c = _clients.next() )
+    {
+      return std::move( c->send(std::move(d)) );
+    }
+    else
+    {
+      IOW_LOG_ERROR( "mtclient::send drop [" << d << "]" )
+    }
+    return nullptr;
   }
 
 private:
   
   clients_type _clients;
-  outgoing_map _handlers;
+  //outgoing_map _handlers;
   mutable mutex_type _mutex;
 };
 
@@ -818,9 +838,9 @@ public:
   {}
   
   template<typename Opt>
-  void start(Opt opt)
+  void start(Opt&& opt)
   {
-    _create_and_start = [this, opt](io_id_t io_id, incoming_handler_t handler) -> client_ptr
+    _create_and_start = [this, opt](io_id_t , incoming_handler_t handler) mutable -> client_ptr 
     {
       opt.connection.incoming_handler = handler;
       auto pconn = std::make_shared<client_type>(this->_io_service);
@@ -834,7 +854,7 @@ public:
   {
     for ( auto& conn : _clients )
     {
-      conn.second->reconfigure();
+      conn.second->reconfigure(std::forward<Opt>(opt));
     }
   }
 
@@ -849,9 +869,11 @@ public:
   
   void send( data_ptr d, io_id_t io_id, outgoing_handler_t handler)
   {
+    IOW_LOG_DEBUG( "auto_client::send [" << d << "]" )
     auto itr = _clients.find(io_id);
     if (itr != _clients.end()) 
     {
+      
       itr->second->send( std::move(d) );
     }
     else

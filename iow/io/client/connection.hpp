@@ -12,7 +12,7 @@ struct _sync_resolver_;
 struct ad_connect
 {
   template<typename T, typename Opt>
-  void operator()(T& t, const Opt& opt)
+  void operator()(T& t, Opt&& opt)
   {
     const auto endpoint = t.get_aspect().template get<_sync_resolver_>()(t, opt);
     auto ch = opt.connect_handler;
@@ -43,12 +43,16 @@ struct ad_connect
         }
       }
     });
+
+/*    
 #warning async_connect всегда возвращает OK. Поймать можно только при попытке прочитать
     ::iow::system::error_code ec;
     IOW_LOG_BEGIN("Client connect to " << opt.addr << ":" << opt.port << " ..." )
     t.descriptor().connect( endpoint, ec);
     tmp(ec);
+    */
     //::iow::asio::async_connect(t.descriptor(), endpoint, tmp);
+    t.descriptor().async_connect(endpoint, tmp);
   }
 };
 

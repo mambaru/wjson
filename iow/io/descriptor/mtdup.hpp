@@ -65,7 +65,16 @@ public:
 
       _threads.push_back( std::thread([io]()
       {
-        io->run();
+        iow::system::error_code ec;
+        io->run(ec);
+        if (!ec)
+        {
+          IOW_LOG_MESSAGE("mtdup thread stopped")
+        }
+        {
+          IOW_LOG_FATAL("mtdup thread io_service::run error: " << ec.message())
+        }
+        
       }));
     }
   }

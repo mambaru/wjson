@@ -23,6 +23,7 @@ public:
   typedef ::iow::asio::io_service io_service_type;
   typedef std::shared_ptr<io_service_type> io_service_ptr;
   typedef std::list<io_service_ptr> service_list;
+  typedef typename holder_list::const_iterator holder_iterator;
 
   mtholder(io_service_type& io)
     : _started(false)
@@ -48,8 +49,7 @@ public:
       //auto h = std::make_shared<Holder>( std::move(desc) );
       auto h = std::make_shared<Holder>( _io_service );
       _holder_list.push_back(h);
-      h->start(opt);
-      return;
+      h->start( std::forward<Opt>(opt));
     }
 
     for (int i = 0; i < opt.threads; ++i)
@@ -58,14 +58,17 @@ public:
       //descriptor_type desc(*io);
       //auto h = std::make_shared<holder_type>( std::move( desc ) );
       auto h = std::make_shared<holder_type>( *io );
+      h->start(std::forward<Opt>(opt)); // Запускаем до потока, чтобы инициализировать
       _holder_list.push_back(h);
       _services.push_back(io);
-      _threads.push_back( std::thread([io, h, opt]()
+      _threads.push_back( std::thread([io/*, h, opt*/]()
       {
-        h->start(opt);
         io->run();
       }));
     }
+    
+    _iterator = _holder_list.begin();
+
   }
 
   template<typename Opt>
@@ -125,12 +128,23 @@ public:
   {
     return _mutex;
   }
+  
+  holder_ptr next() const
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    if ( _holder_list.empty() )
+      return nullptr;
+    if ( _iterator == _holder_list.end() )
+        _iterator = _holder_list.begin();
+    return *(_iterator++);
+  }
 
 private:
   bool _started;
   io_service_type& _io_service;
   mutable mutex_type _mutex;
   holder_list _holder_list;
+  mutable holder_iterator _iterator;
   thread_list _threads;
   service_list _services;
 };
