@@ -199,6 +199,7 @@ class client
 public:
   typedef Connection super;
   typedef client<Connection> self;
+  typedef typename super::data_ptr data_ptr;
   typedef typename super::descriptor_type descriptor_type;
   typedef ::iow::asio::io_service io_service_type;
   typedef typename super::mutex_type mutex_type;
@@ -258,8 +259,11 @@ public:
     std::lock_guard<mutex_type> lk( super::mutex() );
     if ( !_started ) 
       return;
+    _started = false;
     _ready_for_write = false;
+    std::cout <<"client::stop -1-" << std::endl;
     super::stop_(*this);
+    std::cout <<"client::stop -2-" << std::endl;
   }
 
   void close()
@@ -283,6 +287,7 @@ public:
     {
       IOW_LOG_DEBUG( "Client::send write [" << d << "]")
       _outgoing_handler( std::move(d) );
+      IOW_LOG_DEBUG( "Client::send write [...] done")
     }
     else
     {
@@ -361,6 +366,9 @@ private:
   template<typename Opt>
   void initialize_(Opt& opt)
   {
+    std::cout << "std::cout <<client::initialize_" << std::endl;
+    IOW_LOG_ERROR("client::initialize_" )
+
     auto popt = std::make_shared<Opt>(opt);
     std::weak_ptr<self> wthis = this->shared_from_this();
     
@@ -395,14 +403,23 @@ private:
     popt->connection.shutdown_handler 
       = [wthis, shutdown_handler, popt]( io_id_t io_id) 
     {
+      IOW_LOG_DEBUG("client shutdown_handler -1-" )
+
       if ( shutdown_handler ) shutdown_handler(io_id);
+
+      IOW_LOG_DEBUG("client shutdown_handler -2-" )
       
       if ( auto pthis = wthis.lock() )
       {
+        IOW_LOG_DEBUG("client shutdown_handler -3-" )
+
         pthis->stop();
+        IOW_LOG_DEBUG("client shutdown_handler -4-" )
         
         std::lock_guard<mutex_type> lk( pthis->mutex() );
         pthis->delayed_reconnect_(popt);
+        IOW_LOG_DEBUG("client shutdown_handler -5-" )
+
       }
     };
     
@@ -414,12 +431,16 @@ private:
       if ( auto pthis = wthis.lock() )
       {
         std::lock_guard<mutex_type> lk( pthis->mutex() );
+        IOW_LOG_DEBUG("===1===" )
         pthis->startup_handler_(io_id, outgoing);
+        IOW_LOG_DEBUG("===2===" )
       }
 
       if ( startup_handler != nullptr )
       {
+        IOW_LOG_DEBUG("---1---" )
         startup_handler( io_id, outgoing);
+        IOW_LOG_DEBUG("---2---" )
       }
     };
       
@@ -463,69 +484,25 @@ private:
 
 template<typename Client >
 class mtclient
-  : public std::enable_shared_from_this< mtclient<Client> >
+  : public ::iow::io::descriptor::mtholder<Client>
 {
   typedef mtclient<Client> self;
-  typedef ::iow::io::descriptor::mtholder<Client> clients_type;
+  typedef ::iow::io::descriptor::mtholder<Client> super;
 public:
+  typedef typename super::io_service_type io_service_type;
+  typedef typename super::data_ptr data_ptr;
 
-  typedef typename clients_type::io_service_type io_service_type;
-  typedef std::mutex mutex_type;
-  
   mtclient(io_service_type& io)
-    : _clients(io)
+    : super(io)
   {
   }
-  
-  template<typename Opt>
-  void start(Opt&& opt)
-  {
-    /*
-    auto startup_handler = opt.connection.startup_handler;
-    auto shutdown_handler = opt.connection.shutdown_handler;
-    std::weak_ptr<self> wthis = this->shared_from_this();
-    
-    opt.connection.startup_handler = [wthis, startup_handler]( io_id_t io_id, outgoing_handler_t outgoing)
-    {
-      if (auto pthis = wthis.lock() )
-      {
-        std::lock_guard<mutex_type> lk(pthis->_mutex);
-        pthis->_handlers.set(io_id, outgoing);
-      }
-      if ( startup_handler ) startup_handler(io_id, outgoing);
-    };
-    
-    opt.connection.shutdown_handler 
-      = [wthis, shutdown_handler]( io_id_t io_id) 
-    {
-      if ( auto pthis = wthis.lock() )
-      {
-        std::lock_guard<mutex_type> lk(pthis->_mutex);
-        pthis->_handlers.erase(io_id);
-      }
-      if ( shutdown_handler ) shutdown_handler(io_id);
-    };
-    */
-    
-    _clients.start( std::forward<Opt>(opt) );
-  }
-  
-  template<typename Opt>
-  void reconfigure(Opt&& opt)
-  {
-    _clients.reconfigure( std::forward<Opt>(opt) );
-  }
-  
-  void stop()
-  {
-    _clients.stop( );
-  }
-  
+
   data_ptr send(data_ptr d)
   {
     IOW_LOG_DEBUG( "mtclient::send [" << d << "]" )
-    if ( auto c = _clients.next() )
+    if ( auto c = super::next() )
     {
+      IOW_LOG_DEBUG( "mtclient::send.....!!!!!!!!!!!-1-"  )
       return std::move( c->send(std::move(d)) );
     }
     else
@@ -534,12 +511,7 @@ public:
     }
     return nullptr;
   }
-
-private:
   
-  clients_type _clients;
-  //outgoing_map _handlers;
-  mutable mutex_type _mutex;
 };
 
 /*
@@ -844,7 +816,9 @@ public:
     {
       opt.connection.incoming_handler = handler;
       auto pconn = std::make_shared<client_type>(this->_io_service);
+      IOW_LOG_DEBUG( "auto_client::_create_and_start -1-" )
       pconn->start(opt);
+      IOW_LOG_DEBUG( "auto_client::_create_and_start -2-" )
       return pconn;
     };
   }
@@ -873,18 +847,23 @@ public:
     auto itr = _clients.find(io_id);
     if (itr != _clients.end()) 
     {
-      
+      IOW_LOG_DEBUG( "auto_client::send -1-" )
       itr->second->send( std::move(d) );
+      IOW_LOG_DEBUG( "auto_client::send -2-" )
     }
     else
     {
       auto pconn = _create_and_start(io_id, [handler](data_ptr d, io_id_t, outgoing_handler_t)
       {
+        IOW_LOG_DEBUG( "auto_client::send HANDLER =1=" )
         handler(std::move(d));
+        IOW_LOG_DEBUG( "auto_client::send HANDLER =2=" )
       });
       
       _clients[io_id] = pconn;
+      IOW_LOG_DEBUG( "auto_client::send =1=" )
       pconn->send( std::move(d) );
+      IOW_LOG_DEBUG( "auto_client::send =1=" )
     }
   }
   

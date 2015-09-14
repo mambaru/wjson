@@ -44,15 +44,14 @@ struct ad_connect
       }
     });
 
-/*    
-#warning async_connect всегда возвращает OK. Поймать можно только при попытке прочитать
+
+    #warning async_connect всегда возвращает OK. Поймать можно только при попытке прочитать
     ::iow::system::error_code ec;
     IOW_LOG_BEGIN("Client connect to " << opt.addr << ":" << opt.port << " ..." )
     t.descriptor().connect( endpoint, ec);
     tmp(ec);
-    */
-    //::iow::asio::async_connect(t.descriptor(), endpoint, tmp);
-    t.descriptor().async_connect(endpoint, tmp);
+    
+    //t.descriptor().async_connect(endpoint, tmp);
   }
 };
 
@@ -72,7 +71,8 @@ public:
   typedef connection_base<A> self;
   typedef ::iow::io::connection::connection_base< typename fas::merge_aspect<A, aspect>::type > super;
   typedef typename super::descriptor_type descriptor_type;
-
+  typedef typename super::data_ptr data_ptr;
+  
   connection_base(descriptor_type&& desc)
     : super( std::move( desc ) )
   {}

@@ -15,6 +15,7 @@ class mtholder
 {
 public:
   typedef Holder holder_type;
+  typedef typename holder_type::data_ptr data_ptr;
   typedef typename holder_type::descriptor_type descriptor_type;
   typedef std::shared_ptr<holder_type> holder_ptr;
   typedef std::list<holder_ptr> holder_list;
@@ -35,18 +36,16 @@ public:
   void start(Opt&& opt)
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    
+
     if (_started)
     {
       return;
     }
-    
+
     _started = true;
 
     if ( opt.threads == 0 )
     {
-      //descriptor_type desc(_io_service);
-      //auto h = std::make_shared<Holder>( std::move(desc) );
       auto h = std::make_shared<Holder>( _io_service );
       _holder_list.push_back(h);
       h->start( std::forward<Opt>(opt));
@@ -55,8 +54,6 @@ public:
     for (int i = 0; i < opt.threads; ++i)
     {
       auto io = std::make_shared<io_service_type>();
-      //descriptor_type desc(*io);
-      //auto h = std::make_shared<holder_type>( std::move( desc ) );
       auto h = std::make_shared<holder_type>( *io );
       h->start(std::forward<Opt>(opt)); // Запускаем до потока, чтобы инициализировать
       _holder_list.push_back(h);
@@ -66,9 +63,7 @@ public:
         io->run();
       }));
     }
-    
     _iterator = _holder_list.begin();
-
   }
 
   template<typename Opt>
@@ -133,9 +128,14 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
     if ( _holder_list.empty() )
+    {
       return nullptr;
+    }
+
     if ( _iterator == _holder_list.end() )
+    {
         _iterator = _holder_list.begin();
+    }
     return *(_iterator++);
   }
 
