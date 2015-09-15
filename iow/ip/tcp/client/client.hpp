@@ -15,6 +15,6 @@ template< typename Client = client<> >
 using mtclient = ::iow::io::client::mtclient< Client >;
 
 template< typename Client = mtclient<> >
-using auto_client = ::iow::io::client::auto_client< Client >;
+using multi_client = ::iow::io::client::multi_client< Client >;
 
 }}}}

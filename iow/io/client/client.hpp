@@ -269,8 +269,10 @@ public:
   void close()
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
+    IOW_LOG_DEBUG( "client::close()..." )
     _ready_for_write = false;
     super::close_(*this);
+    IOW_LOG_DEBUG( "client::close()... Done" )
   }
 
   data_ptr send(data_ptr d)
@@ -792,7 +794,7 @@ private:
 */
 
 template<typename Client>
-class auto_client
+class multi_client
 {
 public:
   typedef Client client_type;
@@ -802,19 +804,26 @@ public:
   typedef std::shared_ptr<client_type> client_ptr;
   typedef std::map<io_id_t, client_ptr> client_map;
   typedef ::iow::asio::io_service io_service_type;
-  
+  typedef std::recursive_mutex mutex_type;
   // TODO MUTEX!!!!!!!!!!! 
   
-  auto_client(io_service_type& io)
+  multi_client(io_service_type& io)
     : _io_service(io)
   {}
   
   template<typename Opt>
   void start(Opt&& opt)
   {
+    std::lock_guard<mutex_type> lk(_mutex);
+    
     _create_and_start = [this, opt](io_id_t , incoming_handler_t handler) mutable -> client_ptr 
     {
-      opt.connection.incoming_handler = handler;
+      opt.connection.incoming_handler = [handler](data_ptr d, io_id_t id, outgoing_handler_t outgoing)
+      {
+        IOW_LOG_BEGIN( "multi_client incoming_handler begin [" << d << "]" )
+        handler( std::move(d), id, outgoing );
+        IOW_LOG_END( "multi_client incoming_handler end [" << d << "]" )
+      };
       auto pconn = std::make_shared<client_type>(this->_io_service);
       IOW_LOG_DEBUG( "auto_client::_create_and_start -1-" )
       pconn->start(opt);
@@ -826,6 +835,8 @@ public:
   template<typename Opt>
   void reconfigure(Opt&& opt)
   {
+    std::lock_guard<mutex_type> lk(_mutex);
+    
     for ( auto& conn : _clients )
     {
       conn.second->reconfigure(std::forward<Opt>(opt));
@@ -834,6 +845,8 @@ public:
 
   void stop()
   {
+    std::lock_guard<mutex_type> lk(_mutex);
+    
     for ( auto& conn : _clients )
     {
       conn.second->stop();
@@ -843,34 +856,36 @@ public:
   
   void send( data_ptr d, io_id_t io_id, outgoing_handler_t handler)
   {
-    IOW_LOG_DEBUG( "auto_client::send [" << d << "]" )
+    this->client(io_id, handler)->send( std::move(d) );
+  }
+  
+  client_ptr client(io_id_t io_id, outgoing_handler_t handler)
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    
     auto itr = _clients.find(io_id);
     if (itr != _clients.end()) 
     {
-      IOW_LOG_DEBUG( "auto_client::send -1-" )
-      itr->second->send( std::move(d) );
-      IOW_LOG_DEBUG( "auto_client::send -2-" )
+      return itr->second;
     }
     else
     {
       auto pconn = _create_and_start(io_id, [handler](data_ptr d, io_id_t, outgoing_handler_t)
       {
-        IOW_LOG_DEBUG( "auto_client::send HANDLER =1=" )
         handler(std::move(d));
-        IOW_LOG_DEBUG( "auto_client::send HANDLER =2=" )
       });
       
       _clients[io_id] = pconn;
-      IOW_LOG_DEBUG( "auto_client::send =1=" )
-      pconn->send( std::move(d) );
-      IOW_LOG_DEBUG( "auto_client::send =1=" )
+      return pconn;
     }
   }
+    
   
 public:
   io_service_type& _io_service;
   std::function<client_ptr(io_id_t, incoming_handler_t)> _create_and_start;
   client_map _clients;
+  mutable mutex_type _mutex;
 };
 
 }}}

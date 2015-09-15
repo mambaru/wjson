@@ -84,18 +84,18 @@ public:
     
     _started = false;
 
-    IOW_LOG_DEBUG("mtdup::stop: _origin->close()")
+    IOW_LOG_DEBUG("mtholder::stop: close _holder_list")
     for (auto h : _holder_list)
     {
       // сначала закрываем, чтоб реконнект на другой ассептор не прошел 
-      IOW_LOG_DEBUG("mtdup::stop: dup->close()")
+      IOW_LOG_DEBUG("mtholder::stop: holder->close()")
       h->close();
     }
 
-    IOW_LOG_DEBUG("mtdup::stop: _origin->stop()")
+    IOW_LOG_DEBUG("mtholder::stop: stop _holder_list")
     for (auto h : _holder_list)
     {
-      IOW_LOG_DEBUG("mtdup::stop: dup->stop()")
+      IOW_LOG_DEBUG("mtholder::stop: holder->stop()")
       h->stop();
     }
 

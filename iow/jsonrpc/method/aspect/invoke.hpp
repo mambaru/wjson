@@ -45,12 +45,12 @@ namespace{
     }
     catch(const std::exception& e)
     {
-      JSONRPC_LOG_FATAL("jsonrpc service exception: " << e.what() )
+      JSONRPC_LOG_FATAL("jsonrpc engine exception: " << e.what() )
       abort();
     }
     catch(...)
     {
-      JSONRPC_LOG_FATAL("jsonrpc service unhandled exception")
+      JSONRPC_LOG_FATAL("jsonrpc engine unhandled exception")
       abort();
     }
   }

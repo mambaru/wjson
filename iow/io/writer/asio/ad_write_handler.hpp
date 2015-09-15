@@ -22,6 +22,7 @@ struct ad_write_handler
     {
       IOW_LOG_TRACE("WRITE ERROR: (" << ec.value() << ") " << ec.message() )
       abort();
+#warning TODO: _write_error_
       ///!! t.get_aspect().template get<_read_error_>()( t, std::move(d), ec );
     }
   }

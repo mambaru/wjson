@@ -4,6 +4,8 @@
 #include <functional>
 #include <memory>
 
+
+
 namespace iow{ namespace io{
 
 typedef std::vector<char> data_type;
@@ -18,3 +20,16 @@ typedef std::function< void(io_id_t) > shutdown_handler_t;
 
 }}
 
+#include <ostream>
+#include <string>
+
+namespace std{
+  inline std::ostream& operator << (std::ostream& os, std::unique_ptr< std::vector<char> >& d)
+  {
+    if ( d!=nullptr )
+    {
+      os << std::string( d->begin(), d->end() );
+    }
+    return os;
+  }
+}

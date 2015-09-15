@@ -7,7 +7,7 @@ namespace iow{ namespace ip{ namespace tcp{ namespace connection{
 struct options:
   ::iow::io::connection::options
 {
-
+  bool keep_alive = true;
 };
 
 }}}}
