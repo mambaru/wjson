@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iow/jsonrpc/handler/aspect/tags.hpp>
+#include <iow/jsonrpc/handler/handler_options.hpp>
 #include <iow/io/io_base.hpp>
 #include <fas/aop.hpp>
 #include <functional>

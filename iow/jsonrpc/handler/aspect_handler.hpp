@@ -12,7 +12,7 @@
 #include <iow/jsonrpc/handler/aspect/ad_send_request.hpp>
 #include <iow/jsonrpc/handler/aspect/ad_send_notify.hpp>
 #include <iow/jsonrpc/handler/aspect/ad_invoke.hpp>
-#include <iow/jsonrpc/handler/ihandler.hpp>
+#include <iow/jsonrpc/handler/handler_base_options.hpp>
 
 #include <iow/jsonrpc/method/aspect/request_serializer.hpp>
 #include <iow/jsonrpc/method/aspect/notify_serializer.hpp>
