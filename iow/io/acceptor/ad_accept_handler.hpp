@@ -18,10 +18,11 @@ struct ad_accept_handler
     }
     else if ( ec == iow::system::errc::operation_would_block)
     {
-      t.get_aspect().template get< ::iow::io::reader::_complete_ >()(t, std::move(p));
+      t.get_aspect().template get< ::iow::io::reader::_more_ >()(t);
     }
     else if ( ec != iow::system::errc::operation_canceled )
     {
+      IOW_LOG_FATAL("ad_accept_handler " << ec.message())
       const auto& context = t.get_aspect().template get<_context_>();
       context.fatal_handler(ec.value(), ec.message());
     }

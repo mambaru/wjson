@@ -47,6 +47,8 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
 
+    IOW_LOG_DEBUG("mtdup::start -1-")
+    
     if ( opt.threads == 0 )
     {
       _origin->start(opt);
@@ -67,16 +69,20 @@ public:
       {
         iow::system::error_code ec;
         io->run(ec);
+        std::cout << "io->run(ec);" << std::endl;
         if (!ec)
         {
           IOW_LOG_MESSAGE("mtdup thread stopped")
         }
+        else
         {
           IOW_LOG_FATAL("mtdup thread io_service::run error: " << ec.message())
         }
         
       }));
     }
+    
+    IOW_LOG_DEBUG("mtdup::start -2-")
   }
 
   template<typename Opt>
@@ -99,6 +105,7 @@ public:
       h->close();
     }
 
+    
     IOW_LOG_DEBUG("mtdup::stop: _origin->stop()")
     _origin->stop();
     for (auto h : _dup_list)
@@ -106,6 +113,7 @@ public:
       IOW_LOG_DEBUG("mtdup::stop: dup->stop()")
       h->stop();
     }
+    
 
     for (auto s : _services)
     {

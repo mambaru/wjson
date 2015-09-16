@@ -18,6 +18,7 @@ struct ad_initialize
     context.addr = opt.addr;
     context.port = opt.port;
     context.backlog = opt.backlog;
+    
   }
 };
 

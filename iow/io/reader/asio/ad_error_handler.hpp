@@ -10,7 +10,7 @@
 
 namespace iow{ namespace io{ namespace reader{ namespace asio{
 
-// TODO: в descriptor?
+// TODO: в descriptor? и убрать из acceptora
 struct ad_error_handler
 {
   template<typename T, typename P>
@@ -29,10 +29,12 @@ struct ad_error_handler
                       << ec.value() << ") " << ec.message());
       t.get_aspect().template gete< ::iow::io::_on_error_ >()(t, ec);
       t.get_aspect().template get< ::iow::io::_stop_>()(t);
+      // Если исполльзовать в акцепторе, то fatal_handler использовать 
     }
     else
     {
       IOW_LOG_WARNING("iow::io::reader::asio::ad_error_handler (operation_canceled): " << ec.message());
+      
     }
   }
 };
