@@ -5,6 +5,7 @@
 #include <iow/io/writer/stream/ad_attach.hpp>
 #include <iow/io/writer/stream/ad_next.hpp>
 #include <iow/io/writer/stream/ad_confirm.hpp>
+#include <iow/io/writer/stream/ad_rollback.hpp>
 #include <iow/io/writer/stream/tags.hpp>
 #include <iow/io/writer/aspect.hpp>
 #include <iow/io/aux/write_buffer.hpp>
@@ -33,6 +34,7 @@ struct aspect: fas::aspect<
   fas::advice< ::iow::io::writer::_confirm_, ad_confirm>,
   fas::advice< ::iow::io::writer::_attach_,  ad_attach>,
   fas::advice< ::iow::io::writer::_can_write_, ad_can_write>,
+  fas::advice< ::iow::io::writer::_rollback_, ad_rollback>,
   fas::value< _write_buffer_, ::iow::io::write_buffer< DataType > >
 
 >{};

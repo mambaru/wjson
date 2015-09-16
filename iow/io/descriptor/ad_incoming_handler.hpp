@@ -13,24 +13,27 @@ struct ad_incoming_handler
     const auto& cntx = t.get_aspect().template get<_context_>();
     if ( cntx.incoming_handler != nullptr )
     {
-      /*
       auto incoming = cntx.incoming_handler;
       auto outgoing = cntx.outgoing_handler;
       auto io_id = t.get_id_(t);
-      */
-      cntx.incoming_handler(std::move(d), t.get_id_(t), cntx.outgoing_handler);
-      /*
       t.mutex().unlock();
       try
       {
-        incoming( std::move(d), io_id, std::move(outgoing));
+        incoming( std::move(d), std::move(io_id), std::move(outgoing));
+      }
+      catch(const std::exception& e)
+      {
+        if ( outgoing ) outgoing(nullptr);
+        std::lock_guard<typename T::mutex_type> lk(t.mutex());
+        cntx.fatal_handler(-1, std::string("iow::io::descriptor: std::exception: ") + std::string(e.what()));
       }
       catch(...)
       {
-        // TODO: в лог и outgoing(nullptr) ???
+        if ( outgoing ) outgoing(nullptr);
+        std::lock_guard<typename T::mutex_type> lk(t.mutex());
+        cntx.fatal_handler(-1, "iow::io::descriptor: Unhandled exception in incoming handler");
       }
       t.mutex().lock();
-      */
 
     }
     else

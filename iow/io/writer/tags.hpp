@@ -13,6 +13,7 @@ struct _confirm_;
 struct _make_handler_;
 struct _write_some_;
 struct _can_write_;
+struct _rollback_;
 
 
 //struct _output_type_;

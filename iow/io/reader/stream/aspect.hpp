@@ -3,6 +3,7 @@
 #include <iow/io/reader/stream/ad_clear.hpp>
 #include <iow/io/reader/stream/ad_initialize.hpp>
 #include <iow/io/reader/stream/ad_confirm.hpp>
+#include <iow/io/reader/stream/ad_rollback.hpp>
 #include <iow/io/reader/stream/ad_handler.hpp>
 #include <iow/io/reader/stream/ad_next.hpp>
 #include <iow/io/reader/stream/tags.hpp>

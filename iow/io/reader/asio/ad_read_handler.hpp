@@ -27,9 +27,6 @@ struct ad_read_handler
     else
     {
       p.second = 0;
-      
-      IOW_LOG_TRACE("READ ERROR: (" << ec.value() << ") " << ec.message() )
-      
       t.get_aspect().template get< _error_handler_>()(t, std::move(p), std::move(ec));
     }
   }

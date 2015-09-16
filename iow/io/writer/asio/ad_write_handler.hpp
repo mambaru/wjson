@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <iow/io/writer/tags.hpp>
+#include <iow/io/writer/asio/tags.hpp>
 #include <iow/logger/logger.hpp>
 
 namespace iow{ namespace io{ namespace writer{ namespace asio{
@@ -20,10 +21,8 @@ struct ad_write_handler
     }
     else
     {
-      IOW_LOG_TRACE("WRITE ERROR: (" << ec.value() << ") " << ec.message() )
-      abort();
-#warning TODO: _write_error_
-      ///!! t.get_aspect().template get<_read_error_>()( t, std::move(d), ec );
+      p.second = 0;
+      t.get_aspect().template get< _error_handler_>()(t, std::move(p), std::move(ec));
     }
   }
 };

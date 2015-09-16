@@ -16,13 +16,14 @@ struct ad_accept_handler
     {
       t.get_aspect().template get< ::iow::io::reader::_complete_ >()(t, std::move(p));
     }
+    else if ( ec == iow::system::errc::operation_would_block)
+    {
+      t.get_aspect().template get< ::iow::io::reader::_complete_ >()(t, std::move(p));
+    }
     else if ( ec != iow::system::errc::operation_canceled )
     {
-      IOW_LOG_FATAL("Acceptor error: (" << ec.value() << ") " << ec.message() )
-      abort();
-#warning abort();
-      ///!! t.get_aspect().template get<_read_error_>()( t, std::move(d), ec );
-      //
+      const auto& context = t.get_aspect().template get<_context_>();
+      context.fatal_handler(ec.value(), ec.message());
     }
   }
 };

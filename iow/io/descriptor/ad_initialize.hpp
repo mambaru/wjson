@@ -29,6 +29,17 @@ struct ad_initialize
       this->make_outgoing_(t, cntx, fas::bool_<MakeOutgoingHandler>() );
     }
 
+    if (  opt.fatal_handler == nullptr )
+    {
+      opt.fatal_handler = [](int code, std::string message)
+      {
+        IOW_LOG_FATAL("iow::io::descriptor: Default fatal handler (" << code << ") " << message)
+        abort();
+      };
+    }
+
+    iow::asio::socket_base::non_blocking_io non_blocking_io(opt.nonblocking);
+    t.descriptor().io_control(non_blocking_io);
 
     t.get_aspect().template get< TgInitialize >()( t, std::forward<O>(opt) );
   }
@@ -59,10 +70,8 @@ private:
   }
 
   template<typename T, typename Cntx>
-  void make_outgoing_(T& t, Cntx& cntx, fas::false_ )
+  void make_outgoing_(T& /*t*/, Cntx& /*cntx*/, fas::false_ )
   {
-    /// ??? почему не cntx.outgoing_handler = opt.outgoing_handler
-    //cntx.outgoing_handler = nullptr;
   }
 
 };
