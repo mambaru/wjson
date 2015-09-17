@@ -131,22 +131,22 @@ public:
 
     for (auto s : _services)
     {
-      IOW_LOG_DEBUG("mtdup::stop: service->stop()")
+      IOW_LOG_DEBUG("mtholder::stop: service->stop()")
       s->stop();
     }
 
     for (auto& t : _threads)
     {
-      IOW_LOG_DEBUG("mtdup::stop: thread.join()")
+      IOW_LOG_DEBUG("mtholder::stop: thread.join()")
       t.join();
     }
 
-    IOW_LOG_DEBUG("mtdup::stop: clear all")
+    IOW_LOG_DEBUG("mtholder::stop: clear all")
 
     _holder_list.clear();
     _threads.clear();
     _services.clear();
-    IOW_LOG_DEBUG("mtdup::stop: DONE")
+    IOW_LOG_DEBUG("mtholder::stop: DONE")
   }
 
   mutex_type& mutex() const

@@ -1,9 +1,12 @@
 #pragma once
 
+#include <iow/io/client/multi_client.hpp>
+#include <iow/io/client/mtclient.hpp>
+#include <iow/io/client/client.hpp>
+
 #include <iow/ip/tcp/client/connection.hpp>
 #include <iow/ip/tcp/client/aspect.hpp>
 
-#include <iow/io/client/client.hpp>
 #include <fas/aop.hpp>
 
 namespace iow{ namespace ip{ namespace tcp{ namespace client{
