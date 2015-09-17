@@ -6,27 +6,26 @@
 #include <iow/json/json.hpp>
 
 namespace iow{ namespace ip{ namespace tcp{ namespace server{
-  
+ 
+template<
+  typename ServerOptions = ::iow::ip::tcp::server::options<>, 
+  typename AcceptorJson = iow::ip::tcp::acceptor::options_json<>
+>
 struct options_json
 {
-  typedef ::iow::ip::tcp::acceptor::options_json acceptor_option_json;
-  typedef ::iow::ip::tcp::acceptor::options acceptor_options;
-  
-  typedef ::iow::ip::tcp::connection::options_json connection_option_json;
-  typedef ::iow::ip::tcp::connection::options connection_options;
-  
   JSON_NAME(threads)
   
   typedef json::object<
-    options,
+    ServerOptions,
     json::member_list<
-      json::base< acceptor_option_json >,
-      json::member<n_threads, options, int, &options::threads>
+      json::base< AcceptorJson >,
+      // перенести в общий серевер
+      json::member<n_threads, ServerOptions, int, &ServerOptions::threads>
     >
   > type;
-  typedef type::target target;
-  typedef type::serializer serializer;
-  typedef type::member_list member_list;
+  typedef typename type::target target;
+  typedef typename type::serializer serializer;
+  typedef typename type::member_list member_list;
 };
 
 }}}}

@@ -4,18 +4,21 @@
 #include <list>
 #include <thread>
 #include <cstdlib>
-
 #include <iow/logger/logger.hpp>
+
 namespace iow{ namespace io{ namespace descriptor{
 
 
 
 template<typename Holder>
 class mtholder
+  : public std::enable_shared_from_this< mtholder<Holder> >
+  
 {
 public:
   typedef Holder holder_type;
   typedef typename holder_type::data_ptr data_ptr;
+  typedef typename holder_type::io_id_type io_id_type;
   typedef typename holder_type::descriptor_type descriptor_type;
   typedef std::shared_ptr<holder_type> holder_ptr;
   typedef std::list<holder_ptr> holder_list;
@@ -72,6 +75,33 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     std::abort();
   }
+  
+  template<typename Handler>
+  void shutdown(Handler&& handler)
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    IOW_LOG_DEBUG("mtholder::shutdown: -2-")
+    auto counter = std::make_shared< std::atomic<size_t> >(_holder_list.size());
+    // Не weak, т.к. должен жить пока не отработаем все хандлеры
+    auto pthis = this->shared_from_this();
+    auto client_handler = [counter, pthis, handler](io_id_type id)
+    {
+      IOW_LOG_DEBUG("mtholder::shutdown: -2- id=" << id)
+      --(*counter);
+      if ( *counter == 0 )
+      {
+        IOW_LOG_DEBUG("mtholder::shutdown: -3-")
+        pthis->stop();
+        IOW_LOG_DEBUG("mtholder::shutdown: -4-")
+      }
+    };
+    
+    for (auto h : _holder_list)
+    {
+      h->shutdown(client_handler);
+    }
+  }
+
 
   void stop()
   {

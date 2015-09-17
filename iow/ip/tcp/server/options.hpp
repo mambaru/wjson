@@ -4,12 +4,11 @@
 #include <iow/ip/tcp/connection/options.hpp>
 
 namespace iow{ namespace ip{ namespace tcp{ namespace server{
-  
-struct options
-  : public ::iow::ip::tcp::acceptor::options
+
+template<typename AcceptorOptions = ::iow::ip::tcp::acceptor::options<> >  
+struct options:  AcceptorOptions 
 {
-  //::iow::ip::tcp::acceptor::options acceptor;
-  //::iow::ip::tcp::connection::options connection;
+  // TODO: в базовый сервер
   int threads = 0;
 };
 

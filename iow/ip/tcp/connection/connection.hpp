@@ -7,7 +7,12 @@
 namespace iow{ namespace ip{ namespace tcp{ namespace connection{
 
 template<typename A = fas::aspect<> >
+using connection_base =
+  ::iow::io::connection::connection_base< typename fas::merge_aspect<A, aspect >::type >;
+
+template<typename A = fas::aspect<> >
 using connection =
   ::iow::io::connection::connection< typename fas::merge_aspect<A, aspect >::type >;
+
 
 }}}}

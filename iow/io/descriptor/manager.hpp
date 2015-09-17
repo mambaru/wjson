@@ -15,10 +15,19 @@ public:
   typedef DescriptorHolder holder_type;
   typedef std::shared_ptr<holder_type> holder_ptr;
   typedef typename holder_type::descriptor_type descriptor_type;
-  typedef typename holder_type::options_type options_type;
+  //typedef typename holder_type::options_type options_type;
   typedef typename holder_type::io_id_type io_id_type;
   typedef ::iow::asio::io_service io_service;
 
+  template<typename Opt>
+  manager(Opt&& opt)
+  {
+    _initilizer = [opt](holder_ptr h)
+    {
+      h->initialize(opt);
+    };
+  }
+  
   void attach(io_id_type id, holder_ptr h)
   {
     _holders[id] = h;
@@ -26,13 +35,16 @@ public:
 
   holder_ptr create(io_service& io)
   {
-    // TODO: взять из пула
-    return std::make_shared<holder_type>( descriptor_type(io) );
+    auto h =  std::make_shared<holder_type>( descriptor_type(io) );
+    this->_initilizer(h);
+    return h;
   }
 
   holder_ptr create(descriptor_type&& desc)
   {
-    return std::make_shared<holder_type>( std::forward<descriptor_type>(desc) );
+    auto h =  std::make_shared<holder_type>( std::forward<descriptor_type>(desc) );
+    this->_initilizer(h);
+    return h;
   }
 
   void erase(io_id_type id)
@@ -41,11 +53,6 @@ public:
     if ( itr != _holders.end() )
     {
       _holders.erase(itr);
-      /*
-      auto h = itr->second;
-      _holders.erase(itr);
-      this->free(h);
-      */
     }
     else
     {
@@ -53,14 +60,8 @@ public:
     }
   }
 
-  /*void free(holder_ptr h)
-  {
-    h->close();
-    h->reset();
-  }
-  */
-
 private:
+  std::function<void(holder_ptr)> _initilizer;
   typedef std::map< io_id_type, holder_ptr> holder_map;
   holder_map _holders;
 };

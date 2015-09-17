@@ -74,6 +74,22 @@ protected:
   {
     t.get_aspect().template get<_close_>()(t);
   }
+  
+  template<typename T, typename Opt>
+  void reconfigure_(T& t, Opt&& opt)
+  {
+    super::reconfigure_(t, opt);
+    this->initialize_(t, std::forward<Opt>(opt) );
+  }
+
+  template<typename T, typename Opt>
+  void initialize_(T& t, Opt&& opt)
+  {
+    _start_with_opt = [&t, opt](){
+      t.start(std::move(opt));
+    };
+  }
+
 
   template<typename Descriptor, typename IOServiceType, typename ProtocolType>
   Descriptor dup_(IOServiceType& io, const ProtocolType& protocol)
@@ -84,8 +100,17 @@ protected:
     dup_descriptor_type dup_descriptor(io, protocol, d);
     return std::move(dup_descriptor);
   }
+
+  using super::start_;
+  template<typename T>
+  void start_(T& /*t*/)
+  {
+    _start_with_opt();
+  }
+  
 private:
   descriptor_type _descriptor;
+  std::function<void()> _start_with_opt;
 };
 
 
@@ -116,6 +141,19 @@ public:
     super::start_(*this, std::forward<O>(opt));
   }
 
+  void start()
+  {
+    std::lock_guard< mutex_type > lk( super::mutex() );
+    super::start_(*this);
+  }
+
+  template<typename O>
+  void initialize(O&& opt)
+  {
+    std::lock_guard< mutex_type > lk( super::mutex() );
+    super::initialize_(*this, std::forward<O>(opt));
+  }
+
   template<typename O>
   void reconfigure(O&& opt)
   {
@@ -128,7 +166,6 @@ public:
     std::lock_guard< mutex_type > lk( super::mutex() );
     this->close_(*this);
   }
-
   
   void stop()
   {
@@ -136,7 +173,7 @@ public:
     super::stop_(*this);
   }
 
-    template<typename Handler>
+  template<typename Handler>
   void shutdown(Handler&& handler)
   {
     std::lock_guard< mutex_type > lk( super::mutex() );

@@ -266,6 +266,13 @@ public:
     std::cout <<"client::stop -2-" << std::endl;
   }
 
+  template<typename Handler>
+  void shutdown(Handler&& handler)
+  {
+    std::lock_guard<mutex_type> lk( super::mutex() );
+    super::shutdown_( *this, std::forward<Handler>(handler) );
+  }
+
   void close()
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
@@ -870,6 +877,8 @@ public:
     }
     else
     {
+      return this->set_handler_(io_id, std::move(handler));
+      /*
       auto pconn = _create_and_start(io_id, [handler](data_ptr d, io_id_t, outgoing_handler_t)
       {
         handler(std::move(d));
@@ -877,11 +886,43 @@ public:
       
       _clients[io_id] = pconn;
       return pconn;
+      */
     }
   }
-    
   
+  void set_handler(io_id_t io_id, outgoing_handler_t handler)
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    this->set_handler_(io_id, std::move(handler));
+  }
+
+  void erase_handler(io_id_t io_id)
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    auto itr = _clients.find(io_id);
+    if ( itr != _clients.end() ) 
+    {
+      auto pconn = itr->second;
+      pconn->shutdown([pconn](io_id_t){
+        IOW_LOG_DEBUG("client connection shutdown READY")
+      });
+      _clients.erase(itr);
+    }
+    //_clients.erase(io_id);
+  }
+
 public:
+  
+  client_ptr set_handler_(io_id_t io_id, outgoing_handler_t&& handler)
+  {
+    auto pconn = _create_and_start(io_id, [handler](data_ptr d, io_id_t, outgoing_handler_t)
+    {
+      handler(std::move(d));
+    });
+    _clients[io_id] = pconn;
+    return pconn;
+  }
+  
   io_service_type& _io_service;
   std::function<client_ptr(io_id_t, incoming_handler_t)> _create_and_start;
   client_map _clients;

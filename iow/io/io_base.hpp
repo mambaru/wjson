@@ -30,7 +30,7 @@ public:
   typedef typename context_type::io_id_type io_id_type;
   typedef typename context_type::status_type status_type;
   typedef typename context_type::shutdown_complete shutdown_complete;
-  typedef typename super::aspect::template advice_cast<_options_type_>::type options_type;
+  //typedef typename super::aspect::template advice_cast<_options_type_>::type options_type;
 
   /*
   typedef typename super::aspect::template advice_cast<_mutex_type_>::type mutex_type;

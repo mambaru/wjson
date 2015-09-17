@@ -13,6 +13,7 @@ class acceptor
 {
   typedef ::iow::io::descriptor::holder< typename fas::merge_aspect<A, aspect<ConnectionType> >::type > super;
 public:
+  typedef ConnectionType connection_type;
   typedef typename super::descriptor_type descriptor_type;
   typedef typename super::mutex_type mutex_type;
 
