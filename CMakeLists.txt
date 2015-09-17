@@ -4,7 +4,6 @@ project(iow)
 
 include_directories(.)
 include_directories(../faslib)
-include_directories(../../faslib)
 
 SET(CMAKE_CXX_STANDARD    "-std=c++0x")
 SET(CMAKE_CXX_FLAGS       "${CXX_FLAGS} ${CMAKE_CXX_STANDARD} ")
