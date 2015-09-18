@@ -6,10 +6,12 @@
 
 namespace iow{ namespace jsonrpc{
  
-// rename peeper, follower
+/*
+ * Отслеживает открытие и закрытие источников
+ */
 template<typename I>
-struct provider
-  : fas::value<_provider_, std::shared_ptr<I> >
+struct peeper
+  : fas::value<_peeper_, std::shared_ptr<I> >
 {
 };
 

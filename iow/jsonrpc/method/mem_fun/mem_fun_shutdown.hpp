@@ -6,14 +6,14 @@ namespace iow{ namespace jsonrpc{
 
 template<
   typename Target, 
-  void (Target::*mem_ptr)( io::io_id_t ) 
+  void (Target::*mem_ptr)( ::iow::io::io_id_t ) 
 >
 struct mem_fun_shutdown
 {
   template<typename T>
-  void operator()(T& t, io::io_id_t id) const
+  void operator()(T& t, ::iow::io::io_id_t id) const
   {
-    if (auto trg = t.provider() )
+    if (auto trg = t.peeper() )
     {
       (trg.get()->*mem_ptr)( id );
     }

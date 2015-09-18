@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iow/io/basic/tags.hpp>
+#include <iow/logger/logger.hpp>
 
 namespace iow{ namespace io{ namespace basic{
 
@@ -10,9 +11,19 @@ struct ad_shutdown
   void operator()(T& t, Handler&& shutdown_complete)
   {
     t.get_aspect().template get<_stop_>()(t);
-    if ( shutdown_complete != nullptr )
+    if ( auto sc = shutdown_complete )
     {
-      shutdown_complete( t.get_id_(t) );
+      t.mutex().unlock();
+      try
+      {
+        
+        sc( t.get_id_(t) );
+      }
+      catch(...)
+      {
+        IOW_LOG_ERROR("ad_shutdown unhandled exception")
+      }
+      t.mutex().lock();
     }
   }
 };

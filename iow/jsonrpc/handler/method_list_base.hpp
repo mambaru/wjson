@@ -23,8 +23,8 @@ public:
                         ::type  handler_types;
   typedef typename super::aspect::template advice_cast<_target_>
                         ::type  target_type;
-  typedef typename super::aspect::template advice_cast<_provider_>
-                        ::type  provider_type;
+  typedef typename super::aspect::template advice_cast<_peeper_>
+                        ::type  peeper_type;
   typedef typename super::aspect::template advice_cast<_interface_>
                         ::type  interface_type;
   typedef typename super::aspect::template advice_cast<_context_>
@@ -44,7 +44,7 @@ public:
   typedef typename handler_types::result_handler_t      result_handler_t;
   typedef typename handler_types::notify_serializer_t   notify_serializer_t;
   
-  typedef handler_options<target_type, provider_type> options_type;
+  typedef handler_options<target_type, peeper_type> options_type;
   
   
   template<typename Params, typename Serializer>

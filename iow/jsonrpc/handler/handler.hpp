@@ -32,7 +32,7 @@ public:
   typedef handler<MethodList> self;
   typedef MethodList super;
   typedef typename super::target_type target_type;
-  typedef typename super::provider_type provider_type;
+  typedef typename super::peeper_type peeper_type;
   typedef typename super::context_type context_type;
   typedef typename super::options_type options_type;
   
@@ -45,9 +45,9 @@ public:
     return this->get_aspect().template get<_target_>();
   }
 
-  provider_type provider() const
+  peeper_type peeper() const
   {
-    return this->get_aspect().template get<_provider_>();
+    return this->get_aspect().template get<_peeper_>();
   }
   
   context_type& context()

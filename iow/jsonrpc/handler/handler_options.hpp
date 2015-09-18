@@ -9,7 +9,7 @@ template<typename T, typename P>
 struct handler_options: handler_base_options
 {
   T target; 
-  P provider;
+  P peeper;
 };
 
 }} // iow

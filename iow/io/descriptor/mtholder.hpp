@@ -63,7 +63,9 @@ public:
       _services.push_back(io);
       _threads.push_back( std::thread([io/*, h, opt*/]()
       {
-        io->run();
+        iow::system::error_code ec;
+        io->run(ec);
+        IOW_LOG_DEBUG("mtholder shutdown thread " << ec.message() )
       }));
     }
     _iterator = _holder_list.begin();
@@ -80,6 +82,12 @@ public:
   void shutdown(Handler&& handler)
   {
     std::lock_guard<mutex_type> lk(_mutex);
+
+    if ( !_started ) return;
+    _started = false;
+    this->stop_();
+
+    
     IOW_LOG_DEBUG("mtholder::shutdown: -2-")
     auto counter = std::make_shared< std::atomic<size_t> >(_holder_list.size());
     // Не weak, т.к. должен жить пока не отработаем все хандлеры
@@ -91,7 +99,8 @@ public:
       if ( *counter == 0 )
       {
         IOW_LOG_DEBUG("mtholder::shutdown: -3-")
-        pthis->stop();
+        std::lock_guard<mutex_type> lk( pthis->_mutex);
+        pthis->stop_();
         IOW_LOG_DEBUG("mtholder::shutdown: -4-")
       }
     };
@@ -106,14 +115,13 @@ public:
   void stop()
   {
     std::lock_guard<mutex_type> lk(_mutex);
-
-    if ( !_started )
-    {
-      return;
-    }
-    
+    if ( !_started ) return;
     _started = false;
-
+    this->stop_();
+  }
+  
+  void stop_()
+  {
     IOW_LOG_DEBUG("mtholder::stop: close _holder_list")
     for (auto h : _holder_list)
     {
@@ -139,6 +147,7 @@ public:
     {
       IOW_LOG_DEBUG("mtholder::stop: thread.join()")
       t.join();
+      IOW_LOG_DEBUG("mtholder::stop: thread.join() DONE")
     }
 
     IOW_LOG_DEBUG("mtholder::stop: clear all")
