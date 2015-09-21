@@ -4,6 +4,7 @@
 #include <iow/jsonrpc/method/aspect/tags.hpp>
 #include <iow/jsonrpc/errors/errors.hpp>
 #include <iow/jsonrpc/errors/error_json.hpp>
+#include <iow/logger/logger.hpp>
 
 #include <fas/aop/metalist.hpp>
 #include <functional>
@@ -40,10 +41,15 @@ struct call
     std::function< void (result_ptr, error_ptr)>&& callback
   ) const
   {
+    JSONRPC_LOG_DEBUG("iow::jsonrpc::call(advice) -1- " )
+
     if ( callback!=nullptr )
       this->request_(t, tt, std::move(req), std::move(callback) );
     else
       this->notify_(t, tt, std::move(req));
+
+    JSONRPC_LOG_DEBUG("iow::jsonrpc::call(advice) -2- " )
+
   }
 
 private:
@@ -70,6 +76,8 @@ private:
     }
     
     auto ser = std::bind( TT::template serialize_request<T, params_json>, _1, _2, _3);
+
+    JSONRPC_LOG_DEBUG("iow::jsonrpc::call(advice)::request_ -1- " )
     
     t.send_request( 
       tt.name(), 
@@ -77,6 +85,8 @@ private:
       std::move(ser),
       std::move(handler)
     );
+
+    JSONRPC_LOG_DEBUG("iow::jsonrpc::call(advice)::request_ -2- " )
     
   }
   

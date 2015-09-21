@@ -30,6 +30,7 @@ struct ad_send_request
       abort();
     }*/
     
+    JSONRPC_LOG_DEBUG("-1- iow::jsonrpc::ad_send_request t.send_request " )
     t.send_request(
       name,
       std::move(result_handler), 
@@ -39,6 +40,7 @@ struct ad_send_request
         return ser(name, std::move(*p), id);
       }
     );
+    JSONRPC_LOG_DEBUG("-2- iow::jsonrpc::ad_send_request t.send_request " )
   }
 };
 

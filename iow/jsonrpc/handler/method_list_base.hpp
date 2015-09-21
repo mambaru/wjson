@@ -2,6 +2,7 @@
 
 #include <iow/jsonrpc/handler/aspect/tags.hpp>
 #include <iow/jsonrpc/handler/handler_options.hpp>
+#include <iow/logger/logger.hpp>
 #include <iow/io/io_base.hpp>
 #include <fas/aop.hpp>
 #include <functional>
@@ -54,7 +55,8 @@ public:
     Serializer ser,
     result_handler_t  result_handler) const
   {
-    
+    IOW_LOG_DEBUG("-1- iow::jsonrpc::method_list_base::send_request")
+
     super::get_aspect().template get<_send_request_>()(
       //static_cast<const handler_types&>(*this), 
       *this,
@@ -63,11 +65,24 @@ public:
       std::move(ser),
       std::move(result_handler) 
     );
+
+    IOW_LOG_DEBUG("-2- iow::jsonrpc::method_list_base::send_request")
+
   }
   
   void send_request( const char* name, result_handler_t handler, request_serializer_t ser) const
   {
-    this->_send_request( name, std::move(handler), std::move(ser) );
+    IOW_LOG_DEBUG("-1- iow::jsonrpc::method_list_base::send_request =2=")
+    if ( this->_send_request != nullptr )
+    {
+      this->_send_request( name, std::move(handler), std::move(ser) );
+    }
+    else
+    {
+      IOW_LOG_FATAL("-1- (ABORT) iow::jsonrpc::method_list_base::send_request this->_send_request==nullptr")
+      abort();
+    }
+    IOW_LOG_DEBUG("-2- iow::jsonrpc::method_list_base::send_request =2=")
   }
   
   template<typename Params, typename Serializer>
@@ -84,7 +99,15 @@ public:
 
   void send_notify( const char* name, notify_serializer_t ser) const
   {
-    this->_send_notify( name, std::move(ser) );
+    if ( this->_send_notify != nullptr )
+    {
+      this->_send_notify( name, std::move(ser) );
+    }
+    else
+    {
+      IOW_LOG_FATAL(" (ABORT) iow::jsonrpc::method_list_base::send_notify this->_send_notify==nullptr")
+      abort();
+    }
   }
 
   template<typename Tg>

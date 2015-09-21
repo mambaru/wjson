@@ -88,6 +88,8 @@ struct invoke: Handler
     typename T::outgoing_handler_t outgoing_handler
   ) 
   {
+    JSONRPC_LOG_DEBUG("iow::jsonrpc::invoke(advice) tatam!!! " )
+
     //typedef typename T::outgoing_handler_t outgoing_handler_type;  
     typedef typename T::holder_type holder_type;
     params_ptr req = nullptr;

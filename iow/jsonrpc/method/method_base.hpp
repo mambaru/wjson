@@ -59,12 +59,15 @@ public:
   template<typename T, typename ParamsPtr, typename Callback>
   void call(T& t, ParamsPtr params, Callback callback) const
   {
+    IOW_LOG_DEBUG("-1- iow::jsonrpc::method_base::call<>")
+
     this->get_aspect().template get<_call_>()( 
       t, 
       *this, 
       std::move(params), 
       std::move(callback) 
     );
+    IOW_LOG_DEBUG("-2- iow::jsonrpc::method_base::call<>")
   }
 
   /// ///////////////////////////////////////////////////
