@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iow/jsonrpc/method/mem_fun/mem_fun_helper.hpp>
+#include <wfc/logger.hpp>
 
 namespace iow{ namespace jsonrpc{
 
@@ -25,10 +26,14 @@ struct mem_fun_handler
   {
     if ( auto i = t.target() )
     {
+      JSONRPC_LOG_DEBUG("mem_fun_handler -1-" )
+
       (i.get()->*mem_ptr)( 
         std::move(req), 
         mem_fun_make_callback( std::move(cb)) 
       );
+      
+      JSONRPC_LOG_DEBUG("mem_fun_handler -2-" )
     }
     else 
     {
