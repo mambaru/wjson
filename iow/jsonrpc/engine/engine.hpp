@@ -8,41 +8,46 @@ struct engine_options: HandlerOptions
 {
   typedef HandlerOptions handler_options;
   bool allow_callback=true;
+  ::iow::io::outgoing_handler_t outgoing_handler1;
 };
 
 template<typename JsonrpcHandler>
 class engine
-  : public JsonrpcHandler
+ // : private JsonrpcHandler
+ // , public std::enable_shared_from_this< engine<JsonrpcHandler> >
 {
 public:
-  typedef JsonrpcHandler super;
+ // typedef JsonrpcHandler super;
   typedef JsonrpcHandler handler_type;
+  typedef typename handler_type::target_type target_type;
   typedef std::shared_ptr<handler_type> handler_ptr;
   typedef typename handler_type::options_type handler_options_type;
   
   typedef engine_options<handler_options_type> options_type;
   
-  typedef typename super::holder_type holder_type;
-  typedef typename super::io_id_t io_id_t;
-  typedef typename super::outgoing_handler_t outgoing_handler_t;
-  typedef typename super::data_ptr data_ptr;
+  //typedef typename handler_type::holder_type holder_type;
+  typedef typename handler_type::io_id_t io_id_t;
+  typedef typename handler_type::outgoing_handler_t outgoing_handler_t;
+  typedef typename handler_type::data_ptr data_ptr;
 
+  
   template<typename O>
   void start(O&& opt)
   {
-    std::lock_guard< typename super::mutex_type > lk( super::mutex() );
+    //std::lock_guard< typename super::mutex_type > lk( super::mutex() );
+    _handler = std::make_shared<handler_type>();
     this->upgrate_options_(opt);
     initialize_(opt);
-    super::start_(*this, std::forward<O>(opt));
+    _handler->start( std::forward<O>(opt));
   }
   
   template<typename O>
   void reconfigure(O&& opt)
   {
-    std::lock_guard< typename super::mutex_type > lk( super::mutex() );
+    //std::lock_guard< typename super::mutex_type > lk( super::mutex() );
     this->upgrate_options_(opt);
     initialize_(opt);
-    super::reconfigure_(*this, std::forward<O>(opt));
+    _handler->reconfigure(std::forward<O>(opt));
   }
 
   template<typename O>
@@ -63,33 +68,63 @@ public:
       typedef typename handler_type::result_handler_t result_handler_t;
       typedef typename handler_type::request_serializer_t request_serializer_t;
       typedef typename handler_type::notify_serializer_t notify_serializer_t;
-      opt.send_request = [](const char* /*name*/, result_handler_t, request_serializer_t)
+      
+      // Если задан outgoing_handler то сериализуем и отправляем полностью
+      // Если задан holder_handler то создаем outgoing_holder
+      if (opt.outgoing_handler1 != nullptr)
       {
-        //outgoing_holder(const char* name, data_ptr d, result_handler_t result_handler, time_point_t  time_point = time_point_t())
-        //outgoing_holder()
+        auto handler = opt.outgoing_handler1;
+        opt.send_request = [handler](const char* name, result_handler_t result_handler, request_serializer_t ser)
+        {
+          // TODO: mutex
+          // TODO: call_id
+          // TODO: registry result_handler
+          handler( std::move(ser(name, 1111)));
+        };
+      }
+      else
+      {
+        IOW_LOG_FATAL("iow::jsonrpc::engine outgoing_handler==nullptr")
+        // abort();
+
+      }
+
+      /*
+      opt.send_request = [](const char* name, result_handler_t handler, request_serializer_t ser)
+      {
+        // outgoing_holder(const char* name, data_ptr d, result_handler_t result_handler, time_point_t  time_point = time_point_t())
+        // outgoing_holder(const char* name, request_serializer_t serializer, result_handler_t result_handler, time_point_t time_point = time_point_t())
+        
+        outgoing_holder oh(name, [name,ser](typename handler_type::call_id_t id)
+        {
+          return std::move(ser(name, id));
+        },
+          handler
+        );
         IOW_LOG_FATAL("ku-ku request")
         abort();
       };
-      opt.send_notify = [](const char* /*name*/, notify_serializer_t){
+      opt.send_notify = [](const char* name, notify_serializer_t){
         IOW_LOG_FATAL("ku-ku notify")
         abort();
       };
+      */
   }
 
 
   void stop()
   {
-    std::lock_guard< typename super::mutex_type > lk( super::mutex() );
-    super::stop_(*this);
+    //std::lock_guard< typename super::mutex_type > lk( super::mutex() );
+    _handler->stop();
   }
 
-  void invoke(holder_type holder, io_id_t /*io_id*/, outgoing_handler_t outgoing_handler) 
+  void invoke(incoming_holder holder, io_id_t /*io_id*/, outgoing_handler_t outgoing_handler) 
   {
     // TODO: mutex??
     if ( _direct_mode )
     {
       // не нужно регистрировать коннект, работает быстрее
-      super::invoke( std::move(holder), std::move(outgoing_handler) );
+      _handler->invoke( std::move(holder), std::move(outgoing_handler) );
     }
     else
     {
@@ -98,7 +133,7 @@ public:
     }
   }
 
-  void invoke(data_ptr d, io_id_t io_id, outgoing_handler_t handler) 
+  void perform(data_ptr d, io_id_t io_id, outgoing_handler_t handler) 
   {
     try
     {
@@ -110,15 +145,16 @@ public:
     catch(const std::exception& ex)
     {
       JSONRPC_LOG_ERROR( "jsonrpc::engine: server error: " << ex.what() )
-      super::get_aspect().template get<_invoke_error_>()
-        (*this, std::move(incoming_holder(nullptr)), std::make_unique<server_error>(), std::move(handler));
+      // Ахтунг! сделать в кретической секции и в нвндлере
+      _handler->get_aspect().template get<_invoke_error_>()
+        ( *_handler, std::move(incoming_holder(nullptr)), std::make_unique<server_error>(), std::move(handler));
       return;
     }
     catch(...)
     {
       JSONRPC_LOG_ERROR( "jsonrpc::engine: server error: " << "unhandler exception" )
-      super::get_aspect().template get<_invoke_error_>()
-        (*this, std::move(incoming_holder(nullptr)), std::make_unique<server_error>(), std::move(handler));
+      _handler->get_aspect().template get<_invoke_error_>()
+        ( *_handler, std::move(incoming_holder(nullptr)), std::make_unique<server_error>(), std::move(handler));
       return;
     }
   }
@@ -126,7 +162,7 @@ public:
   template<typename Tg, typename ...Args>
   void call(Args... args)
   {
-    super::template call<Tg>(std::forward<Args>(args)...);
+    _handler->template call<Tg>(std::forward<Args>(args)...);
   }
 
   
@@ -155,8 +191,8 @@ private:
     catch(const json::json_error& er)
     {
       JSONRPC_LOG_WARNING( "jsonrpc::engine: parse error: " << holder.error_message(er) )
-      super::get_aspect().template get<_invoke_error_>()
-        (*this, std::move(holder), std::make_unique<parse_error>(), std::move(handler));
+      _handler->get_aspect().template get<_invoke_error_>()
+        (*_handler, std::move(holder), std::make_unique<parse_error>(), std::move(handler));
       return nullptr;
     }
 
@@ -166,7 +202,7 @@ private:
     }
     else if (holder.is_response() )
     {
-      JSONRPC_LOG_FATAL("result message not impl")
+      JSONRPC_LOG_FATAL("engine::invoke_once_ result message not impl")
       abort();
     }
     else if (holder.is_error() )
@@ -177,13 +213,14 @@ private:
     else
     {
       JSONRPC_LOG_WARNING( "jsonrpc::engine: Invalid Request: " << holder.str() )
-      super::get_aspect().template get<_invoke_error_>()
-        (*this, std::move(holder), std::make_unique<invalid_request>(), std::move(handler));
+      _handler->get_aspect().template get<_invoke_error_>()
+        (*_handler, std::move(holder), std::make_unique<invalid_request>(), std::move(handler));
     }
     return std::move(d);
   }
 
 private:
+  handler_ptr _handler;
   std::atomic<bool> _direct_mode;
 };
 

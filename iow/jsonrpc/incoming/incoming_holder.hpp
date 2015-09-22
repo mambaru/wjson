@@ -21,7 +21,7 @@ public:
   typedef std::pair< iterator, iterator> raw_t;
   typedef std::chrono::high_resolution_clock clock_t;
 
-  incoming_holder(data_ptr d, bool timepoint=false );
+  explicit incoming_holder(data_ptr d, bool timepoint=false );
 
   void attach(data_ptr d, bool timepoint=false );
 

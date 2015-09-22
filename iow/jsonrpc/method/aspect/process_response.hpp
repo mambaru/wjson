@@ -12,7 +12,7 @@ struct process_response
 {
   template<typename T, typename JResult, typename JError>
   static inline void process(
-    typename T::holder_type holder, 
+    incoming_holder holder, 
     std::function< void (
       std::unique_ptr<typename JResult::target>, 
       std::unique_ptr<typename JError::target>
@@ -74,7 +74,7 @@ struct process_response_proxy
 {
   template<typename T, typename JResult, typename JError>
   static inline void process(
-    typename T::holder_type holder, 
+    incoming_holder holder, 
     std::function< void (
       std::unique_ptr<typename JResult::target>, 
       std::unique_ptr<typename JError::target>

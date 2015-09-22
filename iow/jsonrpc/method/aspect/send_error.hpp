@@ -14,7 +14,7 @@ struct send_error
 {
   template<typename T, typename JError>
   static inline void send(
-    typename T::holder_type holder, 
+    incoming_holder holder, 
     std::unique_ptr<typename JError::target> err, 
     typename T::outgoing_handler_t outgoing_handler
   )
@@ -49,7 +49,7 @@ struct send_error_proxy
 {
   template<typename T, typename JError>
   static inline void send(
-    typename T::holder_type holder, 
+    incoming_holder holder, 
     std::unique_ptr<typename JError::target> err, 
     typename T::outgoing_handler_t outgoing_handler
   )

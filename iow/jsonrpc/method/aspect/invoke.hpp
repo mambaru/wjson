@@ -84,14 +84,14 @@ struct invoke: Handler
   void operator()(
     T& t, 
     TT&,
-    typename T::holder_type holder, 
+    incoming_holder holder, 
     typename T::outgoing_handler_t outgoing_handler
   ) 
   {
     JSONRPC_LOG_DEBUG("iow::jsonrpc::invoke(advice) tatam!!! " )
 
     //typedef typename T::outgoing_handler_t outgoing_handler_type;  
-    typedef typename T::holder_type holder_type;
+    //typedef typename T::holder_type holder_type;
     params_ptr req = nullptr;
 
     try // invalid_params
@@ -121,7 +121,7 @@ struct invoke: Handler
       else
       {
         using namespace std::placeholders;
-        auto ph = std::make_shared<holder_type>( std::move(holder) );
+        auto ph = std::make_shared<incoming_holder>( std::move(holder) );
         Handler::operator()( t, std::move(req), 
           [ph, outgoing_handler]( result_ptr result, error_ptr err )
           {

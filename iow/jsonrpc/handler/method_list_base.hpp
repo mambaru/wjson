@@ -2,6 +2,7 @@
 
 #include <iow/jsonrpc/handler/aspect/tags.hpp>
 #include <iow/jsonrpc/handler/handler_options.hpp>
+#include <iow/jsonrpc/outgoing/outgoing_holder.hpp>
 #include <iow/logger/logger.hpp>
 #include <iow/io/io_base.hpp>
 #include <fas/aop.hpp>
@@ -33,7 +34,7 @@ public:
   
   typedef typename handler_types::call_id_t        call_id_t;
   typedef typename handler_types::io_id_t          io_id_t;
-  typedef typename handler_types::holder_type      holder_type;
+  //typedef typename handler_types::holder_type      holder_type;
   typedef typename handler_types::data_type        data_type;
   typedef typename handler_types::data_ptr         data_ptr;
   typedef typename handler_types::error_type       error_type;
@@ -72,6 +73,8 @@ public:
   
   void send_request( const char* name, result_handler_t handler, request_serializer_t ser) const
   {
+    // outgoing_holder(const char* name, request_serializer_t serializer, result_handler_t result_handler, time_point_t time_point = time_point_t())
+    //outgoing_holder holder(name, [name,ser](io_id_t id){ser}), std::move(handler) );
     IOW_LOG_DEBUG("-1- iow::jsonrpc::method_list_base::send_request =2=")
     if ( this->_send_request != nullptr )
     {

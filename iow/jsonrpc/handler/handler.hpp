@@ -36,7 +36,7 @@ public:
   typedef typename super::context_type context_type;
   typedef typename super::options_type options_type;
   
-  typedef typename super::holder_type holder_type;
+  //typedef typename super::holder_type holder_type;
   typedef typename super::io_id_t io_id_t;
   typedef typename super::outgoing_handler_t outgoing_handler_t;
   
@@ -66,7 +66,7 @@ public:
     return fas::for_each_group<_method_>(*this, f_get_methods() ).result;
   }
 
-  void invoke(holder_type holder, outgoing_handler_t outgoing_handler) 
+  void invoke(incoming_holder holder, outgoing_handler_t outgoing_handler) 
   {
     super::get_aspect().template get<_invoke_>()(*this, std::move(holder), std::move(outgoing_handler) );
   }

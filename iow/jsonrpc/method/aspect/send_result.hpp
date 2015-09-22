@@ -14,7 +14,7 @@ struct send_result
 {
   template<typename T, typename JResult>
   static inline void send(
-    typename T::holder_type holder, 
+    incoming_holder holder, 
     std::unique_ptr<typename JResult::target> result, 
     typename T::outgoing_handler_t outgoing_handler
   )
@@ -49,7 +49,7 @@ struct send_result_proxy
 {
   template<typename T, typename JResult>
   static inline void send(
-    typename T::holder_type holder, 
+    incoming_holder holder, 
     std::unique_ptr<typename JResult::target> res, 
     typename T::outgoing_handler_t outgoing_handler
   )

@@ -41,7 +41,7 @@ public:
   template<typename T>
   void operator()(
     T& t, 
-    typename T::holder_type holder, 
+    incoming_holder holder, 
     typename T::outgoing_handler_t outgoing_handler
   ) 
   {
@@ -110,7 +110,7 @@ public:
 
   template<typename T, typename ResultJson, typename ErrorJson>
   static inline void process_response(
-    typename T::holder_type holder, 
+    incoming_holder holder, 
     std::function< void (
       std::unique_ptr<typename ResultJson::target>, 
       std::unique_ptr<typename ErrorJson::target>
@@ -132,7 +132,7 @@ public:
   
   template<typename T, typename ResultJson>
   static inline void send_result(
-    typename T::holder_type holder, 
+    incoming_holder holder, 
     std::unique_ptr<typename ResultJson::target> result, 
     typename T::outgoing_handler_t outgoing_handler
   )
@@ -153,7 +153,7 @@ public:
 
   template<typename T, typename ErrorJson>
   static inline void send_error(
-    typename T::holder_type holder, 
+    incoming_holder holder, 
     std::unique_ptr<typename ErrorJson::target> err, 
     typename T::outgoing_handler_t outgoing_handler
   )

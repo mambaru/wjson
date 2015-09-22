@@ -9,9 +9,9 @@ namespace iow{ namespace jsonrpc{
 
 struct handler_types
 {
-  typedef incoming_holder holder_type;
-  typedef holder_type::data_type data_type;
-  typedef holder_type::data_ptr  data_ptr;
+  //typedef incoming_holder holder_type;
+  typedef incoming_holder::data_type data_type;
+  typedef incoming_holder::data_ptr  data_ptr;
   typedef ::iow::io::outgoing_handler_t outgoing_handler_t;
   typedef ::iow::io::io_id_t io_id_t;
   typedef int call_id_t;
