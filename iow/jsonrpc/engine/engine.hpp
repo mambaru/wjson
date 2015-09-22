@@ -17,7 +17,9 @@ class engine
 public:
   typedef JsonrpcHandler super;
   typedef JsonrpcHandler handler_type;
+  typedef std::shared_ptr<handler_type> handler_ptr;
   typedef typename handler_type::options_type handler_options_type;
+  
   typedef engine_options<handler_options_type> options_type;
   
   typedef typename super::holder_type holder_type;
@@ -29,7 +31,8 @@ public:
   void start(O&& opt)
   {
     std::lock_guard< typename super::mutex_type > lk( super::mutex() );
-    _direct_mode = !opt.allow_callback;
+    this->upgrate_options_(opt);
+    initialize_(opt);
     super::start_(*this, std::forward<O>(opt));
   }
   
@@ -37,10 +40,43 @@ public:
   void reconfigure(O&& opt)
   {
     std::lock_guard< typename super::mutex_type > lk( super::mutex() );
-    _direct_mode = !opt.allow_callback;
+    this->upgrate_options_(opt);
+    initialize_(opt);
     super::reconfigure_(*this, std::forward<O>(opt));
   }
+
+  template<typename O>
+  void initialize_(O opt)
+  {
+    _direct_mode = !opt.allow_callback;
+    create_handler_ = [opt](outgoing_handler_t /*handler*/) mutable -> handler_ptr 
+    {
+      auto ph = std::make_shared<handler_type>();
+      ph->start(opt);
+      return ph;
+    };
+  }
   
+  template<typename O>
+  void upgrate_options_(O& opt)
+  {
+      typedef typename handler_type::result_handler_t result_handler_t;
+      typedef typename handler_type::request_serializer_t request_serializer_t;
+      typedef typename handler_type::notify_serializer_t notify_serializer_t;
+      opt.send_request = [](const char* /*name*/, result_handler_t, request_serializer_t)
+      {
+        //outgoing_holder(const char* name, data_ptr d, result_handler_t result_handler, time_point_t  time_point = time_point_t())
+        //outgoing_holder()
+        IOW_LOG_FATAL("ku-ku request")
+        abort();
+      };
+      opt.send_notify = [](const char* /*name*/, notify_serializer_t){
+        IOW_LOG_FATAL("ku-ku notify")
+        abort();
+      };
+  }
+
+
   void stop()
   {
     std::lock_guard< typename super::mutex_type > lk( super::mutex() );
@@ -86,8 +122,28 @@ public:
       return;
     }
   }
+  
+  template<typename Tg, typename ...Args>
+  void call(Args... args)
+  {
+    super::template call<Tg>(std::forward<Args>(args)...);
+  }
+
+  
+  void reg_io( io_id_t io_id, outgoing_handler_t handler )
+  {
+    JSONRPC_LOG_MESSAGE( "jsonrpc::engine: reg_io" )
+  }
+  
+  void unreg_io( io_id_t io_id )
+  {
+    JSONRPC_LOG_MESSAGE( "jsonrpc::engine: unreg_io" )
+  }
+  
 
 private:
+  
+  std::function<handler_ptr(outgoing_handler_t handler)> create_handler_;
 
   data_ptr invoke_once_(data_ptr d, io_id_t io_id, outgoing_handler_t handler) 
   {

@@ -7,6 +7,7 @@
 
 namespace iow{ namespace jsonrpc{
 
+  /*
 class io_info
 {
 public:
@@ -28,10 +29,12 @@ public:
     , outgoing_handler(outgoing_handler)
   {}
 };
+*/
 
 
 class io_registry
 {
+  /*
   typedef io_info::handler_interface handler_interface;
   typedef io_info::result_handler_t result_handler_t;
   typedef io_info::io_id_t io_id_t;
@@ -45,9 +48,10 @@ class io_registry
   typedef ::wfc::rwlock<std::mutex> mutex_type;
   typedef ::wfc::read_lock<mutex_type> read_lock;
   typedef std::lock_guard<mutex_type> lock_guard;
-  
+  */
 public:
   
+  /*
   io_registry();
   
   void set_io(io_id_t io_id, std::shared_ptr<handler_interface> jsonrpc_handler, outgoing_handler_t outgoing_handler);
@@ -68,13 +72,15 @@ public:
   void clear();
   
   void check() const;
-  
+  */
 private:
+  /*
   mutable time_t _tmp_time;
   call_id_t _call_id_counter;
   io_map_t _io_map;
   call_io_map_t _call_io_map;
   mutable mutex_type _mutex;
+  */
 };
 
 }} // wfc

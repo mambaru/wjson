@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iow/jsonrpc/method/aspect/tags.hpp>
+#include <iow/logger/logger.hpp>
 #include <fas/aop.hpp>
 #include <memory>
 

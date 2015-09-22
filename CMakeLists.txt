@@ -15,6 +15,7 @@ add_library(
   iow
   iow/logger/global_log.cpp
   iow/jsonrpc/incoming/incoming_holder.cpp
+  #iow/jsonrpc/engine/io_registry.cpp
 )
 
 if ( IOW_BUILD_ALL )

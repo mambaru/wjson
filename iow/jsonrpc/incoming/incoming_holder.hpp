@@ -65,7 +65,9 @@ public:
   {
     V id = V();
     if ( ready_() )
+    {
       typename J::serializer()( id, _incoming.id.first, _incoming.id.second );
+    }
     return id;
   }
 

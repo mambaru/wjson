@@ -79,6 +79,8 @@ public:
     }
     else
     {
+#warning изучить счетчик каллбаков
+      // outgoing_holder(const char* name, data_ptr d, result_handler_t result_handler, time_point_t  time_point = time_point_t())
       IOW_LOG_FATAL("-1- (ABORT) iow::jsonrpc::method_list_base::send_request this->_send_request==nullptr")
       abort();
     }

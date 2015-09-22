@@ -1,8 +1,8 @@
 
-#include <wfc/jsonrpc/service/io_registry.hpp>
-#include <wfc/logger.hpp>
+#include "io_registry.hpp"
+#include <iow/logger/logger.hpp>
 
-namespace wfc{ namespace jsonrpc{
+namespace iow{ namespace jsonrpc{
 
   
 io_registry::io_registry()
