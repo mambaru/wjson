@@ -1,5 +1,6 @@
 #pragma once
 #include <iow/logger/logger.hpp>
+#include <iow/jsonrpc/engine/call_registry.hpp>
 
 namespace iow{ namespace jsonrpc{
   
@@ -13,11 +14,8 @@ struct engine_options: HandlerOptions
 
 template<typename JsonrpcHandler>
 class engine
- // : private JsonrpcHandler
- // , public std::enable_shared_from_this< engine<JsonrpcHandler> >
 {
 public:
- // typedef JsonrpcHandler super;
   typedef JsonrpcHandler handler_type;
   typedef typename handler_type::target_type target_type;
   typedef std::shared_ptr<handler_type> handler_ptr;
@@ -25,11 +23,10 @@ public:
   
   typedef engine_options<handler_options_type> options_type;
   
-  //typedef typename handler_type::holder_type holder_type;
   typedef typename handler_type::io_id_t io_id_t;
   typedef typename handler_type::outgoing_handler_t outgoing_handler_t;
   typedef typename handler_type::data_ptr data_ptr;
-
+  typedef typename outgoing_holder::call_id_t call_id_t;
   
   template<typename O>
   void start(O&& opt)
@@ -74,13 +71,18 @@ public:
       if (opt.outgoing_handler1 != nullptr)
       {
         auto handler = opt.outgoing_handler1;
-        opt.send_request = [handler](const char* name, result_handler_t result_handler, request_serializer_t ser)
+        opt.send_request = [handler, this](const char* name, result_handler_t result_handler, request_serializer_t ser)
         {
-          // TODO: mutex
-          // TODO: call_id
-          // TODO: registry result_handler
-          handler( std::move(ser(name, 1111)));
+          ++this->_call_counter;
+          this->_call_registry.set(this->_call_counter, std::move(result_handler));
+          handler( std::move(ser(name, this->_call_counter)));
         };
+        
+        opt.send_notify = [handler, this](const char* name, notify_serializer_t ser)
+        {
+          handler( std::move(ser(name)) );
+        };
+
       }
       else
       {
@@ -202,8 +204,12 @@ private:
     }
     else if (holder.is_response() )
     {
-      JSONRPC_LOG_FATAL("engine::invoke_once_ result message not impl")
+      call_id_t call_id = holder.get_id<call_id_t>();
+      auto result_handler = _call_registry.detach(call_id);
+      result_handler(std::move(holder));
+      /*JSONRPC_LOG_FATAL("engine::invoke_once_ result message not impl")
       abort();
+      */
     }
     else if (holder.is_error() )
     {
@@ -221,6 +227,8 @@ private:
 
 private:
   handler_ptr _handler;
+  call_registry _call_registry;
+  std::atomic<int> _call_counter;
   std::atomic<bool> _direct_mode;
 };
 

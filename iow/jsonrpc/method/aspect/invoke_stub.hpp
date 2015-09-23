@@ -19,7 +19,8 @@ struct invoke_stub
   void operator()(
     T&, 
     TT&, 
-    typename T::holder_type holder, 
+    incoming_holder holder,
+    //typename T::holder_type holder, 
     typename T::outgoing_handler_t outgoing_handler
   ) const
   {
