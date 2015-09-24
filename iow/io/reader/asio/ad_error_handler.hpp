@@ -25,10 +25,17 @@ struct ad_error_handler
     }
     else if ( ec != iow::system::errc::operation_canceled )
     {
-      IOW_LOG_ERROR("iow::io::reader::asio::ad_error_handler ("
+      if ( ec != iow::asio::error::eof )
+      {
+        IOW_LOG_ERROR("iow::io::reader::asio::ad_error_handler ("
                       << ec.value() << ") " << ec.message());
-      t.get_aspect().template gete< ::iow::io::_on_error_ >()(t, ec);
-      t.get_aspect().template get< ::iow::io::_stop_>()(t);
+        t.get_aspect().template gete< ::iow::io::_on_error_ >()(t, ec);
+        t.get_aspect().template get< ::iow::io::_stop_>()(t);
+      }
+      else
+      {
+        t.get_aspect().template get< ::iow::io::_shutdown_>()(t, nullptr);
+      }
       // Если исполльзовать в акцепторе, то fatal_handler использовать 
     }
     else

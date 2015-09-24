@@ -7,8 +7,8 @@ namespace iow{ namespace io{ namespace basic{
 
 struct ad_shutdown
 {
-  template<typename T, typename Handler>
-  void operator()(T& t, Handler&& shutdown_complete)
+  template<typename T>
+  void operator()(T& t, std::function<void(io_id_t)>&& shutdown_complete)
   {
     t.get_aspect().template get<_stop_>()(t);
     if ( auto sc = shutdown_complete )
