@@ -92,7 +92,7 @@ public:
     auto counter = std::make_shared< std::atomic<size_t> >(_holder_list.size());
     // Не weak, т.к. должен жить пока не отработаем все хандлеры
     auto pthis = this->shared_from_this();
-    auto client_handler = [counter, pthis, handler](io_id_type /*id*/)
+    auto client_handler = [counter, pthis, handler](io_id_type id)
     {
       IOW_LOG_DEBUG("mtholder::shutdown: -2- id=" << id)
       --(*counter);
