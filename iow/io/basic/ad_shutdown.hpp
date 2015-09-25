@@ -16,7 +16,6 @@ struct ad_shutdown
       t.mutex().unlock();
       try
       {
-        
         sc( t.get_id_(t) );
       }
       catch(...)
