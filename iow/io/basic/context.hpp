@@ -19,7 +19,6 @@ struct context
   status_type status;
   io_id_type  io_id;
   owner_type  holder;
-  //mutable mutex_type mutex;
 };
 
 }}}

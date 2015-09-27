@@ -10,14 +10,14 @@
 #include <memory>
 
 namespace iow{
-  
+
 template<typename H, typename NA >
 struct owner_handler2
 {
   typedef std::weak_ptr<int> weak_type;
-  
+
   owner_handler2() = default;
-  
+
   owner_handler2(H&& h, NA&& nh,  weak_type alive)
     : _handler(  std::forward<H>(h) )
     , _alt_handler(  std::forward<NA>(nh) )
