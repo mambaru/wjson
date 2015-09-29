@@ -232,5 +232,4 @@ private:
   std::atomic<bool> _direct_mode;
 };
 
-
 }}

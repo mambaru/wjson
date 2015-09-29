@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iow/jsonrpc/types.hpp>
+#include <iow/jsonrpc/errors/errors.hpp>
 #include <iow/jsonrpc/incoming/incoming.hpp>
 #include <iow/jsonrpc/incoming/incoming_json.hpp>
 #include <iow/memory.hpp>
@@ -133,6 +134,12 @@ public:
 
   data_ptr acquire_params();
 
+  static void send_error( incoming_holder holder, std::unique_ptr<error>, outgoing_handler_t outgoing_handler);
+  
+  static void perform(
+    data_ptr d, io_id_t io_id, outgoing_handler_t outgoing_handler, 
+    std::function<void(incoming_holder, io_id_t, outgoing_handler_t)> incoming_handler );
+  
 private:
 
   bool ready_() const{ return _data != nullptr && _parsed;}

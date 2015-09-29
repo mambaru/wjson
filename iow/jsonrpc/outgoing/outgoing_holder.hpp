@@ -22,13 +22,6 @@ public:
   typedef ::iow::jsonrpc::outgoing_call_id_t call_id_t;
   typedef std::function< void(incoming_holder) > result_handler_t;
   
-  /*
-  typedef std::function< data_ptr() > result_serializer_t;
-  typedef std::function< data_ptr() > notify_serializer_t;
-  typedef std::function< data_ptr(call_id_t id) > request_serializer_t;
-
-  typedef std::function< data_ptr() > result_serializer_t;
-  */
   typedef std::function< data_ptr() > basic_serializer_t;
   typedef std::function< data_ptr(call_id_t id) > request_serializer_t;
 
@@ -44,7 +37,7 @@ public:
     , _time_point(time_point)
   {
   }
-  
+
   // полностью сериализованный notify
   outgoing_holder(const char* name, data_ptr d, time_point_t time_point = time_point_t())
     : _name(name)
@@ -131,6 +124,9 @@ public:
       return std::move(result);
     }
   }
+  
+  result_handler_t result_handler() const { return _result_handler;}
+  void result_handler(result_handler_t handler) { _result_handler=handler;}
   
 private:
   const char* _name;
