@@ -30,6 +30,10 @@ namespace std{
     {
       os << std::string( d->begin(), d->end() );
     }
+    else
+    {
+      os << "nullptr";
+    }
     return os;
   }
 }

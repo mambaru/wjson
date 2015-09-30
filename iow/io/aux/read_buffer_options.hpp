@@ -13,7 +13,7 @@ struct read_buffer_options
   typedef std::function< data_ptr(size_t, size_t) > create_fun;
   typedef std::function< void(data_ptr) > free_fun;
 
-  std::string sep;
+  std::string sep=std::string("\r\n");
   size_t bufsize=4096;
   size_t maxbuf=4096*2;
   size_t minbuf=0;
