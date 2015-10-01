@@ -16,6 +16,11 @@ public:
 
   void set(call_id_t call_id, result_handler_t result)
   {
+    if (result==nullptr)
+    {
+      std::cout << "TMP call_registry FATAL" << std::endl;
+      abort();
+    }
     _result_map[call_id] = result;
   }
   

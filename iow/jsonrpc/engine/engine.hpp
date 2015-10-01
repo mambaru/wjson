@@ -1,6 +1,7 @@
 #pragma once
 #include <iow/logger/logger.hpp>
-#include <iow/jsonrpc/engine/call_registry.hpp>
+#include <iow/jsonrpc/engine/call_map.hpp>
+#include <iow/jsonrpc/engine/handler_map.hpp>
 
 namespace iow{ namespace jsonrpc{
   
@@ -28,6 +29,7 @@ public:
   typedef typename handler_type::data_ptr data_ptr;
   typedef typename outgoing_holder::call_id_t call_id_t;
   
+
   template<typename O>
   void start(O&& opt)
   {
@@ -51,11 +53,12 @@ public:
   void initialize_(O opt)
   {
     _direct_mode = !opt.allow_callback;
-    create_handler_ = [opt](outgoing_handler_t /*handler*/) mutable -> handler_ptr 
+    _handler_factory = [opt, this](io_id_t io_id, outgoing_handler_t handler) mutable -> handler_ptr 
     {
-      auto ph = std::make_shared<handler_type>();
+      return this->create_handler_(io_id, opt, std::move(handler) );
+      /*auto ph = std::make_shared<handler_type>();
       ph->start(opt);
-      return ph;
+      return ph;*/
     };
   }
   
@@ -73,9 +76,12 @@ public:
         auto handler = opt.outgoing_handler1;
         opt.send_request = [handler, this](const char* name, result_handler_t result_handler, request_serializer_t ser)
         {
+          std::cout << "DEBUG opt.send_request -1- " << (handler!=nullptr) << std::endl;
           ++this->_call_counter;
           this->_call_registry.set(this->_call_counter, std::move(result_handler));
+          std::cout << "DEBUG opt.send_request -2- " << (handler!=nullptr) << std::endl;
           handler( std::move(ser(name, this->_call_counter)));
+          std::cout << "DEBUG opt.send_request -3- " << (handler!=nullptr) << std::endl;
         };
         
         opt.send_notify = [handler, this](const char* name, notify_serializer_t ser)
@@ -87,8 +93,7 @@ public:
       else
       {
         IOW_LOG_FATAL("iow::jsonrpc::engine outgoing_handler==nullptr")
-        // abort();
-
+         // abort();
       }
 
       /*
@@ -120,18 +125,21 @@ public:
     _handler->stop();
   }
 
-  void invoke(incoming_holder holder, io_id_t /*io_id*/, outgoing_handler_t outgoing_handler) 
+  void invoke(incoming_holder holder, io_id_t io_id, outgoing_handler_t outgoing_handler) 
   {
     // TODO: mutex??
     if ( _direct_mode )
     {
+      // TODO: Общая фабрика, для _direct_mode один и тотже объект
       // не нужно регистрировать коннект, работает быстрее
       _handler->invoke( std::move(holder), std::move(outgoing_handler) );
     }
     else
     {
-      JSONRPC_LOG_FATAL( "jsonrpc::engine: реализован только _direct_mode=true(allow_callback=false)" )
-      abort();
+      auto handler = _handler_factory(io_id, outgoing_handler);
+      // TODO: Зачем передавать outgoing_handler если он есть в опциях
+      // В _direct_mode в опциях не используеться, а надо ли
+      handler->invoke( std::move(holder), std::move(outgoing_handler) );
     }
   }
 
@@ -177,11 +185,25 @@ public:
   {
     JSONRPC_LOG_MESSAGE( "jsonrpc::engine: unreg_io" )
   }
-  
 
 private:
   
-  std::function<handler_ptr(outgoing_handler_t handler)> create_handler_;
+  template<typename Opt>
+  handler_ptr create_handler_(io_id_t io_id, Opt opt, outgoing_handler_t handler)
+  {
+    auto ph = _handler_map.findocre(io_id);
+    opt.outgoing_handler1 = std::move(handler);
+    this->upgrate_options_(opt);
+    ph->start(opt);
+    return ph;
+  }
+  /*
+  template<typename Opt>
+  void initialize_handler_(Opt& opt)
+  {
+    //
+  }*/
+
 
   data_ptr invoke_once_(data_ptr d, io_id_t io_id, outgoing_handler_t handler) 
   {
@@ -206,7 +228,9 @@ private:
     {
       call_id_t call_id = holder.get_id<call_id_t>();
       auto result_handler = _call_registry.detach(call_id);
+      std::cout << "engine::invoke_once_ RESULT result_handler!=nullptr " << (result_handler!=nullptr) << std::endl;
       result_handler(std::move(holder));
+      std::cout << "engine::invoke_once_ RESULT DONE" << std::endl;
       /*JSONRPC_LOG_FATAL("engine::invoke_once_ result message not impl")
       abort();
       */
@@ -226,6 +250,10 @@ private:
   }
 
 private:
+  std::function<handler_ptr(io_id_t io_id, outgoing_handler_t handler)> _handler_factory;
+
+  typedef handler_map<handler_type> handler_map_t;
+  handler_map_t _handler_map;
   handler_ptr _handler;
   call_registry _call_registry;
   std::atomic<int> _call_counter;

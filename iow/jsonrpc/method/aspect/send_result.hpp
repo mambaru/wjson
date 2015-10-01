@@ -6,6 +6,8 @@
 #include <iow/memory.hpp>
 #include <fas/aop.hpp>
 
+#include <iostream>
+
 namespace iow{ namespace jsonrpc{
   
 template<size_t ReserveSize>
@@ -19,6 +21,7 @@ struct send_result
     typename T::outgoing_handler_t outgoing_handler
   )
   {
+    std::cout << "DEBUG iow::jsonrpc::send_result -1-" << std::endl;
     typedef JResult result_json;
     typedef typename JResult::target result_type;
     
@@ -31,16 +34,27 @@ struct send_result
           id_range.first, 
           id_range.second 
       );
-
+    std::cout << "DEBUG iow::jsonrpc::send_result -2-" << std::endl;
     auto d = holder.detach();
     d->clear();
     d->reserve(ReserveSize);
     typedef outgoing_result_json<result_json> message_json;
+    std::cout << "DEBUG iow::jsonrpc::send_result -3-" << std::endl;
     typename message_json::serializer()(
       result_message, 
       std::inserter( *d, d->end() )
     );
-    outgoing_handler( std::move(d) );
+    std::cout << "DEBUG iow::jsonrpc::send_result -4- " << std::endl;
+    if ( outgoing_handler != nullptr )
+    {
+      outgoing_handler( std::move(d) );
+    }
+    else
+    {
+      IOW_LOG_FATAL("iow::jsonrpc::send_result outgoing_handler==nullptr")
+      abort();
+    }
+    std::cout << "DEBUG iow::jsonrpc::send_result -5-" << std::endl;
   }
 };
 

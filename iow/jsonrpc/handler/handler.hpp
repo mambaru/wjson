@@ -39,6 +39,7 @@ public:
   //typedef typename super::holder_type holder_type;
   typedef typename super::io_id_t io_id_t;
   typedef typename super::outgoing_handler_t outgoing_handler_t;
+  typedef typename super::mutex_type mutex_type;
   
   target_type target() const
   {
@@ -68,20 +69,21 @@ public:
 
   void invoke(incoming_holder holder, outgoing_handler_t outgoing_handler) 
   {
+    std::lock_guard< mutex_type > lk( super::mutex() );
     super::get_aspect().template get<_invoke_>()(*this, std::move(holder), std::move(outgoing_handler) );
   }
 
   template<typename O>
   void start(O&& opt)
   {
-    std::lock_guard< typename super::mutex_type > lk( super::mutex() );
+    std::lock_guard< mutex_type > lk( super::mutex() );
     super::start_(*this, std::forward<O>(opt));
   }
 
   template<typename O>
   void reconfigure(O&& opt)
   {
-    std::lock_guard< typename super::mutex_type > lk( super::mutex() );
+    std::lock_guard< mutex_type > lk( super::mutex() );
     super::reconfigure_(*this, std::forward<O>(opt));
   }
 
