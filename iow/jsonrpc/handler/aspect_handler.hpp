@@ -3,7 +3,6 @@
 #include <iow/jsonrpc/handler/aspect/tags.hpp>
 #include <iow/jsonrpc/handler/aspect/target.hpp>
 #include <iow/jsonrpc/handler/aspect/interface_.hpp>
-#include <iow/jsonrpc/handler/aspect/dual_interface.hpp>
 #include <iow/jsonrpc/handler/aspect/peeper.hpp>
 #include <iow/jsonrpc/handler/aspect/startup.hpp>
 #include <iow/jsonrpc/handler/aspect/shutdown.hpp>
@@ -13,6 +12,7 @@
 #include <iow/jsonrpc/handler/aspect/ad_send_notify.hpp>
 #include <iow/jsonrpc/handler/aspect/ad_invoke.hpp>
 #include <iow/jsonrpc/handler/aspect/ad_invoke_error.hpp>
+#include <iow/jsonrpc/handler/aspect/ad_initialize.hpp>
 #include <iow/jsonrpc/handler/handler_base_options.hpp>
 
 #include <iow/jsonrpc/method/aspect/request_serializer.hpp>
@@ -26,20 +26,6 @@
 
 namespace iow{ namespace jsonrpc{
   
-//struct _initialize_;
-struct ad_initialize
-{
-  template<typename T, typename Opt>
-  void operator()(T& t, const Opt& opt)
-  {
-    t._send_notify = opt.send_notify;
-    t._send_request = opt.send_request;
-    t.get_aspect().template get<_target_>() = opt.target;
-    t.get_aspect().template get<_peeper_>() = opt.peeper;
-    //t.get_aspect().template get<_context_>().allow_callback = opt.allow_callback;
-  }
-};
-
 struct aspect_handler: fas::aspect<
   target<fas::empty_type>, 
   interface_<fas::empty_type>,

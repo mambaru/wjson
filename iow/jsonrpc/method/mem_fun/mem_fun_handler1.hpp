@@ -14,7 +14,7 @@ template<
     std::unique_ptr<Params>, 
     std::function< void(std::unique_ptr<Result>) >, 
     size_t, 
-    std::shared_ptr<Itf>
+    std::weak_ptr<Itf>
   ) 
 >
 struct mem_fun_handler1

@@ -69,7 +69,6 @@ struct mem_fun_handler2
     }
     else 
     {
-      JSONRPC_LOG_ERROR("mem_fun_handler2: Service Unavailable");
       mem_fun_service_unavailable( std::move(cb) );
     }
   }

@@ -56,19 +56,13 @@ public:
     Serializer ser,
     result_handler_t  result_handler) const
   {
-    IOW_LOG_DEBUG("-1- iow::jsonrpc::method_list_base::send_request")
-
     super::get_aspect().template get<_send_request_>()(
-      //static_cast<const handler_types&>(*this), 
       *this,
       name, 
       std::move(params),
       std::move(ser),
       std::move(result_handler) 
     );
-
-    IOW_LOG_DEBUG("-2- iow::jsonrpc::method_list_base::send_request")
-
   }
   
   void send_request( const char* name, result_handler_t handler, request_serializer_t ser) const
@@ -82,7 +76,7 @@ public:
     }
     else
     {
-#warning изучить счетчик каллбаков
+
       // outgoing_holder(const char* name, data_ptr d, result_handler_t result_handler, time_point_t  time_point = time_point_t())
       IOW_LOG_FATAL("-1- (ABORT) iow::jsonrpc::method_list_base::send_request this->_send_request==nullptr")
       abort();
@@ -94,7 +88,6 @@ public:
   void send_notify( const char* name, Params params, Serializer ser) const
   {
     super::get_aspect().template get<_send_notify_>()(
-      // static_cast<const handler_types&>(*this), 
       *this,
       name, 
       std::move(params),

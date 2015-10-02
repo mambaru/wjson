@@ -3,6 +3,8 @@
 #include <vector>
 #include <functional>
 #include <memory>
+#include <string>
+#include <iow/memory.hpp>
 
 
 
@@ -17,6 +19,11 @@ typedef std::function< void(data_ptr) > outgoing_handler_t;
 typedef std::function< void(data_ptr, io_id_t, outgoing_handler_t )> incoming_handler_t;
 typedef std::function< void(io_id_t, outgoing_handler_t) > startup_handler_t;
 typedef std::function< void(io_id_t) > shutdown_handler_t;
+
+inline data_ptr make(const std::string& str )
+{
+  return std::make_unique<data_type>(str.begin(), str.end() );
+}
 
 }}
 

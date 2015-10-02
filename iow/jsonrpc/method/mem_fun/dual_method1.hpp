@@ -18,7 +18,7 @@ template<
     std::unique_ptr<typename JParams::target>, 
     std::function< void(std::unique_ptr<typename JResult::target>) >, 
     size_t, 
-    std::shared_ptr<Target>
+    std::weak_ptr<Target>
   ),
   typename ...Args
 >
@@ -39,7 +39,7 @@ template<
     std::unique_ptr<typename JParams::target>, 
     std::function< void(std::unique_ptr<typename JResult::target>) >, 
     size_t, 
-    std::shared_ptr<Target>
+    std::weak_ptr<Target>
   ) ,
   typename ...Args
 >

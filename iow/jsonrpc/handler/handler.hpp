@@ -31,6 +31,7 @@ class handler
 public:
   typedef handler<MethodList> self;
   typedef MethodList super;
+  typedef typename super::interface_type interface_type;
   typedef typename super::target_type target_type;
   typedef typename super::peeper_type peeper_type;
   typedef typename super::context_type context_type;
@@ -78,6 +79,14 @@ public:
   {
     std::lock_guard< mutex_type > lk( super::mutex() );
     super::start_(*this, std::forward<O>(opt));
+    this->get_aspect().template get<_startup_>()(*this, super::get_id() );
+  }
+  
+  void stop()
+  {
+    std::lock_guard< mutex_type > lk( super::mutex() );
+    this->get_aspect().template get<_shutdown_>()(*this, super::get_id() );
+    super::stop_(*this);
   }
 
   template<typename O>
