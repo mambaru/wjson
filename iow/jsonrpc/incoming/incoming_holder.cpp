@@ -130,7 +130,7 @@ incoming_holder::data_ptr incoming_holder::acquire_params()
   return std::move(_data);
 }
 
-void incoming_holder::send_error( incoming_holder holder, std::unique_ptr<error> err, outgoing_handler_t outgoing_handler)
+void incoming_holder::send_error( incoming_holder holder, std::unique_ptr<error> err, ::iow::io::outgoing_handler_t outgoing_handler)
 {
   typedef outgoing_error_json< error_json > message_json;
   outgoing_error<error> error_message;
@@ -160,7 +160,7 @@ namespace{
   inline void incoming_send_error(
     incoming_holder holder, 
     std::unique_ptr<typename JError::target> err, 
-    outgoing_handler_t outgoing_handler
+    ::iow::io::outgoing_handler_t outgoing_handler
   )
   {
     typedef JError error_json;
@@ -188,8 +188,8 @@ namespace{
   */
 
   data_ptr incoming_holder_perform_once(
-    data_ptr d, io_id_t io_id, outgoing_handler_t outgoing_handler, 
-    std::function<void(incoming_holder, io_id_t, outgoing_handler_t)> incoming_handler 
+    data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t outgoing_handler, 
+    std::function<void(incoming_holder, io_id_t, ::iow::io::outgoing_handler_t)> incoming_handler 
   )
   {
     incoming_holder holder(std::move(d));
@@ -219,8 +219,8 @@ namespace{
 
 
 void incoming_holder::perform(
-    data_ptr d, io_id_t io_id, outgoing_handler_t outgoing_handler, 
-    std::function<void(incoming_holder, io_id_t, outgoing_handler_t)> incoming_handler )
+    data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t outgoing_handler, 
+    std::function<void(incoming_holder, io_id_t, ::iow::io::outgoing_handler_t)> incoming_handler )
 {
   try
   {

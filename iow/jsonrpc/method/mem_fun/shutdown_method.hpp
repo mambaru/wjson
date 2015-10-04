@@ -9,7 +9,7 @@ namespace iow{ namespace jsonrpc{
 
 template<
   typename Target, 
-  void (Target::*mem_ptr)( ::iow::io::io_id_t ) 
+  void (Target::*mem_ptr)( io_id_t ) 
 >
 struct shutdown_method: shutdown< mem_fun_shutdown<Target, mem_ptr> > {};
 

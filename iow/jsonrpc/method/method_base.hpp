@@ -17,14 +17,14 @@ class method_base
 public:
   typedef method_base<A> self;
   typedef AspectClass<A> super;
-  
+
   typedef fas::metalist::advice metatype;
   typedef typename super::aspect::template advice_cast<_name_>::type::name_type tag;
   typedef self advice_class;
 
   advice_class& get_advice() { return *this;}
   const advice_class& get_advice() const { return *this;}
-  
+
   /// ///////////////////////////////////////////////////
   /// ///////////////////////////////////////////////////
   /// ///////////////////////////////////////////////////

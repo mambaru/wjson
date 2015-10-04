@@ -15,7 +15,7 @@ struct outgoing_result_json
   typedef typename result_type::version_type version_type;
 
   typedef ::iow::json::pointer<std::unique_ptr<target>, T> result_json;
-  typedef ::iow::json::pointer< ::iow::io::data_ptr, json::raw_value< ::iow::io::data_type> > id_json;
+  typedef ::iow::json::pointer<data_ptr, json::raw_value< data_type> > id_json;
   
   JSON_NAME(id)
   JSON_NAME(result)
@@ -25,7 +25,7 @@ struct outgoing_result_json
     typename fas::type_list_n<
       version_member::type,
       ::iow::json::member<n_result, result_type, std::unique_ptr<target>,  &result_type::result, result_json >,
-      ::iow::json::member<n_id,     result_type, ::iow::io::data_ptr, &result_type::id,   id_json >
+      ::iow::json::member<n_id,     result_type, data_ptr, &result_type::id,   id_json >
     >::type
   > type;
 

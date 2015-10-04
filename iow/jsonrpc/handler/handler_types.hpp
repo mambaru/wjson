@@ -3,6 +3,7 @@
 #include <iow/jsonrpc/incoming/incoming_holder.hpp>
 #include <iow/jsonrpc/errors/errors.hpp>
 #include <iow/jsonrpc/errors/error_json.hpp>
+#include <iow/jsonrpc/types.hpp>
 #include <memory>
 
 namespace iow{ namespace jsonrpc{
@@ -10,11 +11,17 @@ namespace iow{ namespace jsonrpc{
 struct handler_types
 {
   //typedef incoming_holder holder_type;
-  typedef incoming_holder::data_type data_type;
-  typedef incoming_holder::data_ptr  data_ptr;
+  typedef ::iow::jsonrpc::data_type data_type;
+  typedef ::iow::jsonrpc::data_ptr  data_ptr;
+
+  typedef ::iow::jsonrpc::io_id_t io_id_t;
+  typedef ::iow::jsonrpc::call_id_t call_id_t;
+
+#warning TODO ::iow::jsonrpc::outgoing_handler_t
   typedef ::iow::io::outgoing_handler_t outgoing_handler_t;
-  typedef ::iow::io::io_id_t io_id_t;
-  typedef int call_id_t;
+  //typedef ::iow::io::outgoing_handler_t outgoing_handler_t;
+  //typedef ::iow::io::io_id_t io_id_t;
+  //typedef int call_id_t;
 
   typedef ::iow::jsonrpc::error error_type;
   typedef ::iow::jsonrpc::error_json error_json;

@@ -19,15 +19,22 @@ public:
   
   typedef ::iow::jsonrpc::data_type data_type;
   typedef ::iow::jsonrpc::data_ptr  data_ptr;
-  typedef ::iow::jsonrpc::outgoing_call_id_t call_id_t;
+  typedef ::iow::jsonrpc::call_id_t call_id_t;
   typedef std::function< void(incoming_holder) > result_handler_t;
-  
+
   typedef std::function< data_ptr() > basic_serializer_t;
-  typedef std::function< data_ptr(call_id_t id) > request_serializer_t;
+  typedef std::function< data_ptr(call_id_t) > request_serializer_t;
 
   const char* name() const
   {
     return _name;
+  }
+
+  outgoing_holder(time_point_t time_point = time_point_t())
+    : _name(nullptr)
+    , _data(nullptr)
+    , _time_point(time_point)
+  {
   }
   
   // полностью сериализованный result, error
@@ -45,7 +52,7 @@ public:
     , _time_point(time_point)
   {
   }
-  
+
   // частично сериализованный request
   outgoing_holder(const char* name, data_ptr d, result_handler_t result_handler, time_point_t  time_point = time_point_t())
     : _name(name)
@@ -54,7 +61,7 @@ public:
     , _time_point(time_point)
   {
   }
-  
+
   // отложенная сериализация result или error
   outgoing_holder(basic_serializer_t serializer, time_point_t  time_point = time_point_t())
     : _name(nullptr)
@@ -62,7 +69,7 @@ public:
     , _time_point(time_point)
   {
   }
-  
+
   // отложенная сериализация исходящих уведомлений
   outgoing_holder(const char* name, basic_serializer_t serializer, time_point_t  time_point = time_point_t())
     : _name(name)
@@ -70,7 +77,7 @@ public:
     , _time_point(time_point)
   {
   }
-  
+
   // отложенная сериализация исходящих запросов
   outgoing_holder(const char* name, request_serializer_t serializer, result_handler_t result_handler, time_point_t time_point = time_point_t())
     : _name(name)
@@ -79,16 +86,16 @@ public:
     , _time_point(time_point)
   {
   }
-  
+
   bool is_result() const  { return _result_handler==nullptr;}
   bool is_request() const { return _result_handler!=nullptr && _name!=nullptr;}
   bool is_notify() const  { return _name!=nullptr && _result_handler==nullptr;}
-  
+
   data_ptr detach()
   {
     if ( _data!=nullptr )
       return std::move(_data);
-    
+
     if ( this->is_notify() || this->is_result() )
     {
       if ( _basic_serializer!=nullptr )
@@ -98,7 +105,7 @@ public:
     }
     return nullptr;
   }
-  
+
   data_ptr detach(call_id_t call_id)
   {
     if ( !this->is_request() )
@@ -123,11 +130,12 @@ public:
       serializer(request, std::inserter(*result, result->end()));
       return std::move(result);
     }
+    return nullptr;
   }
-  
+
   result_handler_t result_handler() const { return _result_handler;}
   void result_handler(result_handler_t handler) { _result_handler=handler;}
-  
+
 private:
   const char* _name;
   data_ptr _data;
