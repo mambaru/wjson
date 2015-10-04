@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iow/jsonrpc/outgoing/outgoing.hpp>
-#include <iow/jsonrpc/types.hpp>
+#include <iow/jsonrpc/basic_types.hpp>
 
 namespace iow{ namespace jsonrpc{
 

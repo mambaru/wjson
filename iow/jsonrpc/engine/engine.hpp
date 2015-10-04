@@ -6,7 +6,7 @@
 #include <iow/jsonrpc/incoming/incoming_holder.hpp>
 
 namespace iow{ namespace jsonrpc{
-  
+
 template<typename JsonrpcHandler>
 class engine
 {
@@ -22,14 +22,17 @@ public:
   typedef typename handler_type::outgoing_handler_t outgoing_handler_t;
   typedef typename handler_type::data_ptr data_ptr;
   typedef typename outgoing_holder::call_id_t call_id_t;
-  
+
+  /***************************************************************/
+  /* Управляющие методы                                          */
+  /***************************************************************/
 
   template<typename O>
   void start(O&& opt)
   {
     this->reconfigure( std::forward<O>(opt) );
   }
-  
+
   template<typename O>
   void reconfigure(O&& opt)
   {
@@ -37,16 +40,87 @@ public:
     {
       auto h = std::make_shared<handler_type>();
       _common_handler = h;
-      //_common_handler->start( std::forward<O>(opt));
     }
-    // _common_handler нестартует никогда (чтобы не вызывалось shutdown и стартап)
     _common_handler->reconfigure(std::forward<O>(opt));
-    
+
     _handler_factory = [opt, this](io_id_t io_id, outgoing_handler_t handler, bool reg_io) -> handler_ptr 
     {
       return this->create_handler_(io_id, opt, std::move(handler), reg_io );
     };
   }
+
+  void stop()
+  {
+    if ( _common_handler!=nullptr )
+    {
+      _common_handler->stop();
+    }
+    _handler_map.clear();
+    _call_map.clear();
+  }
+
+  template<typename Tg, typename ...Args>
+  void call(Args... args)
+  {
+    _common_handler->template call<Tg>(std::forward<Args>(args)...);
+  }
+
+  /***************************************************************/
+  /* jsonrpc                                                     */
+  /***************************************************************/
+
+  void reg_jsonrpc( io_id_t io_id, outgoing_jsonrpc_t handler )
+  {
+    abort();
+    // this->_jsonrpc_factory(io_id, handler, true);
+  }
+
+  void perform_jsonrpc(incoming_holder holder, io_id_t io_id, outgoing_jsonrpc_t handler) 
+  {
+    abort();
+  }
+
+
+  /***************************************************************/
+  /* data_ptr                                                    */
+  /***************************************************************/
+
+  void reg_io( io_id_t io_id, outgoing_handler_t handler )
+  {
+    this->_handler_factory(io_id, handler, true);
+  }
+  
+  void unreg_io( io_id_t io_id )
+  {
+    _handler_map.erase(io_id);
+  }
+
+  void perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler) 
+  {
+    using namespace std::placeholders;
+    incoming_holder::perform( std::move(d), io_id, std::move(handler), std::bind(&engine::perform_incoming, this, _1, _2, _3 ));
+  }
+
+  // private: TODO!!!!: переделать на outgoing_jsonrpc_t
+#error TODO!!!!: переделать на outgoing_jsonrpc_t
+  void perform_incoming(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) 
+  {
+    if ( holder.is_notify() || holder.is_request() )
+    {
+      this->perform_request_( std::move(holder), io_id, std::move(handler) );
+    }
+    else if (holder.is_response() || holder.is_error() )
+    {
+      this->perform_response_( std::move(holder), io_id, std::move(handler) );
+    }
+    else
+    {
+      JSONRPC_LOG_ERROR( "jsonrpc::engine: Invalid Request: " << holder.str() )
+      incoming_holder::send_error( std::move(holder), std::make_unique<invalid_request>(), std::move(handler) );
+    }
+  }
+
+private:
 
   template<typename O>
   void upgrate_options_(O& opt)
@@ -80,24 +154,14 @@ public:
   }
 
 
-  void stop()
-  {
-    if ( _common_handler!=nullptr )
-    {
-      _common_handler->stop();
-    }
-    _handler_map.clear();
-    _call_map.clear();
-  }
-
-  void perform_request(incoming_holder holder, io_id_t io_id, outgoing_handler_t outgoing_handler) 
+  void perform_request_(incoming_holder holder, io_id_t io_id, outgoing_handler_t outgoing_handler) 
   {
     auto handler = _direct_mode ? _common_handler : _handler_factory(io_id, outgoing_handler, false);
     handler->invoke( std::move(holder), std::move(outgoing_handler) );
     
   }
   
-  void perform_response(incoming_holder holder, io_id_t /*io_id*/, outgoing_handler_t handler) 
+  void perform_response_(incoming_holder holder, io_id_t /*io_id*/, outgoing_handler_t handler) 
   {
     call_id_t call_id = holder.get_id<call_id_t>();
     if ( auto result_handler = _call_map.detach(call_id) )
@@ -110,57 +174,7 @@ public:
       handler(nullptr);
     }
   }
-  
-  void perform_incoming(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) 
-  {
-    if ( holder.is_notify() || holder.is_request() )
-    {
-      this->perform_request( std::move(holder), io_id, std::move(handler) );
-    }
-    else if (holder.is_response() || holder.is_error() )
-    {
-      this->perform_response( std::move(holder), io_id, std::move(handler) );
-    }
-    else if (holder.is_error() )
-    {
-      JSONRPC_LOG_FATAL("result ERROR message not impl")
-      abort();
-    }
-    else
-    {
-      JSONRPC_LOG_WARNING( "jsonrpc::engine: Invalid Request: " << holder.str() )
-      _common_handler->get_aspect().template get<_invoke_error_>()
-        (*_common_handler, std::move(holder), std::make_unique<invalid_request>(), std::move(handler));
-    }
-  }
 
-  void perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler) 
-  {
-    using namespace std::placeholders;
-    incoming_holder::perform( std::move(d), io_id, std::move(handler), std::bind(&engine::perform_incoming, this, _1, _2, _3 ));
-  }
-  
-  
-  
-  template<typename Tg, typename ...Args>
-  void call(Args... args)
-  {
-    _common_handler->template call<Tg>(std::forward<Args>(args)...);
-  }
-
-  
-  void reg_io( io_id_t io_id, outgoing_handler_t handler )
-  {
-    this->_handler_factory(io_id, handler, true);
-  }
-  
-  void unreg_io( io_id_t io_id )
-  {
-    _handler_map.erase(io_id);
-  }
-
-private:
-  
   template<typename Opt>
   handler_ptr create_handler_(io_id_t io_id, Opt opt, outgoing_handler_t handler, bool reg_io)
   {

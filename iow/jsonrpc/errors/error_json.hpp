@@ -3,7 +3,6 @@
 #include <iow/jsonrpc/errors/errors.hpp>
 #include <iow/json/json.hpp>
 #include <iow/json/name.hpp>
-#include <iow/io/types.hpp>
 
 namespace iow{ namespace jsonrpc{
 

@@ -1,21 +1,16 @@
 #pragma once
 
 #include <iow/io/types.hpp>
+#include <iow/jsonrpc/incoming/incoming_holder.hpp>
+#include <iow/jsonrpc/outgoing/outgoing_holder.hpp>
+#include <iow/jsonrpc/basic_types.hpp>
 
 namespace iow{ namespace jsonrpc{
 
-typedef ::iow::io::io_id_t   io_id_t;
-typedef ::iow::io::data_type data_type;
-typedef ::iow::io::data_ptr  data_ptr;
-
-typedef data_ptr incoming_call_id_t;
-typedef int      outgoing_call_id_t;
-typedef int      error_code_t;
-
-typedef ::iow::io::outgoing_handler_t outgoing_handler_t;
-typedef ::iow::io::incoming_handler_t incoming_handler_t;
-typedef ::iow::io::startup_handler_t  startup_handler_t;
-typedef ::iow::io::shutdown_handler_t shutdown_handler_t;
+typedef std::function< void(outgoing_holder) > outgoing_jsonrpc_t;
+typedef std::function< void(incoming_holder, io_id_t, outgoing_jsonrpc_t )> incoming_jsonrpc_t;
+typedef std::function< void(io_id_t, outgoing_jsonrpc_t) > startup_jsonrpc_t;
+typedef std::function< void(io_id_t) > shutdown_jsonrpc_t;
 
 }}
 

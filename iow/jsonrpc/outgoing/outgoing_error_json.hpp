@@ -2,7 +2,7 @@
 
 #include <iow/jsonrpc/outgoing/outgoing_error.hpp>
 #include <iow/jsonrpc/outgoing/version_member.hpp>
-#include <iow/jsonrpc/types.hpp>
+#include <iow/jsonrpc/basic_types.hpp>
 #include <iow/json/json.hpp>
 #include <iow/json/name.hpp>
 

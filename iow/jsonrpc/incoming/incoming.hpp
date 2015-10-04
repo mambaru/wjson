@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iow/jsonrpc/types.hpp>
+#include <iow/jsonrpc/basic_types.hpp>
 #include <utility>
 
 namespace iow{ namespace jsonrpc{

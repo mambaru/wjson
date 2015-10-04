@@ -42,7 +42,7 @@ public:
     _handlers.erase(itr);
     return true;
   }
-  
+
   void clear()
   {
     handler_map_t tmp_map;
@@ -50,7 +50,7 @@ public:
       std::lock_guard<mutex_type> lk(_mutex);
       tmp_map.swap(_handlers);
     }
-    
+
     for (auto& tmp : tmp_map)
     {
       if (tmp.second.first != nullptr ) 
@@ -58,7 +58,6 @@ public:
         tmp.second.first->stop();
       }
     }
-
   }
 
 private:
