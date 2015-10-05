@@ -17,12 +17,9 @@ struct handler_types
   typedef ::iow::jsonrpc::io_id_t io_id_t;
   typedef ::iow::jsonrpc::call_id_t call_id_t;
 
-#warning TODO ::iow::jsonrpc::outgoing_handler_t
-  typedef ::iow::io::outgoing_handler_t outgoing_handler_t;
-  //typedef ::iow::io::outgoing_handler_t outgoing_handler_t;
-  //typedef ::iow::io::io_id_t io_id_t;
-  //typedef int call_id_t;
-
+  typedef ::iow::jsonrpc::incoming_handler_t incoming_handler_t;
+  typedef ::iow::jsonrpc::outgoing_handler_t outgoing_handler_t;
+  
   typedef ::iow::jsonrpc::error error_type;
   typedef ::iow::jsonrpc::error_json error_json;
   typedef std::unique_ptr<error_type> error_ptr;

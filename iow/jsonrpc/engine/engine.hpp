@@ -4,6 +4,9 @@
 #include <iow/jsonrpc/engine/handler_map.hpp>
 #include <iow/jsonrpc/engine/engine_options.hpp>
 #include <iow/jsonrpc/incoming/incoming_holder.hpp>
+#include <iow/jsonrpc/outgoing/outgoing_holder.hpp>
+#include <iow/jsonrpc/types.hpp>
+#include <iow/jsonrpc/incoming/aux.hpp>
 
 namespace iow{ namespace jsonrpc{
 
@@ -84,10 +87,18 @@ public:
   /***************************************************************/
   /* data_ptr                                                    */
   /***************************************************************/
+  
+  outgoing_handler_t io2rpc( ::iow::io::outgoing_handler_t handler )
+  {
+    return [handler](outgoing_holder holder)
+    {
+      handler( std::move( holder.detach() ) );
+    };
+  }
 
   void reg_io( io_id_t io_id, ::iow::io::outgoing_handler_t handler )
   {
-    this->_handler_factory(io_id, handler, true);
+    this->_handler_factory(io_id, io2rpc(handler), true);
   }
 
   void unreg_io( io_id_t io_id )
@@ -98,12 +109,13 @@ public:
   void perform_io(data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t handler) 
   {
     using namespace std::placeholders;
-    incoming_holder::perform( std::move(d), io_id, std::move(handler), std::bind(&engine::perform_incoming, this, _1, _2, _3 ));
+    auto rpc = io2rpc( std::move(handler) );
+    aux::perform( std::move(d), io_id, std::move( rpc ), std::bind(&engine::perform_incoming, this, _1, _2, _3 ));
   }
 
   // private: TODO!!!!: переделать на outgoing_jsonrpc_t
 // #error TODO!!!!: переделать на outgoing_jsonrpc_t
-  void perform_incoming(incoming_holder holder, io_id_t io_id, ::iow::io::outgoing_handler_t handler) 
+  void perform_incoming(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) 
   {
     if ( holder.is_notify() || holder.is_request() )
     {
@@ -116,7 +128,7 @@ public:
     else
     {
       JSONRPC_LOG_ERROR( "jsonrpc::engine: Invalid Request: " << holder.str() )
-      incoming_holder::send_error( std::move(holder), std::make_unique<invalid_request>(), std::move(handler) );
+      aux::send_error( std::move(holder), std::make_unique<invalid_request>(), std::move(handler) );
     }
   }
 
@@ -154,13 +166,13 @@ private:
   }
 
 
-  void perform_request_(incoming_holder holder, io_id_t io_id, ::iow::io::outgoing_handler_t outgoing_handler) 
+  void perform_request_(incoming_holder holder, io_id_t io_id, outgoing_handler_t outgoing_handler) 
   {
     auto handler = _direct_mode ? _common_handler : _handler_factory(io_id, outgoing_handler, false);
     handler->invoke( std::move(holder), std::move(outgoing_handler) );
   }
 
-  void perform_response_(incoming_holder holder, io_id_t /*io_id*/, ::iow::io::outgoing_handler_t handler) 
+  void perform_response_(incoming_holder holder, io_id_t /*io_id*/, outgoing_handler_t handler) 
   {
     call_id_t call_id = holder.get_id<call_id_t>();
     if ( auto result_handler = _call_map.detach(call_id) )
@@ -170,12 +182,12 @@ private:
     else if ( handler!=nullptr )
     {
       JSONRPC_LOG_WARNING("jsonrpc::engind incoming response with call_id=" << call_id << " not found")
-      handler(nullptr);
+      handler( outgoing_holder() );
     }
   }
 
   template<typename Opt>
-  handler_ptr create_handler_(io_id_t io_id, Opt opt, ::iow::io::outgoing_handler_t handler, bool reg_io)
+  handler_ptr create_handler_(io_id_t io_id, Opt opt, outgoing_handler_t handler, bool reg_io)
   {
     bool reinit;
     auto ph = _handler_map.findocre(io_id, reg_io, reinit);
@@ -183,14 +195,21 @@ private:
     {
       opt.outgoing_handler = std::move(handler);
       this->upgrate_options_(opt);
-      ph->start(opt);
+      if ( !ph->status() )
+      {
+        ph->start(opt);
+      }
+      else if ( reinit )
+      {
+        ph->reconfigure(opt);
+      }
     }
     return ph;
   }
 
 private:
 
-  std::function<handler_ptr(io_id_t, ::iow::io::outgoing_handler_t, bool)> _handler_factory;
+  std::function<handler_ptr(io_id_t, outgoing_handler_t, bool)> _handler_factory;
 
   typedef handler_map<handler_type> handler_map_t;
   handler_map_t _handler_map;
