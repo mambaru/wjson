@@ -9,7 +9,7 @@ template<typename T>
 inline T create_id()
 {
   static std::atomic<T> counter( (T()) );
-  return ++counter;
+  return counter.fetch_add(1);
 }
 
 }}

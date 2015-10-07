@@ -7,13 +7,27 @@
 #include <iow/jsonrpc/outgoing/outgoing_holder.hpp>
 #include <iow/jsonrpc/types.hpp>
 #include <iow/jsonrpc/incoming/aux.hpp>
-
+#include <iow/io/io_id.hpp>
 namespace iow{ namespace jsonrpc{
 
+#error
+  // TODO: Сделать чеклист по всем вариантам 
+  // Отработать
+  // для handler_map (сервис)
+  //    все handler опции игнорируються (оборачиваются)
+  //    reg_io - новый коннект io (для авто-ответа нового коннекта)
+  //    reg_jsonrpc - новый коннект jsonrpc (для авто-ответа нового коннекта)
+  //    perform_io - обновить хандеры для io
+  //    perform_incoming - обновить хандеры для jsonrpc
+  // для _common_handler (шлюз)
+  //    инициализация в зависимти от опций
+  
 template<typename JsonrpcHandler>
 class engine
+  : public std::enable_shared_from_this< engine<JsonrpcHandler> >
 {
 public:
+  typedef engine<JsonrpcHandler> self;
   typedef JsonrpcHandler handler_type;
   typedef typename handler_type::target_type target_type;
   typedef std::shared_ptr<handler_type> handler_ptr;
@@ -33,6 +47,7 @@ public:
   template<typename O>
   void start(O&& opt)
   {
+    _io_id = ::iow::io::create_id<size_t>();
     this->reconfigure( std::forward<O>(opt) );
   }
 
@@ -45,9 +60,14 @@ public:
       _common_handler = h;
     }
 
-    _handler_factory = [opt, this](io_id_t io_id, outgoing_handler_t handler, bool reg_io) -> handler_ptr
+    _handler_rpc_factory = [opt, this](io_id_t io_id, outgoing_handler_t handler, bool reg_io) -> handler_ptr
     {
-      return this->create_handler_(io_id, opt, std::move(handler), reg_io );
+      return this->create_rpc_handler_(io_id, opt, std::move(handler), reg_io );
+    };
+
+    _handler_io_factory = [opt, this](io_id_t io_id, ::iow::io::outgoing_handler_t handler, bool reg_io) -> handler_ptr
+    {
+      return this->create_io_handler_(io_id, opt, std::move(handler), reg_io );
     };
     
     this->upgrate_options_(opt);
@@ -135,13 +155,71 @@ public:
 
 private:
 
+  // Для запроса с perform_io
   template<typename O>
-  void upgrate_options_(O& opt)
+  void upgrate_options_(O& opt, ::iow::io::outgoing_handler_t handler)
+  {
+    std::weak_ptr<self> wthis = this->shared_from_this();
+    opt.send_request = [handler, wthis](const char* name, result_handler_t result_handler, request_serializer_t ser)
+    {
+      if ( auto pthis = wthis.lock() )
+      {
+        std::cout << "----> engine opt.send_request { "<< std::endl;
+        auto call_id = pthis->_call_counter.fetch_add(1);
+        pthis->_call_map.set(call_id, std::move(result_handler));
+        auto d = std::move(ser(name, call_id));
+            // TODO: wrap
+        handler( std::move(d), pthis->_io_id, [wthis](data_ptr d)
+        {
+          if ( auto pthis = wthis.lock() )
+          {
+            pthis->perform_io( std::move(d), pthis->_io_id, nullptr);
+          }
+        });
+            std::cout << "} <----> engine opt.send_request "<< std::endl;
+      }
+    };
+  }
+  
+  template<typename O>
+  void upgrate_options_(O& opt, ::iow::jsonrpc::outgoing_handler_t handler)
   {
     typedef typename handler_type::result_handler_t result_handler_t;
     typedef typename handler_type::request_serializer_t request_serializer_t;
     typedef typename handler_type::notify_serializer_t notify_serializer_t;
 
+    if ( opt.send_request == nullptr )
+    {
+      if (opt.rpc_send_handler != nullptr )
+      {
+        abort();
+      }
+      else if ( opt.io_send_handler != nullptr )
+      {
+        auto handler = opt.io_send_handler;
+        std::weak_ptr<self> wthis = this->shared_from_this();
+        opt.send_request = [handler, wthis](const char* name, result_handler_t result_handler, request_serializer_t ser)
+        {
+          if ( auto pthis = wthis.lock() )
+          {
+            std::cout << "----> engine opt.send_request { "<< std::endl;
+            auto call_id = pthis->_call_counter.fetch_add(1);
+            pthis->_call_map.set(call_id, std::move(result_handler));
+            auto d = std::move(ser(name, call_id));
+            // TODO: wrap
+            handler( std::move(d), pthis->_io_id, [wthis](data_ptr d){
+              if ( auto pthis = wthis.lock() )
+              {
+                pthis->perform_io( std::move(d), pthis->_io_id, nullptr);
+              }
+            } );
+            std::cout << "} <----> engine opt.send_request "<< std::endl;
+          }
+        };
+
+      }
+    }
+    /*
     if (opt.io_outgoing_handler != nullptr)
     {
       if ( opt.send_request == nullptr )
@@ -166,6 +244,7 @@ private:
         };
       }
     }
+    */
   }
 
 
@@ -189,15 +268,16 @@ private:
     }
   }
 
-  template<typename Opt>
-  handler_ptr create_handler_(io_id_t io_id, Opt opt, outgoing_handler_t handler, bool reg_io)
+  // OutgoingHandler io::outgoing_handler_t или jsonrpc::outgoing_handler_t
+  template<typename Opt, typename OutgoingHandler>
+  handler_ptr create_handler_(io_id_t io_id, Opt opt, OutgoingHandler handler, bool reg_io)
   {
     bool reinit;
     auto ph = _handler_map.findocre(io_id, reg_io, reinit);
     if ( reinit )
     {
-      opt.io_outgoing_handler = std::move(handler);
-      this->upgrate_options_(opt);
+      // специализация в зависимости от типа OutgoingHandler
+      this->upgrate_options_(opt, std::move(handler));
       if ( !ph->status() )
       {
         ph->start(opt);
@@ -212,7 +292,8 @@ private:
 
 private:
 
-  std::function<handler_ptr(io_id_t, outgoing_handler_t, bool)> _handler_factory;
+  std::function<handler_ptr(io_id_t, outgoing_handler_t, bool)> _handler_rpc_factory;
+  std::function<handler_ptr(io_id_t, ::iow::io::outgoing_handler_t, bool)> _handler_io_factory;
 
   typedef handler_map<handler_type> handler_map_t;
   handler_map_t _handler_map;
@@ -220,6 +301,7 @@ private:
   call_map _call_map;
   std::atomic<int> _call_counter;
   std::atomic<bool> _direct_mode;
+  std::atomic<io_id_t> _io_id;
 };
 
 }}
