@@ -45,12 +45,13 @@ public:
       _common_handler = h;
     }
 
-    _common_handler->reconfigure(std::forward<O>(opt));
-
     _handler_factory = [opt, this](io_id_t io_id, outgoing_handler_t handler, bool reg_io) -> handler_ptr
     {
       return this->create_handler_(io_id, opt, std::move(handler), reg_io );
     };
+    
+    this->upgrate_options_(opt);
+    _common_handler->reconfigure(std::forward<O>(opt));
   }
 
   void stop()
@@ -141,22 +142,24 @@ private:
     typedef typename handler_type::request_serializer_t request_serializer_t;
     typedef typename handler_type::notify_serializer_t notify_serializer_t;
 
-    if (opt.outgoing_handler != nullptr)
+    if (opt.io_outgoing_handler != nullptr)
     {
       if ( opt.send_request == nullptr )
       {
-        auto handler = opt.outgoing_handler;
+        auto handler = opt.io_outgoing_handler;
         opt.send_request = [handler, this](const char* name, result_handler_t result_handler, request_serializer_t ser)
         {
+          std::cout << "----> engine opt.send_request { "<< std::endl;
           ++this->_call_counter;
           this->_call_map.set(this->_call_counter, std::move(result_handler));
           handler( std::move(ser(name, this->_call_counter)));
+          std::cout << "} <----> engine opt.send_request "<< std::endl;
         };
       }
 
       if ( opt.send_notify == nullptr )
       {
-        auto handler = opt.outgoing_handler;
+        auto handler = opt.io_outgoing_handler;
         opt.send_notify = [handler, this](const char* name, notify_serializer_t ser)
         {
           handler( std::move(ser(name)) );
@@ -193,7 +196,7 @@ private:
     auto ph = _handler_map.findocre(io_id, reg_io, reinit);
     if ( reinit )
     {
-      opt.outgoing_handler = std::move(handler);
+      opt.io_outgoing_handler = std::move(handler);
       this->upgrate_options_(opt);
       if ( !ph->status() )
       {
