@@ -23,7 +23,10 @@ public:
   typedef std::function< void(incoming_holder) > result_handler_t;
 
   typedef std::function< data_ptr() > basic_serializer_t;
-  typedef std::function< data_ptr(call_id_t) > request_serializer_t;
+  // typedef std::function< data_ptr(call_id_t) > request_serializer_t;
+  typedef std::function< data_ptr(const char* name, call_id_t id) > request_serializer_t;
+  typedef std::function< data_ptr(const char* name) > notify_serializer_t;
+
 
   const char* name() const
   {
@@ -71,9 +74,9 @@ public:
   }
 
   // отложенная сериализация исходящих уведомлений
-  outgoing_holder(const char* name, basic_serializer_t serializer, time_point_t  time_point = time_point_t())
+  outgoing_holder(const char* name, notify_serializer_t serializer, time_point_t  time_point = time_point_t())
     : _name(name)
-    , _basic_serializer(serializer)
+    , _notify_serializer(serializer)
     , _time_point(time_point)
   {
   }
@@ -98,7 +101,11 @@ public:
 
     if ( this->is_notify() || this->is_result() )
     {
-      if ( _basic_serializer!=nullptr )
+      if ( _notify_serializer != nullptr )
+      {
+        return _notify_serializer( _name );
+      }
+      else if ( _basic_serializer!=nullptr )
       {
         return std::move( _basic_serializer() );
       }
@@ -115,7 +122,11 @@ public:
     {
       if ( _request_serializer != nullptr )
       {
-        return std::move( _request_serializer(call_id)  );
+        return std::move( _request_serializer(_name, call_id)  );
+      }
+      else if ( _notify_serializer != nullptr )
+      {
+        return std::move( _notify_serializer(_name)  );
       }
     }
     else
@@ -141,6 +152,7 @@ private:
   data_ptr _data;
   basic_serializer_t _basic_serializer;
   request_serializer_t _request_serializer;
+  notify_serializer_t _notify_serializer;
   result_handler_t _result_handler;
   time_point_t _time_point;
 };

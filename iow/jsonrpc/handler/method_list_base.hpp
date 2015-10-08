@@ -48,6 +48,23 @@ public:
   
   typedef handler_options<target_type, peeper_type> options_type;
   
+  ~method_list_base()
+  {
+    std::cout << "-1- ~method_list_base() " << size_t(this) << " " << (_send_request != nullptr)  << std::endl;
+    _send_request = nullptr;
+    std::cout << "-2- ~method_list_base()" << " " << (_send_notify != nullptr)  << std::endl;
+    _send_notify = nullptr;  
+    std::cout << "-3 ~method_list_base()" << std::endl;
+  }
+  method_list_base()
+  {
+    std::cout << "-1- method_list_base() " << size_t(this) << " " << (_send_request != nullptr)  << std::endl;
+    _send_request = nullptr;
+    std::cout << "-2- method_list_base()" << std::endl;
+    _send_notify = nullptr;  
+    std::cout << "-3 method_list_base()" << std::endl;
+    
+  }
   
   template<typename Params, typename Serializer>
   void send_request( 
@@ -195,8 +212,8 @@ private:
   friend struct super::aspect::template advice_cast< ::iow::io::_initialize_ >::type;
   typedef typename handler_types::send_request_t  send_request_t;
   typedef typename handler_types::send_notify_t   send_notify_t;
-  send_request_t _send_request /* = nullptr*/;
-  send_notify_t  _send_notify /* = nullptr*/;  
+  send_request_t _send_request = send_request_t(nullptr);
+  send_notify_t  _send_notify = send_notify_t(nullptr);  
 
 };
 

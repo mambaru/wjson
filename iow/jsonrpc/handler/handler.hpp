@@ -8,6 +8,7 @@
 #include <iow/jsonrpc/method/aspect/tags.hpp>
 #include <fas/aop.hpp>
 #include <mutex>
+#include <iostream>
 
 namespace iow{ namespace jsonrpc{
 
@@ -92,8 +93,11 @@ public:
   template<typename O>
   void reconfigure(O&& opt)
   {
+    std::cout << "handler::reconfigure -1-" << std::endl;
     std::lock_guard< mutex_type > lk( super::mutex() );
+    std::cout << "handler::reconfigure -2-" << std::endl;
     super::reconfigure_(*this, std::forward<O>(opt));
+    std::cout << "handler::reconfigure -3-" << std::endl;
   }
 
 };
