@@ -53,7 +53,7 @@ namespace iow{ namespace jsonrpc{ namespace aux{
       catch(const std::exception& ex)
       {
         JSONRPC_LOG_ERROR( "jsonrpc::engine: server error: " << ex.what() )
-        send_error( std::move(incoming_holder(nullptr)), std::make_unique<server_error>(), std::move(outgoing_handler));
+        send_error( std::move(incoming_holder(nullptr)),  std::make_unique<server_error>(), std::move(outgoing_handler));
       }
       catch(...)
       {

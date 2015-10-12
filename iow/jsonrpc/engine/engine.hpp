@@ -71,12 +71,19 @@ public:
       _common_handler = std::make_shared<handler_type>();
     }
 
-    _incoming_io_factory = [opt, this](io_id_t io_id, ::iow::io::incoming_handler_t handler, bool reg_io) -> handler_ptr
+    /*
+    _incoming_rpc_factory = [opt, this](io_id_t io_id, incoming_handler_t handler, bool reg_io) -> handler_ptr
+    {
+      return this->create_handler_(io_id, opt, std::move(handler), reg_io );
+    };
+    */
+  
+    _outgoing_rpc_factory = [opt, this](io_id_t io_id, outgoing_handler_t handler, bool reg_io) -> handler_ptr
     {
       return this->create_handler_(io_id, opt, std::move(handler), reg_io );
     };
 
-    _outgoing_rpc_factory = [opt, this](io_id_t io_id, outgoing_handler_t handler, bool reg_io) -> handler_ptr
+    _incoming_io_factory = [opt, this](io_id_t io_id, ::iow::io::incoming_handler_t handler, bool reg_io) -> handler_ptr
     {
       return this->create_handler_(io_id, opt, std::move(handler), reg_io );
     };
@@ -107,7 +114,7 @@ public:
   /* jsonrpc                                                     */
   /***************************************************************/
 
-  void reg_jsonrpc( io_id_t io_id, incoming_handler_t handler )
+  void reg_jsonrpc( io_id_t io_id, outgoing_handler_t handler )
   {
     _outgoing_rpc_factory(io_id, handler, true);
   }
@@ -124,7 +131,7 @@ public:
   
   outgoing_handler_t io2rpc( ::iow::io::outgoing_handler_t handler )
   {
-    return [handler, this](outgoing_holder holder)
+    return [handler, this](outgoing_holder holder/*, io_id_t*/)
     {
       if ( holder.is_request() )
       {
@@ -153,7 +160,7 @@ public:
   void perform_io(data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t handler) 
   {
     using namespace std::placeholders;
-    auto rpc = io2rpc( std::move(handler) );
+    auto rpc = io2rpc( std::move(handler));
     aux::perform( std::move(d), io_id, std::move( rpc ), std::bind(&engine::perform_incoming, this, _1, _2, _3 ));
   }
 
@@ -174,6 +181,11 @@ public:
       JSONRPC_LOG_ERROR( "jsonrpc::engine: Invalid Request: " << holder.str() )
       aux::send_error( std::move(holder), std::make_unique<invalid_request>(), std::move(handler) );
     }
+  }
+
+  io_id_t get_id() const
+  {
+    return _io_id;
   }
 
 private:
@@ -270,13 +282,8 @@ private:
         pthis->_call_map.set(call_id, rh );
         
         static_assert( std::is_same<outgoing_holder::request_serializer_t, request_serializer_t>::value, "TATAM" );
-        //outgoing_holder::result_handler_t rh = result_handler;
-        //outgoing_holder::request_serializer_t rs = std::move(ser);
         outgoing_holder holder(name, std::move(rs), std::move(rh) );
-        //outgoing_holder holder = outgoing_holder(name, std::move(ser), std::move(result_handler) );
-
-        //auto holder = std::move( outgoing_holder(name, std::move(ser), std::move(result_handler) ) );
-        handler(  std::move(holder)/*, pthis->_io_id*/ );
+        handler(  std::move(holder) /*, pthis->_io_id*/ );
       }
     };
 
@@ -288,7 +295,7 @@ private:
         // auto d = std::move(ser(name));
         // TODO: wrap
         outgoing_holder holder(name, std::move(ns) );
-        handler( std::move(holder) /*, pthis->_io_id, nullptr*/);
+        handler( std::move(holder) /*, pthis->_io_id*/ );
       }
     };
   }
@@ -301,7 +308,7 @@ private:
 
   void perform_response_(incoming_holder holder, io_id_t /*io_id*/, outgoing_handler_t handler) 
   {
-    call_id_t call_id = holder.get_id<call_id_t>();
+    call_id_t call_id = holder.template get_id<call_id_t>();
     if ( auto result_handler = _call_map.detach(call_id) )
     {
       result_handler(std::move(holder));
