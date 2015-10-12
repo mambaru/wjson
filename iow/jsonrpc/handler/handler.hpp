@@ -80,24 +80,21 @@ public:
   {
     std::lock_guard< mutex_type > lk( super::mutex() );
     super::start_(*this, std::forward<O>(opt));
-    this->get_aspect().template get<_startup_>()(*this, super::get_id() );
+    this->get_aspect().template get<_connect_>()(*this, super::get_id() );
   }
-  
+
   void stop()
   {
     std::lock_guard< mutex_type > lk( super::mutex() );
-    this->get_aspect().template get<_shutdown_>()(*this, super::get_id() );
+    this->get_aspect().template get<_disconnect_>()(*this, super::get_id() );
     super::stop_(*this);
   }
 
   template<typename O>
   void reconfigure(O&& opt)
   {
-    std::cout << "handler::reconfigure -1-" << std::endl;
     std::lock_guard< mutex_type > lk( super::mutex() );
-    std::cout << "handler::reconfigure -2-" << std::endl;
     super::reconfigure_(*this, std::forward<O>(opt));
-    std::cout << "handler::reconfigure -3-" << std::endl;
   }
 
 };

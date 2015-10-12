@@ -6,8 +6,8 @@
 namespace iow{ namespace jsonrpc{
 
 template<typename Handler>
-struct shutdown:
-  fas::advice<_shutdown_, Handler>
+struct disconnect:
+  fas::advice<_disconnect_, Handler>
 {};
 
 }} // iow

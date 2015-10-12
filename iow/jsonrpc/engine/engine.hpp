@@ -21,7 +21,29 @@ namespace iow{ namespace jsonrpc{
   //    perform_incoming - обновить хандеры для jsonrpc
   // для _common_handler (шлюз)
   //    инициализация в зависимти от опций
-  
+
+/*
+ * Входы:
+ *      perform_io
+ *      perform_jsonrpc
+ *      reg_io
+ *      reg_jsonrpc
+ *      user_interface
+ *        ссылку на user_interface можно получить при запросе или при новом "коннекте"(reg_*)
+*/
+
+/**
+ * Все режимы взаимодействия.
+ * Участики:
+ *      iinterface - сервре и клиент
+ *      ijsonrpc - промежуточные обработчики
+ *      iinterface1 и iinterface2 пользовательские объекты
+ * iinterface -> iinterface1
+ * ijsonrpc   -> iinterface1
+ * iinterface1 -> iinterface
+ * iinterface1 -> ijsonrpc
+ * 
+ */
 template<typename JsonrpcHandler>
 class engine
   : public std::enable_shared_from_this< engine<JsonrpcHandler> >
@@ -104,11 +126,24 @@ public:
     _call_map.clear();
   }
 
+// iterface implementation
+
   template<typename Tg, typename ...Args>
   void call(Args... args)
   {
     _common_handler->template call<Tg>(std::forward<Args>(args)...);
   }
+
+  template<typename ...Args>
+  void connect(Args... args)
+  {
+  }
+
+  template<typename ...Args>
+  void disconnect(Args... args)
+  {
+  }
+
 
   /***************************************************************/
   /* jsonrpc                                                     */
@@ -121,7 +156,7 @@ public:
 
   void perform_jsonrpc(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) 
   {
-    abort();
+    this->perform_incoming_( std::move(holder), io_id, std::move(handler) );
   }
 
   /***************************************************************/
@@ -148,7 +183,6 @@ public:
 
   void reg_io( io_id_t io_id, ::iow::io::incoming_handler_t handler )
   {
-    abort();
     this->_incoming_io_factory(io_id, handler, true);
   }
 
@@ -161,12 +195,18 @@ public:
   {
     using namespace std::placeholders;
     auto rpc = io2rpc( std::move(handler));
-    aux::perform( std::move(d), io_id, std::move( rpc ), std::bind(&engine::perform_incoming, this, _1, _2, _3 ));
+    aux::perform( std::move(d), io_id, std::move( rpc ), std::bind(&engine::perform_incoming_, this, _1, _2, _3 ));
   }
 
+  io_id_t get_id() const
+  {
+    return _io_id;
+  }
+
+private:
   // private: TODO!!!!: переделать на outgoing_jsonrpc_t
   // #error TODO!!!!: переделать на outgoing_jsonrpc_t
-  void perform_incoming(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) 
+  void perform_incoming_(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) 
   {
     if ( holder.is_notify() || holder.is_request() )
     {
@@ -182,13 +222,6 @@ public:
       aux::send_error( std::move(holder), std::make_unique<invalid_request>(), std::move(handler) );
     }
   }
-
-  io_id_t get_id() const
-  {
-    return _io_id;
-  }
-
-private:
   
   /**
    * upgrate_options_ - инициализация send_request и send_notify 

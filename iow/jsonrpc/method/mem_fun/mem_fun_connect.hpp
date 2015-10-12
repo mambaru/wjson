@@ -12,7 +12,7 @@ template<
   typename Target, 
   void (Target::*mem_ptr)( io::io_id_t, std::weak_ptr<Interface> ) 
 >
-struct mem_fun_startup
+struct mem_fun_connect
 {
   template<typename T>
   void operator()(T& t, io::io_id_t id) const
@@ -25,6 +25,7 @@ struct mem_fun_startup
     }
     else
     {
+      abort();
     }
   }
 };

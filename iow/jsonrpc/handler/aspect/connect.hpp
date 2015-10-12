@@ -6,8 +6,8 @@
 namespace iow{ namespace jsonrpc{
 
 template<typename Handler>
-struct startup:
-  fas::advice<_startup_, Handler>
+struct connect:
+  fas::advice<_connect_, Handler>
 {};
 
 

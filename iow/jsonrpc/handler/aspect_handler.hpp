@@ -4,8 +4,8 @@
 #include <iow/jsonrpc/handler/aspect/target.hpp>
 #include <iow/jsonrpc/handler/aspect/interface_.hpp>
 #include <iow/jsonrpc/handler/aspect/peeper.hpp>
-#include <iow/jsonrpc/handler/aspect/startup.hpp>
-#include <iow/jsonrpc/handler/aspect/shutdown.hpp>
+#include <iow/jsonrpc/handler/aspect/connect.hpp>
+#include <iow/jsonrpc/handler/aspect/disconnect.hpp>
 #include <iow/jsonrpc/handler/aspect/context.hpp>
 #include <iow/jsonrpc/handler/aspect/ad_response_handler.hpp>
 #include <iow/jsonrpc/handler/aspect/ad_send_request.hpp>
@@ -31,8 +31,8 @@ struct aspect_handler: fas::aspect<
   interface_<fas::empty_type>,
   peeper<fas::empty_type>, 
   context<fas::empty_type>,
-  fas::stub<_startup_>, 
-  fas::stub<_shutdown_>,
+  fas::stub<_connect_>, 
+  fas::stub<_disconnect_>,
   request_serializer<80>,
   notify_serializer<80>,
   send_error<80>,

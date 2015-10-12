@@ -1,7 +1,7 @@
 #pragma once
 
-#include <iow/jsonrpc/handler/aspect/startup.hpp>
-#include <iow/jsonrpc/method/mem_fun/mem_fun_startup.hpp>
+#include <iow/jsonrpc/handler/aspect/connect.hpp>
+#include <iow/jsonrpc/method/mem_fun/mem_fun_connect.hpp>
 #include <memory>
 
 namespace iow{ namespace jsonrpc{
@@ -11,7 +11,7 @@ template<
   typename Target, 
   void (Target::*mem_ptr)( io_id_t, std::weak_ptr<Interface> ) 
 >
-struct startup_method: startup< mem_fun_startup<Interface, Target, mem_ptr> > {};
+struct connect_method: connect< mem_fun_connect<Interface, Target, mem_ptr> > {};
 
 }} // iow
 

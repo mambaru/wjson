@@ -8,7 +8,7 @@ template<
   typename Target, 
   void (Target::*mem_ptr)( io_id_t ) 
 >
-struct mem_fun_shutdown
+struct mem_fun_disconnect
 {
   template<typename T>
   void operator()(T& t, io_id_t id) const
@@ -19,6 +19,7 @@ struct mem_fun_shutdown
     }
     else
     {
+      abort();
     }
   }
 };

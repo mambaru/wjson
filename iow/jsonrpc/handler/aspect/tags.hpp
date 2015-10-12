@@ -2,8 +2,8 @@
 
 namespace iow{ namespace jsonrpc{
 
-struct _startup_;
-struct _shutdown_;
+struct _connect_;
+struct _disconnect_;
 
 struct _peeper_;
 struct _interface_;
