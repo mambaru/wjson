@@ -45,13 +45,9 @@ public:
 
   ~engine()
   {
-    std::cout << "-1- ~engine" << std::endl;
     _call_map.clear();
-    std::cout << "-2- ~engine" << std::endl;
     _handler_map.clear();
-    std::cout << "-3- ~engine" << std::endl;
     _common_handler = nullptr;
-    std::cout << "-4- ~engine" << std::endl;
   }
   /***************************************************************/
   /* Управляющие методы                                          */
@@ -60,32 +56,20 @@ public:
   template<typename O>
   void start(O&& opt)
   {
-    std::cout << "engine::start -1-" << std::endl;
     _io_id = ::iow::io::create_id<size_t>();
-    std::cout << "engine::start -2-" << std::endl;
     this->reconfigure( std::forward<O>(opt) );
-    std::cout << "engine::start -3-" << std::endl;
   }
 
   template<typename O>
   void reconfigure(O&& opt1)
   {
     typename std::decay<O>::type opt = opt1;
-    std::cout << "engine::reconfigure -1-" << std::endl;
+
     if ( _common_handler == nullptr )
     {
-      std::cout << "engine::reconfigure -1.1-" << std::endl;
       auto h = std::make_shared<handler_type>();
-      // _common_handler = h;
+      _common_handler = std::make_shared<handler_type>();
     }
-
-    std::cout << "engine::reconfigure -2-" << std::endl;
-    /*
-    _incoming_rpc_factory = [opt, this](io_id_t io_id, incoming_handler_t handler, bool reg_io) -> handler_ptr
-    {
-      return this->create_handler_(io_id, opt, std::move(handler), reg_io );
-    };
-    */
 
     _incoming_io_factory = [opt, this](io_id_t io_id, ::iow::io::incoming_handler_t handler, bool reg_io) -> handler_ptr
     {
@@ -101,38 +85,21 @@ public:
     {
       return this->create_handler_(io_id, opt, std::move(handler), reg_io );
     };
-    
-    std::cout << "engine::reconfigure -3- " << (_common_handler!=nullptr) << std::endl;
-    //std::cout << "engine::reconfigure -3- " << _common_handler->mutex().try_lock() << std::endl;
-    //_common_handler->mutex().unlock();
-    ::iow::io::outgoing_handler_t tmp = [](data_ptr){ abort();};
-    this->upgrate_options_(opt, tmp);
-    std::cout << "engine::reconfigure -3.1- " << (_common_handler!=nullptr) << std::endl;
-    opt.send_notify = nullptr;
-    opt.send_request = nullptr;
-    // _common_handler->reconfigure(std::forward<O>(opt)); // не надо стартовать? 
-    std::cout << "engine::reconfigure -4-" << std::endl;
   }
 
   void stop()
   {
-    std::cout << "engine::stop -1-" << std::endl;
     if ( _common_handler!=nullptr )
     {
-      std::cout << "engine::stop -2-" << std::endl;
       _common_handler->stop();
     }
-    std::cout << "engine::stop -3-" << std::endl;
     _handler_map.clear();
-    std::cout << "engine::stop -4-" << std::endl;
     _call_map.clear();
-    std::cout << "engine::stop -5-" << std::endl;
   }
 
   template<typename Tg, typename ...Args>
   void call(Args... args)
   {
-    abort();
     _common_handler->template call<Tg>(std::forward<Args>(args)...);
   }
 
@@ -142,8 +109,6 @@ public:
 
   void reg_jsonrpc( io_id_t io_id, incoming_handler_t handler )
   {
-    abort();
-    // this->_jsonrpc_factory(io_id, handler, true);
     _outgoing_rpc_factory(io_id, handler, true);
   }
 
@@ -173,7 +138,6 @@ public:
       }
     };
   }
-  
 
   void reg_io( io_id_t io_id, ::iow::io::incoming_handler_t handler )
   {
@@ -188,18 +152,13 @@ public:
 
   void perform_io(data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t handler) 
   {
-    abort();
     using namespace std::placeholders;
-    //aux::perform( std::move(d), io_id, std::move( handler ), std::bind(&engine::perform_incoming, this, _1, _2, _3 ));
-    // TODO: perform_io
-    
     auto rpc = io2rpc( std::move(handler) );
     aux::perform( std::move(d), io_id, std::move( rpc ), std::bind(&engine::perform_incoming, this, _1, _2, _3 ));
-    
   }
 
   // private: TODO!!!!: переделать на outgoing_jsonrpc_t
-// #error TODO!!!!: переделать на outgoing_jsonrpc_t
+  // #error TODO!!!!: переделать на outgoing_jsonrpc_t
   void perform_incoming(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) 
   {
     if ( holder.is_notify() || holder.is_request() )
@@ -234,7 +193,6 @@ private:
       {
         auto call_id = pthis->_call_counter.fetch_add(1);
         pthis->_call_map.set(call_id, std::move(result_handler));
-        
         auto d = std::move(ser(name, call_id));
         // TODO: wrap
         // нужен здесь wthis
@@ -252,7 +210,6 @@ private:
       }
     };
   }
-
 
   template<typename O>
   void upgrate_options_(O& opt, ::iow::io::incoming_handler_t handler)
@@ -290,16 +247,6 @@ private:
     };
   }
 
-  /*
-  template<typename O>
-  void upgrate_options_(O& opt, outgoing_handler_t handler)
-  {
-    // Первичная инициализация (reg_jsonrpc вызван небыл, исходящие вызовы не возможны)
-    opt.send_request = nullptr;
-    opt.send_notify = nullptr;
-  }*/
-
-
   template<typename O>
   void upgrate_options_(O& opt, outgoing_handler_t handler)
   {
@@ -309,7 +256,7 @@ private:
       opt.send_notify = nullptr;
       return;
     }
-    
+
     std::weak_ptr<self> wthis = this->shared_from_this();
     opt.send_request = [handler, wthis](const char* name, result_handler_t rh1, request_serializer_t rs1)
     {
@@ -345,74 +292,6 @@ private:
       }
     };
   }
-
-  // Для запроса с perform_io
-  /*
-  template<typename O>
-  void upgrate_options_(O& opt, ::iow::io::outgoing_handler_t handler)
-  {
-    std::weak_ptr<self> wthis = this->shared_from_this();
-    opt.send_request = [handler, wthis](const char* name, result_handler_t result_handler, request_serializer_t ser)
-    {
-      if ( auto pthis = wthis.lock() )
-      {
-        auto call_id = pthis->_call_counter.fetch_add(1);
-        pthis->_call_map.set(call_id, std::move(result_handler));
-        auto d = std::move(ser(name, call_id));
-        // TODO: wrap
-        handler( std::move(d), pthis->_io_id, [wthis](data_ptr d)
-        {
-          if ( auto pthis = wthis.lock() )
-          {
-            pthis->perform_io( std::move(d), pthis->_io_id, nullptr);
-          }
-        });
-            std::cout << "} <----> engine opt.send_request "<< std::endl;
-      }
-    };
-  }
-  
-  template<typename O>
-  void upgrate_options_(O& opt, ::iow::jsonrpc::outgoing_handler_t handler)
-  {
-    typedef typename handler_type::result_handler_t result_handler_t;
-    typedef typename handler_type::request_serializer_t request_serializer_t;
-    typedef typename handler_type::notify_serializer_t notify_serializer_t;
-
-    if ( opt.send_request == nullptr )
-    {
-      if (opt.rpc_send_handler != nullptr )
-      {
-        abort();
-      }
-      else if ( opt.io_send_handler != nullptr )
-      {
-        auto handler = opt.io_send_handler;
-        std::weak_ptr<self> wthis = this->shared_from_this();
-        opt.send_request = [handler, wthis](const char* name, result_handler_t result_handler, request_serializer_t ser)
-        {
-          if ( auto pthis = wthis.lock() )
-          {
-            std::cout << "----> engine opt.send_request { "<< std::endl;
-            auto call_id = pthis->_call_counter.fetch_add(1);
-            pthis->_call_map.set(call_id, std::move(result_handler));
-            auto d = std::move(ser(name, call_id));
-            // TODO: wrap
-            handler( std::move(d), pthis->_io_id, [wthis](data_ptr d){
-              if ( auto pthis = wthis.lock() )
-              {
-                pthis->perform_io( std::move(d), pthis->_io_id, nullptr);
-              }
-            } );
-            std::cout << "} <----> engine opt.send_request "<< std::endl;
-          }
-        };
-
-      }
-    }
-  }
-  */
-
 
   void perform_request_(incoming_holder holder, io_id_t io_id, outgoing_handler_t outgoing_handler) 
   {

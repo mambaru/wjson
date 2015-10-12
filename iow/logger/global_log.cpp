@@ -10,8 +10,10 @@
 
 namespace iow{
 
+namespace {
 static log_writer static_writer = nullptr;
-  
+}
+
 void init_log(log_writer writer)
 {
   static_writer = writer;
