@@ -50,19 +50,13 @@ public:
   
   ~method_list_base()
   {
-    std::cout << "-1- ~method_list_base() " << size_t(this) << " " << (_send_request != nullptr)  << std::endl;
     _send_request = nullptr;
-    std::cout << "-2- ~method_list_base()" << " " << (_send_notify != nullptr)  << std::endl;
     _send_notify = nullptr;  
-    std::cout << "-3 ~method_list_base()" << std::endl;
   }
   method_list_base()
   {
-    std::cout << "-1- method_list_base() " << size_t(this) << " " << (_send_request != nullptr)  << std::endl;
     _send_request = nullptr;
-    std::cout << "-2- method_list_base()" << std::endl;
     _send_notify = nullptr;  
-    std::cout << "-3 method_list_base()" << std::endl;
     
   }
   
@@ -84,21 +78,15 @@ public:
   
   void send_request( const char* name, result_handler_t handler, request_serializer_t ser) const
   {
-    // outgoing_holder(const char* name, request_serializer_t serializer, result_handler_t result_handler, time_point_t time_point = time_point_t())
-    //outgoing_holder holder(name, [name,ser](io_id_t id){ser}), std::move(handler) );
-    IOW_LOG_DEBUG("-1- iow::jsonrpc::method_list_base::send_request =2=")
     if ( this->_send_request != nullptr )
     {
       this->_send_request( name, std::move(handler), std::move(ser) );
     }
     else
     {
-
-      // outgoing_holder(const char* name, data_ptr d, result_handler_t result_handler, time_point_t  time_point = time_point_t())
       IOW_LOG_FATAL("-1- (ABORT) iow::jsonrpc::method_list_base::send_request this->_send_request==nullptr")
       abort();
     }
-    IOW_LOG_DEBUG("-2- iow::jsonrpc::method_list_base::send_request =2=")
   }
   
   template<typename Params, typename Serializer>

@@ -8,6 +8,9 @@
 #include <iow/jsonrpc/types.hpp>
 #include <iow/jsonrpc/incoming/aux.hpp>
 #include <iow/io/io_id.hpp>
+
+#include <type_traits>
+
 namespace iow{ namespace jsonrpc{
 
 //#error
@@ -67,9 +70,10 @@ public:
 
   ~engine()
   {
+    _handler_map.stop();
     _call_map.clear();
-    _handler_map.clear();
-    _common_handler = nullptr;
+    
+    //_common_handler = nullptr;
   }
   /***************************************************************/
   /* Управляющие методы                                          */
@@ -87,19 +91,14 @@ public:
   {
     typename std::decay<O>::type opt = opt1;
 
+    /*
     if ( _common_handler == nullptr )
     {
       auto h = std::make_shared<handler_type>();
       _common_handler = std::make_shared<handler_type>();
     }
-
-    /*
-    _incoming_rpc_factory = [opt, this](io_id_t io_id, incoming_handler_t handler, bool reg_io) -> handler_ptr
-    {
-      return this->create_handler_(io_id, opt, std::move(handler), reg_io );
-    };
     */
-  
+
     _outgoing_rpc_factory = [opt, this](io_id_t io_id, outgoing_handler_t handler, bool reg_io) -> handler_ptr
     {
       return this->create_handler_(io_id, opt, std::move(handler), reg_io );
@@ -118,32 +117,26 @@ public:
 
   void stop()
   {
+    /*
     if ( _common_handler!=nullptr )
     {
       _common_handler->stop();
     }
-    _handler_map.clear();
+    */
+    _handler_map.stop();
     _call_map.clear();
   }
 
 // iterface implementation
 
-  template<typename Tg, typename ...Args>
-  void call(Args... args)
+  template<typename Tg, typename Req, typename ...Args>
+  void call(Req req, io_id_t io_id, Args... args)
   {
-    _common_handler->template call<Tg>(std::forward<Args>(args)...);
+    if ( auto h = _handler_map.find(io_id) )
+    {
+      h->template call<Tg>(std::move(req), std::forward<Args>(args)...);
+    }
   }
-
-  template<typename ...Args>
-  void connect(Args... args)
-  {
-  }
-
-  template<typename ...Args>
-  void disconnect(Args... args)
-  {
-  }
-
 
   /***************************************************************/
   /* jsonrpc                                                     */
@@ -204,8 +197,7 @@ public:
   }
 
 private:
-  // private: TODO!!!!: переделать на outgoing_jsonrpc_t
-  // #error TODO!!!!: переделать на outgoing_jsonrpc_t
+
   void perform_incoming_(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) 
   {
     if ( holder.is_notify() || holder.is_request() )
@@ -333,9 +325,52 @@ private:
     };
   }
 
+  /*
+  template<typename O>
+  void upgrate_options_(O& opt, incoming_handler_t handler)
+  {
+    if ( handler == nullptr )
+    {
+      opt.send_request = nullptr;
+      opt.send_notify = nullptr;
+      return;
+    }
+
+    std::weak_ptr<self> wthis = this->shared_from_this();
+    opt.send_request = [handler, wthis](const char* name, result_handler_t rh1, request_serializer_t rs1)
+    {
+      if ( auto pthis = wthis.lock() )
+      {
+        outgoing_holder::result_handler_t rh = std::move(rh1);
+        outgoing_holder::request_serializer_t rs = std::move(rs1);
+
+        // TODO: убрать call_id ??? 
+        auto call_id = pthis->_call_counter.fetch_add(1);
+        pthis->_call_map.set(call_id, rh );
+        
+        static_assert( std::is_same<outgoing_holder::request_serializer_t, request_serializer_t>::value, "TATAM" );
+        outgoing_holder holder(name, std::move(rs), std::move(rh) );
+        handler(  std::move(holder) );
+      }
+    };
+
+    opt.send_notify = [handler, wthis](const char* name, notify_serializer_t ns1)
+    {
+      if ( auto pthis = wthis.lock() )
+      {
+        outgoing_holder::notify_serializer_t ns = std::move(ns1);
+        // auto d = std::move(ser(name));
+        // TODO: wrap
+        outgoing_holder holder(name, std::move(ns) );
+        handler( std::move(holder) );
+      }
+    };
+  }
+  */
+
   void perform_request_(incoming_holder holder, io_id_t io_id, outgoing_handler_t outgoing_handler) 
   {
-    auto handler = _direct_mode ? _common_handler : _outgoing_rpc_factory(io_id, outgoing_handler, false);
+    auto handler = /*_direct_mode ? _common_handler :*/ _outgoing_rpc_factory(io_id, outgoing_handler, false);
     handler->invoke( std::move(holder), std::move(outgoing_handler) );
   }
 
@@ -384,10 +419,10 @@ private:
 
   typedef handler_map<handler_type> handler_map_t;
   handler_map_t _handler_map;
-  handler_ptr _common_handler;
+  //handler_ptr _common_handler;
   call_map _call_map;
   std::atomic<int> _call_counter;
-  std::atomic<bool> _direct_mode;
+  //std::atomic<bool> _direct_mode;
   std::atomic<io_id_t> _io_id;
 };
 

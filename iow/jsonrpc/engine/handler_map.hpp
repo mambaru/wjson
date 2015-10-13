@@ -15,6 +15,16 @@ public:
   typedef std::shared_ptr<handler_type> handler_ptr;
   typedef typename handler_type::io_id_t io_id_t;
 
+  handler_ptr find(io_id_t io_id) const
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    auto itr = _handlers.find(io_id);
+    if ( itr == _handlers.end() )
+      return nullptr;
+    
+    return itr->second.first;
+    
+  }
   /// @param[in] reg_io Значение reinit при следующем вызове 
   /// @param[out] reinit Требуеться инициализация. Всегда true при первом вызове, при последующих принимает reg_io от передыдущего вызова
   handler_ptr findocre(io_id_t io_id, bool reg_io, bool& reinit)
@@ -43,7 +53,7 @@ public:
     return true;
   }
 
-  void clear()
+  void stop()
   {
     handler_map_t tmp_map;
     {
@@ -65,7 +75,7 @@ private:
   typedef std::mutex mutex_type;
 
   handler_map_t _handlers;
-  mutex_type _mutex;
+  mutable mutex_type _mutex;
 };
 
 }} // wfc
