@@ -81,9 +81,7 @@ public:
       return;
     _started = false;
     _ready_for_write = false;
-    std::cout <<"client::stop -1-" << std::endl;
     super::stop_(*this);
-    std::cout <<"client::stop -2-" << std::endl;
   }
 
   template<typename Handler>
@@ -195,9 +193,6 @@ private:
   template<typename Opt>
   void initialize_(Opt& opt)
   {
-    std::cout << "std::cout <<client::initialize_" << std::endl;
-    IOW_LOG_ERROR("client::initialize_" )
-
     auto popt = std::make_shared<Opt>(opt);
     std::weak_ptr<self> wthis = this->shared_from_this();
     

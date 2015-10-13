@@ -19,7 +19,7 @@ struct mem_fun_disconnect
     }
     else
     {
-      abort();
+      // abort();
     }
   }
 };

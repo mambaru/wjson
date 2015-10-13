@@ -69,7 +69,6 @@ public:
       {
         iow::system::error_code ec;
         io->run(ec);
-        std::cout << "io->run(ec);" << std::endl;
         if (!ec)
         {
           IOW_LOG_MESSAGE("mtdup thread stopped")

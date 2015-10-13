@@ -25,7 +25,7 @@ struct mem_fun_connect
     }
     else
     {
-      abort();
+      // abort();
     }
   }
 };

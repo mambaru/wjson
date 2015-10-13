@@ -24,10 +24,11 @@ namespace{
   inline void invoke_callback_( HolderPtr ph, OutgoingHandler outgoing_handler, Result result, Error err )
   {
     // на 4.7. 
-    try
+#warning try
     {
       if (err == nullptr )
       {
+        JSONRPC_LOG_DEBUG("jsonrpc invoke exception send_result "  )
         TT::template send_result<T, ResultJson>( 
           std::move(*ph),
           std::move(result),
@@ -36,23 +37,26 @@ namespace{
       }
       else
       {
+        JSONRPC_LOG_DEBUG("BEGIN jsonrpc invoke exception send_error " << (outgoing_handler!=nullptr)  )
         TT::template send_error<T, ErrorJson>( 
           std::move(*ph), 
           std::move(err), 
           std::move(outgoing_handler)
         );
+        JSONRPC_LOG_DEBUG("END jsonrpc invoke exception send_error "  )
       }
     }
-    catch(const std::exception& e)
+    /*catch(const std::exception& e)
     {
-      JSONRPC_LOG_FATAL("jsonrpc engine exception: " << e.what() )
+      JSONRPC_LOG_FATAL("jsonrpc invoke exception: " << e.what() )
       abort();
     }
     catch(...)
     {
-      JSONRPC_LOG_FATAL("jsonrpc engine unhandled exception")
+      JSONRPC_LOG_FATAL("jsonrpc invoke unhandled exception")
       abort();
     }
+    */
   }
 }
 

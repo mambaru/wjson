@@ -34,14 +34,10 @@ public:
     {
       opt.connection.incoming_handler = [handler](data_ptr d, io_id_t id, outgoing_handler_t outgoing)
       {
-        IOW_LOG_BEGIN( "multi_client incoming_handler begin [" << d << "]" )
         handler( std::move(d), id, outgoing );
-        IOW_LOG_END( "multi_client incoming_handler end [" << d << "]" )
       };
       auto pconn = std::make_shared<client_type>(this->_io_service);
-      IOW_LOG_DEBUG( "auto_client::_create_and_start -1-" )
       pconn->start(opt);
-      IOW_LOG_DEBUG( "auto_client::_create_and_start -2-" )
       return pconn;
     };
   }
@@ -116,7 +112,7 @@ public:
 
 public:
 
-  client_ptr set_handler_(io_id_t io_id, outgoing_handler_t&& handler)
+  client_ptr set_handler_(io_id_t io_id, outgoing_handler_t handler)
   {
     auto pconn = _create_and_start(io_id, [handler](data_ptr d, io_id_t, outgoing_handler_t)
     {

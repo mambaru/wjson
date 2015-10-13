@@ -17,11 +17,11 @@ struct ad_incoming_handler
       auto outgoing = cntx.outgoing_handler;
       auto io_id = t.get_id_(t);
       t.mutex().unlock();
-      try
+#warning      try
       {
         incoming( std::move(d), std::move(io_id), std::move(outgoing));
       }
-      catch(const std::exception& e)
+      /*catch(const std::exception& e)
       {
         if ( outgoing ) outgoing(nullptr);
         std::lock_guard<typename T::mutex_type> lk(t.mutex());
@@ -32,7 +32,7 @@ struct ad_incoming_handler
         if ( outgoing ) outgoing(nullptr);
         std::lock_guard<typename T::mutex_type> lk(t.mutex());
         cntx.fatal_handler(-1, "iow::io::descriptor: Unhandled exception in incoming handler");
-      }
+      }*/
       t.mutex().lock();
 
     }

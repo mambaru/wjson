@@ -75,6 +75,11 @@ public:
     
     //_common_handler = nullptr;
   }
+  
+  engine()
+    : _call_counter(1)
+  {
+  }
   /***************************************************************/
   /* Управляющие методы                                          */
   /***************************************************************/
@@ -159,6 +164,9 @@ public:
   
   outgoing_handler_t io2rpc( ::iow::io::outgoing_handler_t handler )
   {
+    if ( handler == nullptr )
+      return nullptr;
+
     return [handler, this](outgoing_holder holder/*, io_id_t*/)
     {
       if ( holder.is_request() )
@@ -169,7 +177,8 @@ public:
       }
       else
       {
-        handler( std::move( holder.detach() ) );
+        auto d = holder.detach();
+        handler( std::move( d ) );
       }
     };
   }
@@ -263,11 +272,15 @@ private:
         auto d = std::move(ser(name, call_id));
         // TODO: wrap
         // нужен здесь wthis
-        handler( std::move(d), pthis->_io_id, [wthis](data_ptr d)
+        handler( std::move(d), pthis->_io_id, [wthis, handler](data_ptr d)
         {
           if ( auto pthis = wthis.lock() )
           {
-            pthis->perform_io( std::move(d), pthis->_io_id, nullptr);
+            io_id_t io_id = pthis->_io_id;
+            pthis->perform_io( std::move(d), io_id, [io_id, handler](data_ptr d)
+            {
+              handler( std::move(d), io_id, nullptr );
+            });
           }
         });
       }

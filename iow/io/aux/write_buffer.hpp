@@ -183,7 +183,6 @@ public:
     if ( d==nullptr || ( d->empty() && _sep_size==0 ) )
       return;
 
-    //std::cout << "attach [" << std::string(d->begin(), d->end()) << "]"<< std::endl;
     _size += d->size();
     if ( _list.empty() )
     {
@@ -218,7 +217,6 @@ public:
     auto ptr  = this->cur_ptr_();
     _wait = size;
     
-    //std::cout << "next [" << std::string(ptr, ptr+size) << "]"<< std::endl;
 
 
     return data_pair( ptr, size );
@@ -231,7 +229,6 @@ public:
     if ( _wait == 0 || _size < p.second ) 
       return result;
 
-    // std::cout << "confirm [" << std::string(p.first, p.first+p.second) << "]"<< std::endl;
     _wait = 0;
     _offset += p.second;
     _size -= p.second;

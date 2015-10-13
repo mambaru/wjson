@@ -40,9 +40,7 @@ struct mem_fun_handler2
   {
     if ( auto i = t.target() )
     {
-      std::cout << "mem_fun_handler2::operator() -1- " << (cb!=nullptr) << std::endl;
       std::shared_ptr<Itf> pthis = t.shared_from_this();
-      std::cout << "mem_fun_handler2::operator() -2- " << std::endl;
       (i.get()->*mem_ptr)( 
         std::move(req), 
         mem_fun_make_callback( std::move(cb)),
@@ -51,7 +49,6 @@ struct mem_fun_handler2
         {
           if (callback == nullptr)
           {
-            std::cout << "mem_fun_handler2::operator() callback==nullptr " << std::endl;
             abort();
 
           }

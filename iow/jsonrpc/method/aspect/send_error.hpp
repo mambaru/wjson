@@ -6,6 +6,8 @@
 #include <iow/memory.hpp>
 #include <fas/aop.hpp>
 
+#include <iostream>
+
 namespace iow{ namespace jsonrpc{
   
 template<size_t ReserveSize>
@@ -19,6 +21,7 @@ struct send_error
     typename T::outgoing_handler_t outgoing_handler
   )
   {
+
     typedef typename T::data_type data_type;
     typedef JError error_json;
     typedef typename JError::target error_type;
@@ -33,14 +36,21 @@ struct send_error
       error_message.id = std::make_unique<data_type>( id_range.first, id_range.second );
     }
 
-    //std::cout << std::endl << "id[" << std::string(id_range.first, id_range.second) << "]" << std::endl;
     auto d = holder.detach();
     if ( d == nullptr )
       d = std::make_unique<data_type>();
     d->clear();
     d->reserve(ReserveSize);
     typename message_json::serializer()(error_message, std::inserter( *d, d->end() ));
-    outgoing_handler( std::move(d) );
+    
+    if ( outgoing_handler != nullptr )
+    {
+      outgoing_handler( std::move(d) );
+    }
+    else
+    {
+      abort();
+    }
   }
 };
 
