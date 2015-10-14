@@ -114,10 +114,12 @@ public:
       return this->create_handler_(io_id, opt, std::move(handler), reg_io );
     };
 
+    
     _outgoing_io_factory = [opt, this](io_id_t io_id, ::iow::io::outgoing_handler_t handler, bool reg_io) -> handler_ptr
     {
       return this->create_handler_(io_id, opt, std::move(handler), reg_io );
     };
+    
   }
 
   void stop()
@@ -167,27 +169,10 @@ public:
     if ( handler == nullptr )
       return nullptr;
 
-    return [handler, this](outgoing_holder holder/*, io_id_t*/)
+    return [handler](outgoing_holder holder)
     {
-      if ( holder.is_request() )
-      {
-        this->_call_map.set( holder.call_id(), std::move( holder.result_handler() ));
-      }
       auto d = holder.detach();
       handler( std::move( d ) );
-      /*
-      if ( holder.is_request() )
-      {
-        auto call_id = this->_call_counter.fetch_add(1);
-        this->_call_map.set(call_id, std::move( holder.result_handler() ));
-        handler( std::move( holder.detach( call_id ) ) );
-      }
-      else
-      {
-        auto d = holder.detach();
-        handler( std::move( d ) );
-      }
-      */
     };
   }
 
@@ -204,8 +189,20 @@ public:
   void perform_io(data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t handler) 
   {
     using namespace std::placeholders;
+    aux::perform( std::move(d), io_id, handler, std::bind(&engine::perform_io_once_, this, _1, _2, _3 ));
+    /*auto h = this->_incoming_io_factory(io_id, handler, false);
+    aux::perform( 
+      std::move(d), io_id, std::move( handler ), 
+      [](data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t handler)
+      {
+      }
+    );*/
+    //incoming_holder h(d);
+    /*
+    using namespace std::placeholders;
     auto rpc = io2rpc( std::move(handler));
     aux::perform( std::move(d), io_id, std::move( rpc ), std::bind(&engine::perform_incoming_, this, _1, _2, _3 ));
+    */
   }
 
   io_id_t get_id() const
@@ -214,6 +211,22 @@ public:
   }
 
 private:
+  
+  void perform_io_once_(incoming_holder holder, io_id_t io_id, ::iow::io::outgoing_handler_t handler)
+  {
+    this->perform_incoming_( std::move(holder), io_id, [handler](outgoing_holder holder)
+    {
+      handler( std::move(holder.detach()) );
+    });
+    /*
+    auto h = this->_outgoing_io_factory(io_id, handler, false);
+    h->invoke( std::move(holder), [](outgoing_holder holder)
+    {
+      
+    });
+    */
+  }
+
 
   void perform_incoming_(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) 
   {
@@ -231,11 +244,32 @@ private:
       aux::send_error( std::move(holder), std::make_unique<invalid_request>(), std::move(handler) );
     }
   }
-  
+
+  void perform_request_(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) 
+  {
+    auto h = _outgoing_rpc_factory(io_id, handler, false);
+    h->invoke( std::move(holder), std::move(handler) );
+  }
+
+  void perform_response_(incoming_holder holder, io_id_t /*io_id*/, outgoing_handler_t handler) 
+  {
+    call_id_t call_id = holder.template get_id<call_id_t>();
+    if ( auto result_handler = _call_map.detach(call_id) )
+    {
+      result_handler(std::move(holder));
+    }
+    else if ( handler!=nullptr )
+    {
+      JSONRPC_LOG_WARNING("jsonrpc::engind incoming response with call_id=" << call_id << " not found")
+      handler( outgoing_holder() );
+    }
+  }
+
   /**
    * upgrate_options_ - инициализация send_request и send_notify 
    */
 
+  
   template<typename O>
   void upgrate_options_(O& opt, ::iow::io::outgoing_handler_t handler)
   {
@@ -264,6 +298,7 @@ private:
       }
     };
   }
+  
 
   template<typename O>
   void upgrate_options_(O& opt, ::iow::io::incoming_handler_t handler)
@@ -323,25 +358,19 @@ private:
         io_id_t io_id = pthis->_io_id;
         outgoing_holder::result_handler_t rh = [wthis,  handler, io_id](incoming_holder holder)
         {
-          std::cout << "Engine wrapper " << holder.method() << std::endl;
           if ( auto pthis = wthis.lock() )
           {
-            std::cout << "Engine wrapper -1-"  << std::endl;
             if ( holder.is_response() || holder.is_error() )
             {
-              std::cout << "Engine wrapper -2-"  << std::endl;
               if ( auto h = pthis->_call_map.detach( holder.get_id<call_id_t>() ) )
               {
-                std::cout << "Engine wrapper -3-"  << std::endl;
                 h(std::move(holder) );
               }
             }
             else
             {
-              std::cout << "Engine wrapper -4-"  << std::endl;
               pthis->perform_jsonrpc( std::move(holder), io_id, [handler](outgoing_holder holder)
               {
-                std::cout << "Engine wrapper -5-"  << std::endl;
                 handler( std::move(holder) ) ;
               });
             }
@@ -414,26 +443,6 @@ private:
   }
   */
 
-  void perform_request_(incoming_holder holder, io_id_t io_id, outgoing_handler_t outgoing_handler) 
-  {
-    auto handler = /*_direct_mode ? _common_handler :*/ _outgoing_rpc_factory(io_id, outgoing_handler, false);
-    handler->invoke( std::move(holder), std::move(outgoing_handler) );
-  }
-
-  void perform_response_(incoming_holder holder, io_id_t /*io_id*/, outgoing_handler_t handler) 
-  {
-    call_id_t call_id = holder.template get_id<call_id_t>();
-    std::cout << "perform_response_ detach call_id " << call_id << std::endl;
-    if ( auto result_handler = _call_map.detach(call_id) )
-    {
-      result_handler(std::move(holder));
-    }
-    else if ( handler!=nullptr )
-    {
-      JSONRPC_LOG_WARNING("jsonrpc::engind incoming response with call_id=" << call_id << " not found")
-      handler( outgoing_holder() );
-    }
-  }
 
   // OutgoingHandler io::outgoing_handler_t или jsonrpc::outgoing_handler_t
   template<typename Opt, typename OutgoingHandler>
