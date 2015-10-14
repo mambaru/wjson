@@ -171,6 +171,13 @@ public:
     {
       if ( holder.is_request() )
       {
+        this->_call_map.set( holder.call_id(), std::move( holder.result_handler() ));
+      }
+      auto d = holder.detach();
+      handler( std::move( d ) );
+      /*
+      if ( holder.is_request() )
+      {
         auto call_id = this->_call_counter.fetch_add(1);
         this->_call_map.set(call_id, std::move( holder.result_handler() ));
         handler( std::move( holder.detach( call_id ) ) );
@@ -180,6 +187,7 @@ public:
         auto d = holder.detach();
         handler( std::move( d ) );
       }
+      */
     };
   }
 
@@ -268,7 +276,7 @@ private:
       {
         auto call_id = pthis->_call_counter.fetch_add(1);
         pthis->_call_map.set(call_id, std::move(result_handler));
-        
+          
         auto d = std::move(ser(name, call_id));
         // TODO: wrap
         // нужен здесь wthis
@@ -312,16 +320,41 @@ private:
     {
       if ( auto pthis = wthis.lock() )
       {
-        outgoing_holder::result_handler_t rh = std::move(rh1);
+        io_id_t io_id = pthis->_io_id;
+        outgoing_holder::result_handler_t rh = [wthis,  handler, io_id](incoming_holder holder)
+        {
+          std::cout << "Engine wrapper " << holder.method() << std::endl;
+          if ( auto pthis = wthis.lock() )
+          {
+            std::cout << "Engine wrapper -1-"  << std::endl;
+            if ( holder.is_response() || holder.is_error() )
+            {
+              std::cout << "Engine wrapper -2-"  << std::endl;
+              if ( auto h = pthis->_call_map.detach( holder.get_id<call_id_t>() ) )
+              {
+                std::cout << "Engine wrapper -3-"  << std::endl;
+                h(std::move(holder) );
+              }
+            }
+            else
+            {
+              std::cout << "Engine wrapper -4-"  << std::endl;
+              pthis->perform_jsonrpc( std::move(holder), io_id, [handler](outgoing_holder holder)
+              {
+                std::cout << "Engine wrapper -5-"  << std::endl;
+                handler( std::move(holder) ) ;
+              });
+            }
+          };
+        };
         outgoing_holder::request_serializer_t rs = std::move(rs1);
 
-        // TODO: убрать call_id ??? 
         auto call_id = pthis->_call_counter.fetch_add(1);
-        pthis->_call_map.set(call_id, rh );
+        pthis->_call_map.set(call_id, rh1 );
         
         static_assert( std::is_same<outgoing_holder::request_serializer_t, request_serializer_t>::value, "TATAM" );
-        outgoing_holder holder(name, std::move(rs), std::move(rh) );
-        handler(  std::move(holder) /*, pthis->_io_id*/ );
+        outgoing_holder holder(name, std::move(rs), std::move(rh), call_id );
+        handler(  std::move(holder) );
       }
     };
 
@@ -390,6 +423,7 @@ private:
   void perform_response_(incoming_holder holder, io_id_t /*io_id*/, outgoing_handler_t handler) 
   {
     call_id_t call_id = holder.template get_id<call_id_t>();
+    std::cout << "perform_response_ detach call_id " << call_id << std::endl;
     if ( auto result_handler = _call_map.detach(call_id) )
     {
       result_handler(std::move(holder));

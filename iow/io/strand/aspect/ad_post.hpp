@@ -17,12 +17,12 @@ struct ad_post
     ++(*counter);
 
     size_t size = t.size_(t);
-    if ( size >= context.maxsize )
+    if ( context.maxsize!=0 &&  size >= context.maxsize )
     {
       IOW_LOG_ERROR("mt_strand queue overflow size=" << size << " ( maxsize = " << context.maxsize << ")")
       return false;
     }
-    else if ( size > context.wrnsize )
+    else if ( context.wrnsize!=0 && size > context.wrnsize )
     {
       time_t now = time(0);
       if ( now != context.wrntime )

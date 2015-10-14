@@ -18,12 +18,14 @@ public:
   void set(call_id_t call_id, result_handler_t result)
   {
     std::lock_guard<mutex_type> lk(_mutex);
+    std::cout << "call_map set " << call_id << std::endl;
     _result_map[call_id] = result;
   }
   
   result_handler_t detach(call_id_t call_id)
   {
     std::lock_guard<mutex_type> lk(_mutex);
+    std::cout << "call_map detach " << call_id << std::endl;
     result_handler_t result = nullptr;
     auto itr = _result_map.find(call_id);
     if ( itr!=_result_map.end() )
