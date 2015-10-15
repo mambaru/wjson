@@ -36,8 +36,9 @@ public:
   }
 
   template<typename Opt>
-  void start(Opt&& opt)
+  void start(Opt&& opt1)
   {
+    typename std::decay<Opt>::type opt = opt1;
     std::lock_guard<mutex_type> lk(_mutex);
 
     if (_started)
@@ -50,25 +51,24 @@ public:
     if ( opt.threads == 0 )
     {
       auto h = std::make_shared<Holder>( _io_service );
-      _holder_list.push_back(h);
-      h->start( std::forward<Opt>(opt));
+      _holders.push_back(h);
+      h->start( opt);
     }
-
-    for (int i = 0; i < opt.threads; ++i)
+    else for (int i = 0; i < opt.threads; ++i)
     {
       auto io = std::make_shared<io_service_type>();
       auto h = std::make_shared<holder_type>( *io );
-      h->start(std::forward<Opt>(opt)); // Запускаем до потока, чтобы инициализировать
-      _holder_list.push_back(h);
+      h->start( opt); // Запускаем до потока, чтобы инициализировать
+      _holders.push_back(h);
       _services.push_back(io);
-      _threads.push_back( std::thread([io/*, h, opt*/]()
+      _threads.push_back( std::thread([io]()
       {
         iow::system::error_code ec;
         io->run(ec);
         IOW_LOG_DEBUG("mtholder shutdown thread " << ec.message() )
       }));
     }
-    _iterator = _holder_list.begin();
+    _iterator = _holders.begin();
   }
 
   template<typename Opt>
@@ -89,23 +89,20 @@ public:
 
     
     IOW_LOG_DEBUG("mtholder::shutdown: -2-")
-    auto counter = std::make_shared< std::atomic<size_t> >(_holder_list.size());
+    auto counter = std::make_shared< std::atomic<size_t> >(_holders.size());
     // Не weak, т.к. должен жить пока не отработаем все хандлеры
     auto pthis = this->shared_from_this();
-    auto client_handler = [counter, pthis, handler](io_id_type id)
+    auto client_handler = [counter, pthis, handler](io_id_type)
     {
-      IOW_LOG_DEBUG("mtholder::shutdown: -2- id=" << id)
       --(*counter);
       if ( *counter == 0 )
       {
-        IOW_LOG_DEBUG("mtholder::shutdown: -3-")
         std::lock_guard<mutex_type> lk( pthis->_mutex);
         pthis->stop_();
-        IOW_LOG_DEBUG("mtholder::shutdown: -4-")
       }
     };
     
-    for (auto h : _holder_list)
+    for (auto h : _holders)
     {
       h->shutdown(client_handler);
     }
@@ -123,7 +120,7 @@ public:
   void stop_()
   {
     IOW_LOG_DEBUG("mtholder::stop: close _holder_list")
-    for (auto h : _holder_list)
+    for (auto h : _holders)
     {
       // сначала закрываем, чтоб реконнект на другой ассептор не прошел 
       IOW_LOG_DEBUG("mtholder::stop: holder->close()")
@@ -131,7 +128,7 @@ public:
     }
 
     IOW_LOG_DEBUG("mtholder::stop: stop _holder_list")
-    for (auto h : _holder_list)
+    for (auto h : _holders)
     {
       IOW_LOG_DEBUG("mtholder::stop: holder->stop()")
       h->stop();
@@ -152,7 +149,7 @@ public:
 
     IOW_LOG_DEBUG("mtholder::stop: clear all")
 
-    _holder_list.clear();
+    _holders.clear();
     _threads.clear();
     _services.clear();
     IOW_LOG_DEBUG("mtholder::stop: DONE")
@@ -166,23 +163,25 @@ public:
   holder_ptr next() const
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    if ( _holder_list.empty() )
+    if ( _holders.empty() )
     {
       return nullptr;
     }
 
-    if ( _iterator == _holder_list.end() )
+    if ( _iterator == _holders.end() )
     {
-        _iterator = _holder_list.begin();
+        _iterator = _holders.begin();
     }
-    return *(_iterator++);
+    holder_ptr result = *(_iterator);
+    ++_iterator;
+    return result;
   }
 
 private:
   bool _started;
   io_service_type& _io_service;
   mutable mutex_type _mutex;
-  holder_list _holder_list;
+  holder_list _holders;
   mutable holder_iterator _iterator;
   thread_list _threads;
   service_list _services;

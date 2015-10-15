@@ -5,6 +5,10 @@
 #include <memory>
 #include <map>
 
+
+// удалить
+#include <thread>
+
 namespace iow{ namespace io{ namespace client{
 
 template<typename Client>
@@ -35,6 +39,7 @@ public:
       opt.connection.incoming_handler = [handler](data_ptr d, io_id_t id, outgoing_handler_t outgoing)
       {
         handler( std::move(d), id, outgoing );
+        
       };
       auto pconn = std::make_shared<client_type>(this->_io_service);
       pconn->start(opt);
@@ -55,17 +60,11 @@ public:
 
   void stop()
   {
-    IOW_LOG_DEBUG("multi_client stop lock ...")
-
     std::lock_guard<mutex_type> lk(_mutex);
 
-    IOW_LOG_DEBUG("multi_client stop locked! stop clients")
-    
     for ( auto& conn : _clients )
     {
-      IOW_LOG_DEBUG("multi_client stop client...")
       conn.second->stop();
-      IOW_LOG_DEBUG("multi_client stop client Done!")
     }
   }
 
@@ -114,7 +113,7 @@ public:
 
   client_ptr set_handler_(io_id_t io_id, outgoing_handler_t handler)
   {
-    auto pconn = _create_and_start(io_id, [handler](data_ptr d, io_id_t, outgoing_handler_t)
+    auto pconn = _create_and_start(io_id, [handler](data_ptr d, io_id_t , outgoing_handler_t)
     {
       handler(std::move(d));
     });

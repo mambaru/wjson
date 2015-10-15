@@ -34,6 +34,8 @@ struct ad_post
 
     if ( context.strand != nullptr )
     {
+//#warning обходим strand в качестве эксперимента 
+      //context.strand->get_io_service().post( std::move(func) );
       context.strand->post( std::move(func) );
     }
     else

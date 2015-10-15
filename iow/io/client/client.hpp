@@ -112,9 +112,11 @@ public:
     
     if ( _ready_for_write && _outgoing_handler!=nullptr )
     {
-      IOW_LOG_DEBUG( "Client::send write [" << d << "]")
+      /*auto oh = _outgoing_handler;
+      super::mutex().unlock();
+      oh( std::move(d) );*/
       _outgoing_handler( std::move(d) );
-      IOW_LOG_DEBUG( "Client::send write [...] done")
+      //super::mutex().lock();
     }
     else
     {

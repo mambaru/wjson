@@ -33,6 +33,7 @@ namespace iow{ namespace jsonrpc{ namespace aux{
       }
       else
       {
+        JSONRPC_LOG_WARNING( "jsonrpc error: " << holder.str() );
         send_error( std::move(holder), std::make_unique<invalid_request>(), std::move(outgoing_handler));
       }
       return std::move(d);

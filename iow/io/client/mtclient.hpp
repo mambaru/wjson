@@ -22,10 +22,8 @@ public:
 
   data_ptr send(data_ptr d)
   {
-    IOW_LOG_DEBUG( "mtclient::send [" << d << "]" )
     if ( auto c = super::next() )
     {
-      IOW_LOG_DEBUG( "mtclient::send.....!!!!!!!!!!!-1-"  )
       return std::move( c->send(std::move(d)) );
     }
     else

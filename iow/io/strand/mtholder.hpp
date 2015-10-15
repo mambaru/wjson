@@ -151,6 +151,12 @@ public:
       }
     }
     //std::cout << std::distance(_strands.begin(), itr ) << " - " << _strands.size() << std::endl;
+/*#warning
+
+    auto& io = (*itr)->get_io_service();
+    std::function<void()> ff = f;
+    io.post( ff );
+    return true;*/
     return (*itr)->post( std::forward<F>(f));
   }
 
