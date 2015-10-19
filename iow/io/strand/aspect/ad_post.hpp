@@ -12,7 +12,8 @@ struct ad_post
   bool operator()(T& t,F&& f)
   {
     auto& context = t.get_aspect().template get<_context_>();
-    auto func = t.get_aspect().template get<_wrap_>()(t, std::forward<F>(f) );
+    //auto func = t.get_aspect().template get<_wrap_>()(t, std::forward<F>(f) );
+    auto func = std::move(f);
     auto counter = context.counter;
     ++(*counter);
 

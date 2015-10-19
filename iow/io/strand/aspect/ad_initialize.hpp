@@ -21,7 +21,7 @@ struct ad_initialize
     context.counter = std::make_shared<counter_type>(0);
     if ( !opt.disabled )
     {
-      context.strand = std::make_shared<strand_type>(t.get_io_service());
+      context.strand = std::make_shared<strand_type>( /*t.get_io_service()*/ );
     }
   }
 };

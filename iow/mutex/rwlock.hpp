@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <condition_variable>
 
-namespace wfc{
+namespace iow{
   
 template<typename M = std::mutex>
 class rwlock

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iow/io/strand/options.hpp>
+#include <iow/mutex/delayed_queue.hpp>
 #include <iow/asio.hpp>
 
 #include <memory>
@@ -11,8 +12,9 @@ namespace iow{ namespace io{ namespace strand{
 
 struct context: options
 {
-  typedef ::iow::asio::io_service io_service_type;
-  typedef io_service_type::strand strand_type;
+  //typedef ::iow::asio::io_service io_service_type;
+  //typedef io_service_type::strand strand_type;
+  typedef ::iow::delayed_queue strand_type;
   typedef std::shared_ptr<strand_type> strand_ptr;
   typedef std::atomic<size_t> counter_type;
   typedef std::shared_ptr<counter_type> counter_ptr;

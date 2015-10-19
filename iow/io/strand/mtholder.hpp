@@ -42,6 +42,24 @@ public:
     if ( opt.disabled )
       return;
 
+    for ( size_t i=0; i < /*opt.strands*/1; ++i )
+    {
+      auto h = std::make_shared<holder_type>(_io_ref);
+      h->start(opt);
+      _holders.push_back(h);
+    }
+
+    for ( size_t i=0; i < opt.threads; ++i )
+    {
+      auto h = _holders[0];
+      _threads.push_back(std::thread([h]()
+      {
+        h->run();
+      }));
+    }
+    
+      
+    /*
     if ( opt.threads == 0)
     {
       auto h = std::make_shared<holder_type>(_io_ref);
@@ -50,22 +68,26 @@ public:
 
     for ( size_t i=0; i < opt.threads; ++i )
     {
-      auto s = std::make_shared<io_service_type>();
-      auto h = std::make_shared<holder_type>(*s);
-      _threads.push_back(std::thread([s]()
+      //auto s = std::make_shared<io_service_type>();
+      auto h = std::make_shared<holder_type>(_io_ref);
+      h->start(std::forward<Opt>(opt));
+      _threads.push_back(std::thread([h]()
         {
-          io_service_type::work wrk(*s);
-          s->run();
+          
+          h->run();
+          //io_service_type::work wrk(*s);
+          //s->run();
           IOW_LOG_MESSAGE("strand thread finish " << std::this_thread::get_id())
         }));
       _holders.push_back(h);
-      _services.push_back(s);
+      //_services.push_back(s);
     }
 
     for (auto h: _holders)
     {
-      h->start(std::forward<Opt>(opt));
+      //h->start(std::forward<Opt>(opt));
     }
+    */
 
     /*
     if ( opt.threads != 0 )
@@ -103,10 +125,10 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
 
-    for ( auto s : _services )
+    /*for ( auto s : _services )
     {
       s->stop();
-    }
+    }*/
 
     for ( auto h : _holders ) 
     {
@@ -157,6 +179,7 @@ public:
     std::function<void()> ff = f;
     io.post( ff );
     return true;*/
+    
     return (*itr)->post( std::forward<F>(f));
   }
 

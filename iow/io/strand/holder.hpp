@@ -4,6 +4,7 @@
 #include <iow/asio.hpp>
 #include <iow/io/basic_io.hpp>
 #include <mutex>
+#include <boost/concept_check.hpp>
 
 namespace iow{ namespace io{ namespace strand{
 
@@ -51,6 +52,14 @@ public:
     super::start_(*this, std::forward<O>(opt));
   }
 
+  void stop()
+  {
+    std::lock_guard< mutex_type > lk(super::mutex() );
+    super:: stop_(*this);
+    this->get_aspect().get<_context_>().strand->stop();
+  }
+
+  
   template<typename O>
   void reconfigure(O&& opt)
   {
@@ -66,6 +75,11 @@ public:
 
   io_service_type& get_io_service() { return _io_service;}
 
+  void run()
+  {
+    this->get_aspect().get<_context_>().strand->run();
+  }
+  
 public:
 
   template<typename T>
