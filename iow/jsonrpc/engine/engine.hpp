@@ -350,6 +350,7 @@ private:
       return;
     }
 
+    // TODO: сделать один общий отправитель 
     std::weak_ptr<self> wthis = this->shared_from_this();
     opt.send_request = [handler, wthis](const char* name, result_handler_t rh1, request_serializer_t rs1)
     {

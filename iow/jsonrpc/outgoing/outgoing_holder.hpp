@@ -75,6 +75,8 @@ public:
   {
   }
 
+  
+  /*
   // отложенная сериализация исходящих уведомлений
   outgoing_holder(const char* name, notify_serializer_t serializer)
     : _name(name)
@@ -82,12 +84,19 @@ public:
     , _call_id(0)
   {
   }
+  */
 
   // отложенная сериализация исходящих запросов
-  outgoing_holder(const char* name, request_serializer_t serializer, result_handler_t result_handler, call_id_t call_id)
-    : _name(name)
-    , _request_serializer(serializer)
-    , _result_handler(result_handler)
+  outgoing_holder(
+    const char* name,
+    notify_serializer_t ns,
+    request_serializer_t rs,
+    result_handler_t rh,
+    call_id_t call_id
+  ) : _name(name)
+    , _notify_serializer(ns)
+    , _request_serializer(rs)
+    , _result_handler(rh)
     , _call_id(call_id)
   {
   }
@@ -190,12 +199,38 @@ public:
   result_handler_t result_handler() const { return _result_handler;}
   void result_handler(result_handler_t handler) { _result_handler=handler;}
 
+  outgoing_holder clone() const
+  {
+    outgoing_holder holder;
+    holder._name = this->_name;
+    holder._data = std::make_unique<data_type>(*(this->_data));
+    holder._basic_serializer = this->_basic_serializer;
+    holder._request_serializer = this->_request_serializer;
+    holder._notify_serializer = this->_notify_serializer;
+    holder._result_handler = nullptr;
+    holder._call_id = 0;
+    return std::move(holder);
+  }
+
+  outgoing_holder clone(call_id_t call_id) const
+  {
+    outgoing_holder holder;
+    holder._name = this->_name;
+    holder._data = std::make_unique<data_type>(*(this->_data));
+    holder._basic_serializer = this->_basic_serializer;
+    holder._request_serializer = this->_request_serializer;
+    holder._notify_serializer = this->_notify_serializer;
+    holder._result_handler = this->_result_handler;
+    holder._call_id = call_id;
+    return std::move(holder);
+  }
+
 private:
   const char* _name;
   data_ptr _data;
   basic_serializer_t _basic_serializer;
-  request_serializer_t _request_serializer;
   notify_serializer_t _notify_serializer;
+  request_serializer_t _request_serializer;
   result_handler_t _result_handler;
   call_id_t _call_id/*_time_point*/;
 };
