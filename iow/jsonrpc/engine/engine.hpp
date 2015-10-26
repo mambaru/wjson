@@ -273,7 +273,32 @@ private:
   template<typename O>
   void upgrate_options_(O& opt, ::iow::io::outgoing_handler_t handler)
   {
+    std::weak_ptr<self> wthis = this->shared_from_this();
+    opt.sender_handler = [handler, wthis](const char* name, notify_serializer_t ns1, request_serializer_t rs1, result_handler_t rh1)
+    {
+      auto pthis = wthis.lock();
+      if ( pthis==nullptr )
+        return;
+      
+      if ( rs1!=nullptr )
+      {
+        auto call_id = pthis->_call_counter.fetch_add(1);
+        pthis->_call_map.set(call_id, std::move(rh1));
+        auto d = std::move(rs1(name, call_id));
+        handler( std::move(d));
+      }
+      else if (ns1!=nullptr)
+      {
+        auto d = std::move(ns1(name));
+        handler( std::move(d));
+      }
+      else
+      {
+        handler(nullptr);
+      }
+    };
     // Не нужен! здесь wthis
+    /*
     std::weak_ptr<self> wthis = this->shared_from_this();
     opt.send_request = [handler, wthis](const char* name, result_handler_t result_handler, request_serializer_t ser)
     {
@@ -297,12 +322,46 @@ private:
         handler( std::move(d));
       }
     };
+    */
   }
   
 
   template<typename O>
   void upgrate_options_(O& opt, ::iow::io::incoming_handler_t handler)
   {
+    io_id_t io_id = this->_io_id;
+    std::weak_ptr<self> wthis = this->shared_from_this();
+    opt.sender_handler = [handler, wthis, io_id](const char* name, notify_serializer_t ns1, request_serializer_t rs1, result_handler_t rh1)
+    {
+      auto pthis = wthis.lock();
+      if ( pthis == nullptr )
+        return;
+      
+      if ( rs1!=nullptr && rh1!=nullptr )
+      {
+        auto call_id = pthis->_call_counter.fetch_add(1);
+        pthis->_call_map.set(call_id, std::move(rh1));
+        auto d = std::move( rs1(name, call_id) );
+        
+        handler( std::move(d), io_id, [wthis, handler, io_id](data_ptr d)
+        {
+          auto pthis = wthis.lock();
+          if ( pthis == nullptr )
+            return;
+
+          pthis->perform_io( std::move(d), io_id, [io_id, handler](data_ptr d)
+          {
+            handler( std::move(d), io_id, nullptr );
+          });
+        });
+      }
+      else if ( ns1!=nullptr)
+      {
+        auto d = std::move(ns1(name));
+        handler( std::move(d), io_id, nullptr);
+      }
+    };
+    /*
     // Не нужен! здесь wthis
     std::weak_ptr<self> wthis = this->shared_from_this();
     opt.send_request = [handler, wthis](const char* name, result_handler_t result_handler, request_serializer_t ser)
@@ -338,11 +397,70 @@ private:
         handler( std::move(d), pthis->_io_id, nullptr);
       }
     };
+    */
   }
 
   template<typename O>
   void upgrate_options_(O& opt, outgoing_handler_t handler)
   {
+    if ( handler == nullptr )
+    {
+      opt.sender_handler = nullptr;
+      return;
+    }
+    
+    std::weak_ptr<self> wthis = this->shared_from_this();
+    opt.sender_handler = [handler, wthis](const char* name, notify_serializer_t ns1, request_serializer_t rs1, result_handler_t rh1)
+    {
+      auto pthis = wthis.lock();
+      if ( pthis==nullptr )
+        return;
+      
+      call_id_t call_id = 0;
+      outgoing_holder::result_handler_t rhw = nullptr;
+      
+      if ( rs1!=nullptr && rh1!=nullptr )
+      {
+        io_id_t io_id = pthis->_io_id;
+        outgoing_holder::result_handler_t rhw = [wthis,  handler, io_id](incoming_holder holder)
+        {
+          auto pthis = wthis.lock();
+          if ( pthis==nullptr )
+            return;
+
+          if ( holder.is_response() || holder.is_error() )
+          {
+            if ( auto h = pthis->_call_map.detach( holder.get_id<call_id_t>() ) )
+            {
+              h(std::move(holder) );
+            }
+          }
+          else
+          {
+            pthis->perform_jsonrpc( std::move(holder), io_id, [handler](outgoing_holder holder)
+            {
+              handler( std::move(holder) ) ;
+            });
+          }
+        }; // rh=[](){}
+        
+        call_id = pthis->_call_counter.fetch_add(1);
+        pthis->_call_map.set(call_id, std::move(rh1) );
+      }
+      
+      if ( ns1!=nullptr )
+      {
+        outgoing_holder holder(name, std::move(ns1), std::move(rs1), std::move(rhw), call_id );
+        handler( std::move(holder) );
+      }
+      else
+      {
+        handler( std::move(outgoing_holder()) );
+      }
+    };
+
+    
+    /*
     if ( handler == nullptr )
     {
       opt.send_request = nullptr;
@@ -396,9 +514,10 @@ private:
         // auto d = std::move(ser(name));
         // TODO: wrap
         outgoing_holder holder(name, std::move(ns) );
-        handler( std::move(holder) /*, pthis->_io_id*/ );
+        handler( std::move(holder)  );
       }
     };
+    */
   }
 
   /*

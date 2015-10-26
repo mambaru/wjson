@@ -50,16 +50,20 @@ public:
   
   ~method_list_base()
   {
-    _send_request = nullptr;
-    _send_notify = nullptr;  
+    _sender_handler = nullptr;
+    //_send_request = nullptr;
+    //_send_notify = nullptr;  
   }
   method_list_base()
   {
+    _sender_handler = nullptr;
+    /*
     _send_request = nullptr;
     _send_notify = nullptr;  
-    
+    */
   }
   
+  /*
   template<typename Params, typename Serializer>
   void send_request( 
     const char* name,
@@ -75,7 +79,9 @@ public:
       std::move(result_handler) 
     );
   }
+  */
   
+  /*
   void send_request( const char* name, result_handler_t handler, request_serializer_t ser) const
   {
     if ( this->_send_request != nullptr )
@@ -88,7 +94,8 @@ public:
       abort();
     }
   }
-  
+  */
+  /*
   template<typename Params, typename Serializer>
   void send_notify( const char* name, Params params, Serializer ser) const
   {
@@ -99,7 +106,43 @@ public:
       std::move(ser)
     );
   }
+  */
+  
+  template<typename Params, typename NotifySerializer, typename RequestSerializer, typename ResultHandler >
+  void perform_send( 
+    const char* name,
+    Params params,
+    NotifySerializer ns,
+    RequestSerializer rs,
+    ResultHandler  rh
+  ) const
+  {
+    super::get_aspect().template get<_perform_send_>()(
+      *this,
+      name, 
+      std::move(params),
+      std::move(ns),
+      std::move(rs),
+      std::move(rh) 
+    );
+  }
 
+  
+  void sender_handler( const char* name, notify_serializer_t ns1, request_serializer_t rs1, result_handler_t rh1) const
+  {
+    if ( this->_sender_handler != nullptr )
+    {
+      this->_sender_handler( name, std::move(ns1), std::move(rs1), std::move(rh1) );
+    }
+    else
+    {
+      IOW_LOG_FATAL(" (ABORT) iow::jsonrpc::method_list_base::sender_handler this->_sender_handler==nullptr")
+      abort();
+      
+    }
+  }
+
+  /*
   void send_notify( const char* name, notify_serializer_t ser) const
   {
     if ( this->_send_notify != nullptr )
@@ -112,6 +155,7 @@ public:
       abort();
     }
   }
+  */
 
   template<typename Tg>
   struct call_params_ptr
@@ -198,10 +242,15 @@ private:
   
 private:
   friend struct super::aspect::template advice_cast< ::iow::io::_initialize_ >::type;
+
+  typedef typename handler_types::sender_handler_t   sender_handler_t;
+  sender_handler_t _sender_handler = sender_handler_t(nullptr);
+  /*
   typedef typename handler_types::send_request_t  send_request_t;
   typedef typename handler_types::send_notify_t   send_notify_t;
   send_request_t _send_request = send_request_t(nullptr);
   send_notify_t  _send_notify = send_notify_t(nullptr);  
+  */
 
 };
 

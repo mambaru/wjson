@@ -154,6 +154,14 @@ public:
     std::function<void(incoming_holder, io_id_t, outgoing_handler_t)> incoming_handler );
     */
   
+  incoming_holder clone() const
+  {
+    incoming_holder h(nullptr);
+    h.attach( std::make_unique<data_type>(*_data) );
+    h._time_point = this->_time_point;
+    return std::move(h);
+  }
+  
 private:
 
   bool ready_() const{ return _data != nullptr && _parsed;}

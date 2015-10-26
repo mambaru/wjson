@@ -4,7 +4,8 @@
 #include <memory>
 
 namespace iow{ namespace jsonrpc{
-  
+ 
+  /*
 struct ad_send_notify
 {
   template<typename T, typename Params, typename Serializer>
@@ -32,6 +33,7 @@ struct ad_send_notify
     
   }
 };
+*/
 
 }} // iow
 

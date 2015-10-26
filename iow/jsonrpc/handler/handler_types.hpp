@@ -28,8 +28,12 @@ struct handler_types
   typedef std::function< data_ptr(const char* name) > notify_serializer_t;
   typedef std::function< void(incoming_holder) > result_handler_t;
 
+  typedef std::function< void(const char* name, notify_serializer_t, request_serializer_t, result_handler_t ) > sender_handler_t;
+  
+  /*
   typedef std::function< void(const char* name, result_handler_t, request_serializer_t) > send_request_t;
   typedef std::function< void(const char* name, notify_serializer_t) > send_notify_t;
+  */
 };
 
 }} // iow
