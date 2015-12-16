@@ -24,7 +24,7 @@ namespace{
   inline void invoke_callback_( HolderPtr ph, OutgoingHandler outgoing_handler, Result result, Error err )
   {
     // на 4.7. 
-#warning try
+    try
     {
       if (err == nullptr )
       {
@@ -46,7 +46,7 @@ namespace{
         JSONRPC_LOG_DEBUG("END jsonrpc invoke exception send_error "  )
       }
     }
-    /*catch(const std::exception& e)
+    catch(const std::exception& e)
     {
       JSONRPC_LOG_FATAL("jsonrpc invoke exception: " << e.what() )
       abort();
@@ -56,7 +56,6 @@ namespace{
       JSONRPC_LOG_FATAL("jsonrpc invoke unhandled exception")
       abort();
     }
-    */
   }
 }
 
