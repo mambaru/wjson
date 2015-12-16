@@ -76,7 +76,7 @@ template<typename ...Args>
 using member_list = typename fas::type_list_n<Args...>::type;
 #endif
 
-
+typedef array< std::vector< value< std::string > > > array_of_strings;
 
 /** Ахтунг! замороченые правила:
   * L и M типа member с одинаковыми N (именами)
@@ -249,6 +249,7 @@ struct enumerator
   typedef T target;
   typedef typename fas::normalize<L>::type enum_list;
   typedef serializerT< enumerator<T, enum_list> > serializer;
+  typedef enum_list member_list;
 };
 
 /// //////////////////////////////////////////////////////////////////////////////
