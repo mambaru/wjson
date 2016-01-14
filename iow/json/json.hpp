@@ -150,10 +150,10 @@ struct value<unsigned int>
 };
 
 template<>
-struct value<long>
+struct value<long int>
 {
-  typedef long target;
-  typedef serializerT< value<long> > serializer;
+  typedef long int target;
+  typedef serializerT< value<long int> > serializer;
 };
 
 template<>
