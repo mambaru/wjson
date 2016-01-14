@@ -44,6 +44,9 @@ struct object;
 template<typename C, typename R>
 struct array_reserve;
 
+template<typename K, typename V, int R = -1>
+struct object2array;
+
 template<typename C, int R = -1>
 struct array;
 
@@ -362,7 +365,17 @@ struct array_base< std::vector<J>, R>
   static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
 };
 
-
+template<typename K, typename V, typename R>
+struct array_base< std::vector< pair<K, V> >, R>
+{
+  typedef pair<K, V> json_value;
+  typedef std::vector< json_value > json_container;
+  typedef typename json_value::target target;
+  typedef std::vector<target> target_container;
+  typedef serializerA< array_r< json_container, R>, '{', '}' > serializer;
+  typedef std::back_insert_iterator<target_container> inserter_iterator;
+  static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
+};
 
 template<typename J, int N, typename R>
 struct array_base< J[N], R>
@@ -514,11 +527,20 @@ struct array_r< object<T, L>, R>
 {
 };
 
+template< typename K, typename V, typename R>
+struct array_r< pair<K, V>, R>
+  : array_r< std::vector< pair<K, V> >, R>
+{
+};
+
 template<typename C, int R>
 struct array: array_r<C, fas::int_<R> > {};
 
 template<typename C>
 struct array<C, -1>: array_r<C, fas::empty_type> {};
+
+template<typename KJ, typename VJ, int R>
+struct object2array: array< pair<KJ,VJ>, R > {};
 
 
 /// //////////////////////////////////////////////////////////////////////////////
