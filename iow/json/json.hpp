@@ -9,6 +9,7 @@
 #include <vector>
 #include <array>
 #include <string>
+#include <deque>
 #include <set>
 #include <map>
 #include <memory>
@@ -360,6 +361,18 @@ struct array_base< std::vector<J>, R>
   typedef J json_value;
   typedef typename json_value::target target;
   typedef std::vector<target> target_container;
+  typedef serializerT< array_r< json_container, R> > serializer;
+  typedef std::back_insert_iterator<target_container> inserter_iterator;
+  static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
+};
+
+template<typename J, typename R>
+struct array_base< std::deque<J>, R>
+{
+  typedef std::deque<J> json_container;
+  typedef J json_value;
+  typedef typename json_value::target target;
+  typedef std::deque<target> target_container;
   typedef serializerT< array_r< json_container, R> > serializer;
   typedef std::back_insert_iterator<target_container> inserter_iterator;
   static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
