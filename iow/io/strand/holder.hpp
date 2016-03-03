@@ -13,7 +13,7 @@ class holder
 {
 public:
   typedef ::iow::io::basic_io< ::iow::io::strand::aspect > super;
-  typedef ::iow::asio::io_service io_service_type;
+  typedef ::iow::asio::io_service io_service_type; // TODO: удалить 
   typedef typename super::mutex_type mutex_type;
   
   holder(io_service_type& io)
