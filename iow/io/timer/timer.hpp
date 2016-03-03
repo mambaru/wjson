@@ -4,22 +4,34 @@
 #include <iow/asio.hpp>
 #include <iow/boost.hpp>
 #include <iow/system.hpp>
+#include <iow/logger/logger.hpp>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/asio/time_traits.hpp>
+
 
 #include <string>
 #include <ctime>
+#include <iomanip>
+#include <locale>
+#include <chrono>
 
 namespace iow{ namespace io{
 
-struct timer_options
+struct basic_timer_options
 {
-  bool enabled = true;
-  time_t start_delay_ms = 0;
+  bool expires_from_now = false;
   time_t delay_ms = 0;
+};
+  
+struct timer_options: basic_timer_options
+{
+  time_t start_delay_ms = 0;
   std::string start_time;
 };
 
-class timer
-  : public std::enable_shared_from_this< timer >
+class basic_timer
+  : public std::enable_shared_from_this< basic_timer >
 {
 public:
   typedef timer_options options_type;
@@ -27,56 +39,108 @@ public:
   typedef std::unique_ptr<deadline_timer> timer_ptr; 
   typedef std::function<void()> handler1;
   typedef std::function<void(handler1)> handler2;
+  typedef ::boost::posix_time::ptime time_type;
+  typedef std::function<time_type()> time_handler;
   
-  
-  timer( ::iow::asio::io_service& io, const options_type& opt )
-    : _opt(opt)
+  basic_timer( deadline_timer& timer )
+    : _timer(timer)
+  {}
+
+  template<typename Hundler>
+  void start(Hundler fun, time_handler th, bool expires_from_now = true)
   {
-    if ( !opt.enabled )
-      return;
-    
-    _timer = std::make_unique<deadline_timer>(io);
+    this->start_( std::move(fun), std::move(th), expires_from_now );
   }
 
-  void reconfigure(const timer_options& opt)
+  template<typename Hundler>
+  void start(Hundler fun, time_t ms, bool expires_from_now = true)
   {
-    _opt = opt;
-    // TODO
+    this->start_( std::move(fun), std::move( this->make_time_handler(ms) ), expires_from_now );
+  }
+
+  template<typename Hundler>
+  void proceed(Hundler fun, time_handler th, bool expires_from_now = true)
+  {
+    this->wait_( std::move(fun), std::move(th), expires_from_now );
+  }
+
+  template<typename Hundler>
+  void proceed(Hundler fun, time_t ms, bool expires_from_now = true)
+  {
+    this->wait_( std::move(fun), std::move( this->make_time_handler(ms) ), expires_from_now );
+  }
+
+  void stop()
+  {
+    _timer.cancel();
   }
   
-  void start(handler1 fun)
+  time_handler make_time_handler(time_t ms)
   {
-    this->wait_( _opt.start_delay_ms, std::move(fun) );
+    using namespace ::boost::posix_time;
+    ptime pt = basic_timer::now();
+    return [pt, ms]() mutable -> time_type 
+    {
+      do 
+      {
+        pt += ::boost::posix_time::milliseconds(ms);
+      } 
+      while ( pt < basic_timer::now() );
+      return pt;
+    };
   }
-
-  void start(handler2 fun)
+  
+  typedef ::iow::asio::time_traits<time_type> time_traits_t;
+  
+  static inline time_type now()
   {
-    this->wait_( _opt.start_delay_ms, std::move(fun) );
+    return time_traits_t::now();
   }
-
+  
 private:
+
   template<typename Fun>
-  void wait_( time_t ms, Fun fun )
+  void start_( Fun fun, time_handler th, bool expires_from_now )
   {
-    _timer->expires_from_now( ::boost::posix_time::milliseconds( ms ) );
-    std::weak_ptr<timer> wthis = this->shared_from_this();
-    _timer->async_wait( [wthis, fun]( ::iow::system::error_code ec)
+    _timer.expires_at( th() );
+    this->wait_( std::move(fun), std::move(th), expires_from_now);
+  }
+
+  template<typename Fun>
+  void next_( Fun fun, time_handler th, bool expires_from_now )
+  {
+    if ( expires_from_now )
+    {
+      _timer.expires_at( th() );
+    }
+    this->wait_( std::move(fun), std::move(th), expires_from_now);
+  }
+
+  template<typename Fun>
+  void wait_( Fun fun, time_handler th, bool expires_from_now )
+  {
+    std::weak_ptr<basic_timer> wthis = this->shared_from_this();
+    _timer.async_wait( [wthis, fun, th, expires_from_now]( ::iow::system::error_code ec)
     {
       if ( !ec )
       {
         if (auto pthis = wthis.lock() )
         {
-          pthis->wait_handler_( std::move(fun) );
+          if ( !expires_from_now )
+          {
+            pthis->_timer.expires_at( th() );
+          }
+          pthis->perform_( std::move(fun), std::move(th), expires_from_now );
         }
       }
       else
       {
-        DOMAIN_LOG_ERROR("Timer error: " << ec.message())
+        IOW_LOG_ERROR( "Timer error: " << ec.message() )
       }
     });
   }
   
-  void wait_handler_( handler1 fun )
+  void perform_( handler1 fun, time_handler th, bool expires_from_now )
   {
     try
     {
@@ -86,33 +150,100 @@ private:
     {
       // TODO: LOG
     };
-    this->wait_(_opt.delay_ms, std::move(fun) );
+    this->next_( std::move(fun), std::move(th), expires_from_now );
   }
 
-  void wait_handler_( handler2 fun )
+  void perform_( handler2 fun, time_handler th, bool expires_from_now )
   {
     try
     {
-      std::weak_ptr<timer> wthis = this->shared_from_this();
-      fun([wthis, fun](){
+      std::weak_ptr<basic_timer> wthis = this->shared_from_this();
+      fun([wthis, fun, th, expires_from_now](){
         if (auto pthis = wthis.lock() )
         {
-          pthis->wait_( pthis->_opt.delay_ms, std::move(fun) );
+          pthis->next_( std::move(fun), std::move(th), expires_from_now );
         }
       });
     }
     catch(...)
     {
       // TODO: LOG
-      this->wait_(_opt.delay_ms, std::move(fun) );
+      this->next_(std::move(fun), th, expires_from_now );
     };
     
   }
 
 private:
+  deadline_timer& _timer;
+};
+
+class timer
+{
+  typedef ::iow::asio::deadline_timer deadline_timer ;
+public:
   
-  options_type _opt;
-  timer_ptr _timer;
+  typedef basic_timer::handler1 handler1;
+  typedef basic_timer::handler2 handler2;
+  
+  timer( ::iow::asio::io_service& io)
+    : _deadline_timer(io)
+  {
+  }
+
+  // ::boost::posix_time::time_from_string("2005-12-07 23:59:59.000")
+  // typedef std::function<void()> handler1;
+  // typedef std::function<void(handler1)> handler2;
+  // fun is handler1 or handler2
+  template<typename Handler>
+  void start(Handler fun, timer_options opt)
+  {
+    _timer=std::make_shared<basic_timer>(_deadline_timer);
+    
+    if ( opt.start_time.empty() && opt.start_delay_ms == 0 )
+    {
+      _timer->start(fun, opt.delay_ms, opt.expires_from_now);
+    }
+    else if ( !opt.start_time.empty() )
+    {
+      time_t rawtime;
+      std::tm* ptm;
+      time(&rawtime);
+      ptm = localtime (&rawtime);
+      if ( nullptr ==  strptime(opt.start_time.c_str(), "%H:%M:%S", ptm) )
+      {
+        IOW_LOG_DEBUG("Timer format error %H:%M:%S: " << opt.start_time )
+      }
+      time_t now = time(0);
+      time_t day_in_sec = 3600*24;
+      time_t beg_day = (now/day_in_sec) * day_in_sec - ptm->tm_gmtoff;
+      time_t ready_time_of_day = ptm->tm_sec + ptm->tm_min*60 + ptm->tm_hour*3600;
+      time_t ready_time = beg_day + ready_time_of_day;
+      if ( ready_time < now )
+        ready_time += day_in_sec;
+      IOW_LOG_DEBUG("Timer start from " << (ready_time - now + opt.start_delay_ms/1000) )
+
+      _deadline_timer.expires_from_now( 
+        ::boost::posix_time::seconds( ready_time - now ) 
+        + ::boost::posix_time::milliseconds(opt.start_delay_ms)
+      );
+      _timer->proceed( fun, opt.delay_ms, opt.expires_from_now );
+    }
+    else
+    {
+      _deadline_timer.expires_from_now( ::boost::posix_time::milliseconds(opt.start_delay_ms) );
+      _timer->proceed( fun, opt.delay_ms, opt.expires_from_now );
+    }
+  }
+
+  void stop()
+  {
+    _timer->stop();
+    _timer = nullptr;
+  }
+
+private:
+  deadline_timer _deadline_timer;
+  std::shared_ptr<basic_timer> _timer;
 };
 
 }}
