@@ -8,7 +8,7 @@ void server()
 {
   typedef ::iow::ip::tcp::acceptor::acceptor<> tcp_acceptor;
   typedef tcp_acceptor::descriptor_type accept_descriptor;
-  typedef tcp_acceptor::options_type options;
+  typedef ::iow::ip::tcp::acceptor::options<> options;
   iow::asio::io_service io_service; 
   accept_descriptor desc = accept_descriptor(io_service);
   auto acceptor = std::make_shared<tcp_acceptor>( std::move(desc)  );

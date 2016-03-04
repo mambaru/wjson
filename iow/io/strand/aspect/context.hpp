@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iow/io/strand/options.hpp>
-#include <iow/mutex/delayed_queue.hpp>
+#include <iow/thread/delayed_queue.hpp>
 #include <iow/asio.hpp>
 
 #include <memory>

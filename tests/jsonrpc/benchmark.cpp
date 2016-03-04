@@ -40,13 +40,13 @@ void test1()
 void ttt(std::function<void()> f)
 {
   f();
-};
+}
 
 template<typename F>
 void ttt2(F f)
 {
   f();
-};
+}
 
 void test2()
 {

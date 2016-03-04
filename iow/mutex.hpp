@@ -6,5 +6,5 @@
 
 #pragma once
 
-#include <iow/mutex/rwlock.hpp>
-#include <iow/mutex/spinlock.hpp>
+#include <iow/thread/rwlock.hpp>
+#include <iow/thread/spinlock.hpp>

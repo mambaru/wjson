@@ -37,8 +37,9 @@ public:
   typedef timer_options options_type;
   typedef ::iow::asio::deadline_timer deadline_timer;
   typedef std::unique_ptr<deadline_timer> timer_ptr; 
-  typedef std::function<void()> handler1;
-  typedef std::function<void(handler1)> handler2;
+  typedef std::function<bool()> handler1;
+  typedef std::function<void(bool)> handler_callback;
+  typedef std::function<void(handler_callback)> handler2;
   typedef ::boost::posix_time::ptime time_type;
   typedef std::function<time_type()> time_handler;
   
@@ -142,15 +143,25 @@ private:
   
   void perform_( handler1 fun, time_handler th, bool expires_from_now )
   {
+    bool ready = true;
     try
     {
-      fun();
+      ready = fun();
     }
     catch(...)
     {
       // TODO: LOG
     };
-    this->next_( std::move(fun), std::move(th), expires_from_now );
+    
+    if ( ready )
+    {
+      this->next_( std::move(fun), std::move(th), expires_from_now );
+    }
+    else
+    {
+      _timer.expires_from_now( ::boost::posix_time::seconds(0) );
+      this->wait_( std::move(fun), std::move(th), expires_from_now);
+    }
   }
 
   void perform_( handler2 fun, time_handler th, bool expires_from_now )
@@ -158,10 +169,18 @@ private:
     try
     {
       std::weak_ptr<basic_timer> wthis = this->shared_from_this();
-      fun([wthis, fun, th, expires_from_now](){
+      fun([wthis, fun, th, expires_from_now](bool ready){
         if (auto pthis = wthis.lock() )
         {
-          pthis->next_( std::move(fun), std::move(th), expires_from_now );
+          if ( ready )
+          {
+            pthis->next_( std::move(fun), std::move(th), expires_from_now );
+          }
+          else
+          {
+            pthis->_timer.expires_from_now( ::boost::posix_time::seconds(0) );
+            pthis->wait_( std::move(fun), std::move(th), expires_from_now);
+          }
         }
       });
     }
@@ -183,6 +202,7 @@ class timer
 public:
   
   typedef basic_timer::handler1 handler1;
+  typedef basic_timer::handler_callback handler_callback;
   typedef basic_timer::handler2 handler2;
   
   timer( ::iow::asio::io_service& io)

@@ -16,14 +16,17 @@ add_library(
   iow/logger/global_log.cpp
   iow/jsonrpc/incoming/incoming_holder.cpp
   iow/jsonrpc/incoming/aux.cpp
-  iow/mutex/delayed_queue.cpp
+  iow/thread/delayed_queue.cpp
   #iow/jsonrpc/engine/io_registry.cpp
 )
 
-if ( IOW_BUILD_ALL )
-  enable_testing()
-  add_subdirectory(tests)
-  #add_subdirectory(tutorial)
+target_link_libraries(iow ${Boost_LIBRARIES} )
+
+if ( IOW_BUILD_TEST OR IOW_BUILD_ALL )
+  if( IOW_BUILD_TEST )
+    enable_testing()
+    add_subdirectory(tests)
+  endif() # IOW_BUILD_TEST
 endif()
 
 
