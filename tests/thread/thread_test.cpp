@@ -2,5 +2,6 @@
 
 BEGIN_TEST
   RUN_SUITE(delayed_queue)
+  RUN_SUITE(deadline_timer)
   RUN_SUITE(thread_pool)
 END_TEST

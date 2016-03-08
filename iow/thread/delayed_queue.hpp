@@ -1,7 +1,4 @@
-#ifndef MAMBA_DELAYED_QUEUE_HPP
-#define MAMBA_DELAYED_QUEUE_HPP
-
-//#include <cstddef>
+#pragma once 
 
 #include <chrono>
 #include <queue>
@@ -66,77 +63,4 @@ private:
 }; // delayed_queue
 }
 
-#include <iow/asio.hpp>
-
-namespace iow{
-  
-class delayed_io_post
-{
-public:
-  typedef ::iow::asio::deadline_timer timer_type;
-  typedef ::iow::asio::io_service io_service;
-public:
-  delayed_io_post( delayed_io_post const & ) = delete;
-  void operator=( delayed_io_post const & ) = delete;
-
-  delayed_io_post(io_service& io)
-    : _timer(io)
-  {}
-  
-  timer_type& timer() { return _timer;}
-  const timer_type& timer() const { return _timer;}
-  
-  void run()
-  {
-    _timer.get_io_service().run();
-  }
-  
-  bool run_one()
-  {
-    return 0!=_timer.get_io_service().run_one();
-    
-  }
-  
-  bool poll_one()
-  {
-    return 0!=_timer.get_io_service().poll_one();
-  }
-  
-  void stop()
-  {
-    _timer.get_io_service().stop();
-  }
-  
-  
-  template<typename F>
-  void post( F f )
-  {
-    _timer.get_io_service().post( std::move(f) );
-  }
-  
-  template<typename D, typename F>
-  void delayed_post(D d, F f)
-  {
-    using namespace std::chrono;
-    _timer.expires_from_now( ::boost::posix_time::milliseconds( duration_cast<milliseconds>(d).count() ), std::move(f) );
-  }
-  
-  std::size_t size() const
-  {
-    return 0;
-  }
-  
-  std::size_t waits() const
-  {
-    return 0;
-  }
-
-  
-private:
-  timer_type _timer;
-};
-
-} // ns util
-
-#endif
 
