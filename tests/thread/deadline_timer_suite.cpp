@@ -1,40 +1,44 @@
 #include <fas/testing.hpp>
-#include <iow/thread/deadline_timer.hpp>
+#include <iow/thread/timer_queue.hpp>
 #include "delayed_common_suite.hpp"
 
-UNIT(deadline_timer1, "")
+UNIT(timer_queue1, "")
 {
   ::iow::asio::io_service io;
-  ::iow::deadline_timer dq(io);
-  delayed_unit1(t, dq);
+  ::iow::queue_options opt;
+  auto pq = std::make_shared< ::iow::timer_queue >(io, opt);
+  delayed_unit1(t, *pq);
 }
 
 
-UNIT(deadline_timer2, "")
+UNIT(timer_queue2, "")
 {
   ::iow::asio::io_service io;
-  ::iow::deadline_timer dq(io);
-  delayed_unit2(t, dq);
+  ::iow::queue_options opt;
+  auto pq = std::make_shared< ::iow::timer_queue >(io, opt);
+  delayed_unit2(t, *pq);
 }
 
-UNIT(deadline_timer3, "")
+UNIT(timer_queue3, "")
 {
   ::iow::asio::io_service io;
-  ::iow::deadline_timer dq(io);
-  delayed_unit3(t, dq);
+  ::iow::queue_options opt;
+  auto pq = std::make_shared< ::iow::timer_queue >(io, opt);
+  delayed_unit3(t, *pq);
 }
 
-UNIT(deadline_timer4, "")
+UNIT(timer_queue4, "")
 {
   ::iow::asio::io_service io;
-  ::iow::deadline_timer dq(io);
-  delayed_unit4(t, dq);
+  ::iow::queue_options opt;
+  auto pq = std::make_shared< ::iow::timer_queue >(io, opt);
+  delayed_unit4(t, *pq);
 }
 
-BEGIN_SUITE(deadline_timer, "")
-  ADD_UNIT(deadline_timer1)
-  ADD_UNIT(deadline_timer2)
-  ADD_UNIT(deadline_timer3)
-  ADD_UNIT(deadline_timer4)
-END_SUITE(deadline_timer)
+BEGIN_SUITE(timer_queue, "")
+  ADD_UNIT(timer_queue1)
+  ADD_UNIT(timer_queue2)
+  ADD_UNIT(timer_queue3)
+  ADD_UNIT(timer_queue4)
+END_SUITE(timer_queue)
 

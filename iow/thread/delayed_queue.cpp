@@ -3,33 +3,14 @@
 
 namespace iow {
 
-delayed_queue::delayed_queue()
-  : loop_exit_( true )
-{
-}
-
-delayed_queue::~delayed_queue()
-{
-  this->stop();
-}
-
-void delayed_queue::run()
-{
-  std::unique_lock<mutex_t> lck( _mutex );
-  if ( loop_exit_ )
-    loop_exit_ = false;
-  lck.unlock();
-  this->loop();
-}
 
 bool delayed_queue::run_one()
 {
-  function_t run_func;
   std::unique_lock<mutex_t> lck( _mutex );
-  if ( loop_exit_ )
-    loop_exit_ = false;
+  if ( _loop_exit )
+    _loop_exit = false;
   lck.unlock();
-  return this->run_one_( run_func, lck );
+  return this->run_one_( lck );
 }
 
 bool delayed_queue::poll_one()
@@ -41,18 +22,19 @@ bool delayed_queue::poll_one()
 
 void delayed_queue::stop()
 {
-  if ( ! loop_exit_ )
+  std::unique_lock<mutex_t> lck( _mutex );
+  if ( ! _loop_exit )
   { 
-    loop_exit_ = true;
-    cond_var_.notify_all();
+    _loop_exit = true;
+    _cond_var.notify_all();
   }
 }
 
 void delayed_queue::post( function_t && f )
 {
   std::lock_guard<mutex_t> lock( _mutex );
-  que_.push( std::move( f ) );
-  cond_var_.notify_one();
+  _que.push( std::move( f ) );
+  _cond_var.notify_one();
 }
 
 
@@ -60,83 +42,24 @@ void delayed_queue::delayed_post( duration_t && delay, function_t && f )
 {
   std::lock_guard<mutex_t> lock( _mutex );
   if ( ! delay.count() )
-    que_.push( std::move( f ) );
+    _que.push( std::move( f ) );
   else
-    delayed_que_.emplace( std::chrono::steady_clock::now() + delay, std::move( f ) );
-  cond_var_.notify_one();
+    _delayed_que.emplace( std::chrono::steady_clock::now() + delay, std::move( f ) );
+  _cond_var.notify_one();
 }
 
 std::size_t delayed_queue::size() const
 {
   std::lock_guard<mutex_t> lck( _mutex );
-  return que_.size();
+  return _que.size();
 }
 
 std::size_t delayed_queue::waits() const
 {
   std::lock_guard<mutex_t> lck( _mutex );
-  return delayed_que_.size();
+  return _delayed_que.size();
 }
 
-bool delayed_queue::run_one_( function_t & run_func, std::unique_lock<mutex_t> & lck)
-{
-  while ( !loop_exit_ )
-  {
-    if ( !this->poll_one_( run_func, lck ) )
-    {
-      lck.lock();
-      if ( que_.empty() && delayed_que_.empty() )
-        cond_var_.wait( lck );
-      else if ( que_.empty() && !delayed_que_.empty() )
-        cond_var_.wait_until( lck, delayed_que_.top().first );
-      lck.unlock();
-    }
-    else
-      return true;
-  }
-  return false;
-}
-  
-bool delayed_queue::poll_one_( function_t & run_func, std::unique_lock<mutex_t> & lck)
-{
-  lck.lock();
-  if ( ! delayed_que_.empty() )
-  {
-    if ( delayed_que_.top().first <= std::chrono::steady_clock::now() )
-    {
-      que_.push( std::move( delayed_que_.top().second ) );
-      delayed_que_.pop();
-    }
-  }
-  if ( que_.empty() )
-  {
-    lck.unlock();
-    return false;
-  }
-  run_func.swap( que_.front() );
-  que_.pop();
-  lck.unlock();
-  run_func();
-  return true;
-}
-
-void delayed_queue::loop()
-{
-  function_t run_func;
-  std::unique_lock<mutex_t> lck( _mutex, std::defer_lock );
-  while ( !loop_exit_ )
-  {
-    if ( !this->poll_one_( run_func, lck ) )
-    {
-      lck.lock();
-      if ( que_.empty() && delayed_que_.empty() )
-        cond_var_.wait( lck );
-      else if ( que_.empty() && !delayed_que_.empty() )
-        cond_var_.wait_until( lck, delayed_que_.top().first );
-      lck.unlock();
-    }
-  }
-}
 
 } // ns util
 

@@ -1,5 +1,7 @@
 #pragma once 
 
+#include <iow/thread/queue_options.hpp>
+
 #include <chrono>
 #include <queue>
 #include <utility>
@@ -24,25 +26,101 @@ public:
   typedef std::queue<function_t>                                      queue_t;
   typedef std::priority_queue<event_t, std::vector<event_t>, queue_cmp>  delayed_queue_t;
 
-  delayed_queue  ();
-  ~delayed_queue ();
   delayed_queue( delayed_queue const & ) = delete;
   void operator=( delayed_queue const & ) = delete;
+
+  delayed_queue()
+    : _loop_exit( true )
+  {}
   
-  void run();
+  virtual ~delayed_queue ()
+  {
+    this->stop();
+  }
+  
+  void run()
+  {
+    std::unique_lock<mutex_t> lck( _mutex );
+    if ( _loop_exit )
+      _loop_exit = false;
+    lck.unlock();
+    this->loop_(lck, false);
+  }
+  
   bool run_one();
   bool poll_one();
   void stop();
   void post( function_t && );
   void delayed_post(duration_t &&, function_t &&);
-  std::size_t size() const;
-  std::size_t waits() const;
+  
+  std::size_t size() const
+  {
+    std::lock_guard<mutex_t> lck( _mutex );
+    return _que.size() + _delayed_que.size();
+  }
+  
 
 private:
+  
+  bool poll_one_( function_t& run_func, std::unique_lock<mutex_t>& lck)
+  {
+    lck.lock();
+    if ( ! _delayed_que.empty() )
+    {
+      if ( _delayed_que.top().first <= std::chrono::steady_clock::now() )
+      {
+        _que.push( std::move( _delayed_que.top().second ) );
+        _delayed_que.pop();
+      }
+    }
+    if ( _que.empty() )
+    {
+      lck.unlock();
+      return false;
+    }
+    run_func.swap( _que.front() );
+    _que.pop();
+    lck.unlock();
+    run_func();
+    return true;
+  }
 
-  bool run_one_( function_t&, std::unique_lock<mutex_t> & );
-  bool poll_one_( function_t&, std::unique_lock<mutex_t> & );
-  void loop();
+
+  void run_wait_( std::unique_lock<mutex_t> & lck)
+  {
+    lck.lock();
+    if ( _que.empty() && _delayed_que.empty() )
+    {
+      _cond_var.wait( lck );
+    }
+    else if ( _que.empty() && !_delayed_que.empty() )
+    {
+      _cond_var.wait_until( lck, _delayed_que.top().first );
+    }
+    lck.unlock();
+  }
+
+  bool run_one_( std::unique_lock<mutex_t>& lck)
+  {
+    return this->loop_( lck, true);
+  }
+
+  bool loop_(std::unique_lock<mutex_t>& lck, bool one)
+  {
+    function_t run_func;
+    while ( !_loop_exit )
+    {
+      if ( !this->poll_one_( run_func, lck ) )
+      {
+        this->run_wait_(lck);
+      } 
+      else if ( one )
+      {
+        return true;
+      }
+    }
+    return false;
+  }
 
   struct queue_cmp
   {
@@ -55,10 +133,10 @@ private:
 //members
 
   mutable mutex_t          _mutex;
-  condition_variable_t     cond_var_;
-  queue_t                  que_;
-  delayed_queue_t          delayed_que_;
-  bool                     loop_exit_;
+  condition_variable_t     _cond_var;
+  queue_t                  _que;
+  delayed_queue_t          _delayed_que;
+  bool                     _loop_exit;
 
 }; // delayed_queue
 }

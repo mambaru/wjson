@@ -8,6 +8,7 @@ template<typename DataType>
 struct options:
   ::iow::io::read_buffer_options<DataType>
 {
+  // TODO: не используються по факту
   size_t maxsize = 1024*1024*128;
   size_t wrnsize = 1024*1024;
 };
