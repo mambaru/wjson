@@ -10,75 +10,54 @@ namespace iow {
 
 struct thread_pool_options
 {
-  
+  size_t threads = 0;
 };
 
-template<typename Queue = delayed_queue>
+template<typename Service = delayed_queue>
 class thread_pool
 {
 public:
 
-  typedef Queue queue_type;  
+  typedef Service service_type;
+  typedef std::shared_ptr<service_type> service_ptr;
   
-  ~thread_pool()
-  {
-    this->stop();
-  }
-  
-  template<typename Handler>
-  void post( Handler h )
-  {
-    _queue.post( std::move(h) );
-  }
-  
-  template<typename Duration, typename Handler>
-  void delayed_post(Duration d, Handler h)
-  {
-    _queue.delayed_post( std::move(h) );
-  }
-  
-  size_t size() const 
-  {
-    return _queue.size();
-  }
-
-  size_t wait() const 
-  {
-    return _queue.size();
-  }
-
+  // service_ptr допустим nullptr
+  thread_pool(service_ptr service)
+    : _service(service)
+  {}
+    
   template<typename Opt>
   void start(Opt opt)
   {
-    this->stop();
-    
     std::lock_guard< std::mutex > lk(_mutex);
+    if ( _service==nullptr )
+      return;
+    
     _threads.reserve(opt.threads);
     for (int i = 0 ; i < opt.threads; ++i)
     {
       _threads.push_back( std::thread( [this]()
       {
-        this->_queue.run();
-      }) );
+        this->_service.run();
+      }));
     }
   }
-  
+
+  // только после _service->stop();
   void stop()
   {
-    _queue->stop();
-    
     std::lock_guard< std::mutex > lk(_mutex);
+    if ( _service==nullptr )
+      return;
+
     for (auto& t : _threads)
       t.join();
   }
   
 private:
   std::mutex _mutex;
-  queue_type _queue;
+  service_ptr _service;
   std::vector< std::thread > _threads;
 };
 
 }
-
-
-

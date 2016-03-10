@@ -14,18 +14,18 @@
 
 namespace iow{
   
-class timer_queue
-  : public std::enable_shared_from_this<timer_queue >
+class timed_queue
+  : public std::enable_shared_from_this<timed_queue >
 {
 public:
-  typedef timer_queue self;
+  typedef timed_queue self;
   typedef ::iow::asio::deadline_timer timer_type;
   typedef ::iow::asio::io_service io_service;
 public:
-  timer_queue( timer_queue const & ) = delete;
-  void operator=( timer_queue const & ) = delete;
+  timed_queue( timed_queue const & ) = delete;
+  void operator=( timed_queue const & ) = delete;
 
-  timer_queue(io_service& io, const queue_options& opt)
+  timed_queue(io_service& io, const queue_options& opt)
     : _io(io)
     , _opt(opt)
   {
@@ -114,25 +114,18 @@ public:
 
     if ( _counter < _opt.maxsize )
     {
-      IOW_LOG_WARNING("timer_queue overflow warning size = " << _counter << "( wrnsize=" << _opt.wrnsize << ")");
+      IOW_LOG_WARNING("timed_queue overflow warning size = " << _counter << "( wrnsize=" << _opt.wrnsize << ")");
       return true;
     }
     
-    IOW_LOG_ERROR("timer_queue overflow size = " << _counter << "( maxsize=" << _opt.maxsize << ")");
+    IOW_LOG_ERROR("timed_queue overflow size = " << _counter << "( maxsize=" << _opt.maxsize << ")");
     return false;
   }
   
   std::size_t size() const
   {
-    return 0;
+    return _counter;
   }
-  
-  std::size_t waits() const
-  {
-    return 0;
-  }
-  
-  
   
 private:
   io_service& _io;
