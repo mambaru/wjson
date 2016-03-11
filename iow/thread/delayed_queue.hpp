@@ -18,7 +18,7 @@ class delayed_queue
 public:
 
   typedef std::function<void()>                               function_t;
-  typedef std::chrono::time_point<std::chrono::steady_clock>  time_point_t;
+  typedef std::chrono::time_point<std::chrono::system_clock>  time_point_t;
   typedef time_point_t::duration                              duration_t;
   typedef std::pair<time_point_t, function_t>                 event_t;
   typedef std::condition_variable                             condition_variable_t;
@@ -79,15 +79,31 @@ public:
     _que.push( std::move( f ) );
     _cond_var.notify_one();
   }
+  
+  template<typename TP, typename F>
+  void post_at(TP time_point, F f)
+  {
+    std::lock_guard<mutex_t> lock( _mutex );
+    this->push_at_( std::move(time_point), std::move(f) ); 
+    _cond_var.notify_one();
+  }
 
-  template<typename F>
-  void delayed_post(duration_t delay, F f)
+  template<typename TP, typename F>
+  void push_at_(TP time_point, F f)
+  {
+    _delayed_que.emplace( time_point, std::move( f ) );
+  }
+
+
+  template<typename D, typename F>
+  void delayed_post(D duration, F f)
   {  
     std::lock_guard<mutex_t> lock( _mutex );
-    if ( ! delay.count() )
+    if ( ! duration.count() )
       _que.push( std::move( f ) );
     else
-      _delayed_que.emplace( std::chrono::steady_clock::now() + delay, std::move( f ) );
+      this->push_at_( std::move( std::chrono::system_clock::now() + duration), std::move(f)  );
+      //_delayed_que.emplace( std::chrono::steady_clock::now() + delay, std::move( f ) );
     _cond_var.notify_one();
   }
   
@@ -106,7 +122,7 @@ private:
     lck.lock();
     if ( ! _delayed_que.empty() )
     {
-      if ( _delayed_que.top().first <= std::chrono::steady_clock::now() )
+      if ( _delayed_que.top().first <= std::chrono::system_clock::now() )
       {
         _que.push( std::move( _delayed_que.top().second ) );
         _delayed_que.pop();

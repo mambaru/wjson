@@ -119,13 +119,10 @@ inline void delayed_unit4(T& t, Q& dq)
       std::mutex m;
       std::unique_lock< std::mutex> lck(m);
       cv.wait(lck, [&]{ return !notify;});
-      //std::this_thread::sleep_for( milliseconds(100) );
-      //t << message("thread run! id ") << std::this_thread::get_id() << " i=" << i ;
       dq.run();
     } ).detach();
   }
-  t << message("go!");
-  //std::this_thread::sleep_for( milliseconds(100) );
+  
   start = high_resolution_clock::now();
   notify = true;
   cv.notify_all();
@@ -135,6 +132,6 @@ inline void delayed_unit4(T& t, Q& dq)
   for (int i = 0; i < 10 ; ++i)
   {
     time_t res = 50*(i+1) - times[i];
-    t << is_true<expect>( std::abs(res) < 2 ) << " time error";
+    t << is_true<expect>( std::abs(res) < 2 ) << " time error ( " << 50*(i+1) << "-" << times[i] << " > 1 )" ;
   }
 }
