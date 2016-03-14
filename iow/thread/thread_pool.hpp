@@ -8,10 +8,11 @@
 
 namespace iow {
 
-struct thread_pool_options
+/*struct thread_pool_options
 {
   size_t threads = 0;
 };
+*/
 
 template<typename Service = delayed_queue>
 class thread_pool
@@ -25,22 +26,24 @@ public:
   thread_pool(service_ptr service)
     : _service(service)
   {}
+  
+  bool reconfigure(int threads)
+  {
+    if ( threads < _threads.size() ) 
+      return false;
     
-  template<typename Opt>
-  void start(Opt opt)
+    int diff = threads - _threads.size();
+    this->run_more_(diff);
+    return true;
+  }
+    
+  void start(int threads)
   {
     std::lock_guard< std::mutex > lk(_mutex);
-    if ( _service==nullptr )
+    if ( _service==nullptr || !_threads.empty())
       return;
     
-    _threads.reserve(opt.threads);
-    for (int i = 0 ; i < opt.threads; ++i)
-    {
-      _threads.push_back( std::thread( [this]()
-      {
-        this->_service.run();
-      }));
-    }
+    this->run_more_(threads);
   }
 
   // только после _service->stop();
@@ -52,6 +55,20 @@ public:
 
     for (auto& t : _threads)
       t.join();
+  }
+  
+private: 
+  
+  void run_more_(int threads)
+  {
+    _threads.reserve( _threads.size() + threads);
+    for (int i = 0 ; i < threads; ++i)
+    {
+      _threads.push_back( std::thread( [this]()
+      {
+        this->_service->run();
+      }));
+    }
   }
   
 private:

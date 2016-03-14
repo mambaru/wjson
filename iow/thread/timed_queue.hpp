@@ -28,10 +28,18 @@ public:
 
   timed_queue(io_service& io, const queue_options& opt)
     : _io(io)
-    , _opt(opt)
   {
     _counter = 0;
+    _wrnsize = opt.wrnsize;
+    _maxsize = opt.maxsize;
   }
+  
+  void reconfigure(const queue_options& opt)
+  {
+    _wrnsize = opt.wrnsize;
+    _maxsize = opt.maxsize;
+  }
+
   
   io_service& get_io_service() { return _io;}
   const io_service& get_io_service() const { return _io;}
@@ -114,28 +122,21 @@ public:
   template<typename D, typename F>
   bool delayed_post(D duration, F f)
   {
-    /*
-    time_t now_time = time(0);
-    tm tms;
-    localtime_r(&now_time, &tms);
-    */
-
     return this->post_at( std::move( std::chrono::system_clock::now() + duration  ), std::move(f) );
-    return true;
   }
   
   bool check_size_() const
   {
-    if ( _counter < _opt.wrnsize )
+    if ( _counter < _wrnsize )
       return true;
 
-    if ( _counter < _opt.maxsize )
+    if ( _counter < _maxsize )
     {
-      IOW_LOG_WARNING("timed_queue overflow warning size = " << _counter << "( wrnsize=" << _opt.wrnsize << ")");
+      IOW_LOG_WARNING("timed_queue overflow warning size = " << _counter << "( wrnsize=" << _wrnsize << ")");
       return true;
     }
     
-    IOW_LOG_ERROR("timed_queue overflow size = " << _counter << "( maxsize=" << _opt.maxsize << ")");
+    IOW_LOG_ERROR("timed_queue overflow size = " << _counter << "( maxsize=" << _maxsize << ")");
     return false;
   }
   
@@ -146,8 +147,10 @@ public:
   
 private:
   io_service& _io;
-  queue_options _opt;
   std::atomic<size_t> _counter;
+  std::atomic<size_t> _maxsize;
+  std::atomic<size_t> _wrnsize;
+
 };
 
 } // iow

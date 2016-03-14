@@ -4,6 +4,7 @@ set( SUITE_LIST
   deadline_timer_suite.cpp
   thread_pool_suite.cpp
   timer_manager_suite.cpp
+  dataflow_suite.cpp
 )
 
 add_executable( thread_test ${FAS_TESTING_CPP} thread_test.cpp ${SUITE_LIST} )

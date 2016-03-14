@@ -10,26 +10,30 @@
 
 UNIT(delayed_queue1, "")
 {
-  ::iow::delayed_queue dq;
+  ::iow::queue_options opt;
+  ::iow::delayed_queue dq(opt);
   delayed_unit1(t, dq);
 }
 
 
 UNIT(delayed_queue2, "")
 {
-  ::iow::delayed_queue dq;
+  ::iow::queue_options opt;
+  ::iow::delayed_queue dq(opt);
   delayed_unit2(t, dq);
 }
 
 UNIT(delayed_queue3, "")
 {
-  ::iow::delayed_queue dq;
+  ::iow::queue_options opt;
+  ::iow::delayed_queue dq(opt);
   delayed_unit3(t, dq);
 }
 
 UNIT(delayed_queue4, "")
 {
-  ::iow::delayed_queue dq;
+  ::iow::queue_options opt;
+  ::iow::delayed_queue dq(opt);
   delayed_unit4(t, dq);
 }
 

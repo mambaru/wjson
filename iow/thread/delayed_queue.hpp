@@ -29,13 +29,20 @@ public:
   delayed_queue( delayed_queue const & ) = delete;
   void operator=( delayed_queue const & ) = delete;
 
-  delayed_queue()
-    : _loop_exit( true )
+  delayed_queue(const queue_options& opt)
+    : _opt(opt)
+    , _loop_exit( true )
   {}
   
   virtual ~delayed_queue ()
   {
     this->stop();
+  }
+  
+  void reconfigure(const queue_options& opt)
+  {
+    std::unique_lock<mutex_t> lck( _mutex );
+    _opt = opt;
   }
   
   void run()
@@ -73,38 +80,33 @@ public:
   }
   
   template<typename F>
-  void post( F f )
+  bool post( F f )
   {
     std::lock_guard<mutex_t> lock( _mutex );
     _que.push( std::move( f ) );
     _cond_var.notify_one();
+    return true;
   }
   
   template<typename TP, typename F>
-  void post_at(TP time_point, F f)
+  bool post_at(TP time_point, F f)
   {
     std::lock_guard<mutex_t> lock( _mutex );
     this->push_at_( std::move(time_point), std::move(f) ); 
     _cond_var.notify_one();
+    return true;
   }
-
-  template<typename TP, typename F>
-  void push_at_(TP time_point, F f)
-  {
-    _delayed_que.emplace( time_point, std::move( f ) );
-  }
-
 
   template<typename D, typename F>
-  void delayed_post(D duration, F f)
+  bool delayed_post(D duration, F f)
   {  
     std::lock_guard<mutex_t> lock( _mutex );
     if ( ! duration.count() )
       _que.push( std::move( f ) );
     else
       this->push_at_( std::move( std::chrono::system_clock::now() + duration), std::move(f)  );
-      //_delayed_que.emplace( std::chrono::steady_clock::now() + delay, std::move( f ) );
     _cond_var.notify_one();
+    return true;
   }
   
   std::size_t size() const
@@ -114,6 +116,12 @@ public:
   }
 
 private:
+
+  template<typename TP, typename F>
+  void push_at_(TP time_point, F f)
+  {
+    _delayed_que.emplace( time_point, std::move( f ) );
+  }
   
   bool poll_one_( std::unique_lock<mutex_t>& lck)
   {
@@ -187,6 +195,7 @@ private:
 
 //members
 
+  queue_options            _opt;
   mutable mutex_t          _mutex;
   condition_variable_t     _cond_var;
   queue_t                  _que;

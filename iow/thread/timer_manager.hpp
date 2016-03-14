@@ -46,17 +46,47 @@ public:
   {}
 
   template<typename Handler>
-  timer_id_t create(time_point_t start_time, duration_t delay, Handler handler, bool expires_after = true)
-  {
-    std::lock_guard< mutex_type > lk(_mutex);
-    return this->create_( start_time, delay, expires_after, std::move(handler) );
-  }
-
-  template<typename Handler>
   timer_id_t create( duration_t delay, Handler handler, bool expires_after = true)
   {
     std::lock_guard< mutex_type > lk(_mutex);
-    return this->create_( clock_t::now() + delay, delay, expires_after, std::move(handler) );
+    return this->create_( clock_t::now() + delay, delay, expires_after, std::forward<Handler>(handler) );
+  }
+
+  template<typename Handler>
+  timer_id_t create(time_point_t start_time, duration_t delay, Handler handler, bool expires_after = true)
+  {
+    std::lock_guard< mutex_type > lk(_mutex);
+    return this->create_( start_time, delay, expires_after, std::forward<Handler>(handler) );
+  }
+
+  template<typename Handler>
+  timer_id_t create(const std::string& start_time, Handler handler, bool expires_after = true)
+  {
+    return this->create(start_time, std::chrono::milliseconds(0), std::forward<Handler>(handler), expires_after );
+  }
+
+  template<typename Handler>
+  timer_id_t create(std::string start_time, duration_t delay, Handler handler, bool expires_after = true)
+  {
+    std::time_t now = std::time(0);
+    std::tm ptm;
+    localtime_r(&now, &ptm);
+    
+    if ( nullptr ==  strptime(start_time.c_str(), "%H:%M:%S", &ptm) )
+    {
+      IOW_LOG_ERROR("Timer format error (class timer_manager) %H:%M:%S: " << start_time );
+      return -1;
+    }
+    
+    time_t day_in_sec = 3600*24;
+    time_t beg_day = (now/day_in_sec) * day_in_sec - ptm.tm_gmtoff;
+    time_t ready_time_of_day = ptm.tm_sec + ptm.tm_min*60 + ptm.tm_hour*3600;
+    time_t ready_time = beg_day + ready_time_of_day;
+    if ( ready_time < now )
+      ready_time += day_in_sec;
+    IOW_LOG_DEBUG("Timer start from " << ready_time )
+    
+    return this->create( std::chrono::system_clock::from_time_t(ready_time), delay, std::forward<Handler>(handler),  expires_after);
   }
 
   std::shared_ptr<bool> detach(timer_id_t id)
@@ -69,7 +99,6 @@ public:
     res = itr->second;
     _id_map.erase(itr);
     return res;
-
   }
   
   bool release( timer_id_t id )
@@ -90,9 +119,17 @@ public:
     return s;
   }
   
+  size_t size() 
+  {
+    std::lock_guard< mutex_type > lk(_mutex);
+    return _id_map.size();
+  }
+  
   template<typename Handler>
   timer_id_t create_(time_point_t start_time, duration_t delay, bool expires_after, Handler handler)
   {
+    if ( delay.count() == 0 )
+      delay = std::chrono::hours(24);
     timer_id_t id = ++_id_counter;
     std::shared_ptr<bool> pflag = std::make_shared<bool>(true);
     std::weak_ptr<bool> wflag = pflag;
