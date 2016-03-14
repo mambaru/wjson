@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iow/thread/delayed_queue.hpp>
+#include <iow/workflow/delayed_queue.hpp>
 
 #include <thread>
 #include <mutex>

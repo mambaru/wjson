@@ -1,6 +1,6 @@
 #pragma once 
 
-#include <iow/thread/queue_options.hpp>
+#include <iow/workflow/queue_options.hpp>
 
 #include <chrono>
 #include <queue>

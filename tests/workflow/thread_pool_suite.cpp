@@ -1,6 +1,6 @@
 #include <fas/testing.hpp>
-#include <iow/thread/delayed_queue.hpp>
-#include <iow/thread/thread_pool.hpp>
+#include <iow/workflow/delayed_queue.hpp>
+#include <iow/workflow/thread_pool.hpp>
 #include <chrono>
 #include <atomic>
 #include <thread>

@@ -1,15 +1,15 @@
 #include <fas/testing.hpp>
-#include <iow/thread/dataflow.hpp>
+#include <iow/workflow/workflow.hpp>
 #include <chrono>
 
-UNIT(dataflow1, "")
+UNIT(workflow1, "")
 {
   using namespace ::fas::testing;
   
   ::iow::asio::io_service io;
-  ::iow::dataflow_options opt;
-  opt.threads = 3;
-  ::iow::dataflow queue(io, opt);
+  ::iow::queue_options opt;
+  
+  ::iow::workflow queue(io, opt, 3);
   queue.start();
   std::atomic<int> counter(0);
   queue.post([&t, &counter](){
@@ -39,7 +39,7 @@ UNIT(dataflow1, "")
 }
 
 
-BEGIN_SUITE(dataflow, "")
-  ADD_UNIT(dataflow1)
-END_SUITE(dataflow)
+BEGIN_SUITE(workflow, "")
+  ADD_UNIT(workflow1)
+END_SUITE(workflow)
 

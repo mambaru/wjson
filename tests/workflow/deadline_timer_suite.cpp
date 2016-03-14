@@ -1,5 +1,5 @@
 #include <fas/testing.hpp>
-#include <iow/thread/timed_queue.hpp>
+#include <iow/workflow/timed_queue.hpp>
 #include "delayed_common_suite.hpp"
 
 UNIT(timed_queue1, "")

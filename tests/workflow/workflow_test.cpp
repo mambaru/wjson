@@ -5,5 +5,5 @@ BEGIN_TEST
   RUN_SUITE(timed_queue)
   RUN_SUITE(timer_manager)
   RUN_SUITE(thread_pool)
-  RUN_SUITE(dataflow)
+  RUN_SUITE(workflow)
 END_TEST

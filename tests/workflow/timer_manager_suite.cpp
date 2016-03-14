@@ -1,7 +1,7 @@
 #include <fas/testing.hpp>
-#include <iow/thread/timer_manager.hpp>
-#include <iow/thread/delayed_queue.hpp>
-#include <iow/thread/timed_queue.hpp>
+#include <iow/workflow/timer_manager.hpp>
+#include <iow/workflow/delayed_queue.hpp>
+#include <iow/workflow/timed_queue.hpp>
 
 UNIT(timer_manager1, "")
 {
