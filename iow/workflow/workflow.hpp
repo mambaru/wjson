@@ -26,17 +26,20 @@ public:
   
   void reconfigure(const queue_options& opt, int threads = 0)
   {
-    _queue->reconfigure(opt);
     _threads = threads;
+    _queue->reconfigure(opt);
+    _pool->reconfigure(_threads);
+    
+    /*
     if ( !_pool->reconfigure(_threads) )
     {
-      // Если уменьшаем количество потоков, нужно все остановить, чтобы освободить уже запущенные потоки
       _queue->stop();
       _pool->stop();
       _timer = std::make_shared<timer_manager<bique> >( _queue );
       _pool = std::make_shared<pool_type>(_queue);
       _pool->start(_threads);
     }
+    */
   }
 
   void start()

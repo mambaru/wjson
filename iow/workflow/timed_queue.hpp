@@ -67,10 +67,7 @@ public:
     return 0!=_io.poll_one();
   }
   
-  void stop()
-  {
-    _io.stop();
-  }
+  void stop(){}
   
   template<typename F>
   bool post( F f )

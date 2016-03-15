@@ -63,6 +63,12 @@ public:
   template<typename Handler>
   timer_id_t create(std::string start_time, duration_t delay, Handler handler, bool expires_after = true)
   {
+    if ( start_time.empty() )
+    {
+      if ( delay.count() == -1 )
+        return -1;
+      return this->create(delay, std::move(handler), expires_after);
+    }
     std::time_t now = std::time(0);
     std::tm ptm;
     localtime_r(&now, &ptm);

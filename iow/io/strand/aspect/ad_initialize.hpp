@@ -21,7 +21,10 @@ struct ad_initialize
     context.counter = std::make_shared<counter_type>(0);
     if ( !opt.disabled )
     {
-      context.strand = std::make_shared<strand_type>( /*t.get_io_service()*/ );
+      ::iow::queue_options opt;
+      opt.maxsize = opt.maxsize;
+      opt.wrnsize = opt.wrnsize;
+      context.strand = std::make_shared<strand_type>(opt);
     }
   }
 };
