@@ -27,12 +27,15 @@ public:
   
   // service_ptr допустим nullptr
   thread_pool(service_ptr service)
-    : _service(service)
+    : _started(false)
+    , _service(service)
   {}
   
   bool reconfigure(int threads)
   {
     std::lock_guard< std::mutex > lk(_mutex);
+    if ( !_started )
+      return false;
     
     if ( threads == _threads.size() ) 
       return false;
@@ -55,6 +58,11 @@ public:
   void start(int threads)
   {
     std::lock_guard< std::mutex > lk(_mutex);
+    if ( _started )
+      return;
+    
+    _started = true;
+    
     if ( _service==nullptr || !_threads.empty())
       return;
     
@@ -65,11 +73,14 @@ public:
   void stop()
   {
     std::lock_guard< std::mutex > lk(_mutex);
+    
     if ( _service==nullptr )
       return;
 
     for (auto& t : _threads)
       t.join();
+    
+    _started = false;
   }
   
 private: 
@@ -87,7 +98,8 @@ private:
       {
         while ( auto pthis = wthis.lock() )
         {
-          pthis->_service->run_one();
+          if ( !pthis->_service->run_one() )
+            break;
           if ( wflag.lock() == nullptr)
             break;
         }
@@ -96,6 +108,7 @@ private:
   }
   
 private:
+  bool _started;
   std::mutex _mutex;
   service_ptr _service;
   std::vector< std::thread > _threads;
