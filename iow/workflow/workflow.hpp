@@ -13,14 +13,23 @@ class workflow
 public:
   
   typedef ::iow::asio::io_service io_service_type;
-  typedef timer_manager<bique> timer_type;
-  typedef thread_pool<bique> pool_type;
+  typedef bique queue_type;
+  typedef timer_manager<queue_type> timer_type;
+  typedef thread_pool<queue_type> pool_type;
+
+  workflow( const queue_options& opt, int threads = 0 )
+    : _threads(threads)
+  {
+    _queue = std::make_shared<queue_type>(opt);
+    _timer = std::make_shared<timer_manager<queue_type> >(_queue);
+    _pool = std::make_shared<pool_type>(_queue);
+  }
   
   workflow( io_service_type& io, const queue_options& opt, int threads = 0 )
     : _threads(threads)
   {
-    _queue = std::make_shared<bique>(io, opt, threads==0 );
-    _timer = std::make_shared<timer_manager<bique> >(_queue);
+    _queue = std::make_shared<queue_type>(io, opt, threads==0 );
+    _timer = std::make_shared<timer_type>(_queue);
     _pool = std::make_shared<pool_type>(_queue);
   }
   
@@ -29,17 +38,6 @@ public:
     _threads = threads;
     _queue->reconfigure(opt);
     _pool->reconfigure(_threads);
-    
-    /*
-    if ( !_pool->reconfigure(_threads) )
-    {
-      _queue->stop();
-      _pool->stop();
-      _timer = std::make_shared<timer_manager<bique> >( _queue );
-      _pool = std::make_shared<pool_type>(_queue);
-      _pool->start(_threads);
-    }
-    */
   }
 
   void start()
@@ -99,7 +97,7 @@ public:
 
 private:
   std::atomic<int> _threads;
-  std::shared_ptr<bique> _queue;
+  std::shared_ptr<queue_type> _queue;
   std::shared_ptr<timer_type> _timer;
   std::shared_ptr<pool_type>  _pool;
 };

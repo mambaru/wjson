@@ -51,6 +51,13 @@ public:
        );
   }
 
+  template<typename Handler>
+  owner_handler<typename std::remove_reference<Handler>::type>
+  callback(Handler&& h)
+  {
+    return this->wrap( std::forward<Handler>(h) );
+  }
+
   template<typename Handler, typename AltHandler>
   owner_handler2< 
     typename std::remove_reference<Handler>::type, 

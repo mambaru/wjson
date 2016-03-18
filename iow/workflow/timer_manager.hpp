@@ -4,6 +4,7 @@
 #include <iow/asio.hpp>
 #include <iow/system.hpp>
 #include <iow/logger/logger.hpp>
+#include <iow/owner/owner.hpp>
 
 #include <string>
 #include <ctime>
@@ -40,6 +41,8 @@ public:
     , _id_counter(0)
   {}
 
+  // timers
+  
   template<typename Handler>
   timer_id_t create( duration_t delay, Handler handler, bool expires_after = true)
   {
@@ -55,41 +58,47 @@ public:
   }
 
   template<typename Handler>
-  timer_id_t create(const std::string& start_time, Handler handler, bool expires_after = true)
+  timer_id_t create(std::string start_time, Handler handler, bool expires_after = true)
   {
-    return this->create(start_time, std::chrono::milliseconds(0), std::forward<Handler>(handler), expires_after );
+    return this->create( std::move(start_time), std::chrono::milliseconds(0), std::forward<Handler>(handler), expires_after );
   }
 
   template<typename Handler>
   timer_id_t create(std::string start_time, duration_t delay, Handler handler, bool expires_after = true)
   {
-    if ( start_time.empty() )
-    {
-      if ( delay.count() == -1 )
-        return -1;
-      return this->create(delay, std::move(handler), expires_after);
-    }
-    std::time_t now = std::time(0);
-    std::tm ptm;
-    localtime_r(&now, &ptm);
-    
-    if ( nullptr ==  strptime(start_time.c_str(), "%H:%M:%S", &ptm) )
-    {
-      IOW_LOG_ERROR("Timer format error (class timer_manager) %H:%M:%S: " << start_time );
-      return -1;
-    }
-    
-    time_t day_in_sec = 3600*24;
-    time_t beg_day = (now/day_in_sec) * day_in_sec - ptm.tm_gmtoff;
-    time_t ready_time_of_day = ptm.tm_sec + ptm.tm_min*60 + ptm.tm_hour*3600;
-    time_t ready_time = beg_day + ready_time_of_day;
-    if ( ready_time < now )
-      ready_time += day_in_sec;
-    IOW_LOG_DEBUG("Timer start from " << ready_time )
-    
-    return this->create( std::chrono::system_clock::from_time_t(ready_time), delay, std::forward<Handler>(handler),  expires_after);
+    return start_time.empty() 
+      ? this->create(delay, std::move(handler), expires_after)
+      : this->create( this->str2tp_( std::move(start_time) ), delay, std::move(handler),  expires_after);
   }
 
+  // reqesters 
+  
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create( time_point_t st, duration_t d, std::shared_ptr<I> i, MemFun mem_fun,  Handler result_handler )
+  {
+    return this->create(st, d, this->make_reqester_<Req, Res>(i, mem_fun, result_handler));
+  }
+
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create( std::string st, duration_t d, std::shared_ptr<I> i, MemFun mem_fun,  Handler result_handler )
+  {
+    return this->create(st, d, this->make_reqester_<Req, Res>(i, mem_fun, result_handler));
+  }
+
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create( std::string st, std::shared_ptr<I> i, MemFun mem_fun,  Handler result_handler )
+  {
+    return this->create(st, this->make_reqester_<Req, Res>(i, mem_fun, result_handler));
+  }
+
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create( duration_t d, std::shared_ptr<I> i, MemFun mem_fun,  Handler result_handler )
+  {
+    return this->create(d, this->make_reqester_<Req, Res>(i, mem_fun, result_handler));
+  }
+
+  /// //////////////
+  
   std::shared_ptr<bool> detach(timer_id_t id)
   {
     std::shared_ptr<bool> res;
@@ -125,6 +134,86 @@ public:
     std::lock_guard< mutex_type > lk(_mutex);
     return _id_map.size();
   }
+
+private:
+  
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  auto make_reqester_( std::shared_ptr<I> i, MemFun mem_fun, Handler result_handler ) 
+    -> std::function<void( handler_callback)>
+  {
+    std::weak_ptr<I> wi = i;
+    std::weak_ptr< self > wthis = this->shared_from_this();
+    return [wthis, wi, mem_fun, result_handler](handler_callback timer_handler)
+    {
+      if ( auto pthis = wthis.lock() )
+      {
+        auto req = result_handler( nullptr );
+        pthis->send_request_<Res>( std::move(req), wi, mem_fun, std::move(result_handler), std::move(timer_handler) );
+      }
+    };
+  }
+
+
+  //template< typename Res, typename Req, typename I, void (I::*mem_ptr)( std::unique_ptr<Req>, std::function< void( std::unique_ptr<Res> ) > ) >
+  template< typename Res, typename ReqPtr, typename I, typename MemFun, typename ResultHandler >
+  void send_request_(ReqPtr req, std::weak_ptr<I> wi, MemFun mem_ptr, ResultHandler result_handler, handler_callback timer_handler)
+  {
+    auto i = wi.lock();
+    if ( i == nullptr )
+    {
+      timer_handler(false);
+      return;
+    }
+    
+    std::weak_ptr< self > wthis = this->shared_from_this();
+    
+    auto callback = [ wthis, wi, mem_ptr, result_handler, timer_handler]( std::unique_ptr<Res> res)
+    {
+      if ( auto pthis = wthis.lock() )
+      {
+        auto pres = std::make_shared< std::unique_ptr<Res> >( std::move(res) );
+        pthis->_queue->post([pres, wthis, wi, mem_ptr, result_handler, timer_handler]()
+        {
+          if ( auto pthis = wthis.lock() )
+          {
+            if ( auto req = result_handler( std::move(*pres) ) )
+            {
+              pthis->send_request_<Res>( std::move(req), wi, mem_ptr, std::move(result_handler), std::move(timer_handler) );
+            }
+            else
+            {
+              timer_handler(true);
+            }
+          }
+        });
+      }
+    };
+    
+    (i.get()->*mem_ptr)( std::move(req), callback );
+  }
+  
+  
+  time_point_t str2tp_(std::string start_time)
+  {
+    std::time_t now = std::time(0);
+    std::tm ptm;
+    localtime_r(&now, &ptm);
+    
+    if ( nullptr ==  strptime(start_time.c_str(), "%H:%M:%S", &ptm) )
+    {
+      IOW_LOG_ERROR("Timer format error (class timer_manager) %H:%M:%S: " << start_time );
+      return std::chrono::system_clock::now();
+    }
+    
+    time_t day_in_sec = 3600*24;
+    time_t beg_day = (now/day_in_sec) * day_in_sec - ptm.tm_gmtoff;
+    time_t ready_time_of_day = ptm.tm_sec + ptm.tm_min*60 + ptm.tm_hour*3600;
+    time_t ready_time = beg_day + ready_time_of_day;
+    if ( ready_time < now )
+    ready_time += day_in_sec;
+    return std::chrono::system_clock::from_time_t(ready_time);
+  }
+
   
   template<typename Handler>
   timer_id_t create_(time_point_t start_time, duration_t delay, bool expires_after, Handler handler)
@@ -272,11 +361,13 @@ public:
   }
 
 private:
-
+  
+  owner _owner;
   queue_ptr  _queue;
   timer_id_t _id_counter;
   id_map     _id_map;
   mutable mutex_type _mutex;
+  
 };
 
 }

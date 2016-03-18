@@ -7,7 +7,7 @@
 
 #include <memory>
 #include <cassert>
-#include <boost/concept_check.hpp>
+#include <iow/asio.hpp>
 
 namespace iow{ namespace io{ namespace client{
 
@@ -24,7 +24,7 @@ public:
   typedef ::iow::asio::io_service io_service_type;
   typedef typename super::mutex_type mutex_type;
   typedef typename super::outgoing_handler_type outgoing_handler_t;
-  typedef boost::asio::deadline_timer reconnect_timer;
+  typedef ::iow::asio::deadline_timer reconnect_timer;
   typedef std::vector< data_ptr > wait_data_t;
   
   client( io_service_type& io)
@@ -179,11 +179,11 @@ private:
     std::weak_ptr<self> wthis = this->shared_from_this();
    
     this->delayed_handler_(
-      [wthis, popt](const boost::system::error_code& ec) 
+      [wthis, popt](const ::iow::system::error_code& ec) 
       {
         if ( auto pthis = wthis.lock() )
         {
-          if ( ec == boost::asio::error::operation_aborted )
+          if ( ec == ::iow::asio::error::operation_aborted )
             return;
           // this->connect();
           pthis->connect(*popt);
