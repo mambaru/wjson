@@ -8,12 +8,6 @@
 
 namespace iow {
 
-/*struct thread_pool_options
-{
-  size_t threads = 0;
-};
-*/
-
 template<typename Service = delayed_queue>
 class thread_pool
   : public std::enable_shared_from_this< thread_pool<Service> >

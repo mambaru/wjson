@@ -32,7 +32,7 @@ public:
 
   delayed_queue(const queue_options& opt)
     : _opt(opt)
-    , _loop_exit( true )
+    , _loop_exit( false )
   {}
   
   virtual ~delayed_queue ()
@@ -46,20 +46,23 @@ public:
     _opt = opt;
   }
   
-  void run()
+  void reset()
+  {
+    _loop_exit = false;
+  }
+  
+  bool run()
   {
     std::unique_lock<mutex_t> lck( _mutex );
-    if ( _loop_exit )
-      _loop_exit = false;
+    if ( _loop_exit ) return false;
     lck.unlock();
-    this->loop_(lck, false);
+    return this->loop_(lck, false);
   }
   
   bool run_one()
   {
     std::unique_lock<mutex_t> lck( _mutex );
-    if ( _loop_exit )
-      _loop_exit = false;
+    if ( _loop_exit ) return false;
     lck.unlock();
     return this->run_one_( lck );
   }
@@ -67,16 +70,18 @@ public:
   bool poll_one()
   {
     std::unique_lock<mutex_t> lck( _mutex, std::defer_lock );
+    if ( _loop_exit ) return false;
     return this->poll_one_( lck );
   }
   
   void stop()
   {
     std::unique_lock<mutex_t> lck( _mutex );
-    if ( ! _loop_exit )
+    if ( !_loop_exit )
     { 
       _loop_exit = true;
       _cond_var.notify_all();
+      
     }
   }
   
@@ -169,7 +174,7 @@ private:
         return true;
       }
     }
-    return false;
+    return true;
   }
 
   void run_wait_( std::unique_lock<mutex_t> & lck)

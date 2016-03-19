@@ -26,14 +26,14 @@ public:
     _timed  = nullptr;
   }
 
-  bique( io_service_type& io, const queue_options& opt, bool timed = true )
+  bique( io_service_type& io, const queue_options& opt, bool timed /*= true*/ )
   {
     _dflag = !timed;
     _delayed = std::make_shared<delayed_queue>(opt);
     _timed  = std::make_shared<timed_queue>(io, opt);
   }
   
-  void reconfigure(const queue_options& opt, bool timed = true)
+  void reconfigure(const queue_options& opt, bool timed /*= true*/)
   {
     bool newflag = !timed;
     if ( _timed == nullptr ) newflag = true;
@@ -41,8 +41,13 @@ public:
     _delayed->reconfigure(opt);
     _timed->reconfigure(opt);
   }
-  
-  void run()
+
+  void reset()
+  {
+    return this->invoke_( &delayed_queue::reset, &timed_queue::reset);
+  }
+
+  bool run()
   {
     return this->invoke_( &delayed_queue::run, &timed_queue::run);
   }
@@ -59,6 +64,21 @@ public:
   
   void stop()
   {
+    /*
+    if (_dflag)
+    {
+      std::cout << "delayed" << std::endl;
+      std::cout.flush();
+      abort();
+      _delayed->stop();
+    }
+    else
+    {
+      std::cout << "timed" << std::endl;
+      std::cout.flush();
+      abort();
+      _timed->stop();
+    }*/
     return this->invoke_( &delayed_queue::stop, &timed_queue::stop);
   }
   
@@ -82,7 +102,7 @@ public:
   
   std::size_t size() const
   {
-    return _dflag ? _delayed->size() : _timed->size();
+    return this->invoke_( &delayed_queue::size, &timed_queue::size);
   }
   
 private:
@@ -93,12 +113,22 @@ private:
     R(timed_queue::* method2)(Args...), 
     Args... args)
   {
-    if ( _dflag )
-      return (_delayed.get()->*method1)( std::forward<Args>(args)...);
-    else
-      return (_timed.get()->*method2)( std::forward<Args>(args)...);
+    return _dflag 
+      ? (_delayed.get()->*method1)( std::forward<Args>(args)...)
+      : (_timed.get()->*method2)( std::forward<Args>(args)...);
   }
-  
+
+  template<typename R, typename... Args>
+  R invoke_( 
+    R(delayed_queue::* method1)(Args...) const,
+    R(timed_queue::* method2)(Args...) const, 
+    Args... args) const
+  {
+    return _dflag 
+      ? (_delayed.get()->*method1)( std::forward<Args>(args)...)
+      : (_timed.get()->*method2)( std::forward<Args>(args)...);
+  }
+
 private:
   std::atomic<bool> _dflag;
   delayed_ptr _delayed;

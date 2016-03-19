@@ -52,9 +52,9 @@ public:
   io_service& get_io_service() { return _io;}
   const io_service& get_io_service() const { return _io;}
   
-  void run()
+  bool run()
   {
-    _io.run();
+    return 0!=_io.run();
   }
   
   bool run_one()
@@ -66,6 +66,8 @@ public:
   {
     return 0!=_io.poll_one();
   }
+  
+  void reset() {}
   
   void stop(){}
   

@@ -17,7 +17,16 @@ public:
   typedef timer_manager<queue_type> timer_type;
   typedef thread_pool<queue_type> pool_type;
 
-  workflow( const queue_options& opt, int threads = 0 )
+  workflow( io_service_type& io, const queue_options& opt )
+    : _threads(0)
+  {
+    // delayed отключен и пул потоков
+    _queue = std::make_shared<queue_type>(io, opt, true );
+    _timer = std::make_shared<timer_type>(_queue);
+    _pool = nullptr;
+  }
+  
+  workflow( const queue_options& opt, int threads )
     : _threads(threads)
   {
     _queue = std::make_shared<queue_type>(opt);
@@ -25,7 +34,7 @@ public:
     _pool = std::make_shared<pool_type>(_queue);
   }
   
-  workflow( io_service_type& io, const queue_options& opt, int threads = 0 )
+  workflow( io_service_type& io, const queue_options& opt, int threads  )
     : _threads(threads)
   {
     _queue = std::make_shared<queue_type>(io, opt, threads==0 );
@@ -33,23 +42,24 @@ public:
     _pool = std::make_shared<pool_type>(_queue);
   }
   
-  void reconfigure(const queue_options& opt, int threads = 0)
+  void reconfigure(const queue_options& opt, int threads )
   {
     _threads = threads;
-    _queue->reconfigure(opt);
-    _pool->reconfigure(_threads);
+    _queue->reconfigure(opt, threads==0);
+    if ( _pool!=nullptr) _pool->reconfigure(_threads);
   }
 
   void start()
   {
-    _pool->start(_threads);
+    if ( _pool!=nullptr) _pool->start(_threads);
   }
 
   void stop()
   {
     _timer->clear();
     _queue->stop();
-    _pool->stop();
+    if ( _pool!=nullptr) _pool->stop();
+    _queue->reset();
   }
 
   void run()
