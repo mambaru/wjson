@@ -235,6 +235,28 @@ public:
   }
 };
 
+template<>
+class serializerT< value<std::vector<char> > >
+  : serializerS<char>
+{
+public:
+  template<typename P>
+  P operator()( const std::vector<char>& v, P end)
+  {
+    return serialize( v.begin(), v.end(), end);
+  }
+
+  template<typename P>
+  P operator() ( std::vector<char>& v, P beg, P end )
+  {
+    v.clear();
+    if ( parser::is_null(beg, end) )
+      return parser::parse_null(beg, end);
+    return unserialize(beg, end, std::back_inserter(v));
+  }
+};
+
+
 template<typename T>
 class serializerT< raw_value<T> >
 {

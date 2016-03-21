@@ -81,6 +81,8 @@ using member_list = typename fas::type_list_n<Args...>::type;
 #endif
 
 typedef array< std::vector< value< std::string > > > array_of_strings;
+typedef value< std::vector<char> > binary;
+typedef array< std::vector< binary > > array_of_binary;
 
 /** Ахтунг! замороченые правила:
   * L и M типа member с одинаковыми N (именами)
@@ -194,6 +196,13 @@ struct value<std::string>
 {
   typedef std::string target;
   typedef serializerT< value<std::string> > serializer;
+};
+
+template<>
+struct value< std::vector<char> >
+{
+  typedef std::vector<char> target;
+  typedef serializerT< value< target > > serializer;
 };
 
 template<int N>
