@@ -80,9 +80,7 @@ template<typename ...Args>
 using member_list = typename fas::type_list_n<Args...>::type;
 #endif
 
-typedef array< std::vector< value< std::string > > > array_of_strings;
-typedef value< std::vector<char> > binary;
-typedef array< std::vector< binary > > array_of_binary;
+//typedef array< std::vector< binary > > array_of_binary;
 
 /** Ахтунг! замороченые правила:
   * L и M типа member с одинаковыми N (именами)
@@ -563,6 +561,15 @@ struct array<C, -1>: array_r<C, fas::empty_type> {};
 
 template<typename KJ, typename VJ, int R>
 struct object2array: array< pair<KJ,VJ>, R > {};
+
+
+template<int Reserve>
+struct array_of_strings: array< std::vector< value< std::string > >,  Reserve> {};
+
+struct binary: value< std::vector<char> > {};
+
+template<int Reserve>
+struct array_of_binary: array< std::vector< binary >, Reserve > {};
 
 
 /// //////////////////////////////////////////////////////////////////////////////
