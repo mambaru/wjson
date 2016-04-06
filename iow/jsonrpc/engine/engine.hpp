@@ -103,7 +103,9 @@ public:
       _common_handler = std::make_shared<handler_type>();
     }
     */
-
+    
+    _allow_non_jsonrpc = opt.allow_non_jsonrpc;
+    
     _outgoing_rpc_factory = [opt, this](io_id_t io_id, outgoing_handler_t handler, bool reg_io) -> handler_ptr
     {
       return this->create_handler_(io_id, opt, std::move(handler), reg_io );
@@ -189,20 +191,19 @@ public:
   void perform_io(data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t handler) 
   {
     using namespace std::placeholders;
-    aux::perform( std::move(d), io_id, handler, std::bind(&engine::perform_io_once_, this, _1, _2, _3 ));
-    /*auto h = this->_incoming_io_factory(io_id, handler, false);
-    aux::perform( 
-      std::move(d), io_id, std::move( handler ), 
-      [](data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t handler)
+    if ( _allow_non_jsonrpc )
+    {
+      auto beg = json::parser::parse_space( d->begin(), d->end() );
+      if ( beg!=d->end() && *beg!='{' )
       {
+        if ( auto h = _handler_map.find(io_id) )
+        {
+          h->target()->perform_io(std::move(d), io_id, std::move(handler));
+          return;
+        }
       }
-    );*/
-    //incoming_holder h(d);
-    /*
-    using namespace std::placeholders;
-    auto rpc = io2rpc( std::move(handler));
-    aux::perform( std::move(d), io_id, std::move( rpc ), std::bind(&engine::perform_incoming_, this, _1, _2, _3 ));
-    */
+    }
+    aux::perform( std::move(d), io_id, handler, std::bind(&engine::perform_io_once_, this, _1, _2, _3 ));
   }
 
   io_id_t get_id() const
@@ -600,6 +601,8 @@ private:
   std::atomic<int> _call_counter;
   //std::atomic<bool> _direct_mode;
   std::atomic<io_id_t> _io_id;
+
+  bool _allow_non_jsonrpc = false;
 };
 
 }}

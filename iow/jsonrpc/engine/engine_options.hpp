@@ -15,7 +15,10 @@ struct engine_options: HandlerOptions
   // Инициализируться исключительно при запросе
   // Юзер значение сбрасываеться (TODO: обертка на юзер нандлером)
   // ::iow::io::outgoing_handler_t io_response_handler;
-  bool direct_mode = false;
+  
+  // не используется 
+  //bool direct_mode = false;
+  bool allow_non_jsonrpc = false;
 };
 
 }}
