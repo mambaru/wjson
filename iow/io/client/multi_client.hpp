@@ -23,7 +23,6 @@ public:
   typedef std::map<io_id_t, client_ptr> client_map;
   typedef ::iow::asio::io_service io_service_type;
   typedef std::recursive_mutex mutex_type;
-  // TODO MUTEX!!!!!!!!!!! 
   
   multi_client(io_service_type& io)
     : _io_service(io)
