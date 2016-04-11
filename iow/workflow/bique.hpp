@@ -64,21 +64,6 @@ public:
   
   void stop()
   {
-    /*
-    if (_dflag)
-    {
-      std::cout << "delayed" << std::endl;
-      std::cout.flush();
-      abort();
-      _delayed->stop();
-    }
-    else
-    {
-      std::cout << "timed" << std::endl;
-      std::cout.flush();
-      abort();
-      _timed->stop();
-    }*/
     return this->invoke_( &delayed_queue::stop, &timed_queue::stop);
   }
   
