@@ -38,7 +38,6 @@ public:
       opt.connection.incoming_handler = [handler](data_ptr d, io_id_t id, outgoing_handler_t outgoing)
       {
         handler( std::move(d), id, outgoing );
-        
       };
       auto pconn = std::make_shared<client_type>(this->_io_service);
       pconn->start(opt);

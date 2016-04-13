@@ -9,7 +9,7 @@ UNIT(workflow1, "")
   ::iow::asio::io_service io;
   ::iow::queue_options opt;
   
-  ::iow::workflow queue(io, opt, 3);
+  ::iow::workflow queue(io, opt, 3, false);
   queue.start();
   std::atomic<int> counter(0);
   queue.post([&t, &counter](){
