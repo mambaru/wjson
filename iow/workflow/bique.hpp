@@ -39,7 +39,7 @@ public:
     if ( _timed == nullptr ) newflag = true;
     _dflag = newflag;
     _delayed->reconfigure(opt);
-    _timed->reconfigure(opt);
+    if( _timed ) _timed->reconfigure(opt);
   }
 
   void reset()

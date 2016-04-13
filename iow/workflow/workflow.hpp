@@ -34,18 +34,18 @@ public:
     _pool = std::make_shared<pool_type>(_queue);
   }
   
-  workflow( io_service_type& io, const queue_options& opt, int threads  )
+  workflow( io_service_type& io, const queue_options& opt, int threads, bool timed /*= false*/  )
     : _threads(threads)
   {
-    _queue = std::make_shared<queue_type>(io, opt, threads==0 );
+    _queue = std::make_shared<queue_type>(io, opt, threads==0 || timed );
     _timer = std::make_shared<timer_type>(_queue);
     _pool = std::make_shared<pool_type>(_queue);
   }
   
-  void reconfigure(const queue_options& opt, int threads )
+  void reconfigure(const queue_options& opt, int threads, bool timed /*= false*/ )
   {
     _threads = threads;
-    _queue->reconfigure(opt, threads==0);
+    _queue->reconfigure(opt, threads==0 || timed );
     if ( _pool!=nullptr) _pool->reconfigure(_threads);
   }
 

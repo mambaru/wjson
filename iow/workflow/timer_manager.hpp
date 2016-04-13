@@ -51,16 +51,17 @@ public:
   }
 
   template<typename Handler>
+  timer_id_t create(duration_t start_delay, duration_t delay, Handler handler, bool expires_after = true)
+  {
+    std::lock_guard< mutex_type > lk(_mutex);
+    return this->create_( clock_t::now() + start_delay, delay, expires_after, std::forward<Handler>(handler) );
+  }
+
+  template<typename Handler>
   timer_id_t create(time_point_t start_time, duration_t delay, Handler handler, bool expires_after = true)
   {
     std::lock_guard< mutex_type > lk(_mutex);
     return this->create_( start_time, delay, expires_after, std::forward<Handler>(handler) );
-  }
-
-  template<typename Handler>
-  timer_id_t create(std::string start_time, Handler handler, bool expires_after = true)
-  {
-    return this->create( std::move(start_time), std::chrono::milliseconds(0), std::forward<Handler>(handler), expires_after );
   }
 
   template<typename Handler>
@@ -71,8 +72,29 @@ public:
       : this->create( this->str2tp_( std::move(start_time) ), delay, std::move(handler),  expires_after);
   }
 
+  /// Evry 24 hours
+  template<typename Handler>
+  timer_id_t create(std::string start_time, Handler handler, bool expires_after = true)
+  {
+    return this->create( std::move(start_time), std::chrono::milliseconds(0), std::forward<Handler>(handler), expires_after );
+  }
+
   // reqesters 
   
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create( duration_t d, std::shared_ptr<I> i, MemFun mem_fun,  Handler result_handler )
+  {
+    // в отличие от таймера, первый вызов немедленно 
+    return this->create( std::chrono::milliseconds(0), d, this->make_reqester_<Req, Res>(i, mem_fun, result_handler));
+  }
+
+
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create( duration_t sd, duration_t d, std::shared_ptr<I> i, MemFun mem_fun,  Handler result_handler )
+  {
+    return this->create(sd, d, this->make_reqester_<Req, Res>(i, mem_fun, result_handler));
+  }
+
   template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
   timer_id_t create( time_point_t st, duration_t d, std::shared_ptr<I> i, MemFun mem_fun,  Handler result_handler )
   {
@@ -91,11 +113,6 @@ public:
     return this->create(st, this->make_reqester_<Req, Res>(i, mem_fun, result_handler));
   }
 
-  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
-  timer_id_t create( duration_t d, std::shared_ptr<I> i, MemFun mem_fun,  Handler result_handler )
-  {
-    return this->create(d, this->make_reqester_<Req, Res>(i, mem_fun, result_handler));
-  }
 
   /// //////////////
   
