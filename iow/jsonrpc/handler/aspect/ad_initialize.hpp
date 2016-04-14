@@ -11,11 +11,6 @@ struct ad_initialize
   void operator()(T& t, const Opt& opt)
   {
     t._sender_handler = opt.sender_handler;
-    /*
-    t._send_notify = opt.send_notify;
-    t._send_request = opt.send_request;
-    */
-    
     t.get_aspect().template get<_target_>() = opt.target;
     t.get_aspect().template get<_peeper_>() = opt.peeper;
   }

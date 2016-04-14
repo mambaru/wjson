@@ -138,7 +138,6 @@ public:
     {
       IOW_LOG_FATAL(" (ABORT) iow::jsonrpc::method_list_base::sender_handler this->_sender_handler==nullptr")
       abort();
-      
     }
   }
 

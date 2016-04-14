@@ -186,6 +186,11 @@ private:
     
     auto callback = [ wthis, wi, mem_ptr, result_handler, timer_handler]( std::unique_ptr<Res> res)
     {
+      if ( res == nullptr )
+      {
+        std::cout << "Это DEBUG!!! убрать" << std::endl;
+        abort();
+      }
       if ( auto pthis = wthis.lock() )
       {
         auto pres = std::make_shared< std::unique_ptr<Res> >( std::move(res) );

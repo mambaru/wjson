@@ -8,8 +8,8 @@
 #include <iow/jsonrpc/handler/aspect/disconnect.hpp>
 #include <iow/jsonrpc/handler/aspect/context.hpp>
 #include <iow/jsonrpc/handler/aspect/ad_response_handler.hpp>
-#include <iow/jsonrpc/handler/aspect/ad_send_request.hpp>
-#include <iow/jsonrpc/handler/aspect/ad_send_notify.hpp>
+#include <iow/jsonrpc/handler/aspect/ad_perform_send.hpp>
+
 #include <iow/jsonrpc/handler/aspect/ad_invoke.hpp>
 #include <iow/jsonrpc/handler/aspect/ad_invoke_error.hpp>
 #include <iow/jsonrpc/handler/aspect/ad_initialize.hpp>
