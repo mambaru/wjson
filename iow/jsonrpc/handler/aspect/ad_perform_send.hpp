@@ -19,6 +19,8 @@ struct ad_perform_send
     ResultHandler rh
   ) const
   {
+    IOW_LOG_DEBUG(" DEBUG: --- handler ad_perform_send --- 1 - ")
+
     std::shared_ptr<Params> p = nullptr;
 
     if (params!=nullptr)
@@ -26,19 +28,25 @@ struct ad_perform_send
       p = std::make_shared<Params>( std::move(params) );
     }
 
+    IOW_LOG_DEBUG(" DEBUG: --- handler ad_perform_send --- 1 - ")
     t.sender_handler(
       name,
       [p, ns1](const char* name) -> typename T::data_ptr
       {
+        IOW_LOG_DEBUG(" DEBUG: --- handler ad_perform_send --- 1.1 - ")
         return ns1(name, std::move(*p));
       },
       [p, rs1, this](const char* name, typename T::call_id_t id) 
         -> typename T::data_ptr
       {
+        IOW_LOG_DEBUG(" DEBUG: --- handler ad_perform_send --- 1.2 - ")
         return rs1(name, std::move(*p), id);
       },
       std::move(rh)
     );
+    IOW_LOG_DEBUG(" DEBUG: --- handler ad_perform_send --- 2 - ")
+
+    
   }
   
 };

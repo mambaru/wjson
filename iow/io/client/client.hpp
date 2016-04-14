@@ -108,15 +108,15 @@ public:
     
     IOW_LOG_DEBUG( "Client::send " << _ready_for_write << ", " << (_outgoing_handler!=nullptr) << ", d==nullptr(" << (d==nullptr) << ")" )
     if ( d==nullptr )
-      return nullptr;
+      return nullptr;    
+
+    IOW_LOG_DEBUG( "client::send -1-" )
     
     if ( _ready_for_write && _outgoing_handler!=nullptr )
     {
-      /*auto oh = _outgoing_handler;
-      super::mutex().unlock();
-      oh( std::move(d) );*/
-      _outgoing_handler( std::move(d) );
-      //super::mutex().lock();
+      IOW_LOG_DEBUG( "client::send -2- !!!!!!" )
+      _outgoing_handler( std::move(d) );      //super::mutex().lock();
+      IOW_LOG_DEBUG( "client::send -3- !!!!!!" )
     }
     else
     {
@@ -206,6 +206,8 @@ private:
 
     popt->connect_handler = [wthis, connect_handler, popt]()
     {
+      IOW_LOG_DEBUG("DEBUG: iow::io::connect_handler #################################################################### ")
+
       if ( connect_handler ) connect_handler();
       
       if ( auto pthis = wthis.lock() )
@@ -217,7 +219,9 @@ private:
     
     popt->error_handler = [wthis, error_handler, popt](::iow::system::error_code ec)
     {
-      if ( error_handler!=nullptr ) error_handler(ec);
+      IOW_LOG_DEBUG("DEBUG: iow::io::error_handler !!!!!!!!! ")
+      if ( error_handler!=nullptr )
+	error_handler(ec);
       
       if ( auto pthis = wthis.lock() )
       {
@@ -229,23 +233,14 @@ private:
     popt->connection.shutdown_handler 
       = [wthis, shutdown_handler, popt]( io_id_t io_id) 
     {
-      IOW_LOG_DEBUG("client shutdown_handler -1-" )
+      if ( shutdown_handler!=nullptr ) 
+	shutdown_handler(io_id);
 
-      if ( shutdown_handler ) shutdown_handler(io_id);
-
-      IOW_LOG_DEBUG("client shutdown_handler -2-" )
-      
       if ( auto pthis = wthis.lock() )
       {
-        IOW_LOG_DEBUG("client shutdown_handler -3-" )
-
         pthis->stop();
-        IOW_LOG_DEBUG("client shutdown_handler -4-" )
-        
         std::lock_guard<mutex_type> lk( pthis->mutex() );
         pthis->delayed_reconnect_(popt);
-        IOW_LOG_DEBUG("client shutdown_handler -5-" )
-
       }
     };
     
@@ -257,16 +252,12 @@ private:
       if ( auto pthis = wthis.lock() )
       {
         std::lock_guard<mutex_type> lk( pthis->mutex() );
-        IOW_LOG_DEBUG("===1===" )
         pthis->startup_handler_(io_id, outgoing);
-        IOW_LOG_DEBUG("===2===" )
       }
 
       if ( startup_handler != nullptr )
       {
-        IOW_LOG_DEBUG("---1---" )
         startup_handler( io_id, outgoing);
-        IOW_LOG_DEBUG("---2---" )
       }
     };
       

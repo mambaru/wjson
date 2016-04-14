@@ -281,6 +281,7 @@ private:
     std::weak_ptr<self> wthis = this->shared_from_this();
     opt.sender_handler = [handler, wthis, io_id](const char* name, notify_serializer_t ns1, request_serializer_t rs1, result_handler_t rh1)
     {
+      
       auto pthis = wthis.lock();
       if ( pthis == nullptr )
         return;
@@ -297,40 +298,28 @@ private:
           if ( pthis == nullptr )
             return;
 
-          pthis->perform_io( std::move(d), io_id, [wthis, io_id, call_id, handler](data_ptr d)
+          // если данные не могут быть отправленны
+          if ( d==nullptr )
           {
-            auto io_error_handler = [wthis, call_id](data_ptr d)
-            {
-              auto pthis = wthis.lock();
-              if ( pthis == nullptr ) return;
-              
-              // если данные не могут быть отправленны
-              if ( d==nullptr )
-              {
-                auto rh = pthis->_call_map.detach(call_id);
-                
-                data_ptr ed = std::make_unique<data_type>();
-                ed->reserve(50);
-                outgoing_error<error> err;
-                
-                data_ptr pid = std::make_unique<data_type>();
-                iow::json::value<int>::serializer()( call_id, std::back_inserter(*pid));
-                err.error = std::make_unique<service_unavailable>();
-                err.id = std::move(pid);
-                
-                outgoing_error_json<error_json>::serializer()(err, std::back_inserter(*ed));
-                incoming_holder empty_holder(std::move(ed));
-                rh( std::move(empty_holder) );
-                std::cout << "Убрать этот оборт endgine::upgrate_options_" << std::endl;
-                abort();
-              }
-              else
-              {
-                abort();
-              }
-            };
+            auto rh = pthis->_call_map.detach(call_id);
             
-            handler( std::move(d), io_id, io_error_handler);
+            data_ptr ed = std::make_unique<data_type>();
+            ed->reserve(50);
+            outgoing_error<error> err;
+            
+            data_ptr pid = std::make_unique<data_type>();
+            iow::json::value<int>::serializer()( call_id, std::back_inserter(*pid));
+            err.error = std::make_unique<service_unavailable>();
+            err.id = std::move(pid);
+            
+            outgoing_error_json<error_json>::serializer()(err, std::back_inserter(*ed));
+            incoming_holder empty_holder(std::move(ed));
+            rh( std::move(empty_holder) );
+          }
+
+	  pthis->perform_io( std::move(d), io_id, [wthis, io_id, call_id, handler](data_ptr d)
+          {
+            handler( std::move(d), io_id, nullptr);
           });
         });
       }

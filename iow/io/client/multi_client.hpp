@@ -70,16 +70,28 @@ public:
   // return d - если не смог принять, nullptr в случае успеха
   void send( data_ptr d, io_id_t io_id, outgoing_handler_t handler)
   {
+    IOW_LOG_DEBUG(" DEBUG: multi_client::send -1-")
+
     if ( auto cli = this->client(io_id, handler) )
     {
+      IOW_LOG_DEBUG(" DEBUG: multi_client::send -1.1.1-")
+
       auto dd = cli->send( std::move(d) ) ;
       if ( dd!=nullptr && handler!=nullptr )
+      {
+        IOW_LOG_DEBUG(" DEBUG: multi_client::send -1.1.1.1-")
         handler(nullptr);
+        IOW_LOG_DEBUG(" DEBUG: multi_client::send -1.1.1.2-")
+      }
+      IOW_LOG_DEBUG(" DEBUG: multi_client::send -1.1.2-")
     }
     else if ( handler != nullptr )
     {
+      IOW_LOG_DEBUG(" DEBUG: multi_client::send -1.1.3.1-")
       handler(nullptr);
+      IOW_LOG_DEBUG(" DEBUG: multi_client::send -1.1.3.3-")
     }
+    IOW_LOG_DEBUG(" DEBUG: multi_client::send -2-")
   }
   
   client_ptr client(io_id_t io_id, outgoing_handler_t handler)

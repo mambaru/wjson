@@ -175,6 +175,7 @@ private:
   template< typename Res, typename ReqPtr, typename I, typename MemFun, typename ResultHandler >
   void send_request_(ReqPtr req, std::weak_ptr<I> wi, MemFun mem_ptr, ResultHandler result_handler, handler_callback timer_handler)
   {
+    std::cout << "timer_manager::send_request_ PING" << std::endl;
     auto i = wi.lock();
     if ( i == nullptr )
     {
@@ -186,13 +187,16 @@ private:
     
     auto callback = [ wthis, wi, mem_ptr, result_handler, timer_handler]( std::unique_ptr<Res> res)
     {
-      if ( res == nullptr )
-      {
-        std::cout << "Это DEBUG!!! убрать" << std::endl;
-        abort();
-      }
+
       if ( auto pthis = wthis.lock() )
       {
+        if ( res == nullptr )
+        {
+          // is service unavailable
+          timer_handler(true);
+          return;
+        }
+        
         auto pres = std::make_shared< std::unique_ptr<Res> >( std::move(res) );
         pthis->_queue->post([pres, wthis, wi, mem_ptr, result_handler, timer_handler]()
         {
