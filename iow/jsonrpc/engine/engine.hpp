@@ -289,10 +289,12 @@ private:
       if ( rs1!=nullptr && rh1!=nullptr )
       {
         auto call_id = pthis->_call_counter.fetch_add(1);
+        
         pthis->_call_map.set(call_id, std::move(rh1));
         auto d = std::move( rs1(name, call_id) );
         
-        handler( std::move(d), io_id, [wthis, handler, io_id, call_id](data_ptr d)
+        int cil = call_id;
+        handler( std::move(d), io_id, [wthis, handler, io_id, call_id, cil](data_ptr d)
         {
           auto pthis = wthis.lock();
           if ( pthis == nullptr )
@@ -302,6 +304,8 @@ private:
           if ( d==nullptr )
           {
             auto rh = pthis->_call_map.detach(call_id);
+            if ( rh == nullptr )
+              return;
             
             data_ptr ed = std::make_unique<data_type>();
             ed->reserve(50);
@@ -315,6 +319,7 @@ private:
             outgoing_error_json<error_json>::serializer()(err, std::back_inserter(*ed));
             incoming_holder empty_holder(std::move(ed));
             rh( std::move(empty_holder) );
+            return;
           }
 
 	  pthis->perform_io( std::move(d), io_id, [wthis, io_id, call_id, handler](data_ptr d)

@@ -27,14 +27,12 @@ struct mem_fun_handler
     if ( auto i = t.target() )
     {
 
-      JSONRPC_LOG_DEBUG("mem_fun_handler -1- " << (i.get()!=nullptr) << " and " << typeid(i.get()).name() << ": " << size_t(i.get()) )
 
       (i.get()->*mem_ptr)( 
         std::move(req), 
         mem_fun_make_callback( std::move(cb)) 
       );
       
-      JSONRPC_LOG_DEBUG("mem_fun_handler -2-" )
     }
     else 
     {

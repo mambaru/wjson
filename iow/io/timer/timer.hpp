@@ -231,7 +231,6 @@ public:
       ptm = localtime (&rawtime);
       if ( nullptr ==  strptime(opt.start_time.c_str(), "%H:%M:%S", ptm) )
       {
-        IOW_LOG_DEBUG("Timer format error %H:%M:%S: " << opt.start_time )
       }
       time_t now = time(0);
       time_t day_in_sec = 3600*24;
@@ -240,7 +239,6 @@ public:
       time_t ready_time = beg_day + ready_time_of_day;
       if ( ready_time < now )
         ready_time += day_in_sec;
-      IOW_LOG_DEBUG("Timer start from " << (ready_time - now + opt.start_delay_ms/1000) )
 
       _deadline_timer.expires_from_now( 
         ::boost::posix_time::seconds( ready_time - now ) 

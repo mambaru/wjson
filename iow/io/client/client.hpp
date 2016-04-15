@@ -54,7 +54,6 @@ public:
   template<typename Opt>
   void start(Opt opt)
   {
-    IOW_LOG_DEBUG( "Client start " << opt.addr << ":" << opt.port << " opt.wait_maxsize =" << opt.wait_maxsize )
     std::lock_guard<mutex_type> lk( super::mutex() );
     if ( _started ) return;
     _started = true;
@@ -94,33 +93,25 @@ public:
   void close()
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
-    IOW_LOG_DEBUG( "client::close()..." )
     _ready_for_write = false;
     super::close_(*this);
-    IOW_LOG_DEBUG( "client::close()... Done" )
   }
 
   data_ptr send(data_ptr d)
   {
-    IOW_LOG_DEBUG( "client::send [" << d << "]" )
     
     std::lock_guard<mutex_type> lk( super::mutex() );
     
-    IOW_LOG_DEBUG( "Client::send " << _ready_for_write << ", " << (_outgoing_handler!=nullptr) << ", d==nullptr(" << (d==nullptr) << ")" )
     if ( d==nullptr )
       return nullptr;    
 
-    IOW_LOG_DEBUG( "client::send -1-" )
     
     if ( _ready_for_write && _outgoing_handler!=nullptr )
     {
-      IOW_LOG_DEBUG( "client::send -2- !!!!!!" )
       _outgoing_handler( std::move(d) );      //super::mutex().lock();
-      IOW_LOG_DEBUG( "client::send -3- !!!!!!" )
     }
     else
     {
-      IOW_LOG_DEBUG( "Client::send wait [" << d << "]")
       if ( _wait_cursize >= _wait_maxsize )
       {
         IOW_LOG_ERROR("Client limit wait data size " << _wait_cursize << "( max: " << _wait_maxsize << ")" 
@@ -150,13 +141,11 @@ private:
   
   void startup_handler_(io_id_t, outgoing_handler_t outgoing)
   {
-    IOW_LOG_DEBUG("client::startup_handler_ _wait_data.size()=" << _wait_data.size() )
     _ready_for_write = true;
     _outgoing_handler = outgoing;
     _wait_cursize = 0;
     std::for_each(_wait_data.begin(), _wait_data.end(), [outgoing](data_ptr& d) 
     {
-      IOW_LOG_DEBUG("client startup push [" << d << "]" << (d!=nullptr) )
       outgoing(std::move(d));
     });
     _wait_data.clear();
@@ -206,7 +195,6 @@ private:
 
     popt->connect_handler = [wthis, connect_handler, popt]()
     {
-      IOW_LOG_DEBUG("DEBUG: iow::io::connect_handler #################################################################### ")
 
       if ( connect_handler ) connect_handler();
       
@@ -219,7 +207,6 @@ private:
     
     popt->error_handler = [wthis, error_handler, popt](::iow::system::error_code ec)
     {
-      IOW_LOG_DEBUG("DEBUG: iow::io::error_handler !!!!!!!!! ")
       if ( error_handler!=nullptr )
 	error_handler(ec);
       
@@ -247,7 +234,6 @@ private:
     popt->connection.startup_handler 
       = [wthis, startup_handler]( io_id_t io_id, outgoing_handler_t outgoing)
     {
-      IOW_LOG_DEBUG("client startup_handler " << (outgoing!=nullptr) )
 
       if ( auto pthis = wthis.lock() )
       {

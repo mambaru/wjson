@@ -7,6 +7,7 @@
 #pragma once
 
 #include <iow/logger/log_writer.hpp>
+#include <iow/io/types.hpp>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -62,7 +63,7 @@ public:
   }
 
   template<typename V>
-  std::stringstream& operator << ( V v)
+  std::stringstream& operator << ( const V&  v)
   {
     _ss<<v;
     return _ss;

@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <iow/logger/logger.hpp>
 #include <utility>
 #include <memory>
 #include <type_traits>
@@ -35,6 +36,7 @@ public:
     {
       return _handler( std::forward<Args>(args)... );
     }
+    IOW_LOG_DEBUG("owner_handler() мимо")
     return typename std::result_of< H(Args&&...) >::type();
   }
   

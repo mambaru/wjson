@@ -28,7 +28,6 @@ namespace{
     {
       if (err == nullptr )
       {
-        JSONRPC_LOG_DEBUG("jsonrpc invoke exception send_result "  )
         TT::template send_result<T, ResultJson>( 
           std::move(*ph),
           std::move(result),
@@ -37,13 +36,11 @@ namespace{
       }
       else
       {
-        JSONRPC_LOG_DEBUG("BEGIN jsonrpc invoke exception send_error " << (outgoing_handler!=nullptr)  )
         TT::template send_error<T, ErrorJson>( 
           std::move(*ph), 
           std::move(err), 
           std::move(outgoing_handler)
         );
-        JSONRPC_LOG_DEBUG("END jsonrpc invoke exception send_error "  )
       }
     }
     catch(const std::exception& e)
@@ -91,7 +88,6 @@ struct invoke: Handler
     typename T::outgoing_handler_t outgoing_handler
   ) 
   {
-    JSONRPC_LOG_DEBUG("iow::jsonrpc::invoke(advice) tatam!!! " )
 
     //typedef typename T::outgoing_handler_t outgoing_handler_type;  
     //typedef typename T::holder_type holder_type;

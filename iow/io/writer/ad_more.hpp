@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iow/logger/logger.hpp>
 #include <iow/io/writer/tags.hpp>
 
 namespace iow{ namespace io{ namespace writer{
@@ -13,6 +14,9 @@ struct ad_more
     if (t.get_aspect().template get< _can_write_ >()(t, p))
     {
       t.get_aspect().template get< _some_ >()(t, std::move(p) );
+    }
+    else
+    {
     }
   }
 };

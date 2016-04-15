@@ -19,7 +19,6 @@ struct ad_make_handler
     std::weak_ptr<T> wthis = t.shared_from_this();
     return t.wrap([wthis, p]( ::iow::system::error_code ec )
     {
-      IOW_LOG_DEBUG( "ad_make_handler " << ec.message())
       if ( auto pthis = wthis.lock() )
       {
         std::lock_guard<typename T::mutex_type> lk(pthis->mutex());

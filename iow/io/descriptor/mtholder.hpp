@@ -65,7 +65,6 @@ public:
       {
         iow::system::error_code ec;
         io->run(ec);
-        IOW_LOG_DEBUG("mtholder shutdown thread " << ec.message() )
       }));
     }
     _iterator = _holders.begin();
@@ -88,7 +87,6 @@ public:
     this->stop_();
 
     
-    IOW_LOG_DEBUG("mtholder::shutdown: -2-")
     auto counter = std::make_shared< std::atomic<size_t> >(_holders.size());
     // Не weak, т.к. должен жить пока не отработаем все хандлеры
     auto pthis = this->shared_from_this();
@@ -119,40 +117,31 @@ public:
   
   void stop_()
   {
-    IOW_LOG_DEBUG("mtholder::stop: close _holder_list")
     for (auto h : _holders)
     {
       // сначала закрываем, чтоб реконнект на другой ассептор не прошел 
-      IOW_LOG_DEBUG("mtholder::stop: holder->close()")
       h->close();
     }
 
-    IOW_LOG_DEBUG("mtholder::stop: stop _holder_list")
     for (auto h : _holders)
     {
-      IOW_LOG_DEBUG("mtholder::stop: holder->stop()")
       h->stop();
     }
 
     for (auto s : _services)
     {
-      IOW_LOG_DEBUG("mtholder::stop: service->stop()")
       s->stop();
     }
 
     for (auto& t : _threads)
     {
-      IOW_LOG_DEBUG("mtholder::stop: thread.join()")
       t.join();
-      IOW_LOG_DEBUG("mtholder::stop: thread.join() DONE")
     }
 
-    IOW_LOG_DEBUG("mtholder::stop: clear all")
 
     _holders.clear();
     _threads.clear();
     _services.clear();
-    IOW_LOG_DEBUG("mtholder::stop: DONE")
   }
 
   mutex_type& mutex() const

@@ -31,7 +31,7 @@ inline data_ptr make(const std::string& str )
 #include <string>
 
 namespace std{
-  inline std::ostream& operator << (std::ostream& os, std::unique_ptr< std::vector<char> >& d)
+  inline std::ostream& operator << (std::ostream& os, const ::iow::io::data_ptr& d)
   {
     if ( d!=nullptr )
     {

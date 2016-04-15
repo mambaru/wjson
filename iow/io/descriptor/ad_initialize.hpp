@@ -51,8 +51,10 @@ private:
   template<typename T, typename Cntx> 
   void make_outgoing_(T& t, Cntx& cntx, fas::true_ )
   {
+    io_id_t io_id = t.get_id_(t);
     typedef Cntx context_type;
     auto callback = cntx.outgoing_handler;
+    auto incoming = cntx.incoming_handler;
     std::weak_ptr<T> wthis = t.shared_from_this();
     cntx.outgoing_handler = t.wrap([wthis, callback](typename context_type::data_ptr d)
     {
@@ -69,12 +71,33 @@ private:
           pthis->get_aspect().template get<_outgoing_>()( *pthis, std::move(d) );
           if ( shutdown )
           {
-            IOW_LOG_DEBUG("descriptor shutdown with d==nullptr")
             pthis->get_aspect().template get< ::iow::io::_shutdown_>()( *pthis, nullptr );
           }
         }
       }
-    });
+    }, 
+    [wthis, io_id, incoming](typename context_type::data_ptr d) ->void
+    { 
+      if ( d != nullptr )
+      {
+      }
+      
+      if ( incoming ) 
+      {
+        if ( auto pthis = wthis.lock() )
+        {
+          incoming(nullptr, io_id, nullptr);
+        }
+      }
+      else
+      {
+        if ( auto pthis = wthis.lock() )
+        {
+          pthis->get_aspect().template get<_incoming_>()( *pthis, nullptr );
+        }
+      }
+    }
+    );
   }
 
   template<typename T, typename Cntx>
