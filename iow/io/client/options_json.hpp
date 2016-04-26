@@ -6,7 +6,7 @@
 
 namespace iow{ namespace io{ namespace client{
 
-template< /*typename OptionType,*/ typename ConnectionOptionsJson >
+template< typename ConnectionOptionsJson >
 struct options_json
 {
   typedef ConnectionOptionsJson connection_json;
@@ -20,6 +20,7 @@ struct options_json
   JSON_NAME(reconnect_timeout_ms)
   JSON_NAME(wait_maxsize)
   JSON_NAME(wait_wrnsize)
+  JSON_NAME(connect_count)
   
   typedef json::object<
     option_type,
@@ -30,7 +31,8 @@ struct options_json
       json::member< n_threads, option_type, int, &option_type::threads>,
       json::member< n_reconnect_timeout_ms, option_type, time_t, &option_type::reconnect_timeout_ms>,
       json::member< n_wait_maxsize, option_type, size_t, &option_type::wait_maxsize>,
-      json::member< n_wait_wrnsize, option_type, size_t, &option_type::wait_wrnsize>
+      json::member< n_wait_wrnsize, option_type, size_t, &option_type::wait_wrnsize>,
+      json::member<n_connect_count, option_type, int, &option_type::connect_count>
     >
   > type;
   typedef typename type::target target;

@@ -12,10 +12,6 @@ struct options_json
   typedef ::iow::io::client::options_json<
     ::iow::ip::tcp::connection::options_json
   > base_json;
-  //JSON_NAME(port)
-  //JSON_NAME(connection)
-  
-  //typedef ::iow::ip::tcp::connection::options connection_options;
   
   typedef json::object<
     options,

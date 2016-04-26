@@ -70,11 +70,8 @@ public:
   // return d - если не смог принять, nullptr в случае успеха
   void send( data_ptr d, io_id_t io_id, outgoing_handler_t handler)
   {
-    
-
     if ( auto cli = this->client(io_id, handler) )
     {
-
       auto dd = cli->send( std::move(d) ) ;
       if ( dd!=nullptr && handler!=nullptr )
       {

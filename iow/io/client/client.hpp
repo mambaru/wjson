@@ -4,6 +4,7 @@
 #include <iow/io/descriptor/mtholder.hpp>
 #include <iow/logger/logger.hpp>
 #include <iow/io/client/connection.hpp>
+#include <iow/workflow/workflow.hpp>
 
 #include <memory>
 #include <cassert>
@@ -11,10 +12,10 @@
 
 namespace iow{ namespace io{ namespace client{
 
-template<typename Connection, typename A = fas::aspect<> >
+template<typename Connection/*, typename A = fas::aspect<>*/ >
 class client 
   : public Connection
-  , public std::enable_shared_from_this< client<Connection, A> >
+  , public std::enable_shared_from_this< client<Connection/*, A*/> >
 {
 public:
   typedef Connection super;
@@ -37,7 +38,9 @@ public:
     , _wait_cursize(0)
     , _wait_maxsize(0)
     , _wait_wrnsize(0)
-  {}
+  {
+    _workflow = std::make_shared< ::iow::workflow>(io, ::iow::queue_options() );
+  }
   
   client( io_service_type& io, descriptor_type&& desc)
     : super(std::move(desc) )
@@ -49,13 +52,17 @@ public:
     , _wait_cursize(0)
     , _wait_maxsize(0)
     , _wait_wrnsize(0)
-  {}
+  {
+    _workflow = std::make_shared< ::iow::workflow>(io, ::iow::queue_options() );
+  }
   
   template<typename Opt>
   void start(Opt opt)
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
     if ( _started ) return;
+    if ( opt.workflow != nullptr )
+        _workflow = opt.workflow;
     _started = true;
     _ready_for_write = false;
     _reconnect_timeout_ms = opt.reconnect_timeout_ms;
@@ -99,16 +106,14 @@ public:
 
   data_ptr send(data_ptr d)
   {
-    
     std::lock_guard<mutex_type> lk( super::mutex() );
     
     if ( d==nullptr )
       return nullptr;    
 
-    
     if ( _ready_for_write && _outgoing_handler!=nullptr )
     {
-      _outgoing_handler( std::move(d) );      //super::mutex().lock();
+      _outgoing_handler( std::move(d) );
     }
     else
     {
@@ -174,7 +179,6 @@ private:
         {
           if ( ec == ::iow::asio::error::operation_aborted )
             return;
-          // this->connect();
           pthis->connect(*popt);
         }
       } 
@@ -185,19 +189,15 @@ private:
   void initialize_(Opt& opt)
   {
     auto popt = std::make_shared<Opt>(opt);
-    std::weak_ptr<self> wthis = this->shared_from_this();
-    
     auto startup_handler  = popt->connection.startup_handler;
     auto shutdown_handler = popt->connection.shutdown_handler;
     auto connect_handler  = popt->connect_handler;
     auto error_handler    = popt->error_handler;
 
-
+    std::weak_ptr<self> wthis = this->shared_from_this();
     popt->connect_handler = [wthis, connect_handler, popt]()
     {
-
       if ( connect_handler ) connect_handler();
-      
       if ( auto pthis = wthis.lock() )
       {
         std::lock_guard<mutex_type> lk( pthis->mutex() );
@@ -207,9 +207,7 @@ private:
     
     popt->error_handler = [wthis, error_handler, popt](::iow::system::error_code ec)
     {
-      if ( error_handler!=nullptr )
-	error_handler(ec);
-      
+      if ( error_handler!=nullptr ) error_handler(ec);
       if ( auto pthis = wthis.lock() )
       {
         std::lock_guard<mutex_type> lk( pthis->mutex() );
@@ -217,12 +215,9 @@ private:
       }
     };
     
-    popt->connection.shutdown_handler 
-      = [wthis, shutdown_handler, popt]( io_id_t io_id) 
+    popt->connection.shutdown_handler = [wthis, shutdown_handler, popt]( io_id_t io_id) 
     {
-      if ( shutdown_handler!=nullptr ) 
-	shutdown_handler(io_id);
-
+      if ( shutdown_handler!=nullptr ) shutdown_handler(io_id);
       if ( auto pthis = wthis.lock() )
       {
         pthis->stop();
@@ -231,10 +226,8 @@ private:
       }
     };
     
-    popt->connection.startup_handler 
-      = [wthis, startup_handler]( io_id_t io_id, outgoing_handler_t outgoing)
+    popt->connection.startup_handler = [wthis, startup_handler]( io_id_t io_id, outgoing_handler_t outgoing)
     {
-
       if ( auto pthis = wthis.lock() )
       {
         std::lock_guard<mutex_type> lk( pthis->mutex() );
@@ -282,6 +275,7 @@ private:
   size_t      _wait_maxsize;
   size_t      _wait_wrnsize;
   wait_data_t _wait_data;
+  std::shared_ptr< ::iow::workflow > _workflow;
 };
 
 }}}

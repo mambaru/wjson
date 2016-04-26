@@ -7,6 +7,7 @@ namespace iow{ namespace ip{ namespace tcp{ namespace client{
 struct options:
   public ::iow::io::client::options< ::iow::ip::tcp::connection::options >
 {
+  
 };
 
 }}}}
