@@ -25,7 +25,7 @@ public:
   typedef ::iow::asio::io_service io_service_type;
   typedef typename super::mutex_type mutex_type;
   typedef typename super::outgoing_handler_type outgoing_handler_t;
-  typedef ::iow::asio::deadline_timer reconnect_timer;
+  //typedef ::iow::asio::deadline_timer reconnect_timer;
   typedef std::vector< data_ptr > wait_data_t;
   
   client( io_service_type& io)
@@ -33,8 +33,8 @@ public:
     , _started(false)
     , _ready_for_write(false)
     , _reconnect_timeout_ms(0)
-    , _connect_time_ms(0)
-    , _reconnect_timer(io)
+    // , _connect_time_ms(0)
+    // , _reconnect_timer(io)
     , _wait_cursize(0)
     , _wait_maxsize(0)
     , _wait_wrnsize(0)
@@ -47,8 +47,8 @@ public:
     , _started(false)
     , _ready_for_write(false)
     , _reconnect_timeout_ms(0)
-    , _connect_time_ms(0)
-    , _reconnect_timer(io)
+    // , _connect_time_ms(0)
+    // , _reconnect_timer(io)
     , _wait_cursize(0)
     , _wait_maxsize(0)
     , _wait_wrnsize(0)
@@ -156,6 +156,7 @@ private:
     _wait_data.clear();
   }
   
+  /*
   template<typename H>
   void delayed_handler_(H handler)
   {
@@ -166,10 +167,21 @@ private:
     this->_connect_time_ms = now;
     this->_reconnect_timer.async_wait( std::move(handler) );
   }
+  */
   
   template<typename OptPtr>
   void delayed_reconnect_(OptPtr popt)
   {
+    
+    _workflow->delayed_post( 
+      std::chrono::milliseconds( this->_reconnect_timeout_ms ),
+      [popt, this](){
+        this->connect(*popt);
+      }
+    );
+    
+    
+    /*
     std::weak_ptr<self> wthis = this->shared_from_this();
    
     this->delayed_handler_(
@@ -183,6 +195,7 @@ private:
         }
       } 
     );
+    */
   }
 
   template<typename Opt>
@@ -252,7 +265,7 @@ private:
     opt = *popt;
   }
 
-
+/*
   time_t now_ms()
   {
     using namespace ::boost::posix_time;
@@ -261,14 +274,14 @@ private:
     time_duration diff = now - time_t_epoch;
     return diff.total_milliseconds();
   }
-
+*/
 
 private:
   bool _started;
   bool _ready_for_write;
   time_t _reconnect_timeout_ms;
-  time_t _connect_time_ms;
-  reconnect_timer _reconnect_timer;
+  // time_t _connect_time_ms;
+  // reconnect_timer _reconnect_timer;
   outgoing_handler_t _outgoing_handler;
 
   size_t      _wait_cursize;  

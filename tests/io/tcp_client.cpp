@@ -29,8 +29,7 @@ void server()
 int main()
 {
   connect_count = 1;
-  std::thread t(server);
-  sleep(1);
+
   typedef ::iow::ip::tcp::client::client<> client_type;
   typedef ::iow::ip::tcp::client::options options_type;
   
@@ -67,6 +66,7 @@ int main()
   std::cout << "client start..." << std::endl;
   tcp_client->start(opt);
   tcp_client->send( iow::io::make("Hello World!") );
+  std::thread t(server);
   std::cout << "client main run..." << std::endl;
   io_service.run();
   if ( connect_count != 0 ) 
