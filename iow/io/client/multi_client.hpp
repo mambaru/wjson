@@ -123,19 +123,9 @@ public:
 
   client_ptr set_handler_(io_id_t io_id, outgoing_handler_t handler)
   {
-    auto pconn = _create_and_start(io_id, [handler](data_ptr d, io_id_t io_id, outgoing_handler_t)
+    auto pconn = _create_and_start(io_id, [handler](data_ptr d, io_id_t /*io_id*/, outgoing_handler_t)
     {
        handler(std::move(d));
-       /*
-      //!!!! handler(std::move(d));
-      if ( d == nullptr ) // убрать проверку
-      {
-        handler( make("{\"error\":\"\"}") );
-      }
-      else
-      {
-        handler(std::move(d));
-      }*/
     });
     _clients[io_id] = pconn;
     return pconn;
