@@ -41,6 +41,7 @@ struct owner_handler2
     func_type f = _alt_handler;*/
     IOW_LOG_DEBUG("owner_handler2() мимо 2")
     //return f( std::forward<Args>(args)... );
+    abort();
     return _alt_handler(std::forward<Args>(args)...);
   }
 private:

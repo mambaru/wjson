@@ -31,10 +31,9 @@ public:
   client( io_service_type& io)
     : super(std::move(descriptor_type(io)) )
     , _started(false)
+    , _connected(false)
     , _ready_for_write(false)
     , _reconnect_timeout_ms(0)
-    // , _connect_time_ms(0)
-    // , _reconnect_timer(io)
     , _wait_cursize(0)
     , _wait_maxsize(0)
     , _wait_wrnsize(0)
@@ -47,8 +46,6 @@ public:
     , _started(false)
     , _ready_for_write(false)
     , _reconnect_timeout_ms(0)
-    // , _connect_time_ms(0)
-    // , _reconnect_timer(io)
     , _wait_cursize(0)
     , _wait_maxsize(0)
     , _wait_wrnsize(0)
@@ -60,6 +57,7 @@ public:
   void start(Opt opt)
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
+    IOW_LOG_DEBUG("Client connect start " << opt.addr << ":" << opt.port << "" )
     if ( _started ) return;
     if ( opt.workflow != nullptr )
         _workflow = opt.workflow;
@@ -108,6 +106,9 @@ public:
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
     
+    if ( !_connected )
+      return std::move(d);
+    
     if ( d==nullptr )
       return nullptr;    
 
@@ -148,6 +149,7 @@ private:
   {
     _ready_for_write = true;
     _outgoing_handler = outgoing;
+    _connected = true;
     _wait_cursize = 0;
     std::for_each(_wait_data.begin(), _wait_data.end(), [outgoing](data_ptr& d) 
     {
@@ -156,46 +158,15 @@ private:
     _wait_data.clear();
   }
   
-  /*
-  template<typename H>
-  void delayed_handler_(H handler)
-  {
-    time_t now = this->now_ms();
-    time_t diff = now - this->_connect_time_ms;
-    time_t reconnect_time = diff > this->_reconnect_timeout_ms ? 0 : this->_reconnect_timeout_ms - diff ;
-    this->_reconnect_timer.expires_from_now( ::boost::posix_time::milliseconds( reconnect_time ) );
-    this->_connect_time_ms = now;
-    this->_reconnect_timer.async_wait( std::move(handler) );
-  }
-  */
-  
   template<typename OptPtr>
   void delayed_reconnect_(OptPtr popt)
   {
-    
     _workflow->delayed_post( 
       std::chrono::milliseconds( this->_reconnect_timeout_ms ),
       [popt, this](){
         this->connect(*popt);
       }
     );
-    
-    
-    /*
-    std::weak_ptr<self> wthis = this->shared_from_this();
-   
-    this->delayed_handler_(
-      [wthis, popt](const ::iow::system::error_code& ec) 
-      {
-        if ( auto pthis = wthis.lock() )
-        {
-          if ( ec == ::iow::asio::error::operation_aborted )
-            return;
-          pthis->connect(*popt);
-        }
-      } 
-    );
-    */
   }
 
   template<typename Opt>
@@ -218,6 +189,7 @@ private:
       }
     };
     
+    
     popt->error_handler = [wthis, error_handler, popt](::iow::system::error_code ec)
     {
       if ( error_handler!=nullptr ) error_handler(ec);
@@ -228,17 +200,22 @@ private:
       }
     };
     
+    
+    
     popt->connection.shutdown_handler = [wthis, shutdown_handler, popt]( io_id_t io_id) 
     {
       if ( shutdown_handler!=nullptr ) shutdown_handler(io_id);
       if ( auto pthis = wthis.lock() )
       {
-        pthis->stop();
+        //pthis->stop();
+        // моментальный реконнект
         std::lock_guard<mutex_type> lk( pthis->mutex() );
+        pthis->_connected = false;
         pthis->delayed_reconnect_(popt);
       }
     };
-    
+
+
     popt->connection.startup_handler = [wthis, startup_handler]( io_id_t io_id, outgoing_handler_t outgoing)
     {
       if ( auto pthis = wthis.lock() )
@@ -278,6 +255,7 @@ private:
 
 private:
   bool _started;
+  bool _connected;
   bool _ready_for_write;
   time_t _reconnect_timeout_ms;
   // time_t _connect_time_ms;
