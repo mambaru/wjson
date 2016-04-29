@@ -514,7 +514,7 @@ private:
   // Удаляем отработанные буферы и настраиваем состояние
   void prepare_(const search_pair& p) 
   {
-#warning TODO: сократить список буфферов при разрастании 
+//#warning TODO: сократить список буфферов при разрастании 
     if ( p.first==0 )
     {
       if ( _buffers[0] == nullptr )
@@ -558,6 +558,9 @@ private:
       _offset = complete ? 0 : p.second;
       _parsepos = _offset;
     }
+    
+    if ( _buffers.size() > 128 &&  _buffers.size()*2 < _buffers.capacity() )
+      _buffers.shrink_to_fit();
 
   }
 

@@ -11,46 +11,52 @@ struct _sync_resolver_;
 struct ad_connect
 {
   template<typename T, typename Opt>
-  void operator()(T& t, Opt&& opt)
+  void operator()(T& t, const Opt& opt)
   {
     const auto endpoint = t.get_aspect().template get<_sync_resolver_>()(t, opt);
-    auto ch = opt.connect_handler;
+    auto popt = std::make_shared<Opt>(opt);
+    /*auto ch = opt.connect_handler;
     auto er = opt.error_handler;
+    */
     std::weak_ptr<T> wthis = t.shared_from_this();
     
-    auto tmp = t.wrap([wthis, opt](const ::iow::system::error_code& ec)
+    auto handler = t.wrap([wthis, popt](const ::iow::system::error_code& ec)
     {
       if ( auto p = wthis.lock() )
       {
         if (!ec)
         {
-          IOW_LOG_END("Client connected to " << opt.addr << ":" << opt.port )
-          if ( opt.connect_handler )
+          IOW_LOG_END("Client connected to " << popt->addr << ":" << popt->port )
+          if ( popt->connect_handler )
           {
-            opt.connect_handler();
+            popt->connect_handler();
           }
         }
         else
         {
-          IOW_LOG_END("Client FAIL connected to " << opt.addr << ":" 
-                      << opt.port << ". " << ec.value() << " " << ec.message() )
+          IOW_LOG_END("Client FAIL connected to " << popt->addr << ":" 
+                      << popt->port << ". " << ec.value() << " " << ec.message() )
           
-          if ( opt.error_handler )
+          if ( popt->error_handler )
           {
-            opt.error_handler(ec);
+            popt->error_handler(ec);
           }
         }
       }
+      IOW_LOG_END("Client connect to " << popt->addr << ":" << popt->port << " ..." )
     });
 
 
+    /*
     #warning async_connect всегда возвращает OK. Поймать можно только при попытке прочитать
     ::iow::system::error_code ec;
-    IOW_LOG_BEGIN("Client connect to " << opt.addr << ":" << opt.port << " ..." )
+    
     t.descriptor().connect( endpoint, ec);
     tmp(ec);
+    */
     
-    //t.descriptor().async_connect(endpoint, tmp);
+    IOW_LOG_BEGIN("Client connect to " << opt.addr << ":" << opt.port << " ..." )
+    t.descriptor().async_connect(endpoint, handler);
   }
 };
 
