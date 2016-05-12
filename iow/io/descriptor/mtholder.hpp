@@ -9,7 +9,9 @@
 namespace iow{ namespace io{ namespace descriptor{
 
 
-
+// TODO: удалить
+// #warning depricated
+  
 template<typename Holder>
 class mtholder
   : public std::enable_shared_from_this< mtholder<Holder> >
