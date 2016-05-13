@@ -137,6 +137,16 @@ public:
     return nullptr;
   }
   
+  // return d - если не смог принять, nullptr в случае успеха
+  void send( data_ptr d, io_id_t , outgoing_handler_t handler)
+  {
+    auto dd = this->send( std::move(d) ) ;
+    if ( dd!=nullptr && handler!=nullptr )
+    {
+      handler(nullptr);
+    }
+  }
+
 private:
   
   template<typename Opt>
