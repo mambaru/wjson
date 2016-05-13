@@ -3,7 +3,7 @@
 #include <iow/logger/logger.hpp>
 #include <mutex>
 #include <memory>
-#include <map>
+#include <vector>
 
 
 // удалить
@@ -16,6 +16,83 @@ class multi_client
 {
 public:
   typedef Client client_type;
+  typedef typename client_type::data_ptr data_ptr;
+  typedef std::shared_ptr<client_type> client_ptr;
+  typedef std::vector<client_ptr> client_list;
+  typedef typename client_type::io_service_type io_service_type;
+  typedef std::mutex mutex_type;
+  
+  multi_client(io_service_type& io)
+    : _current(0)
+    , _io_service(io)
+  {}
+  
+  template<typename Opt>
+  void start(Opt opt)
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    _clients.reserve(opt.connect_count);
+    for (size_t i = 0; i < opt.connect_count; ++i)
+    {
+      _clients.push_back( std::make_shared<client_type>(_io_service) );
+      _clients.back()->start( opt );
+    }
+  }
+
+  template<typename Opt>
+  void reconfigure(Opt opt)
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    while ( _clients.size() > opt.connect_count )
+    {
+      _clients.back()->stop();
+      _clients.pop_back();
+    }
+    
+    while ( _clients.size() < opt.connect_count )
+    {
+      _clients.push_back( std::make_shared<client_type>(_io_service) );
+      _clients.back()->start( opt );
+    }
+  }
+
+  void stop()
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+
+    for ( auto& conn : _clients )
+    {
+      conn->stop();
+    }
+    _clients.clear();
+  }
+
+  data_ptr send(data_ptr d)
+  {
+    client_ptr cli = nullptr;
+    {
+      std::lock_guard<mutex_type> lk(_mutex);
+      if ( _clients.empty() ) return std::move(d);
+      if ( _current >= _clients.size() ) _current = 0;
+      cli = _clients[ _current++ ];
+    }
+    return cli->send( std::move(d) );
+  }
+  
+public:
+  int _current;
+  io_service_type& _io_service;
+  client_list _clients;
+  mutable mutex_type _mutex;
+};
+
+  /*
+template<typename Client>
+class multi_client
+{
+public:
+  typedef Client client_type;
+  typedef typename client_type::data_ptr data_ptr;
   typedef ::iow::io::io_id_t io_id_t;
   typedef ::iow::io::incoming_handler_t incoming_handler_t;
   typedef ::iow::io::outgoing_handler_t outgoing_handler_t;
@@ -66,6 +143,11 @@ public:
     }
   }
 
+  data_ptr send(data_ptr d)
+  {
+    this->send( std::move(d), 0, nullptr);
+    return nullptr;
+  }
   
   // return d - если не смог принять, nullptr в случае успеха
   void send( data_ptr d, io_id_t io_id, outgoing_handler_t handler)
@@ -123,7 +205,7 @@ public:
 
   client_ptr set_handler_(io_id_t io_id, outgoing_handler_t handler)
   {
-    auto pconn = _create_and_start(io_id, [handler](data_ptr d, io_id_t /*io_id*/, outgoing_handler_t)
+    auto pconn = _create_and_start(io_id, [handler](data_ptr d, io_id_t io_id, outgoing_handler_t)
     {
        handler(std::move(d));
     });
@@ -137,4 +219,5 @@ public:
   mutable mutex_type _mutex;
 };
 
+*/
 }}}
