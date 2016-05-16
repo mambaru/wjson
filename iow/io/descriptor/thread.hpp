@@ -44,7 +44,7 @@ public:
   void start_(Opt&& opt1)
   {
     typename std::decay<Opt>::type opt = opt1;
-    std::lock_guard<mutex_type> lk(_mutex);
+
     if ( _holder != nullptr ) return;
 
     if ( opt.threads != 0 )

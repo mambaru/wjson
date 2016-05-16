@@ -20,7 +20,7 @@ struct ad_read_handler
     {
       p.second = bytes_transferred;
       
-      IOW_LOG_TRACE("READ[" << std::string(p.first, p.first + p.second) << "]" )
+      IOW_LOG_TRACE("READ[" << std::string(p.first, p.first + p.second) << "] id=" << t.get_id_(t) )
       
       t.get_aspect().template get< ::iow::io::reader::_complete_>()(t, std::move(p));
     }
