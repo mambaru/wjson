@@ -25,5 +25,8 @@ using multi_client = ::iow::io::client::multi_client< Client >;
 template< typename Client = multi_client<> >
 using thread = ::iow::io::client::thread< Client >;
 
+template< typename Client = thread<> >
+using multi_thread = ::iow::io::client::multi_thread< Client >;
+
 
 }}}}
