@@ -13,9 +13,11 @@ template<typename A = fas::aspect<> >
 using connection =
   ::iow::io::client::connection< typename fas::merge_aspect<A, aspect >::type >;
 
+  /*
 template<typename A = fas::aspect<> >
 using multi_connection =
   ::iow::io::client::multi_connection< connection<A> >;
+  */
   
 
 }}}}

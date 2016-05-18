@@ -129,6 +129,7 @@ public:
 };
 
 // удалить, плохая концепция
+/*
 template<typename Connection = connection<> >
 class multi_connection
 {
@@ -210,6 +211,7 @@ private:
   connection_list _connections;
   
 };
+*/
 
   
 }}}

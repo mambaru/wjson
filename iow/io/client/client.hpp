@@ -1,7 +1,7 @@
 #pragma once
 
 #include <fas/aop.hpp>
-#include <iow/io/descriptor/mtholder.hpp>
+
 #include <iow/logger/logger.hpp>
 #include <iow/io/client/connection.hpp>
 #include <iow/workflow/workflow.hpp>
@@ -252,24 +252,11 @@ private:
     opt = *popt;
   }
 
-/*
-  time_t now_ms()
-  {
-    using namespace ::boost::posix_time;
-    ptime time_t_epoch( ::boost::gregorian::date(1970,1,1)); 
-    ptime now = microsec_clock::local_time();
-    time_duration diff = now - time_t_epoch;
-    return diff.total_milliseconds();
-  }
-*/
-
 private:
   bool _started;
   bool _connected;
   bool _ready_for_write;
   time_t _reconnect_timeout_ms;
-  // time_t _connect_time_ms;
-  // reconnect_timer _reconnect_timer;
   outgoing_handler_t _outgoing_handler;
 
   size_t      _wait_cursize;  
