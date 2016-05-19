@@ -25,12 +25,15 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
     
+    /*
     std::stringstream ss;
     ss << "detach call_id=" << call_id << " [";
     for ( const auto& id : _result_map)
       ss << id.first << ", ";
     ss << "]";
     std::cout << ss.str() << std::endl;
+    */
+    
     result_handler_t result = nullptr;
     auto itr = _result_map.find(call_id);
     if ( itr!=_result_map.end() )

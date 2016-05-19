@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iow/io/connection/connection.hpp>
+#include <iow/asio.hpp>
 
 
 namespace iow{ namespace io{ namespace client{
@@ -15,9 +16,6 @@ struct ad_connect
   {
     const auto endpoint = t.get_aspect().template get<_sync_resolver_>()(t, opt);
     auto popt = std::make_shared<Opt>(opt);
-    /*auto ch = opt.connect_handler;
-    auto er = opt.error_handler;
-    */
     std::weak_ptr<T> wthis = t.shared_from_this();
     
     auto handler = t.wrap([wthis, popt](const ::iow::system::error_code& ec)
@@ -26,7 +24,7 @@ struct ad_connect
       {
         if (!ec)
         {
-          IOW_LOG_END("Client connected to " << popt->addr << ":" << popt->port )
+          IOW_LOG_END("Client connected to " << popt->addr << ":" << popt->port << " " << ec.message() )
           if ( popt->connect_handler )
           {
             popt->connect_handler();
@@ -38,25 +36,23 @@ struct ad_connect
                       << popt->port << ". " << ec.value() << " " << ec.message() )
           
           if ( popt->error_handler )
-          {
             popt->error_handler(ec);
-          }
         }
       }
-      IOW_LOG_END("Client connect to " << popt->addr << ":" << popt->port << " ..." )
     });
 
 
-    /*
-    #warning async_connect всегда возвращает OK. Поймать можно только при попытке прочитать
-    ::iow::system::error_code ec;
-    
-    t.descriptor().connect( endpoint, ec);
-    tmp(ec);
-    */
-    
     IOW_LOG_BEGIN("Client connect to " << opt.addr << ":" << opt.port << " ..." )
-    t.descriptor().async_connect(endpoint, handler);
+    if ( opt.async_connect )
+    {
+      t.descriptor().async_connect(endpoint, handler);
+    }
+    else
+    {
+      ::iow::system::error_code ec;
+      t.descriptor().connect( endpoint, ec);
+      handler(ec);
+    }
   }
 };
 
@@ -127,91 +123,6 @@ public:
     super::close_(*this);
   }
 };
-
-// удалить, плохая концепция
-/*
-template<typename Connection = connection<> >
-class multi_connection
-{
-  
-public: 
-  typedef Connection connection_type;
-  typedef std::shared_ptr<connection_type> connection_ptr;
-  typedef std::vector<connection_ptr> connection_list;
-  typedef typename connection_type::descriptor_type descriptor_type;
-  typedef iow::asio::io_service                     io_service_type;
-  typedef std::mutex mutex_type;
-  
-  multi_connection( io_service_type& io)
-    : _io(io) {}
-
-
-  template<typename Opt>
-  void connect(Opt&& opt)
-  {
-    std::lock_guard<mutex_type> lk( _mutex );
-    this->connect_( *this, std::forward<Opt>(opt) );
-  }
-
-  template<typename Opt>
-  void start(Opt&& opt)
-  {
-    std::lock_guard<mutex_type> lk( _mutex );
-    this->start_( *this, std::forward<Opt>(opt) );
-  }
-
-  void close()
-  {
-    std::lock_guard<mutex_type> lk( _mutex );
-    this->close_( *this );
-  }
-
-    
-  template<typename T, typename Opt>
-  void start_(T& t, const Opt& opt)
-  {
-    this->stop_(t);
-    
-    for (auto& conn : _connections)
-    {
-      conn->start(opt);
-    }
-  }
-
-  template<typename T, typename Opt>
-  void connect_(T& t, const Opt& opt)
-  {
-    this->close_(t);
-    _connections.resize(opt.connect_count);
-    for (auto& conn : _connections)
-    {
-      conn = std::make_shared<connection_type>( descriptor_type(_io) );
-      conn->connect(opt);
-    }
-  }
-
-  template<typename T>
-  void close_(T&)
-  {
-    for (auto& conn : _connections)
-      conn->close();
-    _connections.clear();
-  }
-
-  template<typename T>
-  void stop_(T&)
-  {
-    for (auto& conn : _connections)
-      conn->stop();
-  }
-  
-private:
-  io_service_type& _io;
-  mutex_type _mutex;
-  connection_list _connections;
-  
-};
-*/
 
   
 }}}

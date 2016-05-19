@@ -12,10 +12,10 @@
 
 namespace iow{ namespace io{ namespace client{
 
-template<typename Connection/*, typename A = fas::aspect<>*/ >
+template<typename Connection >
 class client 
   : public Connection
-  , public std::enable_shared_from_this< client<Connection/*, A*/> >
+  , public std::enable_shared_from_this< client<Connection> >
 {
 public:
   typedef Connection super;
@@ -25,18 +25,13 @@ public:
   typedef ::iow::asio::io_service io_service_type;
   typedef typename super::mutex_type mutex_type;
   typedef typename super::outgoing_handler_type outgoing_handler_t;
-  //typedef ::iow::asio::deadline_timer reconnect_timer;
   typedef std::vector< data_ptr > wait_data_t;
   
   client( io_service_type& io)
     : super(std::move(descriptor_type(io)) )
     , _started(false)
-    , _connected(false)
     , _ready_for_write(false)
     , _reconnect_timeout_ms(0)
-    , _wait_cursize(0)
-    , _wait_maxsize(0)
-    , _wait_wrnsize(0)
   {
     _workflow = std::make_shared< ::iow::workflow>(io, ::iow::queue_options() );
   }
@@ -46,11 +41,8 @@ public:
     , _started(false)
     , _ready_for_write(false)
     , _reconnect_timeout_ms(0)
-    , _wait_cursize(0)
-    , _wait_maxsize(0)
-    , _wait_wrnsize(0)
   {
-    _workflow = std::make_shared< ::iow::workflow>(io, ::iow::queue_options() );
+    _workflow = std::make_shared< ::iow::workflow >(io, ::iow::queue_options() );
   }
   
   template<typename Opt>
@@ -60,12 +52,16 @@ public:
     IOW_LOG_DEBUG("Client connect start " << opt.addr << ":" << opt.port << "" )
     if ( _started ) return;
     if ( opt.workflow != nullptr )
+    {
         _workflow = opt.workflow;
+    }
+    else
+    {
+      IOW_LOG_WARNING("iow::io::client workflow not set")
+    }
     _started = true;
     _ready_for_write = false;
     _reconnect_timeout_ms = opt.reconnect_timeout_ms;
-    _wait_maxsize = opt.wait_maxsize;
-    _wait_wrnsize = opt.wait_wrnsize;
 
     this->initialize_(opt);
     super::connect_( *this, opt );
@@ -106,9 +102,6 @@ public:
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
     
-    if ( !_connected )
-      return std::move(d);
-    
     if ( d==nullptr )
       return nullptr;    
 
@@ -118,26 +111,12 @@ public:
     }
     else
     {
-      if ( _wait_cursize >= _wait_maxsize )
-      {
-        IOW_LOG_ERROR("Client limit wait data size " << _wait_cursize << "( max: " << _wait_maxsize << ")" 
-                      << " dropped: [" << d << "]")
-        return std::move(d);
-      }
-      else
-      {
-        if ( _wait_cursize >= _wait_wrnsize )
-        {
-          IOW_LOG_WARNING("Client limit wait data size " << _wait_cursize << "( max: " << _wait_maxsize << ")")
-        }
-        _wait_cursize += d->size();
-        _wait_data.push_back( std::move(d) );
-      }
+      IOW_LOG_ERROR("Client not conected. Not send: [" << d << "]")
+      return std::move(d);
     }
     return nullptr;
   }
   
-  // return d - если не смог принять, nullptr в случае успеха
   void send( data_ptr d, io_id_t , outgoing_handler_t handler)
   {
     auto dd = this->send( std::move(d) ) ;
@@ -159,13 +138,6 @@ private:
   {
     _ready_for_write = true;
     _outgoing_handler = outgoing;
-    _connected = true;
-    _wait_cursize = 0;
-    std::for_each(_wait_data.begin(), _wait_data.end(), [outgoing](data_ptr& d) 
-    {
-      outgoing(std::move(d));
-    });
-    _wait_data.clear();
   }
   
   template<typename OptPtr>
@@ -199,7 +171,6 @@ private:
       }
     };
     
-    
     popt->error_handler = [wthis, error_handler, popt](::iow::system::error_code ec)
     {
       if ( error_handler!=nullptr ) error_handler(ec);
@@ -210,21 +181,16 @@ private:
       }
     };
     
-    
-    
     popt->connection.shutdown_handler = [wthis, shutdown_handler, popt]( io_id_t io_id) 
     {
       if ( shutdown_handler!=nullptr ) shutdown_handler(io_id);
       if ( auto pthis = wthis.lock() )
       {
-        //pthis->stop();
-        // моментальный реконнект
         std::lock_guard<mutex_type> lk( pthis->mutex() );
-        pthis->_connected = false;
+        pthis->_ready_for_write = false;
         pthis->delayed_reconnect_(popt);
       }
     };
-
 
     popt->connection.startup_handler = [wthis, startup_handler]( io_id_t io_id, outgoing_handler_t outgoing)
     {
@@ -251,18 +217,11 @@ private:
 
     opt = *popt;
   }
-
 private:
   bool _started;
-  bool _connected;
   bool _ready_for_write;
   time_t _reconnect_timeout_ms;
   outgoing_handler_t _outgoing_handler;
-
-  size_t      _wait_cursize;  
-  size_t      _wait_maxsize;
-  size_t      _wait_wrnsize;
-  wait_data_t _wait_data;
   std::shared_ptr< ::iow::workflow > _workflow;
 };
 
