@@ -281,7 +281,6 @@ private:
     std::weak_ptr<self> wthis = this->shared_from_this();
     opt.sender_handler = [handler, wthis, io_id](const char* name, notify_serializer_t ns1, request_serializer_t rs1, result_handler_t rh1)
     {
-      
       auto pthis = wthis.lock();
       if ( pthis == nullptr )
         return;
@@ -358,7 +357,7 @@ private:
       if ( rs1!=nullptr && rh1!=nullptr )
       {
         io_id_t io_id = pthis->_io_id;
-        outgoing_holder::result_handler_t rhw = [wthis,  handler, io_id](incoming_holder holder)
+        rhw = [wthis,  handler, io_id](incoming_holder holder)
         {
           auto pthis = wthis.lock();
           if ( pthis==nullptr )

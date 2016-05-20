@@ -25,13 +25,17 @@ struct ad_incoming_handler
       {
         if ( outgoing ) outgoing(nullptr);
         std::lock_guard<typename T::mutex_type> lk(t.mutex());
-        cntx.fatal_handler(-1, std::string("iow::io::descriptor: std::exception: ") + std::string(e.what()));
+        if ( cntx.fatal_handler != nullptr ) try {
+          cntx.fatal_handler(-1, std::string("iow::io::descriptor::ad_incoming_handler: std::exception: ") + std::string(e.what()));
+        } catch(...) {}
       }
       catch(...)
       {
         if ( outgoing ) outgoing(nullptr);
         std::lock_guard<typename T::mutex_type> lk(t.mutex());
-        cntx.fatal_handler(-1, "iow::io::descriptor: Unhandled exception in incoming handler");
+        if ( cntx.fatal_handler != nullptr ) try {
+          cntx.fatal_handler(-1, "iow::io::descriptor::ad_incoming_handler: Unhandled exception in incoming handler");
+          } catch(...) {}
       }
       t.mutex().lock();
 
