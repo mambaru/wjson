@@ -338,6 +338,7 @@ private:
   template<typename O>
   void upgrate_options_(O& opt, jsonrpc_outgoing_handler_t handler)
   {
+    
     if ( handler == nullptr )
     {
       opt.sender_handler = nullptr;
@@ -378,7 +379,6 @@ private:
             });
           }
         }; // rh=[](){}
-        
         call_id = pthis->_call_counter.fetch_add(1);
         pthis->_call_map.set(call_id, std::move(rh1) );
       }
@@ -392,7 +392,7 @@ private:
       {
         handler( std::move(outgoing_holder()) );
       }
-    };
+    }; // opt.sender_handler
   }
 
   // OutgoingHandler io::outgoing_handler_t или jsonrpc::outgoing_handler_t
