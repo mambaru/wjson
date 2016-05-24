@@ -42,23 +42,30 @@ public:
     _pool = std::make_shared<pool_type>(_queue);
   }
   
+  void rate_limit(size_t rps) 
+  {
+    if ( _pool!=nullptr) 
+      _pool->rate_limit(rps);
+  }
+  
   void reconfigure(const queue_options& opt, int threads, bool timed /*= false*/ )
   {
     _threads = threads;
     _queue->reconfigure(opt, threads==0 || timed );
-    if ( _pool!=nullptr) _pool->reconfigure(_threads);
   }
 
   void start()
   {
-    if ( _pool!=nullptr) _pool->start(_threads);
+    if ( _pool!=nullptr) 
+      _pool->start(_threads);
   }
 
   void stop()
   {
     _timer->clear();
     _queue->stop();
-    if ( _pool!=nullptr) _pool->stop();
+    if ( _pool!=nullptr) 
+      _pool->stop();
     _queue->reset();
   }
 

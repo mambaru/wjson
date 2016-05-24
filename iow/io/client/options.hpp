@@ -16,9 +16,11 @@ struct options
   std::string port;
   int threads = 0;
   int connect_count = 1;
-  std::shared_ptr< ::iow::workflow > workflow;
-  std::function<void()> connect_handler;
-  std::function<void( ::iow::system::error_code )> error_handler;
+  struct {
+    std::shared_ptr< ::iow::workflow > workflow;
+    std::function<void()> connect_handler;
+    std::function<void( ::iow::system::error_code )> error_handler;
+  } args;
   
 };
   

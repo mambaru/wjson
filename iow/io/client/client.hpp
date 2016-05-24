@@ -33,7 +33,7 @@ public:
     , _ready_for_write(false)
     , _reconnect_timeout_ms(0)
   {
-    _workflow = std::make_shared< ::iow::workflow>(io, ::iow::queue_options() );
+    _workflow = std::make_shared< ::iow::workflow >(io, ::iow::queue_options() );
   }
   
   client( io_service_type& io, descriptor_type&& desc)
@@ -51,9 +51,9 @@ public:
     std::lock_guard<mutex_type> lk( super::mutex() );
     IOW_LOG_DEBUG("Client connect start " << opt.addr << ":" << opt.port << "" )
     if ( _started ) return;
-    if ( opt.workflow != nullptr )
+    if ( opt.args.workflow != nullptr )
     {
-        _workflow = opt.workflow;
+        _workflow = opt.args.workflow;
     }
     else
     {
@@ -157,11 +157,11 @@ private:
     auto popt = std::make_shared<Opt>(opt);
     auto startup_handler  = popt->connection.startup_handler;
     auto shutdown_handler = popt->connection.shutdown_handler;
-    auto connect_handler  = popt->connect_handler;
-    auto error_handler    = popt->error_handler;
+    auto connect_handler  = popt->args.connect_handler;
+    auto error_handler    = popt->args.error_handler;
 
     std::weak_ptr<self> wthis = this->shared_from_this();
-    popt->connect_handler = [wthis, connect_handler, popt]()
+    popt->args.connect_handler = [wthis, connect_handler, popt]()
     {
       if ( connect_handler ) connect_handler();
       if ( auto pthis = wthis.lock() )
@@ -171,7 +171,7 @@ private:
       }
     };
     
-    popt->error_handler = [wthis, error_handler, popt](::iow::system::error_code ec)
+    popt->args.error_handler = [wthis, error_handler, popt](::iow::system::error_code ec)
     {
       if ( error_handler!=nullptr ) error_handler(ec);
       if ( auto pthis = wthis.lock() )

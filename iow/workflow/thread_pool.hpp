@@ -5,6 +5,7 @@
 #include <thread>
 #include <mutex>
 #include <vector>
+#include <chrono>
 
 namespace iow {
 
@@ -23,11 +24,19 @@ public:
   thread_pool(service_ptr service)
     : _started(false)
     , _service(service)
-  {}
+  {
+    _rate_limit = 0;
+  }
   
+  void rate_limit(size_t rps) 
+  {
+    _rate_limit = rps;
+  }
+
   bool reconfigure(int threads)
   {
     std::lock_guard< std::mutex > lk(_mutex);
+    
     if ( !_started )
       return false;
     
@@ -52,6 +61,7 @@ public:
   void start(int threads)
   {
     std::lock_guard< std::mutex > lk(_mutex);
+    
     if ( _started )
       return;
     
@@ -90,12 +100,29 @@ private:
       _flags.push_back(pflag);
       _threads.push_back( std::thread( [wthis, wflag]()
       {
+        auto start = std::chrono::system_clock::now();
+        size_t count = 0;
         while ( auto pthis = wthis.lock() )
         {
           if ( !pthis->_service->run_one() )
             break;
           if ( wflag.lock() == nullptr)
             break;
+          
+          if ( pthis->_rate_limit != 0 )
+          {
+            ++count;
+            if ( count > pthis->_rate_limit )
+            {
+              auto now = std::chrono::system_clock::now();
+              auto tm_ms = std::chrono::duration_cast< std::chrono::milliseconds >( now - start ).count();
+              if ( tm_ms < 1000 )
+                std::this_thread::sleep_for( std::chrono::milliseconds(1000-tm_ms)  );
+              
+              count = 0;
+              start = std::chrono::system_clock::now();
+            }
+          }
         }
       }));
     }
@@ -103,6 +130,7 @@ private:
   
 private:
   bool _started;
+  std::atomic<size_t> _rate_limit;
   std::mutex _mutex;
   service_ptr _service;
   std::vector< std::thread > _threads;

@@ -25,9 +25,9 @@ struct ad_connect
         if (!ec)
         {
           IOW_LOG_END("Client connected to " << popt->addr << ":" << popt->port << " " << ec.message() )
-          if ( popt->connect_handler )
+          if ( popt->args.connect_handler )
           {
-            popt->connect_handler();
+            popt->args.connect_handler();
           }
         }
         else
@@ -35,8 +35,8 @@ struct ad_connect
           IOW_LOG_END("Client FAIL connected to " << popt->addr << ":" 
                       << popt->port << ". " << ec.value() << " " << ec.message() )
           
-          if ( popt->error_handler )
-            popt->error_handler(ec);
+          if ( popt->args.error_handler )
+            popt->args.error_handler(ec);
         }
       }
     });
