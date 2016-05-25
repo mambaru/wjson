@@ -68,7 +68,6 @@ public:
 
   data_ptr send(data_ptr d)
   {
-    IOW_LOG_DEBUG("-4- multi_base::send -1-")
     client_ptr cli = nullptr;
     {
       std::lock_guard<mutex_type> lk(_mutex);
@@ -76,7 +75,6 @@ public:
       if ( _current >= _clients.size() ) _current = 0;
       cli = _clients[ _current++ ];
     }
-    IOW_LOG_DEBUG("-4- multi_base::send -2-")
     return cli->send( std::move(d) );
   }
   
