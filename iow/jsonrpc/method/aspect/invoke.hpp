@@ -23,7 +23,6 @@ namespace{
   >
   inline void invoke_callback_( HolderPtr ph, OutgoingHandler outgoing_handler, Result result, Error err )
   {
-    // на 4.7. 
     try
     {
       if (err == nullptr )
@@ -88,9 +87,6 @@ struct invoke: Handler
     typename T::outgoing_handler_t outgoing_handler
   ) 
   {
-
-    //typedef typename T::outgoing_handler_t outgoing_handler_type;  
-    //typedef typename T::holder_type holder_type;
     params_ptr req = nullptr;
 
     try // invalid_params

@@ -56,8 +56,10 @@ public:
     {
       _thread = std::thread([io]()
       {
+        io_service_type::work wrk( *io );
         iow::system::error_code ec;
         io->run(ec);
+        if (ec) { IOW_LOG_ERROR("io::descriptor::thread io_service.run error" << ec.message()) };
       });
     }
   }

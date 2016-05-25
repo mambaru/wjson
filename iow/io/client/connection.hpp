@@ -27,6 +27,7 @@ struct ad_connect
           IOW_LOG_END("Client connected to " << popt->addr << ":" << popt->port << " " << ec.message() )
           if ( popt->args.connect_handler )
           {
+            IOW_LOG_END("-6- popt->args.connect_handler(); " )
             popt->args.connect_handler();
           }
         }

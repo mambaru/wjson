@@ -26,11 +26,7 @@ bool log_status()
   
 logstream global_log(const std::string& name, const std::string& type)
 {
-  return logstream( 
-    name, 
-    type, 
-    static_writer
-  );
+  return logstream( name,  type,  static_writer );
 }
 
 }

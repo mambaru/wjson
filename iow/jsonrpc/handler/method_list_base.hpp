@@ -19,8 +19,7 @@ class method_list_base
 public:
   typedef ::iow::io::io_base<A> super;
   typedef method_list_base<A> self;
-  //typedef AspectClass<A> super;
-  
+    
   typedef typename super::aspect::template advice_cast<_handler_types_>
                         ::type  handler_types;
   typedef typename super::aspect::template advice_cast<_target_>
@@ -34,7 +33,6 @@ public:
   
   typedef typename handler_types::call_id_t        call_id_t;
   typedef typename handler_types::io_id_t          io_id_t;
-  //typedef typename handler_types::holder_type      holder_type;
   typedef typename handler_types::data_type        data_type;
   typedef typename handler_types::data_ptr         data_ptr;
   typedef typename handler_types::error_type       error_type;
@@ -51,62 +49,11 @@ public:
   ~method_list_base()
   {
     _sender_handler = nullptr;
-    //_send_request = nullptr;
-    //_send_notify = nullptr;  
   }
   method_list_base()
   {
     _sender_handler = nullptr;
-    /*
-    _send_request = nullptr;
-    _send_notify = nullptr;  
-    */
   }
-  
-  /*
-  template<typename Params, typename Serializer>
-  void send_request( 
-    const char* name,
-    Params params,
-    Serializer ser,
-    result_handler_t  result_handler) const
-  {
-    super::get_aspect().template get<_send_request_>()(
-      *this,
-      name, 
-      std::move(params),
-      std::move(ser),
-      std::move(result_handler) 
-    );
-  }
-  */
-  
-  /*
-  void send_request( const char* name, result_handler_t handler, request_serializer_t ser) const
-  {
-    if ( this->_send_request != nullptr )
-    {
-      this->_send_request( name, std::move(handler), std::move(ser) );
-    }
-    else
-    {
-      IOW_LOG_FATAL("-1- (ABORT) iow::jsonrpc::method_list_base::send_request this->_send_request==nullptr")
-      abort();
-    }
-  }
-  */
-  /*
-  template<typename Params, typename Serializer>
-  void send_notify( const char* name, Params params, Serializer ser) const
-  {
-    super::get_aspect().template get<_send_notify_>()(
-      *this,
-      name, 
-      std::move(params),
-      std::move(ser)
-    );
-  }
-  */
   
   template<typename Params, typename NotifySerializer, typename RequestSerializer, typename ResultHandler >
   void perform_send( 
@@ -140,21 +87,6 @@ public:
       abort();
     }
   }
-
-  /*
-  void send_notify( const char* name, notify_serializer_t ser) const
-  {
-    if ( this->_send_notify != nullptr )
-    {
-      this->_send_notify( name, std::move(ser) );
-    }
-    else
-    {
-      IOW_LOG_FATAL(" (ABORT) iow::jsonrpc::method_list_base::send_notify this->_send_notify==nullptr")
-      abort();
-    }
-  }
-  */
 
   template<typename Tg>
   struct call_params_ptr
@@ -244,12 +176,6 @@ private:
 
   typedef typename handler_types::sender_handler_t   sender_handler_t;
   sender_handler_t _sender_handler = sender_handler_t(nullptr);
-  /*
-  typedef typename handler_types::send_request_t  send_request_t;
-  typedef typename handler_types::send_notify_t   send_notify_t;
-  send_request_t _send_request = send_request_t(nullptr);
-  send_notify_t  _send_notify = send_notify_t(nullptr);  
-  */
 
 };
 

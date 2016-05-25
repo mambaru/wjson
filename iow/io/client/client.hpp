@@ -100,14 +100,18 @@ public:
 
   data_ptr send(data_ptr d)
   {
+    IOW_LOG_DEBUG("-5- client::send -1-")
     std::lock_guard<mutex_type> lk( super::mutex() );
+    IOW_LOG_DEBUG("-5- client::send -2- " << d)
     
     if ( d==nullptr )
       return nullptr;    
 
     if ( _ready_for_write && _outgoing_handler!=nullptr )
     {
+      IOW_LOG_DEBUG("-5- client::send -3- " << d)
       _outgoing_handler( std::move(d) );
+      IOW_LOG_DEBUG("-5- client::send -3.1- " )
     }
     else
     {
@@ -131,13 +135,22 @@ private:
   template<typename Opt>
   void client_start_(Opt&& opt)
   {
+    IOW_LOG_DEBUG("-8- client_start_ ")
     super::start_(*this, opt.connection);
+    IOW_LOG_DEBUG("-8.1- client_start_ ")
   }
   
-  void startup_handler_(io_id_t, outgoing_handler_t outgoing)
+  void startup_handler_(io_id_t, outgoing_handler_t handler)
   {
+    IOW_LOG_DEBUG( "-X- client::startup_handler_" )
     _ready_for_write = true;
-    _outgoing_handler = outgoing;
+    auto tmp = [handler](data_ptr d)
+    {
+      IOW_LOG_DEBUG( "-X1- TMP cleint::startup_handler_ " << d )
+      handler(std::move(d));
+      IOW_LOG_DEBUG( "-X2- TMP cleint::startup_handler_ " << d )
+    };
+    _outgoing_handler = tmp;
   }
   
   template<typename OptPtr>
@@ -167,7 +180,9 @@ private:
       if ( auto pthis = wthis.lock() )
       {
         std::lock_guard<mutex_type> lk( pthis->mutex() );
+        IOW_LOG_DEBUG("-7- iow::client::initialize_-> client_start_ ")
         pthis->client_start_(*popt);
+        IOW_LOG_DEBUG("-7.1- iow::client::initialize_-> client_start_ ")
       }
     };
     

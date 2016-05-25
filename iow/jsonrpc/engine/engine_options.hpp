@@ -17,8 +17,9 @@ struct engine_options: HandlerOptions
   // ::iow::io::outgoing_handler_t io_response_handler;
   
   // не используется 
-  //bool direct_mode = false;
   bool allow_non_jsonrpc = false;
+  // максимальное время ожидания ответа на вызов (0 - неограничено)
+  time_t call_lifetime_ms = 0;
 };
 
 }}

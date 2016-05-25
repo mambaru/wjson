@@ -93,7 +93,7 @@ public:
   void reconfigure(O&& opt1)
   {
     typename std::decay<O>::type opt = opt1;
-
+    _call_map.set_lifetime( opt.call_lifetime_ms );
     _allow_non_jsonrpc = opt.allow_non_jsonrpc;
     
     _outgoing_rpc_factory = [opt, this](io_id_t io_id, jsonrpc_outgoing_handler_t handler, bool reg_io) -> handler_ptr
@@ -191,6 +191,17 @@ public:
   io_id_t get_id() const
   {
     return _io_id;
+  }
+  
+  /*
+  void set_call_lifetime(time_t lifetime_ms) 
+  {
+    _call_map.set_lifetime( lifetime_ms );
+  }*/
+  
+  size_t remove_outdated()
+  {
+    return _call_map.remove_outdated();
   }
 
 private:
