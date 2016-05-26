@@ -84,6 +84,8 @@ public:
     for (auto& t : _threads)
       t.join();
     
+    _threads.clear();
+    
     _started = false;
   }
   

@@ -1,122 +1,92 @@
 #pragma once
 
-#include <iow/asio.hpp>
-#include <iow/workflow/timer_manager.hpp>
-#include <iow/workflow/bique.hpp>
-#include <iow/workflow/queue_options.hpp>
-#include <iow/workflow/thread_pool.hpp>
+#include <iow/workflow/workflow_options.hpp>
+#include <iow/workflow/task_manager.hpp>
+#include <wfc/asio.hpp>
+#include <chrono>
+
 
 namespace iow{
- 
+
 class workflow
 {
+  typedef task_manager impl;
 public:
-  
-  typedef ::iow::asio::io_service io_service_type;
-  typedef bique queue_type;
-  typedef timer_manager<queue_type> timer_type;
-  typedef thread_pool<queue_type> pool_type;
+  typedef ::wfc::asio::io_service io_service_type;
+  typedef std::function< void() > post_handler;
+  typedef task_manager::timer_type timer_type;
+  typedef timer_type::timer_id_t timer_id_t;
+  typedef timer_type::time_point_t  time_point_t;
+  typedef timer_type::duration_t    duration_t;
 
-  workflow( io_service_type& io, const queue_options& opt )
-    : _threads(0)
-  {
-    // delayed отключен и пул потоков
-    _queue = std::make_shared<queue_type>(io, opt, true );
-    _timer = std::make_shared<timer_type>(_queue);
-    _pool = nullptr;
-  }
-  
-  workflow( const queue_options& opt, int threads )
-    : _threads(threads)
-  {
-    _queue = std::make_shared<queue_type>(opt);
-    _timer = std::make_shared<timer_manager<queue_type> >(_queue);
-    _pool = std::make_shared<pool_type>(_queue);
-  }
-  
-  workflow( io_service_type& io, const queue_options& opt, int threads, bool timed /*= false*/  )
-    : _threads(threads)
-  {
-    _queue = std::make_shared<queue_type>(io, opt, threads==0 || timed );
-    _timer = std::make_shared<timer_type>(_queue);
-    _pool = std::make_shared<pool_type>(_queue);
-  }
-  
-  void rate_limit(size_t rps) 
-  {
-    if ( _pool!=nullptr) 
-      _pool->rate_limit(rps);
-  }
-  
-  void reconfigure(const queue_options& opt, int threads, bool timed /*= false*/ )
-  {
-    _threads = threads;
-    _queue->reconfigure(opt, threads==0 || timed );
-  }
+  typedef timer_type::handler1 timer_handler;
+  typedef timer_type::handler_callback  callback_timer_handler;
+  typedef timer_type::handler2 async_timer_handler;
 
-  void start()
+public:  
+  virtual ~workflow();
+  workflow(const workflow& ) = delete;
+  workflow& operator=(const workflow& ) = delete;
+  
+  explicit workflow(workflow_options opt = workflow_options() );
+  workflow(io_service_type& io, workflow_options opt = workflow_options() );
+  
+  std::shared_ptr<impl> get() const;
+  
+  void start();
+  void reconfigure(workflow_options opt);
+  void stop();
+
+  bool post(post_handler handler);
+  bool post(time_point_t, post_handler handler);
+  bool post(duration_t,   post_handler handler);
+
+  timer_id_t create_timer(duration_t, timer_handler, bool = true);
+  timer_id_t create_async_timer(duration_t, async_timer_handler, bool = true);
+
+  timer_id_t create_timer(duration_t, duration_t, timer_handler, bool = true);
+  timer_id_t create_async_timer(duration_t, duration_t, async_timer_handler, bool = true);
+
+  timer_id_t create_timer(time_point_t, duration_t, timer_handler, bool = true);
+  timer_id_t create_async_timer(time_point_t, duration_t, async_timer_handler, bool = true);
+
+  timer_id_t create_timer(std::string, duration_t, timer_handler, bool = true);
+  timer_id_t create_async_timer(std::string, duration_t, async_timer_handler, bool = true);
+  
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create_requester( duration_t d, std::shared_ptr<I> i, MemFun mem_fun, Handler handler )
   {
-    if ( _pool!=nullptr) 
-      _pool->start(_threads);
+    return _impl->timer()->create<Req, Res>( d, i, mem_fun, std::move(handler) );
   }
 
-  void stop()
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create_requester( duration_t sd, duration_t d, std::shared_ptr<I> i, MemFun mem_fun, Handler handler )
   {
-    _timer->clear();
-    _queue->stop();
-    if ( _pool!=nullptr) 
-      _pool->stop();
-    _queue->reset();
+    return _impl->timer()->create<Req, Res>( sd, d, i, mem_fun, std::move(handler) );
   }
 
-  void run()
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create_requester( std::string st, duration_t d, std::shared_ptr<I> i, MemFun mem_fun, Handler handler )
   {
-    _queue->run();
-  }
-  
-  bool run_one()
-  {
-    return _queue->run_one();
-  }
-  
-  bool poll_one()
-  {
-    return _queue->poll_one();
-  }
-  
-  template<typename F>
-  bool post( F f )
-  {
-    return _queue->post(std::forward<F>(f) );
-  }
-  
-  template<typename TP, typename F>
-  bool post_at(TP tp, F f)
-  {
-    return _queue->post_at( std::forward<TP>(tp), std::forward<F>(f));
+    return _impl->timer()->create<Req, Res>(st, d, i, mem_fun, std::move(handler) );
   }
 
-  template<typename D, typename F>
-  bool delayed_post(D duration, F f)
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create_requester( time_point_t tp, duration_t d, std::shared_ptr<I> i, MemFun mem_fun, Handler handler )
   {
-    return _queue->delayed_post( std::forward<D>(duration), std::forward<F>(f));
-  }
-  
-  std::size_t size() const
-  {
-    return _queue->size();
-  }
-  
-  std::shared_ptr<timer_type> timer()
-  {
-    return _timer;
+    return _impl->timer()->create<Req, Res>( tp, d, i, mem_fun, std::move(handler) );
   }
 
+  std::shared_ptr<bool> detach_timer(timer_id_t );
+  
+  bool release_timer( timer_id_t id );
+  
+  size_t timer_size() const;
+  size_t queue_size() const;
+  
 private:
-  std::atomic<int> _threads;
-  std::shared_ptr<queue_type> _queue;
-  std::shared_ptr<timer_type> _timer;
-  std::shared_ptr<pool_type>  _pool;
+  std::atomic<time_t> _delay_ms;
+  std::shared_ptr<impl> _impl;
 };
 
 }

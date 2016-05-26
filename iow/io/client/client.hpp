@@ -33,7 +33,6 @@ public:
     , _ready_for_write(false)
     , _reconnect_timeout_ms(0)
   {
-    _workflow = std::make_shared< ::iow::workflow >(io, ::iow::queue_options() );
   }
   
   client( io_service_type& io, descriptor_type&& desc)
@@ -42,7 +41,7 @@ public:
     , _ready_for_write(false)
     , _reconnect_timeout_ms(0)
   {
-    _workflow = std::make_shared< ::iow::workflow >(io, ::iow::queue_options() );
+    //_workflow = std::make_shared< ::iow::workflow >(io, ::iow::queue_options() );
   }
   
   template<typename Opt>
@@ -147,7 +146,7 @@ private:
   template<typename OptPtr>
   void delayed_reconnect_(OptPtr popt)
   {
-    _workflow->delayed_post( 
+    _workflow->post( 
       std::chrono::milliseconds( this->_reconnect_timeout_ms ),
       [popt, this](){
         this->connect(*popt);

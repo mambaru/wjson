@@ -47,7 +47,10 @@ struct call
     using namespace std::placeholders;
     std::function<data_ptr(const char* name, params_ptr)> ns = std::bind( TT::template serialize_notify<T, params_json>, _1, _2);
     std::function<data_ptr(const char* name, params_ptr, call_id_t )> rs = std::bind( TT::template serialize_request<T, params_json>, _1, _2, _3);
-    std::function<void(incoming_holder holder)> rh = std::bind( TT::template process_response<T, result_json, error_json>, _1, callback );
+    std::function<void(incoming_holder holder)> rh = t.wrap( [callback](incoming_holder holder)
+    { 
+      TT::template process_response<T, result_json, error_json>( std::move(holder), std::move(callback) ); 
+    });
     
     t.perform_send( 
       tt.name(), 

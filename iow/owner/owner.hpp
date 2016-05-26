@@ -40,7 +40,7 @@ public:
   
   template<typename Handler>
   owner_handler<typename std::remove_reference<Handler>::type>
-  wrap(Handler&& h)
+  wrap(Handler&& h) const
   {
     return
       owner_handler< 
@@ -53,7 +53,7 @@ public:
 
   template<typename Handler>
   owner_handler<typename std::remove_reference<Handler>::type>
-  callback(Handler&& h)
+  callback(Handler&& h) const
   {
     return this->wrap( std::forward<Handler>(h) );
   }
@@ -63,7 +63,7 @@ public:
     typename std::remove_reference<Handler>::type, 
     typename std::remove_reference<AltHandler>::type
   >
-  wrap(Handler&& h, AltHandler&& nh)
+  wrap(Handler&& h, AltHandler&& nh) const
   {
     return 
       owner_handler2<
@@ -86,7 +86,7 @@ public:
 
 private:
 
-  alive_type _alive;
+  mutable alive_type _alive;
 };
 
 }

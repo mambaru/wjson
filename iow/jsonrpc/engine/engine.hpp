@@ -7,6 +7,7 @@
 #include <iow/jsonrpc/outgoing/outgoing_holder.hpp>
 #include <iow/jsonrpc/types.hpp>
 #include <iow/jsonrpc/incoming/aux.hpp>
+#include <iow/owner/owner.hpp>
 #include <iow/io/io_id.hpp>
 
 #include <type_traits>
@@ -67,15 +68,20 @@ public:
   typedef typename handler_type::outgoing_handler_t jsonrpc_outgoing_handler_t;
   typedef typename handler_type::data_ptr data_ptr;
   typedef typename outgoing_holder::call_id_t call_id_t;
+  
+  typedef ::iow::workflow workflow_type;
+  typedef workflow_type::timer_id_t timer_id_t;
+  
+  typedef ::iow::owner owner_type;
 
   ~engine()
   {
-    _handler_map.stop();
-    _call_map.clear();
+    this->stop();
   }
   
   engine()
     : _call_counter(1)
+    , _timer_id(0)
   {
   }
   /***************************************************************/
@@ -93,6 +99,7 @@ public:
   void reconfigure(O&& opt1)
   {
     typename std::decay<O>::type opt = opt1;
+    _workflow = opt.engine_args.workflow;
     _call_map.set_lifetime( opt.call_lifetime_ms );
     _allow_non_jsonrpc = opt.allow_non_jsonrpc;
     
@@ -110,10 +117,28 @@ public:
     {
       return this->create_handler_(io_id, opt, std::move(handler), reg_io );
     };
+    
+    _workflow->release_timer( _timer_id );
+    if ( opt.remove_outdated_ms != 0 )
+    {
+      _timer_id = _workflow->create_timer(
+        std::chrono::milliseconds(opt.remove_outdated_ms),
+        [this]() -> bool 
+        {
+          if ( size_t count = this->remove_outdated() )
+          {
+            COMMON_LOG_WARNING( count << " calls is outdated.");
+          }
+          return true;
+        }
+      );
+    }
+
   }
 
   void stop()
   {
+    _workflow->release_timer(_timer_id);
     _handler_map.stop();
     _call_map.clear();
   }
@@ -192,12 +217,6 @@ public:
   {
     return _io_id;
   }
-  
-  /*
-  void set_call_lifetime(time_t lifetime_ms) 
-  {
-    _call_map.set_lifetime( lifetime_ms );
-  }*/
   
   size_t remove_outdated()
   {
@@ -436,13 +455,14 @@ private:
 
   typedef handler_map<handler_type> handler_map_t;
   handler_map_t _handler_map;
-  //handler_ptr _common_handler;
   call_map _call_map;
   std::atomic<int> _call_counter;
-  //std::atomic<bool> _direct_mode;
   std::atomic<io_id_t> _io_id;
-
+  timer_id_t _timer_id;
+  owner_type _owner;
+  
   bool _allow_non_jsonrpc = false;
+  std::shared_ptr< ::iow::workflow > _workflow;
 };
 
 }}

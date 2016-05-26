@@ -2,6 +2,8 @@
 
 #include <fas/aop.hpp>
 #include <iow/mutex.hpp>
+#include <iow/owner/owner.hpp>
+#include <iow/memory.hpp>
 #include <mutex>
 
 
@@ -13,11 +15,20 @@ class handler_map
 public:
   typedef Handler handler_type;
   typedef std::shared_ptr<handler_type> handler_ptr;
+  typedef ::iow::owner  owner_type;
+  typedef std::shared_ptr< owner_type > owner_ptr;
   typedef typename handler_type::io_id_t io_id_t;
+
+  struct data
+  {
+    handler_ptr first;
+    bool second;
+    /*owner_ptr owner;*/
+  };
 
   handler_ptr find(io_id_t io_id) const
   {
-    std::lock_guard<mutex_type> lk(_mutex);
+    read_lock< mutex_type > lk(_mutex);
     auto itr = _handlers.find(io_id);
     if ( itr == _handlers.end() )
       return nullptr;
@@ -39,7 +50,7 @@ public:
     }
     reinit = true;
     auto handler = std::make_shared<handler_type>();
-    _handlers[io_id] = std::make_pair(handler, reg_io);
+    _handlers[io_id] = data{handler, reg_io/*, std::make_shared< owner_type >()*/};
     return handler;
   }
 
@@ -69,10 +80,21 @@ public:
       }
     }
   }
+  
+  /*
+  owner_ptr owner( io_id_t io_id ) const 
+  {
+    read_lock< mutex_type > lk(_mutex);
+    auto itr = _handlers.find( io_id );
+    if ( itr == _handlers.end() )
+      return nullptr;
+    return itr->second->owner;
+  }
+  */
 
 private:
-  typedef std::map<io_id_t, std::pair<handler_ptr, bool> > handler_map_t;
-  typedef std::mutex mutex_type;
+  typedef std::map<io_id_t, data > handler_map_t;
+  typedef rwlock<std::mutex> mutex_type;
 
   handler_map_t _handlers;
   mutable mutex_type _mutex;

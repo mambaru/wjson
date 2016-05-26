@@ -97,7 +97,7 @@ public:
   };
   
   template<typename Handler>
-  auto wrap(Handler&& h)
+  auto wrap(Handler&& h) const
     -> typename result_of<_wrap_, Handler>::type
   {
     std::lock_guard< mutex_type > lk(_mutex);
@@ -105,7 +105,7 @@ public:
   }
 
   template<typename Handler, typename AltHandler>
-  auto wrap(Handler&& h, AltHandler&& ah)
+  auto wrap(Handler&& h, AltHandler&& ah) const
     -> typename result_of<_wrap_, Handler, AltHandler>::type
   {
     std::lock_guard< mutex_type > lk(_mutex);
@@ -161,14 +161,14 @@ public:
   }
 
   template<typename T, typename Handler>
-  auto wrap_(T& t, Handler&& h) 
+  auto wrap_( T& t, Handler&& h) const
     -> typename result_of<_wrap_, Handler>::type
   {
     return t.get_aspect().template get<_wrap_>()(t, std::forward<Handler>(h) );
   }
 
   template<typename T, typename Handler, typename AltHandler>
-  auto wrap_(T& t, Handler&& h, AltHandler&& ah) 
+  auto wrap_( T& t, Handler&& h, AltHandler&& ah) const
     -> typename result_of<_wrap_, Handler, AltHandler>::type
   {
     return t.get_aspect().template get<_wrap_>()(t, std::forward<Handler>(h), std::forward<AltHandler>(ah) );
