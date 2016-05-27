@@ -22,9 +22,10 @@ public:
   typedef std::priority_queue< time_pair > time_queue;
   typedef std::deque<call_id_t> call_list;
   
-  void set_lifetime(time_t lifetime_ms) 
+  void set_lifetime(time_t lifetime_ms, bool everytime) 
   {
     std::lock_guard<mutex_type> lk(_mutex);
+    _everytime = everytime;
     _lifetime_ms = lifetime_ms;
     if ( _lifetime_ms == 0 )
     {
@@ -35,6 +36,7 @@ public:
 
   void set(call_id_t call_id, result_handler_t result)
   {
+    if ( _everytime ) this->remove_outdated();
     std::lock_guard<mutex_type> lk(_mutex);
     _result_map[call_id] = result;
     if ( _lifetime_ms != 0 )
@@ -45,8 +47,8 @@ public:
   
   result_handler_t detach(call_id_t call_id)
   {
+    if ( _everytime ) this->remove_outdated();
     std::lock_guard<mutex_type> lk(_mutex);
-    
     result_handler_t result = nullptr;
     auto itr = _result_map.find(call_id);
     if ( itr!=_result_map.end() )

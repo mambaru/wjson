@@ -54,6 +54,9 @@ struct array;
 template<typename C, typename R = fas::empty_type>
 struct array_r;
 
+template<int Reserve>
+struct vector_of_strings;
+
 template<typename K, typename V>
 struct pair;
 
@@ -564,13 +567,14 @@ struct object2array: array< pair<KJ,VJ>, R > {};
 
 
 template<int Reserve>
-struct array_of_strings: array< std::vector< value< std::string > >,  Reserve> {};
+struct vector_of_strings: array< std::vector< value< std::string > >,  Reserve> {};
 
+/*
 struct binary: value< std::vector<char> > {};
 
 template<int Reserve>
 struct array_of_binary: array< std::vector< binary >, Reserve > {};
-
+*/
 
 /// //////////////////////////////////////////////////////////////////////////////
 

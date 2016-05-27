@@ -100,7 +100,7 @@ public:
   {
     typename std::decay<O>::type opt = opt1;
     _workflow = opt.engine_args.workflow;
-    _call_map.set_lifetime( opt.call_lifetime_ms );
+    _call_map.set_lifetime( opt.call_lifetime_ms, opt.remove_everytime );
     _allow_non_jsonrpc = opt.allow_non_jsonrpc;
     
     _outgoing_rpc_factory = [opt, this](io_id_t io_id, jsonrpc_outgoing_handler_t handler, bool reg_io) -> handler_ptr

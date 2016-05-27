@@ -10,11 +10,10 @@
 
 namespace iow{ namespace jsonrpc{
 
-template< 
-  typename A = fas::aspect<>
->
+template< typename A = fas::aspect<> >
 class method_list_base
   : public ::iow::io::io_base<A>
+  // , std::enable_shared_from_this< method_list_base<A> >
 {
 public:
   typedef ::iow::io::io_base<A> super;
@@ -138,12 +137,12 @@ public:
     )> callback_type;
     
     using namespace std::placeholders;
-    callback_type callback = nullptr;
+    callback_type callback = /*nullptr;
     if ( result_callback!=nullptr )
     {
-      callback = std::bind( self::response_handler<Tg>, _1, _2, 
+      callback =*/ std::bind( self::response_handler<Tg>, _1, _2, 
                             result_callback, error_callback);
-    }
+    /*}*/
     
     this->get_aspect().template get<Tg>().call( 
       *this, 
