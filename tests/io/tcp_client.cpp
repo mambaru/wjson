@@ -38,7 +38,7 @@ int main()
   
   options_type opt;
   opt.connect_count = connect_count;
-  opt.connect_handler = []()
+  opt.args.connect_handler = []()
   {
     std::cout << "connect ready" << std::endl;
     --connect_count;

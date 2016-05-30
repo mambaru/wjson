@@ -6,6 +6,7 @@
 #include <mutex>
 #include <vector>
 #include <chrono>
+#include <atomic>
 
 namespace iow {
 
