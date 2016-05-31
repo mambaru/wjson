@@ -5,7 +5,6 @@ namespace iow{
 
 struct workflow_options: queue_options
 {
-  bool enabled = false;
   bool use_io_service = false;
   int  threads = 0;
   
