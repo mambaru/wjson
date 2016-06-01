@@ -41,6 +41,12 @@ public:
     _timer = std::make_shared<timer_type>(_queue);
     _pool = std::make_shared<pool_type>(_queue);
   }
+
+  void reconfigure(const queue_options& opt, int threads, bool timed /*= false*/ )
+  {
+    _threads = threads;
+    _queue->reconfigure(opt, threads==0 || timed );
+  }
   
   void rate_limit(size_t rps) 
   {
@@ -48,11 +54,6 @@ public:
       _pool->rate_limit(rps);
   }
   
-  void reconfigure(const queue_options& opt, int threads, bool timed /*= false*/ )
-  {
-    _threads = threads;
-    _queue->reconfigure(opt, threads==0 || timed );
-  }
 
   void start()
   {
