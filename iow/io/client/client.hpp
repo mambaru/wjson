@@ -62,15 +62,16 @@ public:
     _ready_for_write = false;
     _reconnect_timeout_ms = opt.reconnect_timeout_ms;
 
-    this->initialize_(opt);
+    this->upgrate_options_(opt);
     super::connect_( *this, opt );
   }
 
   template<typename Opt>
-  void connect(Opt&& opt)
+  void connect(Opt opt)
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
-    super::connect_( *this, std::forward<Opt>(opt) );
+    this->upgrate_options_(opt);
+    super::connect_( *this, /*std::forward<Opt>(*/opt/*)*/ );
   }
 
   void stop()
@@ -128,40 +129,113 @@ public:
 private:
   
   template<typename Opt>
-  void client_start_(Opt&& opt)
+  void client_start_(Opt opt)
   {
+    this->upgrate_options_(opt);
     super::start_(*this, opt.connection);
+  }
+
+  
+  void client_stop_()
+  {
+    super::stop_(*this);
+    _ready_for_write = false;
+    _outgoing_handler = nullptr;
   }
   
   void startup_handler_(io_id_t, outgoing_handler_t handler)
   {
     _ready_for_write = true;
-    auto tmp = [handler](data_ptr d)
-    {
-      handler(std::move(d));
-    };
-    _outgoing_handler = tmp;
+    _outgoing_handler = handler;
   }
   
-  template<typename OptPtr>
-  void delayed_reconnect_(OptPtr popt)
+  template<typename Opt>
+  void delayed_reconnect_(Opt opt)
   {
     _workflow->post( 
       std::chrono::milliseconds( this->_reconnect_timeout_ms ),
-      [popt, this](){
-        this->connect(*popt);
+      [opt, this]() mutable
+      {
+        this->upgrate_options_(opt);
+        this->connect_( *this, opt );
       }
     );
   }
-
+  
   template<typename Opt>
-  void initialize_(Opt& opt)
+  void upgrate_options_(Opt& opt)
   {
+    Opt opt2 = opt;
+    std::weak_ptr<self> wthis = this->shared_from_this();
+    opt.args.connect_handler = this->wrap([wthis, opt2]()
+    {
+      if ( opt2.args.connect_handler!=nullptr ) 
+        opt2.args.connect_handler();
+
+      if ( auto pthis = wthis.lock() )
+      {
+        std::lock_guard<mutex_type> lk( pthis->mutex() );
+        pthis->client_start_(opt2);
+      }
+    });
+
+    opt.args.error_handler = this->wrap([wthis, opt2](::iow::system::error_code ec)
+    {
+      IOW_LOG_MESSAGE("iow::io::client error handler" )
+      
+      if ( opt2.args.error_handler!=nullptr ) 
+        opt2.args.error_handler(ec);
+      if ( auto pthis = wthis.lock() )
+      {
+        std::lock_guard<mutex_type> lk( pthis->mutex() );
+        pthis->_ready_for_write = false;
+        pthis->delayed_reconnect_(opt2);
+      }
+    });
+    
+    opt.connection.shutdown_handler = this->wrap([wthis, opt2]( io_id_t io_id) 
+    {
+      IOW_LOG_MESSAGE("iow::io::client connection shutdown handler" )
+      if ( opt2.connection.shutdown_handler!=nullptr ) 
+        opt2.connection.shutdown_handler(io_id);
+      
+      if ( auto pthis = wthis.lock() )
+      {
+        std::lock_guard<mutex_type> lk( pthis->mutex() );
+        pthis->_ready_for_write = false;
+        pthis->delayed_reconnect_(opt2);
+      }
+    });
+
+    opt.connection.startup_handler = [wthis, opt2]( io_id_t io_id, outgoing_handler_t outgoing)
+    {
+      if ( auto pthis = wthis.lock() )
+      {
+        std::lock_guard<mutex_type> lk( pthis->mutex() );
+        pthis->startup_handler_(io_id, outgoing);
+      }
+
+      if ( opt2.connection.startup_handler != nullptr )
+      {
+        opt2.connection.startup_handler( io_id, outgoing);
+      }
+    };
+
+    if ( opt2.connection.incoming_handler == nullptr )
+    {
+      opt2.connection.incoming_handler
+        = [wthis]( data_ptr d, io_id_t /*o_id*/, outgoing_handler_t /*outgoing*/)
+      {
+        IOW_LOG_ERROR("Client incoming_handler not set [" << d << "]" )
+      }; 
+    }
+
+    /*
     auto popt = std::make_shared<Opt>(opt);
-    auto startup_handler  = popt->connection.startup_handler;
-    auto shutdown_handler = popt->connection.shutdown_handler;
-    auto connect_handler  = popt->args.connect_handler;
-    auto error_handler    = popt->args.error_handler;
+    auto startup_handler  = opt.connection.startup_handler;
+    auto shutdown_handler = opt.connection.shutdown_handler;
+    auto connect_handler  = opt.args.connect_handler;
+    auto error_handler    = opt.args.error_handler;
 
     std::weak_ptr<self> wthis = this->shared_from_this();
     popt->args.connect_handler = [wthis, connect_handler, popt]()
@@ -212,13 +286,14 @@ private:
     if ( popt->connection.incoming_handler == nullptr )
     {
       popt->connection.incoming_handler
-        = [wthis]( data_ptr d, io_id_t /*io_id*/, outgoing_handler_t /*outgoing*/)
+        = [wthis]( data_ptr d, io_id_t o_id, outgoing_handler_t outgoing)
       {
         IOW_LOG_ERROR("Client incoming_handler not set [" << d << "]" )
       }; 
     }
 
     opt = *popt;
+    */
   }
 private:
   bool _started;

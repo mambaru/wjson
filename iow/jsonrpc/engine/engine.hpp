@@ -117,28 +117,32 @@ public:
     {
       return this->create_handler_(io_id, opt, std::move(handler), reg_io );
     };
-    
-    _workflow->release_timer( _timer_id );
-    if ( opt.remove_outdated_ms != 0 )
+
+    if ( auto wf = _workflow.lock() )
     {
-      _timer_id = _workflow->create_timer(
-        std::chrono::milliseconds(opt.remove_outdated_ms),
-        [this]() -> bool 
-        {
-          if ( size_t count = this->remove_outdated() )
+      wf->release_timer( _timer_id );
+      if ( opt.remove_outdated_ms != 0 )
+      {
+        _timer_id = wf->create_timer(
+          std::chrono::milliseconds(opt.remove_outdated_ms),
+          [this]() -> bool 
           {
-            COMMON_LOG_WARNING( count << " calls is outdated.");
+            if ( size_t count = this->remove_outdated() )
+            {
+              COMMON_LOG_WARNING( count << " calls is outdated.");
+            }
+            return true;
           }
-          return true;
-        }
-      );
+        );
+      }
     }
 
   }
 
   void stop()
   {
-    _workflow->release_timer(_timer_id);
+    if ( auto wf = _workflow.lock() )
+      wf->release_timer(_timer_id);
     _handler_map.stop();
     _call_map.clear();
   }
@@ -245,7 +249,15 @@ private:
     }
     else
     {
-      JSONRPC_LOG_ERROR( "jsonrpc::engine: Invalid Request: " << holder.str() )
+      auto errreq = holder.str();
+      if ( errreq.empty() )
+      {
+        JSONRPC_LOG_ERROR( "jsonrpc::engine: Bad Gateway" )
+      }
+      else
+      {
+        JSONRPC_LOG_ERROR( "jsonrpc::engine: Invalid Request: " << errreq << " : " << holder.is_error() )
+      }
       aux::send_error( std::move(holder), std::make_unique<invalid_request>(), std::move(handler) );
     }
   }
@@ -462,7 +474,7 @@ private:
   owner_type _owner;
   
   bool _allow_non_jsonrpc = false;
-  std::shared_ptr< ::iow::workflow > _workflow;
+  std::weak_ptr< ::iow::workflow > _workflow;
 };
 
 }}

@@ -15,7 +15,7 @@ struct engine_options: HandlerOptions
   bool   remove_everytime = true;
   
   struct {
-    std::shared_ptr< ::iow::workflow > workflow;
+    std::weak_ptr< ::iow::workflow > workflow;
   } engine_args;
 };
 

@@ -4,7 +4,7 @@
 #include <iow/jsonrpc/outgoing/outgoing_request.hpp>
 #include <iow/jsonrpc/outgoing/outgoing_request_json.hpp>
 #include <fas/aop.hpp>
-#include <memory>
+#include <iow/memory.hpp>
 
 namespace iow{ namespace jsonrpc{
 
