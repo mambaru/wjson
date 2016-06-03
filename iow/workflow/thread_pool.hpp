@@ -115,7 +115,7 @@ private:
           if ( pthis->_rate_limit != 0 )
           {
             ++count;
-            if ( count > pthis->_rate_limit )
+            if ( count >= pthis->_rate_limit )
             {
               auto now = std::chrono::system_clock::now();
               auto tm_ms = std::chrono::duration_cast< std::chrono::milliseconds >( now - start ).count();
