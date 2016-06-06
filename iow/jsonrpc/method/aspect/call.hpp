@@ -56,7 +56,6 @@ struct call
     //TODO: вынести в метод call
     auto callback = t.wrap( [callback1](result_ptr r, error_ptr e) 
     {
-      std::cout << "OOOOOOOOOOOOOOOOOOOOO" << std::endl;
       callback1( std::move(r), std::move(e) ); }
     );
     std::function<void(incoming_holder holder)> rh = t.wrap( [callback](incoming_holder holder)
