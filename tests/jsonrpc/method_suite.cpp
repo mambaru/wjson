@@ -31,7 +31,7 @@ UNIT(incoming_unit, "")
     incoming_holder h( std::make_unique<data_type>(r.begin(), r.end()) );
     t << message("good parse: ") <<  r;
     t << flush;
-    h.parse();
+    h.parse(nullptr);
   }
   
   for (auto r : bad_parse )
@@ -40,7 +40,7 @@ UNIT(incoming_unit, "")
     try
     {
       t << message("bad parse: ") <<  r;
-      h.parse();
+      h.parse(nullptr);
       t << fatal("GOOD PARSE");
     }
     catch(const iow::json::json_error& e)

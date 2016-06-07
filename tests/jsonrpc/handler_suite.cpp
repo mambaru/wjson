@@ -24,7 +24,7 @@ UNIT(nohandler_unit, "")
   {
     auto req = std::make_unique< iow::jsonrpc::data_type>( r[0].begin(), r[0].end() );
     incoming_holder hold( std::move(req) );
-    hold.parse();
+    hold.parse(nullptr);
     h.invoke(std::move(hold), [&t, r](iow::jsonrpc::data_ptr res)
     {
       t << message("request: ") << r[0];
@@ -127,7 +127,7 @@ UNIT(handler1_unit, "")
   {
     auto req = std::make_unique< iow::jsonrpc::data_type>( r[0].begin(), r[0].end() );
     incoming_holder hold( std::move(req) );
-    hold.parse();
+    hold.parse(nullptr);
     
     h.invoke(std::move(hold), [&t, unavailable, r](iow::jsonrpc::data_ptr res)
     {
@@ -158,7 +158,7 @@ UNIT(handler2_unit, "")
   {
     auto req = std::make_unique< iow::jsonrpc::data_type>( r[0].begin(), r[0].end() );
     incoming_holder hold( std::move(req) );
-    hold.parse();
+    hold.parse(nullptr);
     
     h.invoke( std::move(hold), [&t,r](iow::jsonrpc::data_ptr res)
     {

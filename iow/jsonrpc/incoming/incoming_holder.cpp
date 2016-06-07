@@ -1,6 +1,7 @@
 #include <iow/jsonrpc/incoming/incoming_holder.hpp>
 #include <iow/jsonrpc/outgoing/outgoing_holder.hpp>
 #include <iow/jsonrpc/method/aspect/send_error.hpp>
+#include <iow/jsonrpc/incoming/aux.hpp>
 #include <iow/jsonrpc/errors.hpp>
 #include <iow/jsonrpc/types.hpp>
 #include <iow/logger/logger.hpp>
@@ -24,14 +25,24 @@ void incoming_holder::attach(data_ptr d, bool timepoint)
 }
 
 
-incoming_holder::data_ptr incoming_holder::parse()
+incoming_holder::data_ptr incoming_holder::parse(outgoing_handler_t error_handler)
 {
   if ( _data == nullptr )
     return nullptr;
 
   _begin = ::iow::json::parser::parse_space(_data->begin(), _data->end());
-  _end = incoming_json::serializer()( _incoming, _begin, _data->end());
-  _parsed = true;
+  try
+  {
+    _end = incoming_json::serializer()( _incoming, _begin, _data->end());
+    _parsed = true;
+  }
+  catch( ::iow::json::json_error& )
+  {
+    incoming_holder eh( this->detach() );
+    aux::send_error( std::move(eh), std::make_unique<parse_error>(), error_handler );
+    return nullptr;
+  }
+  
   iterator next = ::iow::json::parser::parse_space( _end, _data->end());
   if ( next == _data->end() || *next=='\0')
     return nullptr;

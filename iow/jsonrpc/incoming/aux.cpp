@@ -9,16 +9,32 @@ namespace iow{ namespace jsonrpc{ namespace aux{
 
   namespace{
 
+    
     template<typename OutgoingHandler>
     data_ptr incoming_holder_perform_once(
       data_ptr d, io_id_t io_id, OutgoingHandler outgoing_handler, 
       std::function<void(incoming_holder, io_id_t, OutgoingHandler)> incoming_handler 
     )
     {
+      /*
+      incoming_holder holder(std::move(d));
+      d = holder.parse(outgoing_handler);
+      if ( holder.is_valid() )
+      {
+        incoming_handler( std::move(holder), io_id, std::move(outgoing_handler));
+      } 
+      else if ( holder )
+      {
+        JSONRPC_LOG_WARNING( "Invalid Request: " << holder.str() );
+        send_error( std::move(holder), std::make_unique<invalid_request>(), std::move(outgoing_handler));
+      }
+      return std::move(d);
+      */
+      
       incoming_holder holder(std::move(d));
       try
       {
-        d = holder.parse();
+        d = holder.parse(nullptr);
       }
       catch(const json::json_error& er)
       {
@@ -31,14 +47,21 @@ namespace iow{ namespace jsonrpc{ namespace aux{
       {
         incoming_handler( std::move(holder), io_id, std::move(outgoing_handler));
       }
-      else
+      else if ( holder )
       {
         JSONRPC_LOG_WARNING( "jsonrpc error: " << holder.str() );
         send_error( std::move(holder), std::make_unique<invalid_request>(), std::move(outgoing_handler));
+        return nullptr;
+      }
+      else
+      {
+        JSONRPC_LOG_WARNING( "Parse Error: " << holder.str() )
+        send_error( std::move(holder), std::make_unique<parse_error>(), std::move(outgoing_handler));
+        return nullptr;
       }
       return std::move(d);
     }
-  
+
     template<typename OutgoingHandler>
     void perform_impl_t(
       data_ptr d, io_id_t io_id, OutgoingHandler outgoing_handler, 
@@ -119,25 +142,6 @@ void perform(
     std::function<void(incoming_holder, io_id_t, outgoing_handler_t)> incoming_handler )
 {
   perform_impl_t( std::move(d), io_id, std::move(outgoing_handler), std::move(incoming_handler));
-  /*
-  try
-  {
-    while (d != nullptr)
-    {
-      d = incoming_holder_perform_once(std::move(d), io_id, outgoing_handler, incoming_handler);
-    }
-  }
-  catch(const std::exception& ex)
-  {
-    JSONRPC_LOG_ERROR( "jsonrpc::engine: server error: " << ex.what() )
-    send_error( std::move(incoming_holder(nullptr)), std::make_unique<server_error>(), std::move(outgoing_handler));
-  }
-  catch(...)
-  {
-    JSONRPC_LOG_ERROR( "jsonrpc::engine: server error: " << "unhandler exception" )
-    send_error( std::move(incoming_holder(nullptr)), std::make_unique<server_error>(), std::move(outgoing_handler));
-  }
-  */
 }
 
 void perform(
@@ -146,27 +150,6 @@ void perform(
 )
 {
   perform_impl_t( std::move(d), io_id, std::move(outgoing_handler), std::move(incoming_handler));
-  
-  //perform_impl_t< ::iow::io::outgoing_handler_t>( std::move(d), io_id, std::move(outgoing_handler), std::move(incoming_handler));
-  /*
-  try
-  {
-    while (d != nullptr)
-    {
-      d = incoming_holder_perform_once(std::move(d), io_id, outgoing_handler, incoming_handler);
-    }
-  }
-  catch(const std::exception& ex)
-  {
-    JSONRPC_LOG_ERROR( "jsonrpc::engine: server error: " << ex.what() )
-    send_error( std::move(incoming_holder(nullptr)), std::make_unique<server_error>(), std::move(outgoing_handler));
-  }
-  catch(...)
-  {
-    JSONRPC_LOG_ERROR( "jsonrpc::engine: server error: " << "unhandler exception" )
-    send_error( std::move(incoming_holder(nullptr)), std::make_unique<server_error>(), std::move(outgoing_handler));
-  }
-  */
 }
 
 }}}

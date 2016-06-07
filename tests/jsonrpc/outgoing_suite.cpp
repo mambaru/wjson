@@ -7,7 +7,7 @@ UNIT(outgoing1_unit, "")
 {
   using namespace fas::testing;
   using namespace ::iow::jsonrpc;
-  
+  t << nothing;
 }
 
 
