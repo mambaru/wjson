@@ -11,9 +11,13 @@ namespace iow{
 class task_manager
 {
 public:
-  
-  typedef ::iow::asio::io_service io_service_type;
   typedef bique queue_type;
+
+  typedef std::function<void()>                               function_t;
+  typedef std::chrono::time_point<std::chrono::system_clock>  time_point_t;
+  typedef time_point_t::duration                              duration_t;
+  typedef ::iow::asio::io_service io_service_type;
+
   typedef timer_manager<queue_type> timer_type;
   typedef thread_pool<queue_type> pool_type;
 
@@ -34,18 +38,18 @@ public:
     _pool = std::make_shared<pool_type>(_queue);
   }
   
-  task_manager( io_service_type& io, const queue_options& opt, int threads, bool timed /*= false*/  )
+  task_manager( io_service_type& io, const queue_options& opt, int threads, bool use_asio /*= false*/  )
     : _threads(threads)
   {
-    _queue = std::make_shared<queue_type>(io, opt, threads==0 || timed );
+    _queue = std::make_shared<queue_type>(io, opt, threads==0 || use_asio );
     _timer = std::make_shared<timer_type>(_queue);
     _pool = std::make_shared<pool_type>(_queue);
   }
 
-  void reconfigure(const queue_options& opt, int threads, bool timed /*= false*/ )
+  void reconfigure(const queue_options& opt, int threads, bool use_asio /*= false*/ )
   {
     _threads = threads;
-    _queue->reconfigure(opt, threads==0 || timed );
+    _queue->reconfigure(opt, threads==0 || use_asio );
   }
   
   void rate_limit(size_t rps) 
@@ -85,22 +89,20 @@ public:
     return _queue->poll_one();
   }
   
-  template<typename F>
-  bool post( F f )
+  
+  bool post( function_t&& f )
   {
-    return _queue->post(std::forward<F>(f) );
+    return _queue->post(std::move(f) );
   }
   
-  template<typename TP, typename F>
-  bool post_at(TP tp, F f)
+  bool post_at(time_point_t tp, function_t&& f)
   {
-    return _queue->post_at( std::forward<TP>(tp), std::forward<F>(f));
+    return _queue->post_at( tp, std::move(f));
   }
 
-  template<typename D, typename F>
-  bool delayed_post(D duration, F f)
+  bool delayed_post(duration_t duration, function_t&& f)
   {
-    return _queue->delayed_post( std::forward<D>(duration), std::forward<F>(f));
+    return _queue->delayed_post(duration, std::move(f));
   }
   
   std::size_t size() const

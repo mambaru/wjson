@@ -1,3 +1,4 @@
+
 #pragma once 
 
 #include <iow/workflow/queue_options.hpp>
@@ -8,7 +9,6 @@
 #include <mutex>
 #include <condition_variable>
 #include <functional>
-#include <iostream>
 
 namespace iow {
 
@@ -30,167 +30,41 @@ public:
   delayed_queue( delayed_queue const & ) = delete;
   void operator=( delayed_queue const & ) = delete;
 
-  delayed_queue(const queue_options& opt)
-    : _opt(opt)
-    , _loop_exit( false )
-  {}
+  delayed_queue(const queue_options& opt);
 
-  virtual ~delayed_queue ()
-  {
-    this->stop();
-  }
+  virtual ~delayed_queue ();
   
-  void reconfigure(const queue_options& opt)
-  {
-    std::unique_lock<mutex_t> lck( _mutex );
-    _opt = opt;
-  }
+  void reconfigure(const queue_options& opt);
 
-  void reset()
-  {
-    _loop_exit = false;
-  }
+  void reset();
 
-  bool run()
-  {
-    std::unique_lock<mutex_t> lck( _mutex );
-    if ( _loop_exit ) return false;
-    lck.unlock();
-    return this->loop_(lck, false);
-  }
+  bool run();
   
-  bool run_one()
-  {
-    std::unique_lock<mutex_t> lck( _mutex );
-    if ( _loop_exit ) return false;
-    lck.unlock();
-    return this->run_one_( lck );
-  }
+  bool run_one();
 
-  bool poll_one()
-  {
-    std::unique_lock<mutex_t> lck( _mutex, std::defer_lock );
-    if ( _loop_exit ) return false;
-    return this->poll_one_( lck );
-  }
+  bool poll_one();
 
-  void stop()
-  {
-    std::unique_lock<mutex_t> lck( _mutex );
-    if ( !_loop_exit )
-    { 
-      _loop_exit = true;
-      _cond_var.notify_all();
-      while ( !_que.empty() ) _que.pop();
-      while ( !_delayed_que.empty() ) _delayed_que.pop();
-    }
-  }
+  void stop();
   
+  bool post( function_t f );
   
-  bool post( function_t f )
-  {
-    std::lock_guard<mutex_t> lock( _mutex );
-    _que.push( std::move( f ) );
-    _cond_var.notify_one();
-    return true;
-  }
-  
-  
-  bool post_at(time_point_t time_point, function_t f)
-  {
-    std::lock_guard<mutex_t> lock( _mutex );
-    this->push_at_( std::move(time_point), std::move(f) ); 
-    _cond_var.notify_one();
-    return true;
-  }
+  bool post_at(time_point_t time_point, function_t f);
 
-
-  bool delayed_post(duration_t duration, function_t f)
-  {  
-    std::lock_guard<mutex_t> lock( _mutex );
-    if ( ! duration.count() )
-      _que.push( std::move( f ) );
-    else
-      this->push_at_( std::move( std::chrono::system_clock::now() + duration), std::move(f)  );
-    _cond_var.notify_one();
-    return true;
-  }
+  bool delayed_post(duration_t duration, function_t f);
   
-  std::size_t size() const
-  {
-    std::lock_guard<mutex_t> lck( _mutex );
-    return _que.size() + _delayed_que.size();
-  }
+  std::size_t size() const;
 
 private:
 
+  void push_at_(time_point_t time_point, function_t f);
   
-  void push_at_(time_point_t time_point, function_t f)
-  {
-    _delayed_que.emplace( time_point, std::move( f ) );
-  }
-  
-  bool poll_one_( std::unique_lock<mutex_t>& lck)
-  {
-    function_t run_func;
+  bool poll_one_( std::unique_lock<mutex_t>& lck);
 
-    lck.lock();
-    if ( ! _delayed_que.empty() )
-    {
-      if ( _delayed_que.top().first <= std::chrono::system_clock::now() )
-      {
-        _que.push( std::move( _delayed_que.top().second ) );
-        _delayed_que.pop();
-      }
-    }
-    if ( _que.empty() )
-    {
-      lck.unlock();
-      return false;
-    }
-    run_func.swap( _que.front() );
-    _que.pop();
-    lck.unlock();
-    
-    run_func();
-    
-    return true;
-  }
+  bool run_one_( std::unique_lock<mutex_t>& lck);
 
-  bool run_one_( std::unique_lock<mutex_t>& lck)
-  {
-    return this->loop_( lck, true);
-  }
+  bool loop_(std::unique_lock<mutex_t>& lck, bool one);
 
-  bool loop_(std::unique_lock<mutex_t>& lck, bool one)
-  {
-    while ( !_loop_exit )
-    {
-      if ( !this->poll_one_( lck ) )
-      {
-        this->run_wait_(lck);
-      } 
-      else if ( one )
-      {
-        return true;
-      }
-    }
-    return true;
-  }
-
-  void run_wait_( std::unique_lock<mutex_t> & lck)
-  {
-    lck.lock();
-    if ( _que.empty() && _delayed_que.empty() )
-    {
-      _cond_var.wait( lck );
-    }
-    else if ( _que.empty() && !_delayed_que.empty() )
-    {
-      _cond_var.wait_until( lck, _delayed_que.top().first );
-    }
-    lck.unlock();
-  }
+  void run_wait_( std::unique_lock<mutex_t> & lck);
 
   struct queue_cmp
   {

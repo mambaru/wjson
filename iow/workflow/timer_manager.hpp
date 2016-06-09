@@ -8,6 +8,7 @@
 
 #include <string>
 #include <ctime>
+#include <time.h>
 #include <iomanip>
 #include <locale>
 #include <chrono>
@@ -222,7 +223,7 @@ private:
   {
     std::time_t now = std::time(0);
     std::tm ptm;
-    localtime_r(&now, &ptm);
+    ::localtime_r(&now, &ptm);
     
     if ( nullptr ==  strptime(start_time.c_str(), "%H:%M:%S", &ptm) )
     {
