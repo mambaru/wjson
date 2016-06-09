@@ -175,16 +175,15 @@ private:
   template< typename Res, typename ReqPtr, typename I, typename MemFun, typename ResultHandler >
   void send_request_(ReqPtr req, std::weak_ptr<I> wi, MemFun mem_ptr, ResultHandler result_handler, handler_callback timer_handler)
   {
-    std::cout << "timer_manager::send_request_ PING" << std::endl;
     auto i = wi.lock();
     if ( i == nullptr )
     {
       timer_handler(false);
       return;
     }
-    
+
     std::weak_ptr< self > wthis = this->shared_from_this();
-    
+
     auto callback = [ wthis, wi, mem_ptr, result_handler, timer_handler]( std::unique_ptr<Res> res)
     {
 

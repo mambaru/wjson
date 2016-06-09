@@ -1,11 +1,14 @@
 #pragma once 
 
+/*
 #include <boost/circular_buffer.hpp>
-
+*/
 namespace iow{
  
+  /*
 template<class T, class Allocator = std::allocator<T> >
 using circular_buffer = ::boost::circular_buffer<T, Allocator>;
+*/
 
 /*
 template<class T, class Allocator = std::allocator<T> >

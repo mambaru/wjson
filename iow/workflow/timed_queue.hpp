@@ -18,14 +18,16 @@ namespace iow{
 class timed_queue
   : public std::enable_shared_from_this<timed_queue >
 {
-public:
   typedef timed_queue self;
   typedef ::iow::asio::deadline_timer timer_type;
   typedef std::shared_ptr<timer_type> timer_ptr;
   typedef ::iow::asio::io_service io_service;
   typedef std::mutex mutex_type;
-  
 public:
+  typedef std::function<void()>                               function_t;
+  typedef std::chrono::time_point<std::chrono::system_clock>  time_point_t;
+  typedef time_point_t::duration                              duration_t;
+
   
   timed_queue( timed_queue const & ) = delete;
   void operator=( timed_queue const & ) = delete;
@@ -71,8 +73,8 @@ public:
   
   void stop(){}
   
-  template<typename F>
-  bool post( F f )
+  
+  bool post( function_t f )
   {
     if ( !this->check_size_() )
       return false;
@@ -91,8 +93,8 @@ public:
   }
  
   
-  template<typename TP, typename F>
-  bool post_at(TP tp, F f)
+  
+  bool post_at(time_point_t tp, function_t f)
   {
     auto ptimer = this->create_timer_( tp );
     if ( !this->check_size_() )
@@ -111,8 +113,8 @@ public:
     return true;
   }
   
-  template<typename D, typename F>
-  bool delayed_post(D duration, F f)
+  
+  bool delayed_post(duration_t duration, function_t f)
   {
     return this->post_at( std::move( std::chrono::system_clock::now() + duration  ), std::move(f) );
   }

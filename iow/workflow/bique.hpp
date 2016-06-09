@@ -13,6 +13,9 @@ class bique
   typedef std::shared_ptr<timed_queue> timed_ptr;
 public:
   typedef ::iow::asio::io_service io_service_type;
+  typedef delayed_queue::function_t function_t;
+  typedef delayed_queue::time_point_t time_point_t;
+  typedef delayed_queue::duration_t duration_t;
   
   virtual ~bique()
   {
@@ -61,28 +64,25 @@ public:
   {
     return this->invoke_( &delayed_queue::poll_one, &timed_queue::poll_one);
   }
-  
+
   void stop()
   {
     return this->invoke_( &delayed_queue::stop, &timed_queue::stop);
   }
-  
-  template<typename F>
-  bool post( F f )
+
+  bool post( function_t f )
   {
-    return this->invoke_( &delayed_queue::post<F>, &timed_queue::post<F>, std::forward<F>(f) );
-  }
-  
-  template<typename TP, typename F>
-  bool post_at(TP tp, F f)
-  {
-    return this->invoke_( &delayed_queue::post_at<TP, F>, &timed_queue::post_at<TP, F>, std::forward<TP>(tp), std::forward<F>(f));
+    return this->invoke_( &delayed_queue::post, &timed_queue::post, std::move(f) );
   }
 
-  template<typename D, typename F>
-  bool delayed_post(D duration, F f)
+  bool post_at(time_point_t tp, function_t&& f)
   {
-    return this->invoke_( &delayed_queue::delayed_post<D, F>, &timed_queue::delayed_post<D, F>, std::forward<D>(duration), std::forward<F>(f));
+    return this->invoke_( &delayed_queue::post_at, &timed_queue::post_at, tp, std::move(f));
+  }
+
+  bool delayed_post(duration_t duration, function_t&& f)
+  {
+    return this->invoke_( &delayed_queue::delayed_post, &timed_queue::delayed_post, duration, std::move(f));
   }
   
   std::size_t size() const
@@ -99,8 +99,8 @@ private:
     Args... args)
   {
     return _dflag 
-      ? (_delayed.get()->*method1)( std::forward<Args>(args)...)
-      : (_timed.get()->*method2)( std::forward<Args>(args)...);
+      ? (_delayed.get()->*method1)( std::move(args)...)
+      : (_timed.get()->*method2)( std::move(args)...);
   }
 
   template<typename R, typename... Args>
@@ -110,8 +110,8 @@ private:
     Args... args) const
   {
     return _dflag 
-      ? (_delayed.get()->*method1)( std::forward<Args>(args)...)
-      : (_timed.get()->*method2)( std::forward<Args>(args)...);
+      ? (_delayed.get()->*method1)( std::move(args)...)
+      : (_timed.get()->*method2)( std::move(args)...);
   }
 
 private:

@@ -34,7 +34,7 @@ public:
     : _opt(opt)
     , _loop_exit( false )
   {}
-  
+
   virtual ~delayed_queue ()
   {
     this->stop();
@@ -45,12 +45,12 @@ public:
     std::unique_lock<mutex_t> lck( _mutex );
     _opt = opt;
   }
-  
+
   void reset()
   {
     _loop_exit = false;
   }
-  
+
   bool run()
   {
     std::unique_lock<mutex_t> lck( _mutex );
@@ -66,14 +66,14 @@ public:
     lck.unlock();
     return this->run_one_( lck );
   }
-  
+
   bool poll_one()
   {
     std::unique_lock<mutex_t> lck( _mutex, std::defer_lock );
     if ( _loop_exit ) return false;
     return this->poll_one_( lck );
   }
-  
+
   void stop()
   {
     std::unique_lock<mutex_t> lck( _mutex );
@@ -81,12 +81,13 @@ public:
     { 
       _loop_exit = true;
       _cond_var.notify_all();
-      
+      while ( !_que.empty() ) _que.pop();
+      while ( !_delayed_que.empty() ) _delayed_que.pop();
     }
   }
   
-  template<typename F>
-  bool post( F f )
+  
+  bool post( function_t f )
   {
     std::lock_guard<mutex_t> lock( _mutex );
     _que.push( std::move( f ) );
@@ -94,8 +95,8 @@ public:
     return true;
   }
   
-  template<typename TP, typename F>
-  bool post_at(TP time_point, F f)
+  
+  bool post_at(time_point_t time_point, function_t f)
   {
     std::lock_guard<mutex_t> lock( _mutex );
     this->push_at_( std::move(time_point), std::move(f) ); 
@@ -103,8 +104,8 @@ public:
     return true;
   }
 
-  template<typename D, typename F>
-  bool delayed_post(D duration, F f)
+
+  bool delayed_post(duration_t duration, function_t f)
   {  
     std::lock_guard<mutex_t> lock( _mutex );
     if ( ! duration.count() )
@@ -123,8 +124,8 @@ public:
 
 private:
 
-  template<typename TP, typename F>
-  void push_at_(TP time_point, F f)
+  
+  void push_at_(time_point_t time_point, function_t f)
   {
     _delayed_que.emplace( time_point, std::move( f ) );
   }
@@ -199,7 +200,7 @@ private:
     }
   };
 
-//members
+private:
 
   queue_options            _opt;
   mutable mutex_t          _mutex;
