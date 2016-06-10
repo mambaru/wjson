@@ -1,7 +1,7 @@
 #include <fas/testing.hpp>
 #include <iow/workflow/timer_manager.hpp>
 #include <iow/workflow/delayed_queue.hpp>
-#include <iow/workflow/timed_queue.hpp>
+#include <iow/workflow/asio_queue.hpp>
 #include <iow/memory.hpp>
 
 struct test_request
@@ -29,8 +29,8 @@ UNIT(timer_manager1, "")
   using namespace ::fas::testing;
   iow::asio::io_service io;
   iow::queue_options opt;
-  auto pq = std::make_shared< ::iow::timed_queue >(io, opt);
-  auto tm = std::make_shared< ::iow::timer_manager< ::iow::timed_queue > >( pq );
+  auto pq = std::make_shared< ::iow::asio_queue >(io, opt);
+  auto tm = std::make_shared< ::iow::timer_manager< ::iow::asio_queue > >( pq );
   std::atomic<int> counter(0);
   tm->create( std::chrono::milliseconds(200), [&counter, &t]()
   {

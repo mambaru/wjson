@@ -1,5 +1,4 @@
 #include <fas/testing.hpp>
-#include <iow/workflow/rrqueue.hpp>
 #include <chrono>
 
 UNIT(rrqueue1, "")

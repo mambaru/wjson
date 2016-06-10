@@ -11,6 +11,11 @@ add_library(
   iow/workflow/delayed_queue.cpp
   iow/workflow/asio_queue.cpp
   iow/workflow/bique.cpp
+  iow/workflow/timer.cpp
+  iow/workflow/task_manager.cpp
+  iow/workflow/timer_manager_base.cpp
+  iow/workflow/timer_manager.cpp
+  iow/workflow/thread_pool_base.cpp
   iow/jsonrpc/incoming/incoming_holder.cpp
   iow/jsonrpc/outgoing/outgoing_holder.cpp
   iow/jsonrpc/incoming/aux.cpp

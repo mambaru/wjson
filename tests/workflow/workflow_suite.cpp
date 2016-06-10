@@ -1,5 +1,6 @@
 #include <fas/testing.hpp>
 #include <iow/workflow/task_manager.hpp>
+#include <iow/workflow/bique.hpp>
 #include <chrono>
 
 UNIT(workflow1, "")

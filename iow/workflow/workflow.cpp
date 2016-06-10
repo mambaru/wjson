@@ -1,5 +1,6 @@
 #include <wfc/core/workflow.hpp>
 #include <iow/workflow/workflow.hpp>
+#include <iow/workflow/bique.hpp>
 
 namespace iow{
   
@@ -12,14 +13,14 @@ workflow::~workflow()
 
 workflow::workflow(workflow_options opt )
 {
-  _impl = std::make_shared<impl>(opt, opt.threads);
+  _impl = std::make_shared<task_manager>(opt, opt.threads);
   _impl->rate_limit( opt.rate_limit );
   _delay_ms = opt.post_delay_ms;
 }
 
 workflow::workflow(io_service_type& io, workflow_options opt)
 {
-  _impl = std::make_shared<impl>(io, opt, opt.threads, opt.use_io_service);
+  _impl = std::make_shared<task_manager>(io, opt, opt.threads, opt.use_io_service);
   _impl->rate_limit( opt.rate_limit );
   _delay_ms = opt.post_delay_ms;
 }
@@ -41,9 +42,14 @@ void workflow::stop()
   _impl->stop();
 }
 
-std::shared_ptr< workflow::impl > workflow::get() const
+std::shared_ptr< task_manager > workflow::get() const
 {
   return _impl;
+}
+
+std::shared_ptr< workflow::timer_type> workflow::get_timer() const
+{
+  return _impl->timer();
 }
 
 bool workflow::post(post_handler handler)
