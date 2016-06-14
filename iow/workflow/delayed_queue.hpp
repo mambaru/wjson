@@ -1,7 +1,4 @@
-
 #pragma once 
-
-#include <iow/workflow/queue_options.hpp>
 
 #include <chrono>
 #include <queue>
@@ -30,11 +27,11 @@ public:
   delayed_queue( delayed_queue const & ) = delete;
   void operator=( delayed_queue const & ) = delete;
 
-  delayed_queue(const queue_options& opt);
+  delayed_queue(size_t maxsize);
 
   virtual ~delayed_queue ();
   
-  void reconfigure(const queue_options& opt);
+  void set_maxsize(size_t maxsize);
 
   void reset();
 
@@ -53,8 +50,12 @@ public:
   bool delayed_post(duration_t duration, function_t f);
   
   std::size_t size() const;
+  std::size_t dropped() const;
 
 private:
+  bool check_();
+
+  std::size_t size_() const;
 
   void push_at_(time_point_t time_point, function_t f);
   
@@ -76,13 +77,14 @@ private:
 
 private:
 
-  queue_options            _opt;
   mutable mutex_t          _mutex;
   condition_variable_t     _cond_var;
   queue_t                  _que;
   delayed_queue_t          _delayed_que;
-  bool                     _loop_exit;
+  bool                     _loop_exit = false;
 
+  size_t                   _maxsize = 0;
+  size_t                   _drop_count = 0;
 }; // delayed_queue
 }
 

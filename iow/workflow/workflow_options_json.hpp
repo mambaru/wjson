@@ -1,6 +1,6 @@
 #pragma once 
 
-#include <iow/workflow/queue_options_json.hpp>
+//#include <iow/workflow/queue_options_json.hpp>
 #include <iow/workflow/workflow_options.hpp>
 #include <wfc/json.hpp>
 
@@ -9,14 +9,20 @@ namespace iow {
 struct workflow_options_json
 {
   JSON_NAME(threads)
-  /*JSON_NAME(enabled)*/
   JSON_NAME(use_io_service)
+  JSON_NAME(maxsize)
+  JSON_NAME(wrnsize)
+  JSON_NAME(show_wrn_ms)
+
  
   typedef json::object<
     workflow_options,
     json::member_list<
       /*json::member< n_enabled, workflow_options, bool, &workflow_options::enabled >,*/
-      json::base< queue_options_json >,
+      /*json::base< queue_options_json >,*/
+      json::member< n_wrnsize, workflow_options, size_t, &workflow_options::wrnsize >,
+      json::member< n_maxsize, workflow_options, size_t, &workflow_options::maxsize >,
+      json::member< n_show_wrn_ms, workflow_options, time_t, &workflow_options::show_wrn_ms >,
       json::member< n_threads, workflow_options, int,  &workflow_options::threads >,
       json::member< n_use_io_service, workflow_options, bool, &workflow_options::use_io_service >
     >
@@ -53,7 +59,7 @@ struct workflow_options_on_json
   typedef json::object<
     workflow_options,
     json::member_list<
-      json::base< ::iow::queue_options_json >,
+      //json::base< ::iow::queue_options_json >,
       json::member< n_threads, workflow_options, int,  &workflow_options::threads >,
       json::member< n_use_io_service, workflow_options, bool, &workflow_options::use_io_service >
     >

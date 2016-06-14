@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iow/workflow/queue_options.hpp>
 #include <iow/asio.hpp>
 #include <functional>
 #include <chrono>
@@ -13,7 +12,7 @@ class asio_queue;
 class bique
 {
   typedef std::shared_ptr<delayed_queue> delayed_ptr;
-  typedef std::shared_ptr<asio_queue> timed_ptr;
+  typedef std::shared_ptr<asio_queue> asio_ptr;
 public:
   typedef ::iow::asio::io_service io_service_type;
   typedef std::function<void()>                               function_t;
@@ -22,11 +21,11 @@ public:
   
   virtual ~bique();
  
-  bique( const queue_options& opt );
+  bique( size_t maxsize);
 
-  bique( io_service_type& io, const queue_options& opt, bool use_asio/*= true*/ );
+  bique( io_service_type& io, size_t maxsize, bool use_asio/*= true*/ );
   
-  void reconfigure(const queue_options& opt, bool use_asio /*= true*/);
+  void reconfigure(size_t maxsize, bool use_asio /*= true*/);
 
   void reset();
 
@@ -46,6 +45,8 @@ public:
   
   std::size_t size() const;
   
+  std::size_t dropped() const;
+  
 private:
   
   template<typename R, typename... Args>
@@ -63,7 +64,7 @@ private:
 private:
   std::atomic<bool> _dflag;
   delayed_ptr _delayed;
-  timed_ptr   _timed;
+  asio_ptr   _asio;
 };
 
 }

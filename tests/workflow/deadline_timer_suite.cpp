@@ -5,8 +5,7 @@
 UNIT(asio_queue1, "")
 {
   ::iow::asio::io_service io;
-  ::iow::queue_options opt;
-  auto pq = std::make_shared< ::iow::asio_queue >(io, opt);
+  auto pq = std::make_shared< ::iow::asio_queue >(io, 0);
   delayed_unit1(t, *pq);
 }
 
@@ -14,24 +13,21 @@ UNIT(asio_queue1, "")
 UNIT(asio_queue2, "")
 {
   ::iow::asio::io_service io;
-  ::iow::queue_options opt;
-  auto pq = std::make_shared< ::iow::asio_queue >(io, opt);
+  auto pq = std::make_shared< ::iow::asio_queue >(io, 0);
   delayed_unit2(t, *pq);
 }
 
 UNIT(asio_queue3, "")
 {
   ::iow::asio::io_service io;
-  ::iow::queue_options opt;
-  auto pq = std::make_shared< ::iow::asio_queue >(io, opt);
+  auto pq = std::make_shared< ::iow::asio_queue >(io, 0);
   delayed_unit3(t, *pq);
 }
 
 UNIT(asio_queue4, "")
 {
   ::iow::asio::io_service io;
-  ::iow::queue_options opt;
-  auto pq = std::make_shared< ::iow::asio_queue >(io, opt);
+  auto pq = std::make_shared< ::iow::asio_queue >(io, 0);
   delayed_unit4(t, *pq);
 }
 

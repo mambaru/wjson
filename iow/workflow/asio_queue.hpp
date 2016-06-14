@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iow/workflow/queue_options.hpp>
 #include <iow/asio.hpp>
 #include <mutex>
 #include <memory>
@@ -25,9 +24,9 @@ public:
   asio_queue( asio_queue const & ) = delete;
   void operator=( asio_queue const & ) = delete;
 
-  asio_queue(io_service_type& io, const queue_options& opt);
+  asio_queue(io_service_type& io, size_t maxsize);
   
-  void reconfigure(const queue_options& opt);
+  void set_maxsize(size_t maxsize);
 
   io_service_type& get_io_service();
   
@@ -50,10 +49,11 @@ public:
   bool delayed_post(duration_t duration, function_t f);
   
   std::size_t size() const;
+  std::size_t dropped() const;
   
 private:
   
-  bool check_size_() const;
+  bool check_();
   
   template<typename TP>
   timer_ptr create_timer_(TP tp);
@@ -62,11 +62,7 @@ private:
   io_service_type& _io;
   std::atomic<size_t> _counter;
   std::atomic<size_t> _maxsize;
-  std::atomic<size_t> _wrnsize;
-  
-  mutable mutex_type _handler_mutex;
-  queue_options::handler_type _wrn_handler;
-  queue_options::handler_type _max_handler;
+  std::atomic<size_t> _drop_count;
 };
 
 } // iow

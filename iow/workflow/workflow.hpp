@@ -88,8 +88,13 @@ public:
   }
 
 private:
+  void create_wrn_timer_(time_t ms, size_t wrnsize, size_t maxsize);
+private:
+  std::string _id;
   std::atomic<time_t> _delay_ms;
   std::shared_ptr<task_manager> _impl;
+  timer_id_t _wrn_timer = 0;
+  std::shared_ptr<workflow> _workflow_ptr;
 };
 
 }

@@ -6,22 +6,16 @@
 
 namespace iow{
   
-asio_queue::asio_queue(io_service_type& io, const queue_options& opt)
+asio_queue::asio_queue(io_service_type& io, const size_t maxsize)
   : _io(io)
 {
   _counter = 0;
-  _wrnsize = opt.wrnsize;
-  _maxsize = opt.maxsize;
+  _maxsize = maxsize;
 }
   
-void asio_queue::reconfigure(const queue_options& opt)
+void asio_queue::set_maxsize(size_t maxsize)
 {
-  _wrnsize = opt.wrnsize;
-  _maxsize = opt.maxsize;
-    
-  std::lock_guard<mutex_type> lk(_handler_mutex);
-  _wrn_handler = opt.wrn_handler;
-  _max_handler = opt.max_handler;
+  _maxsize = maxsize;
 }
 
 asio_queue::io_service_type& asio_queue::get_io_service() 
@@ -55,7 +49,7 @@ void asio_queue::stop(){}
   
 bool asio_queue::post( function_t f )
 {
-  if ( !this->check_size_() )
+  if ( !this->check_() )
     return false;  
   std::weak_ptr<self> wthis = this->shared_from_this();
   ++_counter;
@@ -72,10 +66,10 @@ bool asio_queue::post( function_t f )
 
 bool asio_queue::post_at(time_point_t tp, function_t f)
 {
-  auto ptimer = this->create_timer_( tp );
-  if ( !this->check_size_() )
+  if ( !this->check_() )
     return false;
 
+  auto ptimer = this->create_timer_( tp );
   std::weak_ptr<self> wthis = this->shared_from_this();
   ++_counter;
   ptimer->async_wait([f, ptimer, wthis]( const ::iow::system::error_code& )
@@ -98,36 +92,21 @@ std::size_t asio_queue::size() const
 {
   return _counter;
 }
+
+std::size_t asio_queue::dropped() const
+{
+  return _drop_count;
+}
   
 //private:
   
-bool asio_queue::check_size_() const
+bool asio_queue::check_()
 {
-  if ( _counter < _wrnsize )
+  if ( _maxsize == 0 )
     return true;
-
-  std::lock_guard<mutex_type> lk(_handler_mutex);
   if ( _counter < _maxsize )
-  {
-    if ( _wrn_handler == nullptr )
-    {
-      IOW_LOG_WARNING("asio_queue overflow warning size = " << _counter << "( wrnsize=" << _wrnsize << ")");
-    }
-    else
-    {
-      _wrn_handler(_counter, _wrnsize);
-    }
     return true;
-  }
-    
-  if ( _max_handler == nullptr )
-  {
-    IOW_LOG_ERROR("asio_queue overflow size = " << _counter << "( maxsize=" << _maxsize << ")");
-  }
-  else
-  {
-    _wrn_handler(_counter, _maxsize);
-  }
+  ++_drop_count;
   return false;
 }
 

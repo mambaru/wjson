@@ -13,16 +13,22 @@ workflow::~workflow()
 
 workflow::workflow(workflow_options opt )
 {
-  _impl = std::make_shared<task_manager>(opt, opt.threads);
+  _id = opt.id;
+  _workflow_ptr = opt.workflow_ptr;
+  _impl = std::make_shared<task_manager>(opt.maxsize, opt.threads);
   _impl->rate_limit( opt.rate_limit );
   _delay_ms = opt.post_delay_ms;
+  this->create_wrn_timer_( opt.show_wrn_ms, opt.wrnsize, opt.maxsize);
 }
 
 workflow::workflow(io_service_type& io, workflow_options opt)
 {
-  _impl = std::make_shared<task_manager>(io, opt, opt.threads, opt.use_io_service);
+  _id = opt.id;
+  _workflow_ptr = opt.workflow_ptr;
+  _impl = std::make_shared<task_manager>(io, opt.maxsize, opt.threads, opt.use_io_service);
   _impl->rate_limit( opt.rate_limit );
   _delay_ms = opt.post_delay_ms;
+  this->create_wrn_timer_( opt.show_wrn_ms, opt.wrnsize, opt.maxsize);
 }
 
 void workflow::start()
@@ -32,9 +38,11 @@ void workflow::start()
 
 void workflow::reconfigure(workflow_options opt)
 {
+  _id = opt.id;
+  _workflow_ptr = opt.workflow_ptr;
   _impl->rate_limit( opt.rate_limit );
-  _impl->reconfigure(opt, opt.threads, opt.use_io_service);
-  
+  _impl->reconfigure(opt.maxsize, opt.threads, opt.use_io_service);
+  this->create_wrn_timer_( opt.show_wrn_ms, opt.wrnsize, opt.maxsize);
 }
 
 void workflow::stop()
@@ -128,6 +136,35 @@ size_t workflow::timer_size() const
 size_t workflow::queue_size() const
 {
   return _impl->size();
+}
+
+void workflow::create_wrn_timer_(time_t ms, size_t wrnsize, size_t maxsize)
+{
+  workflow& wrkf = _workflow_ptr == 0 ? *this : *_workflow_ptr;
+  size_t dropsave = 0;
+  if ( _wrn_timer != 0 )
+    wrkf.release_timer(_wrn_timer);
+
+  if ( wrnsize == 0 || maxsize==0)
+    return;
+
+  _wrn_timer = wrkf.create_timer(std::chrono::milliseconds(ms), [this, wrnsize, dropsave]() mutable ->bool 
+    {
+      auto dropped = this->_impl->dropped();
+      auto size = this->_impl->size();
+      auto dropdiff = dropped - dropsave;
+      if ( dropdiff!=0 )
+      {
+        IOW_LOG_ERROR("Workflow '" << this->_id << "' queue dropped " << dropdiff << " items (total " << dropped << ", size " << size << ")" )
+        dropsave = dropped;
+      }
+      else if ( size > wrnsize )
+      {
+        IOW_LOG_WARNING("Workflow '" << this->_id << "' queue size warning. Size " << size << " (wrnsize=" << wrnsize << ")")
+      }
+      return true;
+    }
+  );
 }
   
 }

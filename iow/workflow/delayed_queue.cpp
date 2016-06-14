@@ -2,9 +2,8 @@
 
 namespace iow {
 
-delayed_queue::delayed_queue(const queue_options& opt)
-  : _opt(opt)
-  , _loop_exit( false )
+delayed_queue::delayed_queue(size_t maxsize)
+  : _maxsize(maxsize)
 {}
 
 delayed_queue::~delayed_queue ()
@@ -12,10 +11,10 @@ delayed_queue::~delayed_queue ()
   this->stop();
 }
   
-void delayed_queue::reconfigure(const queue_options& opt)
+void delayed_queue::set_maxsize(size_t maxsize)
 {
   std::unique_lock<mutex_t> lck( _mutex );
-  _opt = opt;
+  _maxsize = maxsize;
 }
 
 void delayed_queue::reset()
@@ -66,6 +65,9 @@ void delayed_queue::stop()
 bool delayed_queue::post( function_t f )
 {
   std::lock_guard<mutex_t> lock( _mutex );
+  if ( !this->check_() )
+    return false;
+
   _que.push( std::move( f ) );
   _cond_var.notify_one();
   return true;
@@ -74,6 +76,9 @@ bool delayed_queue::post( function_t f )
 bool delayed_queue::post_at(time_point_t time_point, function_t f)
 {
   std::lock_guard<mutex_t> lock( _mutex );
+  if ( !this->check_() )
+    return false;
+
   this->push_at_( std::move(time_point), std::move(f) ); 
   _cond_var.notify_one();
   return true;
@@ -82,6 +87,9 @@ bool delayed_queue::post_at(time_point_t time_point, function_t f)
 bool delayed_queue::delayed_post(duration_t duration, function_t f)
 {  
   std::lock_guard<mutex_t> lock( _mutex );
+  if ( !this->check_() )
+    return false;
+
   if ( ! duration.count() )
     _que.push( std::move( f ) );
   else
@@ -93,11 +101,30 @@ bool delayed_queue::delayed_post(duration_t duration, function_t f)
 std::size_t delayed_queue::size() const
 {
   std::lock_guard<mutex_t> lck( _mutex );
-  return _que.size() + _delayed_que.size();
+  return this->size_();
+}
+
+std::size_t delayed_queue::dropped() const
+{
+  std::lock_guard<mutex_t> lck( _mutex );
+  return _drop_count;
 }
 
 //private:
+bool delayed_queue::check_()
+{
+  if ( _maxsize == 0 )
+    return true;
+  if ( this->size_() < _maxsize )
+    return true;
+  ++_drop_count;
+  return false;
+}
 
+std::size_t delayed_queue::size_() const
+{
+  return _que.size() + _delayed_que.size();
+}
 void delayed_queue::push_at_(time_point_t time_point, function_t f)
 {
   _delayed_que.emplace( time_point, std::move( f ) );

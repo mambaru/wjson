@@ -8,9 +8,8 @@ UNIT(workflow1, "")
   using namespace ::fas::testing;
   
   ::iow::asio::io_service io;
-  ::iow::queue_options opt;
-  
-  ::iow::task_manager queue(io, opt, 3, false);
+
+  ::iow::task_manager queue(io, 0, 3, false);
   queue.start();
   std::atomic<int> counter(0);
   queue.post([&t, &counter](){

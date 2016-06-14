@@ -9,30 +9,30 @@ bique::~bique()
   this->stop();
 }
  
-bique::bique( const queue_options& opt )
+bique::bique( size_t maxsize )
 {
   _dflag = true;
-  _delayed = std::make_shared<delayed_queue>(opt);
-  _timed  = nullptr;
+  _delayed = std::make_shared<delayed_queue>(maxsize);
+  _asio  = nullptr;
 }
 
-bique::bique( io_service_type& io, const queue_options& opt, bool timed /*= true*/ )
+bique::bique( io_service_type& io, size_t maxsize, bool use_asio /*= true*/ )
 {
-  _dflag = !timed;
-  _delayed = std::make_shared<delayed_queue>(opt);
-  _timed  = std::make_shared<asio_queue>(io, opt);
+  _dflag = !use_asio;
+  _delayed = std::make_shared<delayed_queue>(maxsize);
+  _asio = std::make_shared<asio_queue>(io, maxsize);
 }
   
-void bique::reconfigure(const queue_options& opt, bool timed /*= true*/)
+void bique::reconfigure(size_t maxsize, bool use_asio /*= true*/)
 {
-  bool newflag = !timed;
-  if ( _timed == nullptr ) 
+  bool newflag = !use_asio;
+  if ( _asio == nullptr ) 
     newflag = true;
 
   _dflag = newflag;
-  _delayed->reconfigure(opt);
-  if( _timed ) 
-    _timed->reconfigure(opt);
+  _delayed->set_maxsize(maxsize);
+  if( _asio ) 
+    _asio->set_maxsize(maxsize);
 }
 
 void bique::reset()
@@ -74,12 +74,16 @@ bool bique::delayed_post(duration_t duration, function_t&& f)
 {
   return this->invoke_( &delayed_queue::delayed_post, &asio_queue::delayed_post, duration, std::move(f));
 }
-  
+
 std::size_t bique::size() const
 {
   return this->invoke_( &delayed_queue::size, &asio_queue::size);
 }
-  
+
+std::size_t bique::dropped() const
+{
+  return this->invoke_( &delayed_queue::dropped, &asio_queue::dropped);
+}
 //private:
   
 template<typename R, typename... Args>
@@ -90,7 +94,7 @@ R bique::invoke_(
 {
   return _dflag 
          ? (_delayed.get()->*method1)( std::move(args)...)
-         : (_timed.get()->*method2)( std::move(args)...);
+         : (_asio.get()->*method2)( std::move(args)...);
 }
 
 template<typename R, typename... Args>
@@ -101,7 +105,7 @@ R bique::invoke_(
 {
   return _dflag 
          ? (_delayed.get()->*method1)( std::move(args)...)
-         : (_timed.get()->*method2)( std::move(args)...);
+         : (_asio.get()->*method2)( std::move(args)...);
 }
 
 }

@@ -18,35 +18,35 @@ public:
 };
 
 
-task_manager::task_manager( io_service_type& io, const queue_options& opt )
+task_manager::task_manager( io_service_type& io, size_t queue_maxsize )
   : _threads(0)
 {
   // delayed отключен и пул потоков
-  _queue = std::make_shared<queue_type>(io, opt, true );
+  _queue = std::make_shared<queue_type>(io, queue_maxsize, true );
   _timer = std::make_shared<timer_type>(_queue);
   _pool = nullptr;
 }
   
-task_manager::task_manager( const queue_options& opt, int threads )
+task_manager::task_manager( size_t queue_maxsize, int threads )
   : _threads(threads)
 {
-  _queue = std::make_shared<queue_type>(opt);
+  _queue = std::make_shared<queue_type>(queue_maxsize);
   _timer = std::make_shared<timer_manager<queue_type> >(_queue);
   _pool = std::make_shared<pool_type>(_queue);
 }
   
-task_manager::task_manager( io_service_type& io, const queue_options& opt, int threads, bool use_asio /*= false*/  )
+task_manager::task_manager( io_service_type& io, size_t queue_maxsize, int threads, bool use_asio /*= false*/  )
   : _threads(threads)
 {
-  _queue = std::make_shared<queue_type>(io, opt, threads==0 || use_asio );
+  _queue = std::make_shared<queue_type>(io, queue_maxsize, threads==0 || use_asio );
   _timer = std::make_shared<timer_type>(_queue);
   _pool = std::make_shared<pool_type>(_queue);
 }
 
-void task_manager::reconfigure(const queue_options& opt, int threads, bool use_asio /*= false*/ )
+void task_manager::reconfigure(size_t queue_maxsize, int threads, bool use_asio /*= false*/ )
 {
   _threads = threads;
-  _queue->reconfigure(opt, threads==0 || use_asio );
+  _queue->reconfigure(queue_maxsize, threads==0 || use_asio );
 }
   
 void task_manager::rate_limit(size_t rps) 
@@ -103,6 +103,11 @@ bool task_manager::delayed_post(duration_t duration, function_t&& f)
 std::size_t task_manager::size() const
 {
   return _queue->size();
+}
+
+std::size_t task_manager::dropped() const
+{
+  return _queue->dropped();
 }
   
 std::shared_ptr<task_manager::timer_type> task_manager::timer()
