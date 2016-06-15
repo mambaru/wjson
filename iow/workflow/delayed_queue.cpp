@@ -4,7 +4,9 @@ namespace iow {
 
 delayed_queue::delayed_queue(size_t maxsize)
   : _maxsize(maxsize)
-{}
+{
+  _drop_count = 0;
+}
 
 delayed_queue::~delayed_queue ()
 {
@@ -19,6 +21,7 @@ void delayed_queue::set_maxsize(size_t maxsize)
 
 void delayed_queue::reset()
 {
+  _drop_count = 0;
   _loop_exit = false;
 }
 
@@ -53,6 +56,7 @@ void delayed_queue::stop()
   std::unique_lock<mutex_t> lck( _mutex );
   if ( !_loop_exit )
   { 
+    _drop_count = 0;
     _loop_exit = true;
     _cond_var.notify_all();
     while ( !_que.empty() ) 

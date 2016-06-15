@@ -44,8 +44,9 @@ public:
   std::shared_ptr<bool> detach_timer(timer_id_t );
   bool release_timer( timer_id_t id );
 
-  size_t timer_size() const;
+  size_t timer_count() const;
   size_t queue_size() const;
+  size_t dropped() const;
 
   bool post(post_handler handler);
   bool post(time_point_t, post_handler handler);
@@ -88,7 +89,7 @@ public:
   }
 
 private:
-  void create_wrn_timer_(time_t ms, size_t wrnsize, size_t maxsize);
+  void create_wrn_timer_(const workflow_options& opt);
 private:
   std::string _id;
   std::atomic<time_t> _delay_ms;

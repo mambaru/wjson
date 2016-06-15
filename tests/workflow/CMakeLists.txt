@@ -5,7 +5,6 @@ set( SUITE_LIST
   thread_pool_suite.cpp
   timer_manager_suite.cpp
   workflow_suite.cpp
-  rrqueue_suite.cpp
 )
 
 add_executable( workflow_test ${FAS_TESTING_CPP} workflow_test.cpp ${SUITE_LIST} )

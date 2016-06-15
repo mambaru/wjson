@@ -10,6 +10,7 @@ asio_queue::asio_queue(io_service_type& io, const size_t maxsize)
   : _io(io)
 {
   _counter = 0;
+  _drop_count = 0;
   _maxsize = maxsize;
 }
   

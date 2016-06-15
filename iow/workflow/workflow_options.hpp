@@ -20,6 +20,7 @@ struct workflow_options
 
   // для таймера проверки wrnsize
   std::shared_ptr< ::iow::workflow> workflow_ptr;
+  std::function<bool()> handler = nullptr;
 };
 
 }
