@@ -1,3 +1,4 @@
+#include <stdexcept>
 
 namespace iow{ namespace json{
 
