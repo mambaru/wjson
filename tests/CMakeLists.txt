@@ -12,3 +12,4 @@ endif()
 
 
 add_subdirectory(json)
+add_subdirectory(json2)
