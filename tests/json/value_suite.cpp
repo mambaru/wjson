@@ -116,9 +116,9 @@ UNIT(string_unit, "")
 
 
 
-BEGIN_SUITE(value_suite, "")
+BEGIN_SUITE(value, "")
   ADD_UNIT(bool_unit)
   ADD_UNIT(integer_unit)
   ADD_UNIT(float_unit)
   ADD_UNIT(string_unit)
-END_SUITE(value_suite)
+END_SUITE(value)
