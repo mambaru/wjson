@@ -1,5 +1,6 @@
 
 #define CHAR_TO_STRING(CH) #CH
+
 namespace iow{ namespace json{
 
 template<typename K, typename V>

@@ -1,5 +1,5 @@
-#include <iow/json2/json.hpp>
-#include <iow/json2/name.hpp>
+#include <iow/json.old/json.hpp>
+#include <iow/json.old/name.hpp>
 #include <chrono>
 #include <iostream>
 
@@ -65,11 +65,10 @@ int main()
     start = high_resolution_clock::now();
     beg = json;
     end = json + ARR_SIZE;
-    iow::json::json_error e;
     while ( beg!=end && *beg!='\0')
     {
       ++dcount;
-      beg = serializer()(vf[fi++], beg, end, &e );
+      beg = serializer()(vf[fi++], beg, end );
     }
     finish = high_resolution_clock::now();
 

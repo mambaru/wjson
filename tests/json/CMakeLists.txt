@@ -1,4 +1,4 @@
-add_executable(benchmark1 benchmark.cpp)
+add_executable(benchmark benchmark.cpp)
 
 add_executable(
   test_json

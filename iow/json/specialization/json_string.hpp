@@ -264,109 +264,6 @@ public:
   }
 };
 
-
-template<typename T>
-class serializerT< raw_value<T> >
-{
-public:
-  template<typename P>
-  P operator()( const T& v, P end)
-  {
-    if ( v.begin() != v.end() )
-    {
-      /*
-      for (const auto& i: v )
-      {
-        *(end++) = i;
-      }*/
-      return std::copy(v.begin(), v.end(), end );
-    }
-    else
-    {
-      *(end++)='"';
-      *(end++)='"';
-      return end;
-    }
-  }
-
-  template<typename P>
-  P operator() ( T& v, P beg, P end, json_error* e )
-  {
-    
-    v.clear();
-    P start = beg;
-    beg = parser::parse_value(beg, end, e);
-    std::copy( start, beg, std::back_inserter(v) );
-    
-    return beg;
-  }
-};
-
-template<typename T, typename J>
-class serializerT< pointer<T, J> >
-{
-  //typedef typename T target;
-public:
-  template< typename P>
-  P operator()( const T& ptr, P end)
-  {
-    // Можно обычный указатель
-//#warning TODO: nullptr
-    if ( ptr!=nullptr)
-      return typename J::serializer()( *ptr, end);
-    
-    *(++end)='n';
-    *(++end)='u';
-    *(++end)='l';
-    *(++end)='l';
-    return end;
-    /*
-    if ( v.begin() != v.end() )
-      return std::copy(v.begin(), v.end(), end );
-    else
-    {
-      *(end++)='"';
-      *(end++)='"';
-      return end;
-    }
-    */
-  }
-
-  template< typename Type, typename P>
-  P operator() ( std::unique_ptr<Type>& ptr, P beg, P end )
-  {
-    // Только умный
-    if (beg!=end && *beg!='n')
-    {
-      ptr = new Type()/*std::make_unique<Type>()*/;
-      return typename J::serializer()( *ptr, beg, end);
-    }
-    else
-    {
-      ptr=nullptr;
-      for (int i=0; beg!=end && i<4; ++i, ++beg);
-    }
-    return beg;
-  }
-  
-  template< typename Type, typename P>
-  P operator() ( std::shared_ptr<Type>& ptr, P beg, P end )
-  {
-    // Только умный
-    if (beg!=end && *beg!='n')
-    {
-      ptr = std::make_shared<Type>();
-      return typename J::serializer()( *ptr, beg, end);
-    }
-    else
-    {
-      ptr=nullptr;
-      for (int i=0; beg!=end && i<4; ++i, ++beg);
-    }
-    return beg;
-  }
-};
-
 template<typename T>
 class serializerT< raw_pair<T> >
 {
@@ -387,20 +284,98 @@ public:
   template<typename P>
   P operator() ( T& v, P beg, P end, json_error* e )
   {
-    
     v.first = beg;
     beg = parser::parse_value(beg, end, e);
     v.second = beg;
-    
-    /*
-    v.clear();
-    P start = beg;
-    beg = parser::parse_value(beg, end);
-    std::copy( start, beg, std::back_inserter(v) );
-    */
     return beg;
   }
 };
+
+
+template<typename T>
+class serializerT< raw_value<T> >
+{
+public:
+  template<typename P>
+  P operator()( const T& v, P end)
+  {
+    if ( v.begin() != v.end() )
+    {
+      return std::copy(v.begin(), v.end(), end );
+    }
+    else
+    {
+      *(end++)='"';
+      *(end++)='"';
+      return end;
+    }
+  }
+
+  template<typename P>
+  P operator() ( T& v, P beg, P end, json_error* e )
+  {
+    v.clear();
+    P start = beg;
+    beg = parser::parse_value(beg, end, e);
+    std::copy( start, beg, std::back_inserter(v) );
+    return beg;
+  }
+};
+
+template<typename T, typename J>
+class serializerT< pointer<T, J> >
+{
+  //typedef typename T target;
+public:
+  template< typename P>
+  P operator()( const T& ptr, P end)
+  {
+    // Можно обычный указатель
+    if ( ptr!=0 )
+      return typename J::serializer()( *ptr, end);
+    
+    *(++end)='n';
+    *(++end)='u';
+    *(++end)='l';
+    *(++end)='l';
+    return end;
+  }
+
+  template< typename Type, typename P>
+  P operator() ( std::unique_ptr<Type>& ptr, P beg, P end )
+  {
+    // Только умный
+    if (beg!=end && *beg!='n')
+    {
+      ptr = new Type();
+      return typename J::serializer()( *ptr, beg, end);
+    }
+    else
+    {
+      ptr=0;
+      for (int i=0; beg!=end && i<4; ++i, ++beg);
+    }
+    return beg;
+  }
+  
+  template< typename Type, typename P>
+  P operator() ( std::shared_ptr<Type>& ptr, P beg, P end )
+  {
+    // Только умный
+    if (beg!=end && *beg!='n')
+    {
+      ptr = std::make_shared<Type>();
+      return typename J::serializer()( *ptr, beg, end);
+    }
+    else
+    {
+      ptr=0;
+      for (int i=0; beg!=end && i<4; ++i, ++beg);
+    }
+    return beg;
+  }
+};
+
 
 
 }}

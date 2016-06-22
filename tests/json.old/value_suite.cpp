@@ -1,5 +1,5 @@
 #include <fas/testing.hpp>
-#include <iow/json2/json.hpp>
+#include <iow/json.old/json.hpp>
 #include <algorithm>
 
 namespace iow{ namespace json{
@@ -21,7 +21,7 @@ namespace detail
     }
 
     template<typename P>
-    P operator() ( T& v, P beg, P end, iow::json::json_error*  )
+    P operator() ( T& v, P beg, P end )
     {
       std::stringstream ss;
       ss << std::string(beg, end);
@@ -72,8 +72,7 @@ void value_serializer_test(T& t, const V& v, const std::string& chk, int line)
   serializer_t()(val, std::back_inserter(json) );
   t << equal_str<expect>(json, chk) << "serialize: " << json << "!=" << chk << ", line: " << line;
   val = V();
-  ::iow::json::json_error e;
-  serializer_t()(val, json.begin(), json.end(), &e );
+  serializer_t()(val, json.begin(), json.end() );
   t << equal<expect>(v, val) << "unserialize: " << v << "!=" << val << ", line: " << line;
 }
 

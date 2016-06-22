@@ -1,4 +1,5 @@
 #include <iow/json/json.hpp>
+#include <iow/json/name.hpp>
 #include <chrono>
 #include <iostream>
 
@@ -45,9 +46,9 @@ int main()
   time_t stime = std::numeric_limits< time_t >::max();
   time_t dtime = std::numeric_limits< time_t >::max();
   size_t dcount = 0;
+  ::iow::json::json_error e;
   for (int j=0; j < 1000; ++j)
   {
-    
     char* beg = json;
     char* end = json + ARR_SIZE;
     auto start = high_resolution_clock::now();
@@ -58,7 +59,6 @@ int main()
     if ( stime==0 || t < stime )
       stime = t;
 
-    
     vf.resize(SER_COUNT);
     int fi = 0;
     start = high_resolution_clock::now();
@@ -67,7 +67,7 @@ int main()
     while ( beg!=end && *beg!='\0')
     {
       ++dcount;
-      beg = serializer()(vf[fi++], beg, end );
+      beg = serializer()(vf[fi++], beg, end, &e );
     }
     finish = high_resolution_clock::now();
 
