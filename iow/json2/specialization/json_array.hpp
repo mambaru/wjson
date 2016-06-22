@@ -1,4 +1,5 @@
 
+#define CHAR_TO_STRING(CH) #CH
 namespace iow{ namespace json{
 
 template<typename K, typename V>
@@ -23,17 +24,17 @@ public:
   template<typename P>
   P operator()( target& t,  P beg, P end, json_error* e)
   {
-    beg = key_serializer()(t.first, beg, end );
-    beg = parser::parse_space(beg, end);
+    beg = key_serializer()(t.first, beg, end, e );
+    beg = parser::parse_space(beg, end, e);
     if (beg==end) 
       return json_error::create<unexpected_end_fragment>(e, end);
     if (*beg!=':') 
       return json_error::create<expected_of>(e, end,":", std::distance(beg, end) );
     ++beg;
-    beg = parser::parse_space(beg, end);
+    beg = parser::parse_space(beg, end, e);
     if (beg==end) 
       return json_error::create<unexpected_end_fragment>(e, end);
-    beg = value_serializer()(t.second, beg, end );
+    beg = value_serializer()(t.second, beg, end, e );
     return beg;
   }
 };
@@ -69,7 +70,7 @@ public:
       return json_error::create<unexpected_end_fragment>(e, end);
     
     if (*beg!=L) 
-      return json_error::create<expected_of>(e, end, std::string(1, L), std::distance(beg, end) );
+      return json_error::create<expected_of>(e, end, CHAR_TO_STRING(L)/*std::string(1, L)*/, std::distance(beg, end) );
     ++beg;
     for (;beg!=end;)
     {
@@ -94,7 +95,7 @@ public:
     if (beg==end) 
       return json_error::create<unexpected_end_fragment>(e, end);
     if (*beg!=R) 
-      return json_error::create<expected_of>(e, end, std::string(1, R), std::distance(beg, end) );
+      return json_error::create<expected_of>(e, end, CHAR_TO_STRING(R), std::distance(beg, end) );
     ++beg;
     return beg;
   }

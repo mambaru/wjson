@@ -290,12 +290,12 @@ public:
   }
 
   template<typename P>
-  P operator() ( T& v, P beg, P end )
+  P operator() ( T& v, P beg, P end, json_error* e )
   {
     
     v.clear();
     P start = beg;
-    beg = parser::parse_value(beg, end);
+    beg = parser::parse_value(beg, end, e);
     std::copy( start, beg, std::back_inserter(v) );
     
     return beg;
@@ -372,7 +372,7 @@ class serializerT< raw_pair<T> >
 {
 public:
   template<typename P>
-  P operator()( const T& v, P end)
+  P operator()( const T& v, P end )
   {
     if ( v.first != v.second )
       return std::copy(v.first, v.second, end );
@@ -385,11 +385,11 @@ public:
   }
 
   template<typename P>
-  P operator() ( T& v, P beg, P end )
+  P operator() ( T& v, P beg, P end, json_error* e )
   {
     
     v.first = beg;
-    beg = parser::parse_value(beg, end);
+    beg = parser::parse_value(beg, end, e);
     v.second = beg;
     
     /*
