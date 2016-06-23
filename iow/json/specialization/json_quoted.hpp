@@ -64,10 +64,5 @@ public:
   }
 };
 
-template<typename T>
-struct value_quoted {
-  typedef T target;
-  typedef serializerQuoted< T > serializer;
-};
 
 }}

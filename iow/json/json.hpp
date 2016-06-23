@@ -53,7 +53,14 @@ template<typename T = std::string>
 struct raw_value;
 
 template<typename T>
+struct raw_pair;
+
+template<typename T>
 struct value_quoted;
+
+template<typename T, typename J>
+struct pointer;
+
 
 template<typename C, typename R>
 struct array_reserve;
@@ -107,159 +114,7 @@ struct member_if;
 template<typename J>
 class serializerT;
 
-
-
-/// //////////////////////////////////////////////////////// 
-
-/// /////////////////////////////////////////////////////
-
-template<typename J>
-struct base: J::member_list {};
-
-
-template<typename T>
-struct raw_value
-{
-  typedef T target;
-  typedef serializerT< raw_value< T > > serializer;
-};
-
-template<typename T>
-struct raw_pair
-{
-  typedef T target;
-  typedef serializerT< raw_pair< T > > serializer;
-};
-
-template<typename T, typename J>
-struct pointer
-{
-  typedef T target;
-  typedef serializerT< pointer< T, J > > serializer;
-};
-
-/// /////////////////////////////////////////
-template<typename K, typename V>
-struct pair
-{
-  typedef typename K::target key_target;
-  typedef typename V::target value_target;
-  typedef std::pair<key_target, value_target> target;
-  typedef serializerT< pair<K, V> > serializer;
-  typedef typename K::serializer key_serializer;
-  typedef typename V::serializer value_serializer;
-};
-
-/// //////////////////////////////////////////////////////////////////////////////
-
-template<typename N, typename T, T v>
-struct enum_value: N
-{
-  static const T value = v;
-  const char* operator()() const { return N::operator()(); }
-};
-
-template< typename T, typename L>
-struct enumerator
-{
-  typedef T target;
-  typedef typename fas::normalize<L>::type enum_list;
-  typedef serializerT< enumerator<T, enum_list> > serializer;
-  typedef enum_list member_list;
-};
-
-/// //////////////////////////////////////////////////////////////////////////////
-
-template< typename T, typename L>
-struct set_enumerator
-{
-  typedef T target;
-  typedef typename fas::normalize<L>::type enum_list;
-  typedef serializerT< set_enumerator<T, enum_list> > serializer;
-};
-
-/// /////////////////////////////////////////////////////////////////
-
-template<typename T, typename L>
-struct object
-{
-  typedef T target;
-  typedef serializerT< object<T, L> > serializer;
-  typedef typename fas::normalize<L>::type member_list;
-};
-
-///
-template<typename T, typename V, typename M, M V::* m, typename W >
-struct member_value
-{
-  typedef T target;
-  typedef serializerT< member_value<T, V, M, m, W> > serializer;
-};
-
-/// //////////////////////////////////////////////////////////////////////////////
-
-template<typename N, typename T, typename M, M T::* m, typename W >
-struct member: N
-{
-  typedef T target;
-  typedef M type;
-  typedef W wrapper;
-  typedef typename W::serializer serializer;
-  typedef typename W::target wrapper_target;
-  const char* operator()() const { return N::operator()(); }
-
-  wrapper_target* ptr(T* t) { return static_cast<wrapper_target*>(t->*m);};
-  const wrapper_target* ptr(const T* t) const { return static_cast< const wrapper_target*>(t->*m);};
-  wrapper_target& ref(T& t) { return static_cast<wrapper_target&>(t.*m); };
-  const wrapper_target& ref(const T& t) const { return static_cast< const wrapper_target&>(t.*m);};
-};
-
-
-template<typename T, typename M, M T::* m>
-struct property
-{
-  void operator()(T& t, const M& value ) const
-  {
-    t.*m = value;
-  }
-
-  const M& operator()(const T& t) const
-  {
-    return t.*m;
-  }
-};
-
-template<typename N,
-         typename T,
-         typename M,
-         typename G, // getter
-         typename W
-        >
-struct member_p: N
-{
-private:
-  G _g;
-public:
-  typedef M type;
-  typedef typename W::serializer serializer;
-  typedef typename W::target wrapper_target;
-  const char* operator()() const { return N::operator()(); }
-  void set(T& t, const wrapper_target& v) const { _g(t, v); }
-  wrapper_target get(const T& t) const { return _g(t); }
-};
-
-
-template<typename L, typename R, bool RU >
-struct member_if
-{
-};
-
-/// //////////////////////////////////////////////////////////////////////////////
-
 }}
-
-#include "specialization/value.hpp"
-#include "specialization/array.hpp"
 
 #include "specialization/json_error.hpp"
 #include "specialization/json_parser.hpp"
@@ -271,4 +126,8 @@ struct member_if
 #include "specialization/json_set_enum.hpp"
 #include "specialization/json_quoted.hpp"
 
-
+#include "specialization/value.hpp"
+#include "specialization/array.hpp"
+#include "specialization/enum.hpp"
+#include "specialization/object.hpp"
+#include "specialization/utility.hpp"

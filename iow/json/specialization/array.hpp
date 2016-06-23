@@ -1,10 +1,9 @@
-#pragma once
+
 
 #include <fas/type_list.hpp>
 #include <fas/integral/int_.hpp>
 #include <fas/typemanip/empty_type.hpp>
 
-#include <stdexcept>
 #include <vector>
 #include <array>
 #include <string>
@@ -192,10 +191,6 @@ struct array_base< std::multimap<JK, JV>, R>
   typedef std::insert_iterator<target_container> inserter_iterator;
   static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
 };
-
-
-
-
 
 template<typename C, typename R>
 struct array_r

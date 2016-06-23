@@ -1,7 +1,27 @@
 
-#define CHAR_TO_STRING(CH) #CH
+// #define CHAR_TO_STRING(CH) #CH
 
 namespace iow{ namespace json{
+
+namespace
+{
+
+template<char C>
+struct ch2str;
+
+template<>
+struct ch2str<'{'>{ static const char* get() { return "{"; } };
+
+template<>
+struct ch2str<'}'>{ static const char* get() { return "}"; } };
+
+template<>
+struct ch2str<'['>{ static const char* get() { return "["; } };
+
+template<>
+struct ch2str<']'>{ static const char* get() { return "]"; } };
+
+}
 
 template<typename K, typename V>
 class serializerT< pair<K, V> >
@@ -71,7 +91,7 @@ public:
       return json_error::create<unexpected_end_fragment>(e, end);
     
     if (*beg!=L) 
-      return json_error::create<expected_of>(e, end, CHAR_TO_STRING(L)/*std::string(1, L)*/, std::distance(beg, end) );
+      return json_error::create<expected_of>(e, end, ch2str<L>::get()/*std::string(1, L)*/, std::distance(beg, end) );
     ++beg;
     for (;beg!=end;)
     {
@@ -96,7 +116,7 @@ public:
     if (beg==end) 
       return json_error::create<unexpected_end_fragment>(e, end);
     if (*beg!=R) 
-      return json_error::create<expected_of>(e, end, CHAR_TO_STRING(R), std::distance(beg, end) );
+      return json_error::create<expected_of>(e, end, ch2str<R>::get(), std::distance(beg, end) );
     ++beg;
     return beg;
   }
@@ -151,7 +171,7 @@ public:
       return json_error::create<unexpected_end_fragment>(e, end);
     
     if (*beg!=L) 
-      return json_error::create<expected_of>(e, end, std::string(1, L), std::distance(beg, end) );
+      return json_error::create<expected_of>(e, end, ch2str<L>::get(), std::distance(beg, end) );
     
     ++beg;
     for (;beg!=end && bitr!=eitr;)
@@ -174,7 +194,7 @@ public:
     if (beg==end) 
       return json_error::create<unexpected_end_fragment>(e, end);
     if (*beg!=R) 
-      return json_error::create<expected_of>(e, end, std::string(1, R), std::distance(beg, end) );
+      return json_error::create<expected_of>(e, end, ch2str<R>::get(), std::distance(beg, end) );
     ++beg;
     return beg;
   }
@@ -208,37 +228,52 @@ class serializerA< array_r< J[N], RR>, L, R >
 
 public:
   template<typename P>
-  P operator()( target_container& t,  P beg, P end)
+  P operator()( target_container& t,  P beg, P end, json_error* e)
   {
     if ( parser::is_null(beg, end) )
     {
       for (int i = 0; i < N ; ++i)
-        t[i] = target();
-      return parser::parse_null(beg, end);
+      {
+        #warning БЫЛО: t[i] = target();
+        // Подсовываем null каждому значению
+        serializer()(t[i], beg, end, e);
+      }
+      return parser::parse_null(beg, end, e);
     }
 
     target* bitr = t;
     target* eitr = bitr + N;
 
-    if (beg==end) throw unexpected_end_fragment();
-    if (*beg!=L) throw expected_of( std::string(1, L), std::distance(beg, end) );
+    if (beg==end) 
+      return json_error::create<unexpected_end_fragment>(e, end);
+    if (*beg!=L) 
+      return json_error::create<expected_of>(e, end, ch2str<L>::get(), std::distance(beg, end) );
+      
     ++beg;
     for (;beg!=end && bitr!=eitr;)
     {
-      beg = parser::parse_space(beg, end);
-      if (beg==end) throw unexpected_end_fragment();
+      beg = parser::parse_space(beg, end, e);
+      if (beg==end) 
+        return json_error::create<unexpected_end_fragment>(e, end);
       if (*beg==R) break;
-      target tg;
-      beg = serializer()( tg, beg, end);
-      *(bitr++) = tg;
-      beg = parser::parse_space(beg, end);
-      if (beg==end) throw unexpected_end_fragment();
+      //!!! target tg;
+      //!!! beg = serializer()( tg, beg, end, e);
+      //!!! *(bitr++) = tg;
+      beg = serializer()( *(bitr++), beg, end, e);
+      beg = parser::parse_space(beg, end, e);
+      if (beg==end) 
+        return json_error::create<unexpected_end_fragment>(e, end);
       if (*beg==R) break;
-      if (*beg!=',') throw expected_of(",", std::distance(beg, end));
+      if (*beg!=',') 
+        return json_error::create<expected_of>(e, end, ",", std::distance(beg, end) );
       ++beg;
     }
-    if (beg==end) throw unexpected_end_fragment();
-    if (*beg!=R) throw expected_of(std::string(1, R), std::distance(beg, end));
+    if (beg==end) 
+      return json_error::create<unexpected_end_fragment>(e, end);
+    
+    if (*beg!=R) 
+      return json_error::create<expected_of>(e, end, ch2str<R>::get(), std::distance(beg, end) );
+
     ++beg;
     return beg;
   }
