@@ -6,7 +6,7 @@ namespace iow{ namespace json{
 class json_error
 {
 public:
-  json_error(): _what1(0), _tail_of(0) {}
+  json_error(): _what1(0), _what2(0), _tail_of(0) {}
   json_error(const char *msg, size_t tail_of = 0 ): _what1(msg), _what2(0), _tail_of(tail_of) {}
   json_error(const char *msg, const char *sym, size_t tail_of = 0 ): _what1(msg), _what2(sym), _tail_of(tail_of) {}
   size_t tail_of() const { return _tail_of; }
@@ -18,8 +18,12 @@ public:
   template<typename P>
   std::string message( P beg, P end ) const
   {
+    if ( _what1==0 )
+      return "OK";
+    
     if (std::distance(beg, end) < _tail_of )
-      return this->what();
+      return std::string(_what1);
+    
     std::stringstream ss;
     ss << _what1;
     if ( _what2 != 0 )
@@ -152,10 +156,10 @@ class unexpected_end_fragment
 {
 public:
   unexpected_end_fragment(size_t tail_of = 0)
-    : json_error( "unexpected end of ragment", tail_of) {}
+    : json_error( "Unexpected end of ragment", tail_of) {}
     
   unexpected_end_fragment(const char* str, size_t tail_of = 0)
-   : json_error( "unexpected end of ragment", str, tail_of ) {}
+   : json_error( "Unexpected end of ragment", str, tail_of ) {}
    
 };
 
@@ -164,11 +168,7 @@ class expected_of
 {
 public:
   expected_of(const char* sym, size_t tail_of = 0)
-    : json_error( 
-        "expected of ",
-        sym,
-        tail_of
-      ) {}
+    : json_error( "Expected of ", sym, tail_of) {}
 };
 
 }}

@@ -26,8 +26,11 @@ UNIT(array1, "Одномерный массив")
   json = "1,2,3,4,5]";
   e.reset();
   ser(nums, json.begin(), json.end(), &e);
+  std::string error = e.message( json.begin(), json.end() );
+  t << message("Test JSON error: ") << error;
   t << is_false<expect>(e) << e.message( json.begin(), json.end() ) << ": " << FAS_TESTING_FILE_LINE;
-
+  t << equal<expect>(error, "Expected of  '[': >>>1,2,3,4,5]") << FAS_TESTING_FILE_LINE;
+  
   json = "[1,2,3,4,5";
   e.reset();
   ser(nums, json.begin(), json.end(), &e);

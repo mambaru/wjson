@@ -45,6 +45,7 @@ namespace detail
   template<typename T>
   class integer_serializer
   {
+#warning убрать из состояния, сделать бенчмарк
     char _buf[integer_buffer_size<T>::result];
   public:
 
