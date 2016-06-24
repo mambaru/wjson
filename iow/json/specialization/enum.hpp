@@ -44,6 +44,7 @@ struct set_enumerator
   typedef T target;
   typedef typename fas::normalize<L>::type enum_list;
   typedef serializerT< set_enumerator<T, enum_list> > serializer;
+  typedef enum_list member_list;
 };
 
 /// /////////////////////////////////////////////////////////////////

@@ -61,13 +61,11 @@ struct value_quoted;
 template<typename T, typename J>
 struct pointer;
 
-
 template<typename C, typename R>
 struct array_reserve;
 
 template<typename K, typename V, int R = -1>
 struct object2array;
-
 
 template<typename C, typename R = fas::empty_type>
 struct array_r;
@@ -80,7 +78,6 @@ struct pair;
 
 template<typename T, typename V, typename M, M V::* m, typename W = value<M> >
 struct member_value;
-
 
 template<typename N,
          typename T,

@@ -45,8 +45,8 @@ namespace detail
   template<typename T>
   class integer_serializer
   {
-#warning убрать из состояния, сделать бенчмарк
-    char _buf[integer_buffer_size<T>::result];
+//#warning убрать из состояния, сделать бенчмарк
+    //char _buf[integer_buffer_size<T>::result];
   public:
 
     integer_serializer() {}
@@ -54,8 +54,9 @@ namespace detail
     template<typename P>
     P serialize(T v, P itr)
     {
-      register char *beg = _buf;
-      register char *end = _buf;
+      register char buf[integer_buffer_size<T>::result];
+      register char *beg = buf;
+      register char *end = buf;
       if (v==0)
         *(end++) = '0';
       else
@@ -74,7 +75,7 @@ namespace detail
       for ( register char* cur = end ; cur-beg > 1;--cur, ++beg) 
       { *beg ^= *(cur-1); *(cur-1)^=*beg; *beg^=*(cur-1); }
 
-      for (beg = _buf; beg!=end; ++beg)
+      for (beg = buf; beg!=end; ++beg)
         *(itr++)=*beg;
 
       return itr;

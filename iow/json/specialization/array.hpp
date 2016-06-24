@@ -8,12 +8,14 @@
 #include <array>
 #include <string>
 #include <deque>
+#include <list>
 #include <set>
 #include <map>
 #include <memory>
 
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
 #include <unordered_map>
+#include <unordered_set>
 #endif
 
 #include <stdint.h>
@@ -71,6 +73,18 @@ struct array_base< std::deque<J>, R>
   static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
 };
 
+template<typename J, typename R>
+struct array_base< std::list<J>, R>
+{
+  typedef std::list<J> json_container;
+  typedef J json_value;
+  typedef typename json_value::target target;
+  typedef std::list<target> target_container;
+  typedef serializerT< array_r< json_container, R> > serializer;
+  typedef std::back_insert_iterator<target_container> inserter_iterator;
+  static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
+};
+
 template<typename K, typename V, typename R>
 struct array_base< std::vector< pair<K, V> >, R>
 {
@@ -101,7 +115,6 @@ struct array_base< std::set<J>, R>
   typedef typename json_value::target target;
   typedef std::set<target> target_container;
   typedef serializerT< array_r< json_container, R > > serializer;
-
   typedef std::insert_iterator<target_container> inserter_iterator;
   static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
 };
@@ -120,6 +133,32 @@ struct array_base< std::multiset<J>, R>
 
 
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
+
+template<typename J, typename R>
+struct array_base< std::unordered_set<J>, R>
+{
+  typedef std::unordered_set<J> json_container;
+  typedef J json_value;
+  typedef typename json_value::target target;
+  typedef std::unordered_set<target> target_container;
+  typedef serializerT< array_r< json_container, R > > serializer;
+  typedef std::insert_iterator<target_container> inserter_iterator;
+  static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
+};
+
+template<typename J, typename R>
+struct array_base< std::unordered_multiset<J>, R>
+{
+  typedef std::unordered_multiset<J> json_container;
+  typedef J json_value;
+  typedef typename json_value::target target;
+  typedef std::unordered_multiset<target> target_container;
+  typedef serializerT< array_r< json_container, R > > serializer;
+  typedef std::insert_iterator<target_container> inserter_iterator;
+  static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
+};
+
+
 template<typename JK, typename JV, typename R>
 struct array_base< std::unordered_map<JK, JV>, R>
 {

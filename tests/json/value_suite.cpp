@@ -79,7 +79,7 @@ void value_serializer_test(T& t, const V& v, const std::string& chk, int line)
 
 UNIT(bool_unit, "")
 {
-  value_serializer_test<T, bool>(t, true, "true", __LINE__);
+ value_serializer_test<T, bool>(t, true, "true", __LINE__);
  value_serializer_test<T, bool>(t, false, "false", __LINE__);
 }
 
@@ -98,7 +98,6 @@ UNIT(integer_unit, "")
   value_serializer_test<T, size_t>(t, 1199511627775, "1199511627775", __LINE__);
   value_serializer_test<T, std::ptrdiff_t>(t, 1199511627775, "1199511627775", __LINE__);
 }
-
 
 UNIT(float_unit, "")
 {

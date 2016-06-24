@@ -168,7 +168,7 @@ class expected_of
 {
 public:
   expected_of(const char* sym, size_t tail_of = 0)
-    : json_error( "Expected of ", sym, tail_of) {}
+    : json_error( "Expected of", sym, tail_of) {}
 };
 
 }}

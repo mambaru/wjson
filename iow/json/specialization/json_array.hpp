@@ -160,8 +160,11 @@ public:
     if ( parser::is_null(beg, end) )
     {
       for (size_t i = 0; i < N ; ++i)
-        t[i] = target();
-      return parser::parse_null(beg, end);
+      {
+        //t[i] = target();
+        serializer()(t[i], beg, end, e);
+      }
+      return parser::parse_null(beg, end, e);
     }
 
     target* bitr = &t[0];
@@ -234,7 +237,7 @@ public:
     {
       for (int i = 0; i < N ; ++i)
       {
-        #warning БЫЛО: t[i] = target();
+        // #warning БЫЛО: t[i] = target();
         // Подсовываем null каждому значению
         serializer()(t[i], beg, end, e);
       }
