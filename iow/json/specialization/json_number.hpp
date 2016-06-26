@@ -193,7 +193,7 @@ public:
   P operator() ( bool& v, P beg, P end, json_error* e )
   {
     if (beg==end)
-      throw unexpected_end_fragment();
+      return json_error::create<unexpected_end_fragment>( e, end );
 
     if ( parser::is_null(beg, end) )
     {
@@ -208,7 +208,7 @@ public:
     if ( *beg == 'f' )
       return parser::parse_bool(beg, end, e);
 
-    throw invalid_json_bool( std::distance(beg, end) );
+    return json_error::create<invalid_json_bool>( e, end, std::distance(beg, end) );
 
   }
 };

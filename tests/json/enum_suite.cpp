@@ -165,6 +165,10 @@ UNIT(enum1, "")
   std::string json;
   foo_json::serializer()(f, std::back_inserter(json));
   t << message("json:") << json;
+  
+  f = foo();
+  iow::json::json_error e;
+  foo_json::serializer()(f, json.begin(), json.end(), &e);
 }
 
 BEGIN_SUITE(enumerator, "")

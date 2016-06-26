@@ -5,4 +5,5 @@ BEGIN_TEST
   RUN_SUITE(array)
   RUN_SUITE(object)
   RUN_SUITE(enumerator)
+  RUN_SUITE(util)
 END_TEST

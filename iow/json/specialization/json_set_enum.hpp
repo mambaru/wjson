@@ -42,27 +42,42 @@ public:
   }
 
   template<typename P>
-  P operator() ( T& v, P beg, P end )
+  P operator() ( T& v, P beg, P end, json_error* e )
   {
     for ( ; beg!=end && *beg<=' '; ++beg);
-    if (beg==end) throw unexpected_end_fragment();
-    if (*beg =='"') {
+    if (beg==end) 
+      return json_error::create<unexpected_end_fragment>(e, end);
+
+    if (*beg =='"') 
+    {
       ++beg;
-      if (beg==end) throw unexpected_end_fragment();
+      if (beg==end) 
+        return json_error::create<unexpected_end_fragment>(e, end);
       P first = beg;
       for ( ; beg!=end && *beg!='"'; ++beg);
-      if (beg==end) throw unexpected_end_fragment();
-      if (*beg!='"') throw expected_of("\"");
+      if (beg==end)
+        return json_error::create<unexpected_end_fragment>(e, end);
+
+      if (*beg!='"') 
+        return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+
       this->deserialize(v, enum_list(), first, beg);
       ++beg;
     } else if (*beg == '[') {
       ++beg;
-      if (beg==end) throw unexpected_end_fragment();
-      beg = this->deserialize_arr(v, enum_list(), beg, end);
-      if (beg==end) throw unexpected_end_fragment();
-      if (*beg!=']') throw expected_of("]");
+      if (beg==end) 
+        return json_error::create<unexpected_end_fragment>(e, end);
+      beg = this->deserialize_arr(v, enum_list(), beg, end, e);
+      if (beg==end) 
+        return json_error::create<unexpected_end_fragment>(e, end);
+      if (*beg!=']') 
+        return json_error::create<expected_of>(e, end, "]", std::distance(beg, end) );
+
       ++beg;
-    } else throw expected_of("\"");
+    } 
+    else
+      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+
     return beg;
   }
 
@@ -107,22 +122,26 @@ public:
   * для десериализации массива вида ["One","Two","Three"]
   */
   template<typename LL, typename RR, typename P>
-  P deserialize_arr( T& v, fas::type_list<LL, RR> /*tl*/, P beg, P end) {
+  P deserialize_arr( T& v, fas::type_list<LL, RR> /*tl*/, P beg, P end, json_error* e) {
     v = T();
     char lastChar = ' ';
     while (*beg=='"') {
       ++beg;
-      if (beg==end) throw unexpected_end_fragment();
+      if (beg==end)
+        return json_error::create<unexpected_end_fragment>(e, end);
       P first = beg;
       for ( ; beg!=end && *beg!='"'; ++beg);
-      if (beg==end) throw unexpected_end_fragment();
-      if (*beg!='"') throw expected_of("\"");
+      if (beg==end) 
+        return json_error::create<unexpected_end_fragment>(e, end);
+      if (*beg!='"') 
+        return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
       this->deserialize_one(v, enum_list(), first, beg);
       beg++;
       lastChar = *beg;
       if (lastChar==',') beg++;
     }
-    if (lastChar==',') throw unexpected_end_fragment();
+    if (lastChar==',') 
+      return json_error::create<unexpected_end_fragment>(e, end);
     return beg;
   }
 

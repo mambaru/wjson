@@ -1,23 +1,7 @@
 #pragma once
 
 #include <fas/type_list.hpp>
-#include <fas/integral/int_.hpp>
-#include <fas/typemanip/empty_type.hpp>
-
-#include <stdexcept>
-#include <vector>
-#include <array>
 #include <string>
-#include <deque>
-#include <set>
-#include <map>
-#include <memory>
-
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-#include <unordered_map>
-#endif
-
-#include <stdint.h>
 
 namespace iow{ namespace json{
 

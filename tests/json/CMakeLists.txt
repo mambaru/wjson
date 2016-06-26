@@ -8,6 +8,7 @@ add_executable(
   array_suite.cpp
   object_suite.cpp
   enum_suite.cpp
+  util_suite.cpp
   ${FAS_TESTING_CPP}
 )
 

@@ -40,18 +40,26 @@ public:
   }
 
   template<typename P>
-  P operator() ( T& v, P beg, P end )
+  P operator() ( T& v, P beg, P end, json_error* e )
   {
     v = T();
     for ( ; beg!=end && *beg<=' '; ++beg);
-    if (beg==end) throw unexpected_end_fragment();
-    if (*beg!='"') throw expected_of("\"");
+    if (beg==end) 
+      return json_error::create<unexpected_end_fragment>(e, end);
+    if (*beg!='"') 
+      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+
     ++beg;
-    if (beg==end) throw unexpected_end_fragment();
+    if (beg==end) 
+      return json_error::create<unexpected_end_fragment>(e, end);
+
     P first = beg;
     for ( ; beg!=end && *beg!='"'; ++beg);
-    if (beg==end) throw unexpected_end_fragment();
-    if (*beg!='"') throw expected_of("\"");
+    if (beg==end) 
+      return json_error::create<unexpected_end_fragment>(e, end);
+    if (*beg!='"') 
+      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+
     this->deserialize(v, enum_list(), first, beg);
     ++beg;
     return beg;

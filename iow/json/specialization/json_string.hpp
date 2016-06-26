@@ -1,4 +1,5 @@
 #include <memory>
+#include <vector>
 
 namespace iow{ namespace json{
 
@@ -73,7 +74,6 @@ public:
           case 'u':  beg = _unserialize_uhex(++beg, end, &vitr, n, e); break;
           default:
             return json_error::create<invalid_json_string>(e, end, std::distance(beg, end));
-            
         }
       }
       else
@@ -88,7 +88,9 @@ public:
 
     return beg;
   }
+
 private:
+
   template<typename P, typename P1>
   P _unserialize_symbol(P beg, P end, P1* vitr, int& n, json_error* e)
   {
@@ -178,9 +180,7 @@ U+0439	й	d0 b9	CYRILLIC SMALL LETTER SHORT I
        *((*vitr)++) = 128 | ( static_cast<unsigned char>( hex ) & 63 );
        --n;
     }
-
     return beg;
-
   }
 
   unsigned short _toUShort(unsigned char c, json_error* e)
@@ -191,7 +191,6 @@ U+0439	й	d0 b9	CYRILLIC SMALL LETTER SHORT I
     json_error::create<invalid_json_string>(e, (char*)(0));
     return 0;
   }
-
 };
 
 
@@ -212,12 +211,13 @@ public:
   template<typename P>
   P operator() ( value_type& v, P beg, P end )
   {
-    for ( register int i =0 ; i < N; ++i) v[i]=0;
+    for ( register int i =0 ; i < N; ++i)
+      v[i]=0;
+
     if ( parser::is_null(beg, end) )
       return parser::parse_null(beg, end);
 
-    //P s_end = parser::parse_string(beg, end);
-    return unserialize(beg, end, &(v[0]), N);
+    return this->unserialize(beg, end, &(v[0]), N);
   }
 };
 
