@@ -342,13 +342,13 @@ public:
   }
 
   template< typename Type, typename P>
-  P operator() ( std::unique_ptr<Type>& ptr, P beg, P end )
+  P operator() ( std::unique_ptr<Type>& ptr, P beg, P end, json_error* e )
   {
     // Только умный
     if (beg!=end && *beg!='n')
     {
-      ptr = new Type();
-      return typename J::serializer()( *ptr, beg, end);
+      ptr = std::unique_ptr<Type>(new Type());
+      return typename J::serializer()( *ptr, beg, end, e);
     }
     else
     {
@@ -359,13 +359,13 @@ public:
   }
   
   template< typename Type, typename P>
-  P operator() ( std::shared_ptr<Type>& ptr, P beg, P end )
+  P operator() ( std::shared_ptr<Type>& ptr, P beg, P end, json_error* e )
   {
     // Только умный
     if (beg!=end && *beg!='n')
     {
       ptr = std::make_shared<Type>();
-      return typename J::serializer()( *ptr, beg, end);
+      return typename J::serializer()( *ptr, beg, end, e);
     }
     else
     {

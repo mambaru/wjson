@@ -10,7 +10,7 @@ namespace iow{ namespace json{
 template<typename T>
 struct value;
 
-template<typename C, int R = -1>
+template<typename T, int R = -1>
 struct array;
 
 template<typename T, typename L>
@@ -30,6 +30,18 @@ struct set_enumerator;
 
 template<typename N, typename T, T v>
 struct enum_value;
+
+template<typename T, int R = -1>
+struct dict;
+
+template<typename KJ, typename VJ, int R = 10>
+struct dict_vector;
+
+template<typename KJ, typename VJ, int R = 10>
+struct dict_deque;
+
+template<typename KJ, typename VJ>
+struct dict_map;
 
 /// 
 
@@ -111,4 +123,5 @@ class serializerT;
 #include "specialization/array.hpp"
 #include "specialization/enum.hpp"
 #include "specialization/object.hpp"
+#include "specialization/dict.hpp"
 #include "specialization/utility.hpp"

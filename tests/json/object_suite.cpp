@@ -47,7 +47,7 @@ struct bar_json
       ::iow::json::base< foo_json >,
       ::iow::json::member<n_bar1, bar, foo, &bar::bar1, foo_json>,
       ::iow::json::member<n_bar2, bar, std::list<foo>, &bar::bar2, iow::json::array< std::list<foo_json> > >,
-      ::iow::json::member<n_bar3, bar, std::map<std::string, foo>, &bar::bar3, iow::json::array< std::map< iow::json::value< std::string >, foo_json  >  > >
+      ::iow::json::member<n_bar3, bar, std::map<std::string, foo>, &bar::bar3, iow::json::dict< std::map< iow::json::value< std::string >, foo_json  >  > >
     >
   > type;
   typedef type::target target;
@@ -78,7 +78,6 @@ UNIT(object1, "")
   bar_json::serializer()( b2, json1.begin(), json1.end(), 0 );
   bar_json::serializer()( b2, std::back_inserter(json2) );
   t << equal<expect>(json1, json2) << FAS_TESTING_FILE_LINE;
-  
 }
 
 BEGIN_SUITE(object, "")

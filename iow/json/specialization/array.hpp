@@ -158,24 +158,6 @@ struct array_base< std::unordered_multiset<J>, R>
   static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
 };
 
-
-template<typename JK, typename JV, typename R>
-struct array_base< std::unordered_map<JK, JV>, R>
-{
-  typedef std::unordered_map<JK, JV> json_container;
-  typedef typename JK::target key;
-  typedef typename JV::target value;
-  typedef std::pair<key, value> pair_type;
-  typedef pair< JK , JV > json_value;
-  typedef typename json_value::target target;
-  typedef std::unordered_map< key, value > target_container;
-  typedef serializerA< array_r< json_container, R >, '{', '}' > serializer;
-
-  typedef std::insert_iterator<target_container> inserter_iterator;
-  static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
-};
-
-
 template<typename J, size_t N, typename R>
 struct array_base< std::array<J, N>, R>
 {
@@ -187,49 +169,6 @@ struct array_base< std::array<J, N>, R>
 };
 
 #endif
-
-template<typename JK, typename JV, typename R>
-struct array_base< std::map<JK, JV>, R >
-{
-  typedef std::map<JK, JV> json_container;
-  typedef typename JK::target key;
-  typedef typename JV::target value;
-  typedef std::pair<key, value> pair_type;
-  typedef pair< JK , JV > json_value;
-  typedef typename json_value::target target;
-  typedef std::map< key, value > target_container;
-  typedef serializerA< array_r< json_container, R >, '{', '}' > serializer;
-
-  typedef std::insert_iterator<target_container> inserter_iterator;
-  static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
-};
-
-
-struct n_key { const char* operator()() const{ return "key";} };
-struct n_value { const char* operator()() const{ return "value";} };
-
-template<typename JK, typename JV, typename R>
-struct array_base< std::multimap<JK, JV>, R>
-{
-  typedef std::multimap<JK, JV> json_container;
-  typedef typename JK::target key;
-  typedef typename JV::target value;
-  typedef std::pair<key, value> pair_type;
-  typedef object<
-            pair_type,
-            typename fas::type_list_n<
-              member< n_key, pair_type, key, &pair_type::first, JK >,
-              member< n_value, pair_type, value, &pair_type::second, JV >
-            >::type
-          > json_value;
-  typedef typename json_value::target target;
-  typedef std::map< key, value > target_container;
-
-  typedef serializerT< array_r< json_container, R> > serializer;
-
-  typedef std::insert_iterator<target_container> inserter_iterator;
-  static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
-};
 
 template<typename C, typename R>
 struct array_r
@@ -260,10 +199,13 @@ struct array: array_r<C, fas::int_<R> > {};
 template<typename C>
 struct array<C, -1>: array_r<C, fas::empty_type> {};
 
-template<typename KJ, typename VJ, int R>
-struct object2array: array< pair<KJ,VJ>, R > {};
-
 template<int Reserve>
 struct vector_of_strings: array< std::vector< value< std::string > >,  Reserve> {};
+
+template<int Reserve>
+struct deque_of_strings: array< std::deque< value< std::string > >,  Reserve> {};
+
+template<int Reserve>
+struct list_of_strings: array< std::list< value< std::string > >,  Reserve> {};
 
 }}

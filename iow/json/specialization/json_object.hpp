@@ -13,9 +13,9 @@ struct serializerT< member_value<T, V, M, m, W> >
   }
 
   template<typename P>
-  P operator()( T& t, P beg, P end)
+  P operator()( T& t, P beg, P end, json_error* e)
   {
-    return typename W::serializer()( static_cast<V&>(t).*m, beg, end);
+    return typename W::serializer()( static_cast<V&>(t).*m, beg, end, e);
   }
 };
 

@@ -26,16 +26,6 @@ struct pointer
 };
 
 /// /////////////////////////////////////////
-template<typename K, typename V>
-struct pair
-{
-  typedef typename K::target key_target;
-  typedef typename V::target value_target;
-  typedef std::pair<key_target, value_target> target;
-  typedef serializerT< pair<K, V> > serializer;
-  typedef typename K::serializer key_serializer;
-  typedef typename V::serializer value_serializer;
-};
 
 template<typename T, typename V, typename M, M V::* m, typename W >
 struct member_value
