@@ -110,10 +110,7 @@ UNIT(string_unit, "")
 {
   using namespace fas::testing;
   value_serializer_test<T, std::string>(t, "привет", "\"привет\"", __LINE__);
-  //value_serializer_test<T, std::wstring>(t, L"привет", L"\"привет1\"", __LINE__);
 }
-
-
 
 BEGIN_SUITE(value, "")
   ADD_UNIT(bool_unit)

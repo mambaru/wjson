@@ -4,11 +4,11 @@ namespace iow{ namespace json{
 
 /// /////////////////////////////////////////////////////
 
-template<typename T>
+template<typename T, int R>
 struct raw_value
 {
   typedef T target;
-  typedef serializerT< raw_value< T > > serializer;
+  typedef serializerT< raw_value< T, R > > serializer;
 };
 
 template<typename T>

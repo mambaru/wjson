@@ -1,5 +1,6 @@
 #include <memory>
 #include <vector>
+#include <fas/integral/bool_.hpp>
 
 namespace iow{ namespace json{
 
@@ -222,8 +223,8 @@ public:
 };
 
 
-template<>
-class serializerT< value<std::string> >
+template<int R>
+class serializerT< value<std::string, R> >
   : serializerS<char>
 {
 public:
@@ -237,14 +238,24 @@ public:
   P operator() ( std::string& v, P beg, P end, json_error* e )
   {
     v.clear();
+    this->reserve( v, fas::bool_< (R>0) >() );
     if ( parser::is_null(beg, end) )
       return parser::parse_null(beg, end, e);
     return unserialize(beg, end, std::back_inserter(v), -1, e);
   }
+  
+  void reserve( std::string&, fas::false_){}
+
+  
+  void reserve( std::string& v, fas::true_)
+  {
+    v.reserve(R);
+  }
+
 };
 
-template<>
-class serializerT< value<std::vector<char> > >
+template<int R>
+class serializerT< value<std::vector<char>, R > >
   : serializerS<char>
 {
 public:
@@ -255,12 +266,20 @@ public:
   }
 
   template<typename P>
-  P operator() ( std::vector<char>& v, P beg, P end )
+  P operator() ( std::vector<char>& v, P beg, P end, json_error* e )
   {
     v.clear();
+    this->reserve( v, fas::bool_< (R>0) >() );
     if ( parser::is_null(beg, end) )
       return parser::parse_null(beg, end);
-    return unserialize(beg, end, std::back_inserter(v));
+    return unserialize(beg, end, std::back_inserter(v), e);
+  }
+
+  void reserve( std::vector<char>&, fas::false_){}
+
+  void reserve( std::vector<char>& v, fas::true_)
+  {
+    v.reserve(R);
   }
 };
 
@@ -292,8 +311,8 @@ public:
 };
 
 
-template<typename T>
-class serializerT< raw_value<T> >
+template<typename T, int R>
+class serializerT< raw_value<T, R> >
 {
 public:
   template<typename P>

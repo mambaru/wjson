@@ -12,10 +12,10 @@ UNIT(util1, "raw_value")
   std::string value;
   raw_value< std::string >::serializer ser;
   ser( value, json.begin(), json.end(), 0 );
-  t << equal<expect>(json, value) << FAS_TESTING_FILE_LINE;
+  t << equal<expect>(json, value) << FAS_ENDL;
   json.clear();;
   ser( value, std::back_inserter(json) );
-  t << equal<expect>(json, value) << FAS_TESTING_FILE_LINE;
+  t << equal<expect>(json, value) << FAS_ENDL;
 }
 
 UNIT(util2, "raw_range")
@@ -29,11 +29,11 @@ UNIT(util2, "raw_range")
   raw_pair<range_t>::serializer ser;
   ser( value, json.begin(), json.end(), 0 );
   //value.first++;
-  t << equal<expect>(json, std::string(value.first, value.second)) << FAS_TESTING_FILE_LINE;
+  t << equal<expect>(json, std::string(value.first, value.second)) << FAS_ENDL;
   json.clear();
   //value.first++;
   ser( value, std::back_inserter(json) );
-  t << equal<expect>(json, std::string(value.first, value.second) ) << FAS_TESTING_FILE_LINE;
+  t << equal<expect>(json, std::string(value.first, value.second) ) << FAS_ENDL;
 }
 
 
@@ -57,10 +57,10 @@ UNIT(util3, "member_value")
   typename member_value< bar, foo, int, &foo::value, value<int> >::serializer ser;
   ser( b, std::back_inserter(json) );
   
-  t << equal<expect>( json, "12345" ) << FAS_TESTING_FILE_LINE;
+  t << equal<expect>( json, "12345" ) << FAS_ENDL;
   std::reverse(json.begin(), json.end());
   ser( b, json.begin(), json.end(), 0 );
-  t << equal<expect>( b.value, 54321 ) << FAS_TESTING_FILE_LINE;
+  t << equal<expect>( b.value, 54321 ) << FAS_ENDL;
 }
 
 UNIT(util4, "pointer")
@@ -75,7 +75,7 @@ UNIT(util4, "pointer")
     // ser( str, json.begin(), json.end(), 0 );
     *str = "Привет мир!";
     ser(str, std::back_inserter( json ) );
-    t << equal<expect>( json, "\"Привет мир!\"" ) << FAS_TESTING_FILE_LINE;
+    t << equal<expect>( json, "\"Привет мир!\"" ) << FAS_ENDL;
     delete str;
   }
 
@@ -84,16 +84,16 @@ UNIT(util4, "pointer")
     pointer< std::shared_ptr<std::string>, value< std::string > >::serializer ser;
     auto str = std::make_shared<std::string>("Привет мир!");
     ser( str, std::back_inserter( json ) );
-    t << equal<expect>( json, "\"Привет мир!\"" ) << FAS_TESTING_FILE_LINE;
+    t << equal<expect>( json, "\"Привет мир!\"" ) << FAS_ENDL;
     str = nullptr;
     ser( str, json.begin(), json.end(), 0 );
-    t << equal<expect>( *str, "Привет мир!" ) << FAS_TESTING_FILE_LINE;
+    t << equal<expect>( *str, "Привет мир!" ) << FAS_ENDL;
     json = "null";
     ser( str, json.begin(), json.end(), 0 );
-    t << equal<expect>( str, nullptr ) << FAS_TESTING_FILE_LINE;
+    t << equal<expect>( str, nullptr ) << FAS_ENDL;
     json.clear();
     ser( str, std::back_inserter( json ) );
-    t << equal<expect>( json, "null" ) << FAS_TESTING_FILE_LINE;
+    t << equal<expect>( json, "null" ) << FAS_ENDL;
   }
 
   {
@@ -101,16 +101,16 @@ UNIT(util4, "pointer")
     pointer< std::unique_ptr<std::string>, value< std::string > >::serializer ser;
     std::unique_ptr<std::string> str( new std::string("Привет мир!") );
     ser( str, std::back_inserter( json ) );
-    t << equal<expect>( json, "\"Привет мир!\"" ) << FAS_TESTING_FILE_LINE;
+    t << equal<expect>( json, "\"Привет мир!\"" ) << FAS_ENDL;
     str = nullptr;
     ser( str, json.begin(), json.end(), 0 );
-    t << equal<expect>( *str, "Привет мир!" ) << FAS_TESTING_FILE_LINE;
+    t << equal<expect>( *str, "Привет мир!" ) << FAS_ENDL;
     json = "null";
     ser( str, json.begin(), json.end(), 0 );
-    t << is_true<expect>( str == nullptr ) << FAS_TESTING_FILE_LINE;
+    t << is_true<expect>( str == nullptr ) << FAS_ENDL;
     json.clear();
     ser( str, std::back_inserter( json ) );
-    t << equal<expect>( json, "null" ) << FAS_TESTING_FILE_LINE;
+    t << equal<expect>( json, "null" ) << FAS_ENDL;
   }
 
 }
@@ -124,7 +124,7 @@ UNIT(util5, "pair")
   pair< value< std::string>, value<int> >::serializer ser;
   std::string json;
   ser( p, std::back_inserter(json) );
-  t << equal<expect>( json, "\"foo\":12345") << FAS_TESTING_FILE_LINE;
+  t << equal<expect>( json, "\"foo\":12345") << FAS_ENDL;
 }
 
 BEGIN_SUITE(util, "")

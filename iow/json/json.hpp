@@ -7,7 +7,7 @@ namespace iow{ namespace json{
 
 /// /////////////////////////////////////////////////////
 
-template<typename T>
+template<typename T, int R = -1>
 struct value;
 
 template<typename T, int R = -1>
@@ -45,7 +45,7 @@ struct dict_map;
 
 /// 
 
-template<typename T = std::string>
+template<typename T = std::string, int R = -1>
 struct raw_value;
 
 template<typename T>
