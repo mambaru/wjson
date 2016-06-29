@@ -2,7 +2,9 @@
 #include <iow/json/json.hpp>
 #include <algorithm>
 
+/*
 namespace iow{ namespace json{
+
 
 namespace detail
 {
@@ -59,7 +61,7 @@ struct value<double>
 
 
 }}
-
+*/
 
 
 template<typename T, typename V>
@@ -70,11 +72,12 @@ void value_serializer_test(T& t, const V& v, const std::string& chk, int line)
   V val = v;
   std::string json;
   serializer_t()(val, std::back_inserter(json) );
-  t << equal_str<expect>(json, chk) << "serialize: " << json << "!=" << chk << ", line: " << line;
+  t << equal_str<expect>(json, chk) << "Serialize. Line: " << line;
   val = V();
   ::iow::json::json_error e;
   serializer_t()(val, json.begin(), json.end(), &e );
-  t << equal<expect>(v, val) << "unserialize: " << v << "!=" << val << ", line: " << line;
+  t << equal<expect>(v, val) << "Unserialize. Line: " << line;
+  
 }
 
 UNIT(bool_unit, "")
@@ -102,8 +105,13 @@ UNIT(integer_unit, "")
 UNIT(float_unit, "")
 {
   using namespace fas::testing;
-  value_serializer_test<T, float>(t, 10.1, "10.1", __LINE__);
-  value_serializer_test<T, double>(t, 10.1, "10.1", __LINE__);
+  value_serializer_test<T, float>(t, 10.1, "1.010000e+01", __LINE__);
+  value_serializer_test<T, double>(t, 10.1, "1.010000e+01", __LINE__);
+  std::cout << std::scientific;
+  long double ld = 10.1;
+  t << message("10.1: ") << ld;
+  value_serializer_test<T, long double>(t, 10.1, "1.010000e+01", __LINE__);
+  
 }
 
 UNIT(string_unit, "")

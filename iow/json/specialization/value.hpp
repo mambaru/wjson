@@ -74,6 +74,28 @@ struct value<unsigned long long, -1>
   typedef serializerT< value<unsigned long long, -1> > serializer;
 };
 
+template<int R>
+struct value<float, R>
+{
+  typedef float target;
+  typedef serializerT< value<float, -1> > serializer;
+};
+
+template<int R>
+struct value<double, R>
+{
+  typedef double target;
+  typedef serializerT< value<double, -1> > serializer;
+};
+
+template<int R>
+struct value<long double, R>
+{
+  typedef long double target;
+  typedef serializerT< value<long double, -1> > serializer;
+};
+
+
 template<>
 struct value<bool, -1>
 {

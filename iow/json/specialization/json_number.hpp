@@ -1,3 +1,4 @@
+#include <sstream>
 
 namespace iow{ namespace json{
 
@@ -111,6 +112,62 @@ namespace detail
        return this->unserialize(v, beg, end, e);
     }
   };
+  
+  template<typename T, int R>
+  class serializerF
+  {
+  public:
+    template<typename P>
+    P operator()( T v, P end)
+    {
+      std::stringstream ss;
+      const size_t bufsize = ( R == -1 ? 20 : 20 + R ) ;
+      char buf[bufsize]={'\0'};
+      ss.rdbuf()->pubsetbuf(buf, bufsize);
+      if ( R == -1 ) 
+      {
+        ss << std::scientific;
+      }
+      else
+      {
+        ss << std::fixed;
+        ss.precision(R);
+      }
+
+      ss << v;
+
+      for (int i = 0; i < bufsize && buf[i]!='\0'; ++i)
+      {
+        *(end++) = buf[i];
+      }
+      return end;
+    }
+    
+    template<typename P>
+    P operator() ( T& v, P beg, P end, json_error* e )
+    {
+      if( beg==end)
+        return json_error::create<unexpected_end_fragment>( e, end );
+
+      if ( parser::is_null(beg, end) )
+      {
+        v = T();
+        return parser::parse_null(beg, end, e);
+      }
+      
+      if ( !parser::is_number(beg, end) )
+      {
+        return json_error::create<invalid_json_number>( e, end, std::distance(beg, end) );
+      }
+        
+
+      std::stringstream ss;
+      ss.rdbuf()->pubsetbuf( &(*beg), std::distance(beg, end) );
+      ss >> v;
+      return parser::parse_number(beg, end, e);
+    }
+  };
+
 }
 
 
@@ -172,6 +229,24 @@ class serializerT< value<long long> >
 template<>
 class serializerT< value<unsigned long long> >
   : public detail::serializerN<unsigned long long>
+{
+};
+
+template<int R>
+class serializerT< value<float, R> >
+  : public detail::serializerF<float, R>
+{
+};
+
+template<int R>
+class serializerT< value<double, R> >
+  : public detail::serializerF<double, R>
+{
+};
+
+template<int R>
+class serializerT< value<long double, R> >
+  : public detail::serializerF<long double, R>
 {
 };
 
