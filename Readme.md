@@ -42,6 +42,22 @@ foo_json::serializer()( f, std::back_inserter(json) );
 foo_json::serializer()( f, std::ostreambuf_iterator<char>(std::cout) );
 ```
 Для десериализации нужна пара итераторов произвольного доступа:
+```cpp
 ::iow::json::error e;
 foo_json::serializer()( f, json.begin(), json.end(), &e );
 ```
+Если есть ошибка:
+```cpp
+if ( e )
+{
+  // Сообщение об ошибке
+  std::cout << e.message() << std::endl;
+  // Позиция в строке
+  std::cout << e.where( json.begin(), json.end() ) << std::endl;
+  // Исходная строка с указанием места ошибки символами 
+  std::cout << e.trace( json.begin(), json.end() ) << std::endl;
+}
+```
+
+[ДОКУМЕНТАЦИЯ](http://github.lan/cpp/wjson/wikis/home)
+

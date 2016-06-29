@@ -78,13 +78,6 @@ UNIT(object1, "")
   bar_json::serializer()( b2, json1.begin(), json1.end(), 0 );
   bar_json::serializer()( b2, std::back_inserter(json2) );
   t << equal<expect>(json1, json2) << FAS_TESTING_FILE_LINE;
-  
-  std::cout << std::endl;
-  std::cout << std::endl;
-  std::cout << std::endl;
-  bar_json::serializer()( b1, std::ostreambuf_iterator<char>(std::cout) );
-  std::cout << std::endl;
-  std::cout << std::endl;
 }
 
 BEGIN_SUITE(object, "")

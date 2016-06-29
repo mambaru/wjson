@@ -16,7 +16,7 @@ UNIT(array1, "Одномерный массив")
   std::fill_n(nums, 5, 0);
   json_error e;
   ser(nums, json.begin(), json.end(), &e);
-  t << is_false<expect>(e) << e.message( json.begin(), json.end() ) << ": " << FAS_ENDL;
+  t << is_false<expect>(e) << e.where( json.begin(), json.end() ) << ": " << FAS_ENDL;
 
   json.clear();
   ser(nums, std::back_inserter(json) );
@@ -26,40 +26,40 @@ UNIT(array1, "Одномерный массив")
   json = "1,2,3,4,5]";
   e.reset();
   ser(nums, json.begin(), json.end(), &e);
-  std::string error = e.message( json.begin(), json.end() );
-  t << message("Test JSON error: ") << error;
+  std::string error = e.trace( json.begin(), json.end() );
+  t << message("Test JSON error: ") << e.message() << error;
   t << is_true<expect>(e) << FAS_ENDL;
   t << equal<expect>(error, "Expected of '[': >>>1,2,3,4,5]") << FAS_ENDL;
   
   json = "[1,2,3,4,5";
   e.reset();
   ser(nums, json.begin(), json.end(), &e);
-  error = e.message( json.begin(), json.end() );
-  t << message("Test JSON error: ") << error;
+  error = e.trace( json.begin(), json.end() );
+  t << message("Test JSON error: ") << e.message() << error;
   t << is_true<expect>(e) << FAS_ENDL;
   t << equal<expect>(error, "Unexpected end of ragment: [1,2,3,4,5<<<") << FAS_ENDL;
 
   json = "[1,2,3,[4,5]";
   e.reset();
   ser(nums, json.begin(), json.end(), &e);
-  error = e.message( json.begin(), json.end() );
-  t << message("Test JSON error: ") << error;
+  error = e.trace( json.begin(), json.end() );
+  t << message("Test JSON error: ") << e.message() <<error;
   t << is_true<expect>(e) << FAS_ENDL;
   t << equal<expect>(error, "Invalid json number: [1,2,3,>>>[4,5]") << FAS_ENDL;
 
   json = "[1,2,3 4,5]";
   e.reset();
   ser(nums, json.begin(), json.end(), &e);
-  error = e.message( json.begin(), json.end() );
-  t << message("Test JSON error: ") << error;
+  error = e.trace( json.begin(), json.end() );
+  t << message("Test JSON error: ") << e.message() << error;
   t << is_true<expect>(e) << FAS_ENDL;
   t << equal<expect>(error, "Expected of ',': [1,2,3 >>>4,5]") << FAS_ENDL;
 
   json = "[1,2,'3 4',5]";
   e.reset();
   ser(nums, json.begin(), json.end(), &e);
-  error = e.message( json.begin(), json.end() );
-  t << message("Test JSON error: ") << error;
+  error = e.trace( json.begin(), json.end() );
+  t << message("Test JSON error: ") << e.message() << error;
   t << is_true<expect>(e) << FAS_ENDL;
   t << equal<expect>(error, "Invalid json number: [1,2,>>>'3 4',5]") << FAS_ENDL;
 }
@@ -80,7 +80,7 @@ UNIT(array2, "Двумерный массив")
   json="[[4,3],[2,1]]";
   json_error e;
   ser(nums, json.begin(), json.end(), &e);
-  t << is_false<expect>(e) << e.message( json.begin(), json.end() ) << ": " << FAS_ENDL;
+  t << is_false<expect>(e) << e.message() <<  e.trace( json.begin(), json.end() ) << ": " << FAS_ENDL;
   json.clear();
   ser(nums, std::back_inserter(json) );
   t << equal<expect>( json, "[[4,3],[2,1]]") << FAS_ENDL;
@@ -103,7 +103,7 @@ UNIT(array3, "Трехмерный массив")
   json="[[[4],[3]],[[2],[1]]]";
   json_error e;
   ser(nums, json.begin(), json.end(), &e);
-  t << is_false<expect>(e) << e.message( json.begin(), json.end() ) << ": " << FAS_ENDL;
+  t << is_false<expect>(e) << e.message() << e.trace( json.begin(), json.end() ) << ": " << FAS_ENDL;
   json.clear();
   ser(nums, std::back_inserter(json) );
   t << equal<expect>( json, "[[[4],[3]],[[2],[1]]]") << FAS_ENDL;
@@ -111,7 +111,7 @@ UNIT(array3, "Трехмерный массив")
   // при десериализации перезапишем только последнюю [1] на [5]
   json="[[[],[]],[[],[5]]]";
   ser(nums, json.begin(), json.end(), &e);
-  t << is_false<expect>(e) << e.message( json.begin(), json.end() ) << ": " << FAS_ENDL;
+  t << is_false<expect>(e) << e.message() << e.trace( json.begin(), json.end() ) << ": " << FAS_ENDL;
   json.clear();
   ser(nums, std::back_inserter(json) );
   t << equal<expect>( json, "[[[4],[3]],[[2],[5]]]") << FAS_ENDL;
@@ -119,7 +119,7 @@ UNIT(array3, "Трехмерный массив")
   // Обнулим все элементы кроме последнего
   json="[[[null],[null]],[[null],[5]]]";
   ser(nums, json.begin(), json.end(), &e);
-  t << is_false<expect>(e) << e.message( json.begin(), json.end() ) << ": " << FAS_ENDL;
+  t << is_false<expect>(e) << e.message() << e.trace( json.begin(), json.end() ) << ": " << FAS_ENDL;
   json.clear();
   ser(nums, std::back_inserter(json) );
   t << equal<expect>( json, "[[[0],[0]],[[0],[5]]]") << FAS_ENDL;
@@ -127,7 +127,7 @@ UNIT(array3, "Трехмерный массив")
   // сбросим все
   json="null";
   ser(nums, json.begin(), json.end(), &e);
-  t << is_false<expect>(e) << e.message( json.begin(), json.end() ) << ": " << FAS_ENDL;
+  t << is_false<expect>(e) << e.message() << e.trace( json.begin(), json.end() ) << ": " << FAS_ENDL;
   json.clear();
   ser(nums, std::back_inserter(json) );
   t << equal<expect>( json, "[[[0],[0]],[[0],[0]]]") << FAS_ENDL;

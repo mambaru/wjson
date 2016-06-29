@@ -10,25 +10,46 @@ public:
   json_error(const char *msg, size_t tail_of = 0 ): _what1(msg), _what2(0), _tail_of(tail_of) {}
   json_error(const char *msg, const char *sym, size_t tail_of = 0 ): _what1(msg), _what2(sym), _tail_of(tail_of) {}
   size_t tail_of() const { return _tail_of; }
-  const char* what() const { return _what1;}
-
-  operator bool () const {return _what1!=0; }
-  void reset() { _what1=0; _what2=0; _tail_of=0;}
-  
-  template<typename P>
-  std::string message( P beg, P end ) const
+  const char* what() const 
   {
     if ( _what1==0 )
       return "OK";
+    return _what1;
     
-    if (std::distance(beg, end) < _tail_of )
-      return std::string(_what1);
-    
+  }
+
+  operator bool () const {return _what1!=0; }
+  void reset() { _what1=0; _what2=0; _tail_of=0;}
+
+  std::string message( ) const
+  {
     std::stringstream ss;
     ss << _what1;
     if ( _what2 != 0 )
-      ss << " '" << _what2 << "'";
-    ss << ": " << std::string(beg, end - _tail_of ) << (_tail_of ? ">>>" : "<<<") << std::string(end - _tail_of, end);
+      ss << " '" << _what2 << "'.";
+    return ss.str();
+  }
+
+  template<typename P>
+  size_t where( P beg, P end) const
+  {
+    if ( _what1==0 )
+      return 0;
+
+    if (std::distance(beg, end) < _tail_of )
+      return 0;
+
+    return std::distance(beg, end) - _tail_of;
+  }
+
+  template<typename P>
+  std::string trace( P beg, P end ) const
+  {
+    if ( this->what() == 0 )
+      return 0;
+
+    std::stringstream ss;
+    ss  << std::string(beg, end - _tail_of ) << (_tail_of ? ">>>" : "<<<") << std::string(end - _tail_of, end);
     return ss.str();
   }
   
