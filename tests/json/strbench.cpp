@@ -64,7 +64,7 @@ void str1_bench()
       dtime2 = t;
   }
 
-    std::cout << "serialization time: " << stime << " ns" << std::endl;
+  std::cout << "serialization time: " << stime << " ns" << std::endl;
   std::cout << "serialization rate: " << size_t(( 1000000000.0/stime ) * TESTS) << " persec" << std::endl;
   std::cout << "deserialization time 1: " << dtime1 << " ns" << std::endl;
   std::cout << "deserialization rate 1: " << size_t(( 1000000000.0/dtime1 ) * TESTS) << " persec" << std::endl;

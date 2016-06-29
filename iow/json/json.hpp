@@ -48,11 +48,11 @@ struct dict_map;
 template<typename T = std::string, int R = -1>
 struct raw_value;
 
-template<typename T>
-struct raw_pair;
+template<typename Itr>
+struct iterator_pair;
 
-template<typename T>
-struct value_quoted;
+template<typename J, bool SerQ = true, bool ReqQ = true>
+struct raw_quoted;
 
 template<typename T, typename J>
 struct pointer;

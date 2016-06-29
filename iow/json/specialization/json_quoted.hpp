@@ -10,22 +10,24 @@ namespace iow{ namespace json{
 /**
  * сериализует с обязательным обрамлением кавычками
  * нужно для сериализации map{ int => value }
+ * SerQ = сериализовывать с кавычками
+ * ReqQ = только строки
  */
-template<typename T>
-class serializerQuoted {
+template<typename J, bool SerQ, bool ReqQ>
+class serializerRQ {
 public:
-  serializerT< value<T> > serializer;
-  serializerQuoted(){}
-
+  typedef J serializer;
+  typedef typename J::target target;
+  
   /** serialization:
    * end - back inserter iterator
    */
   template<typename P>
-  P operator()( const T& t, P end)
+  P operator()( const target& t, P end)
   {
-    *(end++)='"';
-    end = serializer(t, end);
-    *(end++)='"';
+    if ( SerQ ) *(end++)='"';
+    end = serializer()(t, end);
+    if ( SerQ ) *(end++)='"';
     return end;
   }
 
@@ -33,36 +35,28 @@ public:
    * beg, end - forward iterator
    */
   template<typename P>
-  P operator()( T& t, P beg, P end)
+  P operator()( target& t, P beg, P end, json_error* e)
   {
-    if ( parser::is_null(beg, end) )
-    {
-      return parser::parse_null(beg, end);
-    }
-
     if (beg == end)
-    {
-      throw unexpected_end_fragment();
-    }
+      return json_error::create<unexpected_end_fragment>(e, end);
 
-    if (*(beg++) != '"')
-    {
-      throw unexpected_end_fragment();
-    }
+    if ( ReqQ && *beg == '"')
+      ++beg;
+    else
+      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+    
+    beg = serializer()(t, beg, end, e);
 
-    beg = serializer(t, beg, end);
-    if (beg == end)
-    {
-      throw unexpected_end_fragment();
-    }
+    if ( ReqQ && beg == end)
+      return json_error::create<unexpected_end_fragment>(e, end);
 
-    if (*(beg++)!='"')
-    {
-      throw unexpected_end_fragment();
-    }
+    if ( ReqQ && *beg == '"')
+      ++beg;
+    else
+      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+
     return beg;
   }
 };
-
 
 }}

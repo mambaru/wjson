@@ -238,12 +238,14 @@ public:
   P operator() ( std::string& v, P beg, P end, json_error* e )
   {
     v.clear();
-    this->reserve( v, fas::bool_< (R>0) >() );
+    //this->reserve( v, fas::bool_< (R>0) >() );
+    v.reserve( (R >= 0) ? R : 64);
+
     if ( parser::is_null(beg, end) )
       return parser::parse_null(beg, end, e);
     return unserialize(beg, end, std::back_inserter(v), -1, e);
   }
-  
+ /* 
   void reserve( std::string&, fas::false_){}
 
   
@@ -251,6 +253,7 @@ public:
   {
     v.reserve(R);
   }
+  */
 
 };
 
@@ -269,22 +272,25 @@ public:
   P operator() ( std::vector<char>& v, P beg, P end, json_error* e )
   {
     v.clear();
-    this->reserve( v, fas::bool_< (R>0) >() );
+    v.reserve( (R >= 0) ? R : 64);
+    //this->reserve( v, fas::bool_< (R>0) >() );
     if ( parser::is_null(beg, end) )
       return parser::parse_null(beg, end);
     return unserialize(beg, end, std::back_inserter(v), e);
   }
 
+  /*
   void reserve( std::vector<char>&, fas::false_){}
 
   void reserve( std::vector<char>& v, fas::true_)
   {
     v.reserve(R);
   }
+  */
 };
 
 template<typename T>
-class serializerT< raw_pair<T> >
+class serializerT< iterator_pair<T> >
 {
 public:
   template<typename P>

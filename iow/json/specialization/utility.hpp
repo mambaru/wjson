@@ -12,10 +12,10 @@ struct raw_value
 };
 
 template<typename T>
-struct raw_pair
+struct iterator_pair
 {
   typedef T target;
-  typedef serializerT< raw_pair< T > > serializer;
+  typedef serializerT< iterator_pair< T > > serializer;
 };
 
 template<typename T, typename J>

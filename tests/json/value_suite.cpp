@@ -77,7 +77,21 @@ void value_serializer_test(T& t, const V& v, const std::string& chk, int line)
   ::iow::json::json_error e;
   serializer_t()(val, json.begin(), json.end(), &e );
   t << equal<expect>(v, val) << "Unserialize. Line: " << line;
-  
+}
+
+template<typename T, typename V, int R>
+void real_serializer_test(T& t, const V& v, const std::string& chk, int line)
+{
+  typedef typename ::iow::json::value<V, R>::serializer serializer_t;
+  using namespace fas::testing;
+  V val = v;
+  std::string json;
+  serializer_t()(val, std::back_inserter(json) );
+  t << equal_str<expect>(json, chk) << "Serialize. Line: " << line;
+  val = V();
+  ::iow::json::json_error e;
+  serializer_t()(val, json.begin(), json.end(), &e );
+  t << less<expect>(v - val, 0.000001) << "Unserialize. Line: " << line;
 }
 
 UNIT(bool_unit, "")
@@ -105,12 +119,13 @@ UNIT(integer_unit, "")
 UNIT(float_unit, "")
 {
   using namespace fas::testing;
-  value_serializer_test<T, float>(t, 10.1, "1.010000e+01", __LINE__);
-  value_serializer_test<T, double>(t, 10.1, "1.010000e+01", __LINE__);
-  std::cout << std::scientific;
-  long double ld = 10.1;
-  t << message("10.1: ") << ld;
-  value_serializer_test<T, long double>(t, 10.1, "1.010000e+01", __LINE__);
+  real_serializer_test<T, float, -1>(t, 10.1, "1.010000e+01", __LINE__);
+  real_serializer_test<T, double, -1>(t, 10.1, "1.010000e+01", __LINE__);
+  real_serializer_test<T, long double, -1>(t, 10.1, "1.010000e+01", __LINE__);
+
+  real_serializer_test<T, float, 0>(t, 10.1, "10", __LINE__);
+  real_serializer_test<T, double, 2>(t, 10.1, "10.1", __LINE__);
+  real_serializer_test<T, long double, 10>(t, 10.1, "10.1", __LINE__);
   
 }
 

@@ -58,8 +58,19 @@ public:
     if (beg==end) 
       return json_error::create<unexpected_end_fragment>(e, end);
 
-    if ( *(beg++) != '{' ) 
-      return json_error::create<expected_of>(e, end, "{", std::distance(beg, end) + 1 );
+    if ( *beg != '{' ) 
+    {
+      if (*beg=='[')
+      {
+        beg = parser::parse_space(++beg, end, e);
+        if (*beg!=']')
+          return json_error::create<expected_of>(e, end, "]", std::distance(beg, end) );
+        // Фикс для php. {} <=> []
+        return ++beg;
+      }
+      return json_error::create<expected_of>(e, end, "{", std::distance(beg, end)  );
+    }
+    ++beg;
 
     beg = parser::parse_space(beg, end, e);
     if ( beg==end ) 

@@ -26,7 +26,7 @@ UNIT(util2, "raw_range")
   std::string json="\"Привет мир!\"";
   typedef std::pair<std::string::iterator, std::string::iterator> range_t;
   range_t value;
-  raw_pair<range_t>::serializer ser;
+  iterator_pair<range_t>::serializer ser;
   ser( value, json.begin(), json.end(), 0 );
   //value.first++;
   t << equal<expect>(json, std::string(value.first, value.second)) << FAS_ENDL;

@@ -264,7 +264,12 @@ public:
   template<typename P>
   static bool is_object( P beg, P end )
   {
-    return beg!=end && *beg=='{';
+    // [] <=> {} 
+    if (beg==end) return false;
+    if ( *beg=='{' ) return true;
+    if ( *beg!='[' ) return false;
+    beg = parser::parse_space(++beg, end, 0);
+    return beg!=end && *beg==']';
   }
 
   template<typename P>
@@ -289,7 +294,6 @@ public:
     else if (is_array(beg, end) )
       return parse_array(beg, end, e);
     return json_error::create<invalid_json>( e, end, std::distance(beg, end) );
-    
   }
 
 

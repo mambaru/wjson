@@ -78,21 +78,21 @@ template<int R>
 struct value<float, R>
 {
   typedef float target;
-  typedef serializerT< value<float, -1> > serializer;
+  typedef serializerT< value<float, R> > serializer;
 };
 
 template<int R>
 struct value<double, R>
 {
   typedef double target;
-  typedef serializerT< value<double, -1> > serializer;
+  typedef serializerT< value<double, R> > serializer;
 };
 
 template<int R>
 struct value<long double, R>
 {
   typedef long double target;
-  typedef serializerT< value<long double, -1> > serializer;
+  typedef serializerT< value<long double, R> > serializer;
 };
 
 
@@ -106,15 +106,13 @@ struct value<bool, -1>
 template<int R>
 struct value<std::string, R>
 {
-  enum {reserve=-1};
   typedef std::string target;
-  typedef serializerT< value<std::string, R> > serializer;
+  typedef serializerT< value<std::string, R > > serializer;
 };
 
 template<int R>
 struct value< std::vector<char>, R >
 {
-  enum {reserve=-1};
   typedef std::vector<char> target;
   typedef serializerT< value< target, R > > serializer;
 };
@@ -126,10 +124,10 @@ struct value< char[N], -1 >
   typedef serializerT< value<char[N], -1>  > serializer;
 };
 
-template<typename T>
-struct value_quoted {
-  typedef T target;
-  typedef serializerQuoted< T > serializer;
+template<typename J, bool SerQ, bool ReqQ>
+struct raw_quoted {
+  typedef typename J::target target;
+  typedef serializerRQ< J, SerQ, ReqQ > serializer;
 };
 
 }}

@@ -127,14 +127,16 @@ namespace detail
       if ( R == -1 ) 
       {
         ss << std::scientific;
+        ss << "S:";
       }
       else
       {
         ss << std::fixed;
         ss.precision(R);
+        ss << "P:";
       }
 
-      ss << v;
+      ss << v ;
 
       for (int i = 0; i < bufsize && buf[i]!='\0'; ++i)
       {
