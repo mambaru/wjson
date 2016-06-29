@@ -13,7 +13,7 @@
 #include <map>
 #include <memory>
 
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
+#if __cplusplus >= 201103L
 #include <unordered_map>
 #include <unordered_set>
 #endif
@@ -100,6 +100,18 @@ struct dict_base< std::list< pair<K, V> >, R>
   static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
 };
 
+template<typename K, typename V, typename R>
+struct dict_base< std::set< pair<K, V> >, R>
+{
+  typedef pair<K, V> json_value;
+  typedef std::set< json_value > json_container;
+  typedef typename json_value::target target;
+  typedef std::set<target> target_container;
+  typedef serializerA< dict_r< json_container, R>, '{', '}' > serializer;
+  typedef std::back_insert_iterator<target_container> inserter_iterator;
+  static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
+};
+
 template<typename JK, typename JV, typename R>
 struct dict_base< std::map<JK, JV>, R >
 {
@@ -132,7 +144,7 @@ struct dict_base< std::multimap<JK, JV>, R >
   static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
 };
 
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
+#if __cplusplus >= 201103L
 
 template<typename JK, typename JV, typename R>
 struct dict_base< std::unordered_map<JK, JV>, R>
@@ -176,6 +188,18 @@ struct dict_base< std::array< pair<K, V>, R::value >, R>
   typedef serializerA< dict_r< json_container, R>, '{', '}' > serializer;
 };
 
+template<typename K, typename V, typename R>
+struct dict_base< std::unordered_set< pair<K, V> >, R>
+{
+  typedef pair<K, V> json_value;
+  typedef std::set< json_value > json_container;
+  typedef typename json_value::target target;
+  typedef std::set<target> target_container;
+  typedef serializerA< dict_r< json_container, R>, '{', '}' > serializer;
+  typedef std::back_insert_iterator<target_container> inserter_iterator;
+  static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
+};
+
 #endif
 
 template<typename C, typename R>
@@ -196,14 +220,14 @@ struct dict: dict_r<C, fas::int_<R> > {};
 template<typename C>
 struct dict<C, -1>: dict_r<C, fas::empty_type> {};
 
-template<typename KJ, typename VJ, int R>
-struct dict_vector: dict< std::vector< pair<KJ,VJ> >, R > {};
+template<typename VJ, int R>
+struct dict_vector: dict< std::vector< pair< value<std::string>, VJ > >, R > {};
 
-template<typename KJ, typename VJ, int R>
-struct dict_deque: dict< std::deque< pair<KJ,VJ> >, R > {};
+template<typename VJ, int R>
+struct dict_deque: dict< std::deque< pair< value<std::string>,VJ > >, R > {};
 
-template<typename KJ, typename VJ>
-struct dict_map: dict< std::map< KJ,VJ >, -1 > {};
+template<typename VJ>
+struct dict_map: dict< std::map< value<std::string>, VJ >, -1 > {};
 
 
 }}

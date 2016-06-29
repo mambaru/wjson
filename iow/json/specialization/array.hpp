@@ -10,15 +10,12 @@
 #include <deque>
 #include <list>
 #include <set>
-#include <map>
 #include <memory>
 
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-#include <unordered_map>
+#if __cplusplus >= 201103L
 #include <unordered_set>
 #endif
 
-#include <stdint.h>
 
 namespace iow{ namespace json{
 
@@ -132,7 +129,7 @@ struct array_base< std::multiset<J>, R>
 };
 
 
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
+#if __cplusplus >= 201103L
 
 template<typename J, typename R>
 struct array_base< std::unordered_set<J>, R>

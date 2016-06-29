@@ -65,7 +65,7 @@ UNIT(dict2, "")
 {
   using namespace fas::testing;
   using namespace iow::json;
-  typedef dict_vector< value<std::string>, value<std::string> > dv_t;
+  typedef dict_vector< value<std::string> > dv_t;
   typedef dv_t::target dict;
   dict d;
   dv_t::serializer ser;

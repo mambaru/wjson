@@ -41,7 +41,6 @@ public:
     return end;
   }
 
-
   template<typename P>
   P operator()( target& t,  P beg, P end, json_error* e)
   {

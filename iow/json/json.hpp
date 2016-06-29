@@ -34,13 +34,13 @@ struct enum_value;
 template<typename T, int R = -1>
 struct dict;
 
-template<typename KJ, typename VJ, int R = 10>
+template<typename VJ, int R = 10>
 struct dict_vector;
 
-template<typename KJ, typename VJ, int R = 10>
+template<typename VJ, int R = 10>
 struct dict_deque;
 
-template<typename KJ, typename VJ>
+template<typename VJ>
 struct dict_map;
 
 /// 
