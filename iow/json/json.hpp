@@ -19,6 +19,12 @@ struct object;
 template<typename N, typename T, typename M, M T::* m, typename W = value<M> >
 struct member;
 
+template<typename T, typename L>
+struct object_array;
+
+template<typename T, typename M, M T::* m, typename W = value<M> >
+struct member_array;
+
 template<typename J>
 struct base;
 
@@ -54,17 +60,24 @@ struct iterator_pair;
 template<typename J, bool SerQ = true, bool ReqQ = true>
 struct raw_quoted;
 
+template<typename J, bool SerQ = true, bool ReqQ = true, int R = -1>
+struct quoted;
+
 template<typename T, typename J>
 struct pointer;
 
-template<typename C, typename R>
+/*template<typename C, typename R>
 struct array_reserve;
-
+*/
+/*
 template<typename K, typename V, int R = -1>
 struct object2array;
+*/
 
+/*
 template<typename C, typename R = fas::empty_type>
 struct array_r;
+*/
 
 template<int Reserve>
 struct vector_of_strings;
@@ -101,7 +114,7 @@ using member_list = typename fas::type_list_n<Args...>::type;
   *   если L пустой, то применяем сериализацию R. Соответственно если попытатся десериализовать, то сразу десериализуется по правилам в R.
   *   но если RU задать как false, то копируем в raw_value значение мембера
   */
-template<typename L, typename R, bool RU = true >
+template<typename L, typename R, bool RU = false >
 struct member_if;
 
 template<typename J>
@@ -109,7 +122,6 @@ class serializerT;
 
 }}
 
-#include "specialization/json_error.hpp"
 #include "specialization/json_parser.hpp"
 #include "specialization/json_number.hpp"
 #include "specialization/json_string.hpp"

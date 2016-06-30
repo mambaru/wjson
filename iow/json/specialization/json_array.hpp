@@ -3,6 +3,9 @@
 
 namespace iow{ namespace json{
 
+template<typename C, typename R>
+struct array_r;
+
 namespace
 {
 
@@ -183,7 +186,7 @@ public:
         return json_error::create<unexpected_end_fragment>(e, end);
       if (*beg==R) break;
       target tg;
-      beg = serializer()( tg, beg, end);
+      beg = serializer()( tg, beg, end, e);
       *(bitr++) = tg;
       beg = parser::parse_space(beg, end);
       if (beg==end) 

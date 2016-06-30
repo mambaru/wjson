@@ -28,6 +28,29 @@ struct member: N
   const wrapper_target& ref(const T& t) const { return static_cast< const wrapper_target&>(t.*m);};
 };
 
+template<typename T, typename L>
+struct object_array
+{
+  typedef T target;
+  typedef serializerT< object_array<T, L> > serializer;
+  typedef typename fas::normalize<L>::type member_list;
+};
+
+template<typename T, typename M, M T::* m, typename W >
+struct member_array
+{
+  typedef T target;
+  typedef M type;
+  typedef W wrapper;
+  typedef typename W::serializer serializer;
+  typedef typename W::target wrapper_target;
+  
+  wrapper_target* ptr(T* t) { return static_cast<wrapper_target*>(t->*m);};
+  const wrapper_target* ptr(const T* t) const { return static_cast< const wrapper_target*>(t->*m);};
+  wrapper_target& ref(T& t) { return static_cast<wrapper_target&>(t.*m); };
+  const wrapper_target& ref(const T& t) const { return static_cast< const wrapper_target&>(t.*m);};
+};
+
 
 template<typename T, typename M, M T::* m>
 struct property

@@ -125,10 +125,19 @@ struct value< char[N], -1 >
 };
 
 template<typename J, bool SerQ, bool ReqQ>
-struct raw_quoted {
+struct raw_quoted 
+{
   typedef typename J::target target;
   typedef serializerRQ< J, SerQ, ReqQ > serializer;
 };
+
+template<typename J, bool SerQ , bool ReqQ , int R >
+struct quoted
+{
+  typedef typename J::target target;
+  typedef serializerQ< J, value<std::string>, SerQ, ReqQ, R> serializer;
+};
+
 
 }}
 

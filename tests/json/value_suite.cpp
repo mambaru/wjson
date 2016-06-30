@@ -123,9 +123,9 @@ UNIT(float_unit, "")
   real_serializer_test<T, double, -1>(t, 10.1, "1.010000e+01", __LINE__);
   real_serializer_test<T, long double, -1>(t, 10.1, "1.010000e+01", __LINE__);
 
-  real_serializer_test<T, float, 0>(t, 10.1, "10", __LINE__);
-  real_serializer_test<T, double, 2>(t, 10.1, "10.1", __LINE__);
-  real_serializer_test<T, long double, 10>(t, 10.1, "10.1", __LINE__);
+  real_serializer_test<T, float, 0>(t, 10.0, "10", __LINE__);
+  real_serializer_test<T, double, 2>(t, 10.1, "10.10", __LINE__);
+  real_serializer_test<T, long double, 10>(t, 10.1, "10.1000000000", __LINE__);
   
 }
 

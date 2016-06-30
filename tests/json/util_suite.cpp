@@ -1,5 +1,6 @@
 #include <fas/testing.hpp>
 #include <iow/json/json.hpp>
+#include <iow/json/strerror.hpp>
 #include <algorithm>
 #include <cstring>
 
@@ -28,16 +29,11 @@ UNIT(util2, "raw_range")
   range_t value;
   iterator_pair<range_t>::serializer ser;
   ser( value, json.begin(), json.end(), 0 );
-  //value.first++;
   t << equal<expect>(json, std::string(value.first, value.second)) << FAS_ENDL;
   json.clear();
-  //value.first++;
-  ser( value, std::back_inserter(json) );
+    ser( value, std::back_inserter(json) );
   t << equal<expect>(json, std::string(value.first, value.second) ) << FAS_ENDL;
 }
-
-
-
 
 UNIT(util3, "member_value")
 {
@@ -127,10 +123,50 @@ UNIT(util5, "pair")
   t << equal<expect>( json, "\"foo\":12345") << FAS_ENDL;
 }
 
+UNIT(util6, "quoted")
+{
+  using namespace fas::testing;
+  using namespace iow::json;
+  int val = 123456;
+  std::string json;
+  typedef value<int> int_json;
+  quoted<int_json>::serializer()( val, std::back_inserter(json) );
+  t << equal<expect>( json, "\"123456\"") << FAS_ENDL;
+  val=0;
+  quoted<int_json>::serializer()( val, json.begin(), json.end(), 0 );
+  t << equal<expect>( val, 123456) <<  FAS_ENDL;
+
+  val=123456;json.clear();
+  quoted<int_json, false, false, 1>::serializer()( val, std::back_inserter(json) );
+  t << equal<expect>( json, "123456") << FAS_ENDL;
+  val=0;
+  quoted<int_json, false, false, 1>::serializer()( val, json.begin(), json.end(), 0 );
+  t << equal<expect>( val, 123456) <<  FAS_ENDL;
+
+  std::vector<int> arr={1,2,3};
+  typedef array< std::vector< value<int> > > arr_json;
+  json.clear();
+  quoted<arr_json>::serializer()( arr, std::back_inserter(json) );
+  t << equal<expect>( json, "\"[1,2,3]\"") << FAS_ENDL;
+  arr.clear();
+  quoted<arr_json>::serializer()( arr, json.begin(), json.end(), 0 );
+  t << equal<expect>( arr, std::vector<int>{1,2,3} ) <<  FAS_ENDL;
+  
+  json = "\"[1,[1,2,3,4],3]\"";
+  json_error e;
+  arr.clear();
+    quoted<arr_json>::serializer()( arr, json.begin(), json.end(), &e );
+  t << message("error: ") << strerror::message(e);
+  t << message("trace: ") << strerror::trace(e, json.begin(), json.end());
+  t << is_true<expect>(e) << FAS_ENDL;
+  
+}
+
 BEGIN_SUITE(util, "")
   ADD_UNIT(util1)
   ADD_UNIT(util2)
   ADD_UNIT(util3)
   ADD_UNIT(util4)
   ADD_UNIT(util5)
+  ADD_UNIT(util6)
 END_SUITE(util)
