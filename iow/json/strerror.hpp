@@ -16,7 +16,7 @@ struct error_code_json
   JSON_NAME2(InvalidNumber, "Invalid Number")
   JSON_NAME2(InvalidBool, "Invalid Bool")
   JSON_NAME2(InvalidString, "Invalid String")
-  JSON_NAME2(InvalidMember, "Invalid Member")
+  JSON_NAME2(InvalidMemberr, "Invalid Member")
   
   typedef ::iow::json::enumerator<
     int, 
@@ -29,7 +29,7 @@ struct error_code_json
       enum_value<InvalidNumber, int, static_cast<int>(error_code::InvalidNumber)>,
       enum_value<InvalidBool, int, static_cast<int>(error_code::InvalidBool)>,
       enum_value<InvalidString, int, static_cast<int>(error_code::InvalidString)>,
-      enum_value<InvalidMember, int, static_cast<int>(error_code::InvalidMember)>
+      enum_value<InvalidMemberr, int, static_cast<int>(error_code::InvalidMember)>
     >
   > type;
 };
@@ -72,23 +72,7 @@ public:
     ss  << std::string(beg, end - e.tail_of() ) << ( e.tail_of() ? ">>>" : "<<<") << std::string(end - e.tail_of(), end);
     return ss.str();
   }
-  
-  template<typename E, typename Itr>
-  static inline Itr create(json_error* e, Itr end, size_t tail_of = 0)
-  {
-    if ( e != nullptr && !*e )
-      *e = E(tail_of);
-    return end;
-  }
-
-  template<typename E, typename Itr >
-  static inline Itr create(json_error* e, Itr end, const char* msg, size_t tail_of = 0)
-  {
-    if ( e != nullptr && !*e)
-      *e = E(msg, tail_of);
-    return end;
-  }
-  
+    
 private:
 
   template<typename L, typename R>
@@ -99,7 +83,7 @@ private:
     return strerror::what_(code, R());
   }
 
-  static const char* what_( int code, fas::empty_list )
+  static const char* what_( int , fas::empty_list )
   {
     return "";
   }

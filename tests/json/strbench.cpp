@@ -17,7 +17,6 @@ void str1_bench()
   time_t stime = std::numeric_limits< time_t >::max();
   time_t dtime1 = std::numeric_limits< time_t >::max();
   time_t dtime2 = std::numeric_limits< time_t >::max();
-  size_t dcount = 0;
 
   for (int x=0; x < 5; ++x) 
   {

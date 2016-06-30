@@ -16,14 +16,14 @@ UNIT(dict1, "")
     m["два"]="два";
     std::string json;
     ser(m, std::back_inserter(json) );
-    t << equal<expect>(json, "{\"два\":\"два\",\"раз\":\"раз\"}" ) << FAS_ENDL;
+    t << equal<expect>(json, "{\"два\":\"два\",\"раз\":\"раз\"}" ) << FAS_FL;
     m.clear();
     ser(m, json.begin(), json.end(), 0);
-    t << equal<expect>(m.size(), 2 ) << FAS_ENDL;
-    t << equal<expect>(m.count("раз"), 1 ) << FAS_ENDL;
-    t << equal<expect>(m.count("два"), 1 ) << FAS_ENDL;
-    t << equal<expect>(m["раз"], "раз" ) << FAS_ENDL;
-    t << equal<expect>(m["два"], "два" ) << FAS_ENDL;
+    t << equal<expect>(m.size(), 2 ) << FAS_FL;
+    t << equal<expect>(m.count("раз"), 1 ) << FAS_FL;
+    t << equal<expect>(m.count("два"), 1 ) << FAS_FL;
+    t << equal<expect>(m["раз"], "раз" ) << FAS_FL;
+    t << equal<expect>(m["два"], "два" ) << FAS_FL;
   }
 
   {
@@ -33,14 +33,14 @@ UNIT(dict1, "")
     m["два"]="два";
     std::string json;
     ser(m, std::back_inserter(json) );
-    t << equal<expect>(json, "{\"два\":\"два\",\"раз\":\"раз\"}" ) << FAS_ENDL;
+    t << equal<expect>(json, "{\"два\":\"два\",\"раз\":\"раз\"}" ) << FAS_FL;
     m.clear();
     ser(m, json.begin(), json.end(), 0);
-    t << equal<expect>(m.size(), 2 ) << FAS_ENDL;
-    t << equal<expect>(m.count("раз"), 1 ) << FAS_ENDL;
-    t << equal<expect>(m.count("два"), 1 ) << FAS_ENDL;
-    t << equal<expect>(m["раз"], "раз" ) << FAS_ENDL;
-    t << equal<expect>(m["два"], "два" ) << FAS_ENDL;
+    t << equal<expect>(m.size(), 2 ) << FAS_FL;
+    t << equal<expect>(m.count("раз"), 1 ) << FAS_FL;
+    t << equal<expect>(m.count("два"), 1 ) << FAS_FL;
+    t << equal<expect>(m["раз"], "раз" ) << FAS_FL;
+    t << equal<expect>(m["два"], "два" ) << FAS_FL;
   }
 
   {
@@ -50,14 +50,14 @@ UNIT(dict1, "")
     m.push_back( std::make_pair("два","два") );
     std::string json;
     ser(m, std::back_inserter(json) );
-    t << equal<expect>(json, "{\"раз\":\"раз\",\"два\":\"два\"}" ) << FAS_ENDL;
+    t << equal<expect>(json, "{\"раз\":\"раз\",\"два\":\"два\"}" ) << FAS_FL;
     m.clear();
     ser(m, json.begin(), json.end(), 0);
-    t << equal<expect>(m.size(), 2 ) << FAS_ENDL;
-    t << equal<expect>(m[0].first, "раз" ) << FAS_ENDL;
-    t << equal<expect>(m[0].second, "раз" ) << FAS_ENDL;
-    t << equal<expect>(m[1].first, "два" ) << FAS_ENDL;
-    t << equal<expect>(m[1].second, "два" ) << FAS_ENDL;
+    t << equal<expect>(m.size(), 2 ) << FAS_FL;
+    t << equal<expect>(m[0].first, "раз" ) << FAS_FL;
+    t << equal<expect>(m[0].second, "раз" ) << FAS_FL;
+    t << equal<expect>(m[1].first, "два" ) << FAS_FL;
+    t << equal<expect>(m[1].second, "два" ) << FAS_FL;
   }
 }
 
@@ -71,7 +71,7 @@ UNIT(dict2, "")
   dv_t::serializer ser;
   std::string json;
   ser(d, std::back_inserter(json) );
-  t << equal<expect>(json, "{}" ) << FAS_ENDL;
+  t << equal<expect>(json, "{}" ) << FAS_FL;
   t << nothing;
 }
 

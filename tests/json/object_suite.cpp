@@ -3,6 +3,8 @@
 #include <iow/json/name.hpp>
 #include <iow/json/strerror.hpp>
 
+namespace {
+  
 struct foo
 {
   int foo1 = 0;
@@ -102,6 +104,7 @@ struct bar_array_json
   typedef type::member_list member_list;
 };
 
+} // namespace
 
 UNIT(object1, "")
 {
@@ -125,7 +128,7 @@ UNIT(object1, "")
   t << message("json: ") << json1;
   bar_json::serializer()( b2, json1.begin(), json1.end(), 0 );
   bar_json::serializer()( b2, std::back_inserter(json2) );
-  t << equal<expect>(json1, json2) << FAS_ENDL;
+  t << equal<expect>(json1, json2) << FAS_FL;
 }
 
 UNIT(object2, "")
@@ -150,9 +153,11 @@ UNIT(object2, "")
   t << message("json: ") << json1;
   bar_array_json::serializer()( b2, json1.begin(), json1.end(), 0 );
   bar_array_json::serializer()( b2, std::back_inserter(json2) );
-  t << equal<expect>(json1, json2) << FAS_ENDL;
+  t << equal<expect>(json1, json2) << FAS_FL;
 }
 
+namespace {
+  
 struct baz
 {
   int foo1 = 0;
@@ -190,28 +195,30 @@ void object3_toster( T& t )
   b.foo2 = "hello";
 
   typename baz_json<Pri>::serializer()(b, std::back_inserter(json) );
-  t << equal<expect>( json, "{\"foo\":\"hello\"}" ) << FAS_ENDL;
+  t << equal<expect>( json, "{\"foo\":\"hello\"}" ) << FAS_FL;
   b.foo2.clear();
   b.foo1=10;
   iow::json::json_error e;
   typename baz_json<Pri>::serializer()(b, json.begin(), json.end(), &e );
   if ( e ) t << message("ERROR:") << iow::json::strerror::message(e);
-  t << equal<expect>( b.foo2, "hello" ) << FAS_ENDL;
-  t << equal<expect>( b.foo1, 0 ) << FAS_ENDL;
+  t << equal<expect>( b.foo2, "hello" ) << FAS_FL;
+  t << equal<expect>( b.foo1, 0 ) << FAS_FL;
   
   json.clear();
   b.foo1 = 123;
   b.foo2 = "hello";
   typename baz_json<Pri>::serializer()(b, std::back_inserter(json) );
-  t << equal<expect>( json, "{\"foo\":123}" ) << FAS_ENDL;
+  t << equal<expect>( json, "{\"foo\":123}" ) << FAS_FL;
   b.foo2="---";
   b.foo1=10;
   e.reset();
   typename baz_json<Pri>::serializer()(b, json.begin(), json.end(), &e );
   if ( e ) t << message("ERROR:") << iow::json::strerror::message(e);
-  t << equal<expect>( b.foo2, "" ) << FAS_ENDL;
-  t << equal<expect>( b.foo1, 123 ) << FAS_ENDL;
+  t << equal<expect>( b.foo2, "" ) << FAS_FL;
+  t << equal<expect>( b.foo1, 123 ) << FAS_FL;
 }
+
+} //namespace
 
 UNIT(object3, "")
 {

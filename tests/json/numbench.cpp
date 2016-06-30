@@ -24,12 +24,11 @@ void json_bench()
   
   time_t stime = std::numeric_limits< time_t >::max();
   time_t dtime = std::numeric_limits< time_t >::max();
-  size_t dcount = 0;
 
   for (int x=0; x < 5; ++x) 
   {
     auto start = high_resolution_clock::now();
-    for (int i = 0; i < ARR_SIZE; i++)
+    for (size_t i = 0; i < ARR_SIZE; i++)
     {
       value<int>::serializer()( i, numarr[i] );
     }
@@ -43,7 +42,7 @@ void json_bench()
   for (int x=0; x < 5; ++x) 
   {
     auto start = high_resolution_clock::now();
-    for (int i = 0; i < ARR_SIZE; i++)
+    for (size_t i = 0; i < ARR_SIZE; i++)
     {
       value<int>::serializer()( resarr[i], std::begin(numarr[i]), std::end(numarr[i]), 0 );
     }
@@ -76,14 +75,13 @@ void atoi_bench()
 
   time_t stime = std::numeric_limits< time_t >::max();
   time_t dtime = std::numeric_limits< time_t >::max();
-  size_t dcount = 0;
 
   for (int x=0; x < 5; ++x) 
   {
     auto start = high_resolution_clock::now();
-    for (int i = 0; i < ARR_SIZE; i++)
+    for (size_t i = 0; i < ARR_SIZE; i++)
     {
-      sprintf( numarr[i], "%d", i );
+      sprintf( numarr[i], "%lu", i );
       //value<int>::serializer()( i, numarr[i] );
     }
     auto finish = high_resolution_clock::now();
@@ -96,7 +94,7 @@ void atoi_bench()
   for (int x=0; x < 5; ++x) 
   {
     auto start = high_resolution_clock::now();
-    for (int i = 0; i < ARR_SIZE; i++)
+    for (size_t i = 0; i < ARR_SIZE; i++)
     {
       resarr[i] = atoi(numarr[i]);
       //value<int>::serializer()( resarr[i], std::begin(numarr[i]), std::end(numarr[i]), 0 );
@@ -150,13 +148,12 @@ void ss_bench()
 
   time_t stime = std::numeric_limits< time_t >::max();
   time_t dtime = std::numeric_limits< time_t >::max();
-  size_t dcount = 0;
 
   std::stringstream ss;
   for (int x=0; x < 5; ++x) 
   {
     auto start = high_resolution_clock::now();
-    for (int i = 0; i < ARR_SIZE; i++)
+    for (size_t i = 0; i < ARR_SIZE; i++)
     {
       ss.rdbuf()->pubsetbuf(numarr[i], sizeof(numarr[i]));
       ss << i;
@@ -171,7 +168,7 @@ void ss_bench()
   for (int x=0; x < 5; ++x) 
   {
     auto start = high_resolution_clock::now();
-    for (int i = 0; i < ARR_SIZE; i++)
+    for (size_t i = 0; i < ARR_SIZE; i++)
     {
       ss.rdbuf()->pubsetbuf(numarr[i], sizeof(numarr[i]) );
       ss >> resarr[i];

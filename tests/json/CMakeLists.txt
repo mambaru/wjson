@@ -1,6 +1,7 @@
 add_executable(benchmark benchmark.cpp)
 add_executable(numbench  numbench.cpp)
 add_executable(strbench  strbench.cpp)
+add_executable(num  num.cpp)
 
 add_executable(
   test_json

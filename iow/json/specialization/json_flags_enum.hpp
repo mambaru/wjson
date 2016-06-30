@@ -4,9 +4,9 @@ namespace iow{ namespace json{
 /// /////////////////////////////////////////////////////////////////
 
 template<typename T, typename L>
-class serializerT< set_enumerator<T, L> >
+class serializerT< flags_enumerator<T, L> >
 {
-  typedef typename set_enumerator<T, L>::enum_list enum_list;
+  typedef typename flags_enumerator<T, L>::enum_list enum_list;
 public:
   template<typename P>
   P operator()( const T& v, P end)
@@ -46,37 +46,37 @@ public:
   {
     for ( ; beg!=end && *beg<=' '; ++beg);
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if (*beg =='"') 
     {
       ++beg;
       if (beg==end) 
-        return json_error::create<unexpected_end_fragment>(e, end);
+        return create_error<error_code::UnexpectedEndFragment>(e, end);
       P first = beg;
       for ( ; beg!=end && *beg!='"'; ++beg);
       if (beg==end)
-        return json_error::create<unexpected_end_fragment>(e, end);
+        return create_error<error_code::UnexpectedEndFragment>(e, end);
 
       if (*beg!='"') 
-        return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+        return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
 
       this->deserialize(v, enum_list(), first, beg);
       ++beg;
     } else if (*beg == '[') {
       ++beg;
       if (beg==end) 
-        return json_error::create<unexpected_end_fragment>(e, end);
+        return create_error<error_code::UnexpectedEndFragment>(e, end);
       beg = this->deserialize_arr(v, enum_list(), beg, end, e);
       if (beg==end) 
-        return json_error::create<unexpected_end_fragment>(e, end);
+        return create_error<error_code::UnexpectedEndFragment>(e, end);
       if (*beg!=']') 
-        return json_error::create<expected_of>(e, end, "]", std::distance(beg, end) );
+        return create_error<error_code::ExpectedOf>(e, end, "]", std::distance(beg, end) );
 
       ++beg;
     } 
     else
-      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
 
     return beg;
   }
@@ -128,20 +128,20 @@ public:
     while (*beg=='"') {
       ++beg;
       if (beg==end)
-        return json_error::create<unexpected_end_fragment>(e, end);
+        return create_error<error_code::UnexpectedEndFragment>(e, end);
       P first = beg;
       for ( ; beg!=end && *beg!='"'; ++beg);
       if (beg==end) 
-        return json_error::create<unexpected_end_fragment>(e, end);
+        return create_error<error_code::UnexpectedEndFragment>(e, end);
       if (*beg!='"') 
-        return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+        return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
       this->deserialize_one(v, enum_list(), first, beg);
       beg++;
       lastChar = *beg;
       if (lastChar==',') beg++;
     }
     if (lastChar==',') 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
     return beg;
   }
 

@@ -51,17 +51,17 @@ public:
   P unserialize(P beg, P end, P1 vitr, int n /*= -1*/, json_error* e)
   {
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( *(beg++) != '"' ) 
-      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) + 1);
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) + 1);
 
     for ( ;beg!=end && *beg!='"' && n!=0; )
     {
       if (*beg=='\\')
       {
         if (++beg==end) 
-          return json_error::create<unexpected_end_fragment>(e, end);
+          return create_error<error_code::UnexpectedEndFragment>(e, end);
         switch (*beg)
         {
           case '"' :
@@ -74,7 +74,7 @@ public:
           case 'f':  *(vitr++) = '\f'; ++beg; --n; break;
           case 'u':  beg = _unserialize_uhex(++beg, end, &vitr, n, e); break;
           default:
-            return json_error::create<invalid_json_string>(e, end, std::distance(beg, end));
+            return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
         }
       }
       else
@@ -82,10 +82,10 @@ public:
     }
 
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( *(beg++) != '"' ) 
-      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) + 1);
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) + 1);
 
     return beg;
   }
@@ -96,7 +96,7 @@ private:
   P _unserialize_symbol(P beg, P end, P1* vitr, int& n, json_error* e)
   {
     if (beg == end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( (*beg & 128)==0 )
     {
@@ -110,7 +110,7 @@ private:
     else if ( (*beg & 248)==240 )
       beg = _symbol_copy<4>(beg, end, vitr, n, e);
     else
-      return json_error::create<invalid_json_string>(e, end, std::distance(beg, end));
+      return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
     return beg;
   }
 
@@ -120,7 +120,7 @@ private:
     for (register int i = 0; i < N && n!=0; ++i, --n)
     {
       if (beg == end) 
-        return json_error::create<unexpected_end_fragment>(e, end);
+        return create_error<error_code::UnexpectedEndFragment>(e, end);
       *((*vitr)++) = *(beg++);
     }
     return beg;
@@ -142,16 +142,16 @@ U+0439	й	d0 b9	CYRILLIC SMALL LETTER SHORT I
   {
     unsigned short hex = 0;
     if (beg == end ) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
     hex |= _toUShort(*(beg++), e) << 12;
     if (beg == end ) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
     hex |= _toUShort(*(beg++), e) << 8;
     if (beg == end ) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
     hex |= _toUShort(*(beg++), e) << 4;
     if (beg == end ) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
     hex |= _toUShort(*(beg++), e);
 
     if ( hex <= 0x007F )
@@ -164,7 +164,7 @@ U+0439	й	d0 b9	CYRILLIC SMALL LETTER SHORT I
        *((*vitr)++) = 192 | static_cast<unsigned char>( hex >> 6 );
        --n;
        if ( n==0) 
-         return json_error::create<invalid_json_string>(e, end, std::distance(beg, end));
+         return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
        *((*vitr)++) = 128 | ( static_cast<unsigned char>( hex ) & 63 );
        --n;
     }
@@ -173,11 +173,11 @@ U+0439	й	d0 b9	CYRILLIC SMALL LETTER SHORT I
        *((*vitr)++) = 224 | static_cast<unsigned char>( hex >> 12 );
        --n;
        if ( n==0) 
-         return json_error::create<invalid_json_string>(e, end, std::distance(beg, end));
+         return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
        *((*vitr)++) = 128 | ( static_cast<unsigned char>( hex >> 6 ) & 63 );
        --n;
        if ( n==0)
-         return json_error::create<invalid_json_string>(e, end, std::distance(beg, end));
+         return create_error<error_code::error_code::InvalidString>(e, end, std::distance(beg, end));
        *((*vitr)++) = 128 | ( static_cast<unsigned char>( hex ) & 63 );
        --n;
     }
@@ -189,7 +189,7 @@ U+0439	й	d0 b9	CYRILLIC SMALL LETTER SHORT I
     if ( c >= '0' && c<='9' ) return c - '0';
     if ( c >= 'a' && c<='f' ) return (c - 'a') + 10;
     if ( c >= 'A' && c<='F' ) return (c - 'A') + 10;
-    json_error::create<invalid_json_string>(e, (char*)(0));
+    create_error<error_code::error_code::InvalidString>(e, (char*)(0));
     return 0;
   }
 };

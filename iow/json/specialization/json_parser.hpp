@@ -40,7 +40,7 @@ public:
         else
         {
           if ( start_comment )
-            return json_error::create<unexpected_end_fragment>(e, end, "Unterminated comment");
+            return create_error<error_code::UnexpectedEndFragment>(e, end, "Unterminated comment");
           break;
         }
       }
@@ -61,7 +61,7 @@ public:
   static P parse_null( P beg, P end, size_t& p, json_error* e )
   {
     if (beg==end)
-      return json_error::create<unexpected_end_fragment>( e, end );
+      return create_error<error_code::UnexpectedEndFragment>( e, end );
 
     if ( *beg=='n' )
     {
@@ -72,13 +72,13 @@ public:
       { ++p ; return ++beg; }
 
       if (beg==end)
-        return json_error::create<unexpected_end_fragment>( e, end );
+        return create_error<error_code::UnexpectedEndFragment>( e, end );
 
-      return json_error::create<expected_of>( e, end, "null", p );
+      return create_error<error_code::ExpectedOf>( e, end, "null", p );
       
     }
 
-    return json_error::create<invalid_json_null>( e, end, p );
+    return create_error<error_code::InvalidNull>( e, end, p );
   }
 
 public:
@@ -93,7 +93,7 @@ public:
   static P parse_bool( P beg, P end, size_t& p, json_error* e  )
   {
     if (beg==end)
-      return json_error::create<unexpected_end_fragment>( e, end );
+      return create_error<error_code::UnexpectedEndFragment>( e, end );
 
     if ( *beg=='t' )
     {
@@ -103,9 +103,9 @@ public:
       { ++p; return ++beg; }
 
       if (beg==end)
-        return json_error::create<unexpected_end_fragment>( e, end );
+        return create_error<error_code::UnexpectedEndFragment>( e, end );
 
-      return json_error::create<expected_of>( e, end, "true", p );
+      return create_error<error_code::ExpectedOf>( e, end, "true", p );
     }
     else if ( *beg=='f' )
     {
@@ -116,12 +116,12 @@ public:
       { ++p; return ++beg; }
 
       if (beg==end)
-        return json_error::create<unexpected_end_fragment>( e, end );
+        return create_error<error_code::UnexpectedEndFragment>( e, end );
 
-      return json_error::create<expected_of>( e, end, "false", p );
+      return create_error<error_code::ExpectedOf>( e, end, "false", p );
     }
 
-    return json_error::create<invalid_json_bool>( e, end, p );
+    return create_error<error_code::InvalidBool>( e, end, p );
   }
 
 
@@ -137,28 +137,28 @@ public:
   static P parse_number( P beg, P end, size_t& p, json_error* e )
   {
     if (beg==end)
-      return json_error::create<unexpected_end_fragment>( e, end );
+      return create_error<error_code::UnexpectedEndFragment>( e, end );
 
     if ( beg!=end && *beg=='-') { ++beg; ++p; }
     if ( beg==end )
-      return json_error::create<unexpected_end_fragment>( e, end );
+      return create_error<error_code::UnexpectedEndFragment>( e, end );
 
     if ( *beg == '0') { ++beg; ++p; }
     else if ( *beg >='1' && *beg <='9' )
       beg = _parse_digit(beg, end, p);
     else
-      return json_error::create<invalid_json_number>( e, end );
+      return create_error<error_code::InvalidNumber>( e, end );
       
 
     if ( beg!=end && *beg=='.' )
     {
       ++beg; ++p;
       if ( beg==end )
-        return json_error::create<unexpected_end_fragment>( e, end );
+        return create_error<error_code::UnexpectedEndFragment>( e, end );
       if ( *beg >='0' && *beg <='9')
         beg = _parse_digit(beg, end, p);
       else
-        return json_error::create<invalid_json_number>( e, end );
+        return create_error<error_code::InvalidNumber>( e, end );
     }
 
     if (beg!=end && ( *beg=='e' || *beg=='E' ) )
@@ -166,9 +166,9 @@ public:
       ++beg; ++p;
       if ( (beg!=end) && (*beg=='-' || *beg=='+')) { ++beg; ++p; }
       if ( beg==end )
-        return json_error::create<unexpected_end_fragment>( e, end );
+        return create_error<error_code::UnexpectedEndFragment>( e, end );
       if ( *beg < '0' || *beg > '9' ) 
-        return json_error::create<invalid_json_number>( e, end );
+        return create_error<error_code::InvalidNumber>( e, end );
       beg = _parse_digit(beg, end, p);
     }
     return beg;
@@ -188,24 +188,24 @@ public:
   static P parse_string( P beg, P end, json_error* e )
   {
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if (*beg!='"') 
-      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end));
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end));
 
     for ( ++beg; beg!=end && *beg!='"'; /*++beg*/)
     {
       if (*beg=='\\')
       {
         if ( ++beg == end ) 
-          return json_error::create<unexpected_end_fragment>(e, end);
+          return create_error<error_code::UnexpectedEndFragment>(e, end);
 
         if ( *beg != '"' && *beg != '\\' && *beg != '/'
              && *beg != 't' && *beg != 'b' && *beg != 'n'
              && *beg != 'r' && *beg != 'f' && *beg != 'u'
            )
         {
-            return json_error::create<invalid_json_string>(e, end, std::distance(beg, end));
+            return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
         }
 
 
@@ -222,9 +222,9 @@ public:
     }
 
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
     if (*beg!='"') 
-      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end));
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end));
     return ++beg;
   }
 
@@ -232,16 +232,16 @@ public:
   static P parse_hex( P beg, P end, json_error* e )
   {
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
     for (register int i=0; i < 0; ++i, ++beg)
     {
       if (beg==end) 
-        return json_error::create<unexpected_end_fragment>(e, end);
+        return create_error<error_code::UnexpectedEndFragment>(e, end);
       if ( (*beg < '0' || *beg>'9')
              && (*beg < 'A' || *beg>'F')
              && (*beg < 'a' || *beg>'f') )
       {
-               return json_error::create<invalid_json_string>(e, end, std::distance(beg, end));
+               return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
       }
     }
     return beg;
@@ -260,7 +260,7 @@ public:
     if ( (*beg & 224)==192 && ++beg!=end && (*beg & 192)==128 ) return ++beg;
     if ( (*beg & 240)==224 && ++beg!=end && (*beg & 192)==128 && ++beg!=end && (*beg & 192)==128 ) return ++beg;
     if ( (*beg & 248)==240 && ++beg!=end && (*beg & 192)==128 && ++beg!=end && (*beg & 192)==128 ) return ++beg;
-    return json_error::create<invalid_json_string>( e, end, std::distance(beg, end) );
+    return create_error<error_code::InvalidString>( e, end, std::distance(beg, end) );
   }
 
 
@@ -296,7 +296,7 @@ public:
       return parse_object(beg, end, e);
     else if (is_array(beg, end) )
       return parse_array(beg, end, e);
-    return json_error::create<invalid_json>( e, end, std::distance(beg, end) );
+    return create_error<error_code::InvalidJSON>( e, end, std::distance(beg, end) );
   }
 
 
@@ -304,21 +304,21 @@ public:
   static P parse_member( P beg, P end, json_error* e )
   {
     if ( !is_string(beg, end) )
-      return json_error::create<invalid_json_member>( e, end, std::distance(beg, end) );
+      return create_error<error_code::InvalidMember>( e, end, std::distance(beg, end) );
       
     beg = parse_string(beg, end, e);
     if ( beg==end ) 
-      return json_error::create<unexpected_end_fragment>( e, end );
+      return create_error<error_code::UnexpectedEndFragment>( e, end );
     beg = parse_space(beg, end, e);
     if ( beg==end )
-      return json_error::create<unexpected_end_fragment>( e, end );
+      return create_error<error_code::UnexpectedEndFragment>( e, end );
     if ( *(beg++)!=':' ) 
-      return json_error::create<expected_of>( e, end, ":", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>( e, end, ":", std::distance(beg, end) );
     if ( beg==end )
-      return json_error::create<unexpected_end_fragment>( e, end );
+      return create_error<error_code::UnexpectedEndFragment>( e, end );
     beg = parse_space(beg, end, e);
     if ( beg==end ) 
-      return json_error::create<unexpected_end_fragment>( e, end );
+      return create_error<error_code::UnexpectedEndFragment>( e, end );
     beg = parse_value(beg, end, e);
     return beg;
   }
@@ -327,7 +327,7 @@ public:
   static P parse_object( P beg, P end, json_error* e  )
   {
     if ( !is_object(beg, end) )
-      return json_error::create<expected_of>( e, end, "{", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>( e, end, "{", std::distance(beg, end) );
 
     for ( ++beg; beg!=end && *beg!='}'; )
     {
@@ -337,12 +337,12 @@ public:
       beg = parse_member(beg, end, e);
       beg = parse_space(beg, end, e);
       if (beg == end || ( *beg!=',' && *beg!='}' ) )
-        return json_error::create<expected_of>( e, end, "}", std::distance(beg, end) );
+        return create_error<error_code::ExpectedOf>( e, end, "}", std::distance(beg, end) );
 
       if ( *beg==',' )  ++beg;
     }
     if (beg == end || *beg!='}') 
-      return json_error::create<expected_of>( e, end, "}", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>( e, end, "}", std::distance(beg, end) );
     ++beg;
     return beg;
   }
@@ -351,7 +351,7 @@ public:
   static P parse_array( P beg, P end, json_error* e )
   {
     if ( !is_array(beg, end) )
-      return json_error::create<expected_of>( e, end, "[", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>( e, end, "[", std::distance(beg, end) );
 
     for ( ++beg; beg!=end && *beg!=']'; )
     {
@@ -362,11 +362,11 @@ public:
       beg = parse_value(beg, end, e);
       beg = parse_space(beg, end, e);
       if (beg == end || ( *beg!=',' && *beg!=']' ) ) 
-        return json_error::create<expected_of>( e, end, "]", std::distance(beg, end) );
+        return create_error<error_code::ExpectedOf>( e, end, "]", std::distance(beg, end) );
       if ( *beg==',' )  ++beg;
     }
     if (beg == end || *beg!=']') 
-      return json_error::create<expected_of>( e, end, "]", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>( e, end, "]", std::distance(beg, end) );
     ++beg;
     return beg;
   }
@@ -386,13 +386,13 @@ public:
   inline static P unserialize_integer( T& v, P beg, P end, json_error* e )
   {
     if( beg==end)
-      return json_error::create<unexpected_end_fragment>( e, end );
+      return create_error<error_code::UnexpectedEndFragment>( e, end );
     v = 0;
 
    register bool neg = *beg=='-';
    if ( neg ) ++beg;
    if ( beg == end || *beg < '0' || *beg > '9')
-     return json_error::create<invalid_json_number>( e, end, std::distance(beg, end) );
+     return create_error<error_code::InvalidNumber>( e, end, std::distance(beg, end) );
 
    // цифры с первым нулем запрещены (напр 001), только 0
    if (*beg=='0')

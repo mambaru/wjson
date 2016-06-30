@@ -55,9 +55,9 @@ namespace detail
     template<typename P>
     P serialize(T v, P itr)
     {
-      register char buf[integer_buffer_size<T>::result];
-      register char *beg = buf;
-      register char *end = buf;
+      char buf[integer_buffer_size<T>::result];
+      char *beg = buf;
+      char *end = buf;
       if (v==0)
         *(end++) = '0';
       else
@@ -147,7 +147,7 @@ namespace detail
     P operator() ( T& v, P beg, P end, json_error* e )
     {
       if( beg==end)
-        return json_error::create<unexpected_end_fragment>( e, end );
+        return create_error<error_code::UnexpectedEndFragment>( e, end );
 
       if ( parser::is_null(beg, end) )
       {
@@ -157,7 +157,7 @@ namespace detail
       
       if ( !parser::is_number(beg, end) )
       {
-        return json_error::create<invalid_json_number>( e, end, std::distance(beg, end) );
+        return create_error<error_code::InvalidNumber>( e, end, std::distance(beg, end) );
       }
         
 
@@ -268,7 +268,7 @@ public:
   P operator() ( bool& v, P beg, P end, json_error* e )
   {
     if (beg==end)
-      return json_error::create<unexpected_end_fragment>( e, end );
+      return create_error<error_code::UnexpectedEndFragment>( e, end );
 
     if ( parser::is_null(beg, end) )
     {
@@ -283,7 +283,7 @@ public:
     if ( *beg == 'f' )
       return parser::parse_bool(beg, end, e);
 
-    return json_error::create<invalid_json_bool>( e, end, std::distance(beg, end) );
+    return create_error<error_code::InvalidBool>( e, end, std::distance(beg, end) );
 
   }
 };

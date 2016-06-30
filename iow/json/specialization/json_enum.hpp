@@ -45,20 +45,20 @@ public:
     v = T();
     for ( ; beg!=end && *beg<=' '; ++beg);
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
     if (*beg!='"') 
-      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
 
     ++beg;
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     P first = beg;
     for ( ; beg!=end && *beg!='"'; ++beg);
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
     if (*beg!='"') 
-      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
 
     this->deserialize(v, enum_list(), first, beg);
     ++beg;

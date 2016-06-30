@@ -83,21 +83,6 @@ public:
     return std::distance(beg, end) - _tail_of;
   }
 
-  template<typename E, typename Itr>
-  static inline Itr create(json_error* e, Itr end, size_t tail_of = 0)
-  {
-    if ( e != nullptr && !*e )
-      *e = E(tail_of);
-    return end;
-  }
-
-  template<typename E, typename Itr >
-  static inline Itr create(json_error* e, Itr end, const char* msg, size_t tail_of = 0)
-  {
-    if ( e != nullptr && !*e)
-      *e = E(msg, tail_of);
-    return end;
-  }
   
 private:
 
@@ -119,65 +104,21 @@ private:
   std::ptrdiff_t _tail_of;
 };
 
-class invalid_json: public json_error
-{ 
-public:
-  invalid_json(size_t tail_of = 0)
-    : json_error(error_code::InvalidJSON, tail_of)  {}
-};
 
-class invalid_json_null: public json_error
-{ 
-public:
-  invalid_json_null(size_t tail_of = 0)
-    : json_error(error_code::InvalidNull, tail_of)  {}
-};
-
-
-class invalid_json_number: public json_error
-{ 
-public:
-  invalid_json_number(size_t tail_of = 0)
-    : json_error(error_code::InvalidNumber, tail_of)  {}
-};
-
-class invalid_json_bool: public json_error
-{ 
-public:
-  invalid_json_bool(size_t tail_of = 0)
-    : json_error(error_code::InvalidBool, tail_of)  {}
-};
-
-class invalid_json_string: public json_error
-{ 
-public:
-  invalid_json_string(size_t tail_of = 0)
-    : json_error(error_code::InvalidString, tail_of)  {}
-};
-
-class invalid_json_member: public json_error
-{ 
-public:
-  invalid_json_member(size_t tail_of = 0)
-    : json_error(error_code::InvalidMember, tail_of)  {}
-};
-
-class unexpected_end_fragment
-  : public json_error
+template<error_code::type code, typename Itr>
+inline Itr create_error(json_error* e, Itr end, size_t tail_of = 0)
 {
-public:
-  unexpected_end_fragment(size_t tail_of = 0)
-    : json_error( error_code::UnexpectedEndFragment, tail_of) {}
-  unexpected_end_fragment(const char* str, size_t tail_of = 0)
-   : json_error( error_code::UnexpectedEndFragment, str, tail_of ) {}
-};
+  if ( e != nullptr && !*e )
+    *e = json_error(code, tail_of);
+  return end;
+}
 
-class expected_of
-  : public json_error
+template<error_code::type code, typename Itr >
+inline Itr create_error(json_error* e, Itr end, const char* msg, size_t tail_of = 0)
 {
-public:
-  expected_of(const char* sym, size_t tail_of = 0)
-    : json_error( error_code::ExpectedOf, sym, tail_of) {}
-};
+  if ( e != nullptr && !*e)
+    *e = json_error(code, msg, tail_of);
+  return end;
+}
 
 }}

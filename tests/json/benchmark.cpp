@@ -73,12 +73,12 @@ void json_bench()
   time_t dtime = std::numeric_limits< time_t >::max();
   size_t dcount = 0;
   ::iow::json::json_error e;
-  for (int j=0; j < TESTS; ++j)
+  for (size_t j=0; j < TESTS; ++j)
   {
     char* beg = json;
     char* end = json + ARR_SIZE;
     auto start = high_resolution_clock::now();
-    for (int i = 0; i < SER_COUNT; ++i)
+    for (size_t i = 0; i < SER_COUNT; ++i)
       beg = serializer()(f, beg );
     auto finish = high_resolution_clock::now();
     auto t = duration_cast<nanoseconds>(finish - start).count();
@@ -119,9 +119,7 @@ void json_bench()
 void sprintf_bench()
 {
   using namespace std::chrono;
-  typedef foo_json::serializer serializer;
   char* json = new char[ARR_SIZE];
-  char str[100]="";
   std::fill_n(json, ARR_SIZE, '\0' );
   foo f;
   f.init();
@@ -130,14 +128,14 @@ void sprintf_bench()
   time_t dtime = std::numeric_limits< time_t >::max();
   size_t dcount = 0;
   ::iow::json::json_error e;
-  for (int j=0; j < TESTS; ++j)
+  for (size_t j=0; j < TESTS; ++j)
   {
     memset(json, 0, ARR_SIZE);
     
     char* beg = json;
     char* end = json + ARR_SIZE;
     auto start = high_resolution_clock::now();
-    for (int i = 0; i < SER_COUNT; ++i)
+    for (size_t i = 0; i < SER_COUNT; ++i)
     {
       beg+=sprintf( beg, "{\"field1\":%d,\"field2\":%d,\"field3\":%d,\"field5\":[%d,%d,%d,%d,%d]}",
                    f.field1, f.field2, f.field3, f.field5[0], f.field5[1], f.field5[2], f.field5[3], f.field5[4]);

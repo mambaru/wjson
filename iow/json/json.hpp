@@ -32,7 +32,7 @@ template< typename T, typename L>
 struct enumerator;
 
 template< typename T, typename L>
-struct set_enumerator;
+struct flags_enumerator;
 
 template<typename N, typename T, T v>
 struct enum_value;
@@ -128,7 +128,7 @@ class serializerT;
 #include "specialization/json_object.hpp"
 #include "specialization/json_array.hpp"
 #include "specialization/json_enum.hpp"
-#include "specialization/json_set_enum.hpp"
+#include "specialization/json_flags_enum.hpp"
 #include "specialization/json_quoted.hpp"
 
 #include "specialization/value.hpp"

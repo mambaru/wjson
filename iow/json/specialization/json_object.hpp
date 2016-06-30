@@ -55,7 +55,7 @@ public:
     }
 
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( *beg != '{' ) 
     {
@@ -63,34 +63,34 @@ public:
       {
         beg = parser::parse_space(++beg, end, e);
         if (*beg!=']')
-          return json_error::create<expected_of>(e, end, "]", std::distance(beg, end) );
+          return create_error<error_code::ExpectedOf>(e, end, "]", std::distance(beg, end) );
         // Фикс для php. {} <=> []
         return ++beg;
       }
-      return json_error::create<expected_of>(e, end, "{", std::distance(beg, end)  );
+      return create_error<error_code::ExpectedOf>(e, end, "{", std::distance(beg, end)  );
     }
     ++beg;
 
     beg = parser::parse_space(beg, end, e);
     if ( beg==end ) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     
     if ( *beg != '}')
     {
        beg = unserialize_members(t, beg, end, L(), false, e );
        if ( beg==end ) 
-         return json_error::create<unexpected_end_fragment>(e, end);
+         return create_error<error_code::UnexpectedEndFragment>(e, end);
        beg = parser::parse_space(beg, end, e);
        if ( beg==end ) 
-         return json_error::create<unexpected_end_fragment>(e, end);
+         return create_error<error_code::UnexpectedEndFragment>(e, end);
     }
 
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( *(beg++) != '}' ) 
-      return json_error::create<expected_of>(e, end,"}", std::distance(beg, end) + 1 );
+      return create_error<error_code::ExpectedOf>(e, end,"}", std::distance(beg, end) + 1 );
 
     return beg;
   }
@@ -147,7 +147,7 @@ private:
 
 
   template<typename P, typename ML, typename MR, bool RU >
-  P serialize_member( const T& t, P end, const member_if<ML, MR, RU>& memb )
+  P serialize_member( const T& t, P end, const member_if<ML, MR, RU>&  )
   {
     typedef typename ML::type typeL;
     if ( !( _get_value(t, ML()) == typeL() ) )
@@ -188,7 +188,7 @@ private:
     beg = parser::parse_space(beg, end, e);
 
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( *beg == ',' )
     {
@@ -202,10 +202,10 @@ private:
     }
 
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( *beg != '}' )
-      return json_error::create<expected_of>(e, end,"}", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>(e, end,"}", std::distance(beg, end) );
 
     return beg;
   }
@@ -218,7 +218,7 @@ private:
     {
       beg = parser::parse_space(beg, end, e);
       if ( beg==end ) 
-        return json_error::create<unexpected_end_fragment>(e, end);
+        return create_error<error_code::UnexpectedEndFragment>(e, end);
 
       if ( *beg=='}' ) return beg;
       for(;;)
@@ -226,10 +226,10 @@ private:
         beg = parser::parse_member(beg, end, e);
         beg = parser::parse_space(beg, end, e);
         if ( beg==end ) 
-          return json_error::create<unexpected_end_fragment>(e, end);
+          return create_error<error_code::UnexpectedEndFragment>(e, end);
         if ( *beg=='}' ) return beg;
         if ( *beg!=',' ) 
-          return json_error::create<expected_of>(e, end, ",", std::distance(beg, end) );
+          return create_error<error_code::ExpectedOf>(e, end, ",", std::distance(beg, end) );
 
         ++beg;
         beg = parser::parse_space(beg, end, e);
@@ -251,7 +251,7 @@ private:
     const char* name = memb();
     P start = beg;
     if ( !parser::is_string(beg, end) )
-      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
       
     ++beg;
     unserialized = true;
@@ -265,7 +265,7 @@ private:
     }
 
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if (*beg!='"' || *name!='\0') 
       unserialized = false;
@@ -274,16 +274,16 @@ private:
     ++beg;
     beg = parser::parse_space(beg, end, e);
     if (beg==end) 
-       return json_error::create<unexpected_end_fragment>(e, end);
+       return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if (*beg!=':') 
-      return json_error::create<expected_of>(e, end, ":", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>(e, end, ":", std::distance(beg, end) );
       
     ++beg;
     beg = parser::parse_space(beg, end, e);
 
     if (beg==end) 
-       return json_error::create<unexpected_end_fragment>(e, end);
+       return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     return beg;
   }
@@ -387,32 +387,32 @@ public:
     }
 
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( *beg != '[' ) 
-      return json_error::create<expected_of>(e, end, "[", std::distance(beg, end)  );
+      return create_error<error_code::ExpectedOf>(e, end, "[", std::distance(beg, end)  );
     ++beg;
 
     beg = parser::parse_space(beg, end, e);
     if ( beg==end ) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     
     if ( *beg != ']')
     {
        beg = unserialize_members(t, beg, end, L(), e );
        if ( beg==end ) 
-         return json_error::create<unexpected_end_fragment>(e, end);
+         return create_error<error_code::UnexpectedEndFragment>(e, end);
        beg = parser::parse_space(beg, end, e);
        if ( beg==end ) 
-         return json_error::create<unexpected_end_fragment>(e, end);
+         return create_error<error_code::UnexpectedEndFragment>(e, end);
     }
 
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( *(beg++) != ']' ) 
-      return json_error::create<expected_of>(e, end,"]", std::distance(beg, end) + 1 );
+      return create_error<error_code::ExpectedOf>(e, end,"]", std::distance(beg, end) + 1 );
 
     return beg;
   }
@@ -490,7 +490,7 @@ private:
     beg = parser::parse_space(beg, end, e);
 
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( *beg == ',' )
     {
@@ -500,10 +500,10 @@ private:
     }
 
     if (beg==end) 
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( *beg != ']' )
-      return json_error::create<expected_of>(e, end,"]", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>(e, end,"]", std::distance(beg, end) );
 
     return beg;
   }

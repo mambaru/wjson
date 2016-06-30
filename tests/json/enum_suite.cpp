@@ -2,7 +2,8 @@
 #include <iow/json/json.hpp>
 #include <iow/json/name.hpp>
 
-
+namespace {
+  
 enum class count1: int
 {
   one   = 1,
@@ -30,11 +31,13 @@ struct count2
 
 struct foo
 {
-  count1 counter = count1::one;
-  int   flags;
-  int   flags2;
-  int   counter2;
+  int   flags = 0;
+  int   flags2 = 0;
+  int   counter2 = 0;
+  int   counter3 = 0;
+  count1 counter = count1::one; 
 };
+
 
 struct enum_list1
 {
@@ -114,7 +117,7 @@ struct count2_json
 
 struct flags1_json
 {
-  typedef ::iow::json::set_enumerator<int, enum_flags1::type > type;
+  typedef ::iow::json::flags_enumerator<int, enum_flags1::type > type;
   typedef type::target target;
   typedef type::serializer serializer;
   typedef type::member_list member_list;
@@ -122,7 +125,7 @@ struct flags1_json
 
 struct flags2_json
 {
-  typedef ::iow::json::set_enumerator<int, enum_flags2::type > type;
+  typedef ::iow::json::flags_enumerator<int, enum_flags2::type > type;
   typedef type::target target;
   typedef type::serializer serializer;
   typedef type::member_list member_list;
@@ -142,8 +145,6 @@ struct foo_json
       ::iow::json::member<n_counter2, foo, int, &foo::counter2, count2_json>,
       ::iow::json::member<n_flags, foo, int, &foo::flags, flags1_json>,
       ::iow::json::member<n_flags2, foo, int, &foo::flags2, flags2_json>
-      
-      
     >
   > type;
   typedef type::target target;
@@ -151,11 +152,13 @@ struct foo_json
   typedef type::member_list member_list;
 };
 
+} // namespace
 
 UNIT(enum1, "")
 {
   using namespace fas::testing;
   foo f;
+  
   f.counter = count1::four;
   f.flags   = static_cast<int>(count1::one)
             | static_cast<int>(count1::three)
@@ -171,7 +174,7 @@ UNIT(enum1, "")
   foo_json::serializer()(f, json.begin(), json.end(), &e);
 }
 
-BEGIN_SUITE(enumerator, "")
+BEGIN_SUITE(enumerator, "enumerator")
   ADD_UNIT(enum1)
 END_SUITE(enumerator)
 

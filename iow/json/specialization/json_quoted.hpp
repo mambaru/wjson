@@ -38,22 +38,22 @@ public:
   P operator()( target& t, P beg, P end, json_error* e)
   {
     if (beg == end)
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( ReqQ && *beg == '"')
       ++beg;
     else
-      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
     
     beg = serializer()(t, beg, end, e);
 
     if ( ReqQ && beg == end)
-      return json_error::create<unexpected_end_fragment>(e, end);
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( ReqQ && *beg == '"')
       ++beg;
     else
-      return json_error::create<expected_of>(e, end, "\"", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
 
     return beg;
   }

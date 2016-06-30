@@ -39,11 +39,11 @@ struct enumerator
 /// //////////////////////////////////////////////////////////////////////////////
 
 template< typename T, typename L>
-struct set_enumerator
+struct flags_enumerator
 {
   typedef T target;
   typedef typename fas::normalize<L>::type enum_list;
-  typedef serializerT< set_enumerator<T, enum_list> > serializer;
+  typedef serializerT< flags_enumerator<T, enum_list> > serializer;
   typedef enum_list member_list;
 };
 

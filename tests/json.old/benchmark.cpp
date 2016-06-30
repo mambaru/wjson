@@ -52,7 +52,7 @@ int main()
     char* beg = json;
     char* end = json + ARR_SIZE;
     auto start = high_resolution_clock::now();
-    for (int i = 0; i < SER_COUNT; ++i)
+    for (size_t i = 0; i < SER_COUNT; ++i)
       beg = serializer()(f, beg );
     auto finish = high_resolution_clock::now();
     auto t = duration_cast<nanoseconds>(finish - start).count();
