@@ -181,6 +181,8 @@ void sprintf_bench()
 
 int main()
 {
+  std::cout << std::endl<< "JSON benchmark:" << std::endl;
   json_bench();
+  std::cout << std::endl<< "sprintf benchmark:" << std::endl;
   sprintf_bench();
 }

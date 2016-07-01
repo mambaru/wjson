@@ -1,3 +1,7 @@
+#pragma once
+
+#include <iow/json/predef.hpp>
+#include <iow/json/error.hpp>
 /*
  * json_quoted.hpp
  *

@@ -1,10 +1,5 @@
 #pragma once 
-
-#include <string>
-#include <sstream>
-#include <iow/json/name.hpp>
-#include <iow/json/json.hpp>
-
+#include <cstddef>
 namespace iow{ namespace json{
 
 struct error_code
@@ -19,6 +14,7 @@ struct error_code
     InvalidBool = 6,
     InvalidString = 7,
     InvalidMember = 8,
+    InvalidEnum = 9
   } type;
 };
 

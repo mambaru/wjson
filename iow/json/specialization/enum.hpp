@@ -1,22 +1,8 @@
+#pragma once
 
-#include <fas/type_list.hpp>
-#include <fas/integral/int_.hpp>
-#include <fas/typemanip/empty_type.hpp>
-
-#include <stdexcept>
-#include <vector>
-#include <array>
-#include <string>
-#include <deque>
-#include <set>
-#include <map>
-#include <memory>
-
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-#include <unordered_map>
-#endif
-
-#include <stdint.h>
+#include <iow/json/predef.hpp>
+#include <iow/json/serializer/enum.hpp>
+#include <fas/type_list/normalize.hpp>
 
 namespace iow{ namespace json{
 
@@ -38,12 +24,12 @@ struct enumerator
 
 /// //////////////////////////////////////////////////////////////////////////////
 
-template< typename T, typename L>
+template< typename T, typename L, char Sep>
 struct flags_enumerator
 {
   typedef T target;
   typedef typename fas::normalize<L>::type enum_list;
-  typedef serializerT< flags_enumerator<T, enum_list> > serializer;
+  typedef serializerT< flags_enumerator<T, enum_list, Sep> > serializer;
   typedef enum_list member_list;
 };
 

@@ -117,7 +117,7 @@ UNIT(util5, "pair")
   using namespace iow::json;
   
   std::pair<std::string, int> p("foo", 12345 );
-  pair< value< std::string>, value<int> >::serializer ser;
+  field< value< std::string>, value<int> >::serializer ser;
   std::string json;
   ser( p, std::back_inserter(json) );
   t << equal<expect>( json, "\"foo\":12345") << FAS_FL;

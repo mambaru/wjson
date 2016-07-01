@@ -120,7 +120,7 @@ void atoi_bench()
 }
 
 
-
+/*
 struct ostreambuf : public std::basic_streambuf<char, std::char_traits<char> >
 {
   std::basic_streambuf<char, std::char_traits<char> >*
@@ -129,7 +129,7 @@ struct ostreambuf : public std::basic_streambuf<char, std::char_traits<char> >
     return std::basic_streambuf<char, std::char_traits<char> >::setbuf(buffer, bufferLength);
     //this->setp(buffer, buffer + bufferLength);
   }
-};
+};*/
 
 void ss_bench()
 {

@@ -7,12 +7,96 @@ namespace iow{ namespace json{
 class parser
 {
 public:
+  template<typename P>
+  static bool is_space( P beg, P end );
 
   template<typename P>
-  static P parse_space( P beg, P end, json_error* e) { size_t p = 0; return parse_space(beg, end, p, e); }
+  static bool is_null( P beg, P end );
 
   template<typename P>
-  static P parse_space( P beg, P end, size_t& p, json_error* e)
+  static bool is_bool( P beg, P end );
+
+  template<typename P>
+  static bool is_number( P beg, P end );
+
+  template<typename P>
+  static bool is_string( P beg, P end );
+
+  template<typename P>
+  static bool is_object( P beg, P end );
+
+  template<typename P>
+  static bool is_array( P beg, P end );
+
+public:
+
+  template<typename P>
+  static P parse_space( P beg, P end, json_error* e);
+
+  template<typename P>
+  static P parse_null( P beg, P end, json_error* e );
+
+  template<typename P>
+  static P parse_bool( P beg, P end, json_error* e  );
+
+  template<typename P>
+  static P parse_number( P beg, P end, json_error* e );
+
+  template<typename P>
+  static P parse_string( P beg, P end, json_error* e );
+
+  template<typename P>
+  static P parse_object( P beg, P end, json_error* e );
+
+  template<typename P>
+  static P parse_array( P beg, P end, json_error* e );
+
+  template<typename P>
+  static P parse_value( P beg, P end, json_error* e );
+
+  template<typename P>
+  static P parse_member( P beg, P end, json_error* e );
+
+  template<typename T, typename P>
+  static P unserialize_integer( T& v, P beg, P end, json_error* e );
+
+private:
+
+  template<typename P>
+  static P parse_space( P beg, P end, size_t& p, json_error* e);
+
+  template<typename P>
+  static P parse_null( P beg, P end, size_t& p, json_error* e );
+
+  template<typename P>
+  static P parse_bool( P beg, P end, size_t& p, json_error* e  );
+
+  template<typename P>
+  static P parse_number( P beg, P end, size_t& p, json_error* e );
+
+  template<typename P>
+  static P parse_digit( P beg, P end, size_t& p );
+
+  template<typename P>
+  static P parse_hex( P beg, P end, json_error* e );
+
+  template<typename P>
+  static P parse_symbol( P beg, P end, json_error* e );
+};
+
+
+/// //////////////////
+/// //////////////////
+
+  template<typename P>
+  P parser::parse_space( P beg, P end, json_error* e) 
+  {
+    size_t p = 0; 
+    return parse_space(beg, end, p, e); 
+  }
+
+  template<typename P>
+  P parser::parse_space( P beg, P end, size_t& p, json_error* e)
   {
     bool start_comment = false;
 
@@ -49,16 +133,36 @@ public:
     return beg;
   }
 
-public:
+  template<typename P>
+  bool parser::is_space( P beg, P end ) 
+  {
+    if (beg == end )
+      return false;
+    if ( *beg==' ' || *beg=='\t' || *beg=='\r' || *beg=='\n' )
+      return true;
+    if ( *beg == '/' )
+    {
+      ++beg;
+      return beg!=end && *beg=='*';
+    }
+    return false;
+  }
+  
+  template<typename P>
+  bool parser::is_null( P beg, P end ) 
+  {
+    return beg!=end && *beg=='n'; 
+  }
 
   template<typename P>
-  static bool is_null( P beg, P end ) {  return beg!=end && *beg=='n'; }
+  P parser::parse_null( P beg, P end, json_error* e ) 
+  {
+    size_t p = 0; 
+    return parse_null(beg, end, p, e); 
+  }
 
   template<typename P>
-  static P parse_null( P beg, P end, json_error* e ) { size_t p = 0; return parse_null(beg, end, p, e); }
-
-  template<typename P>
-  static P parse_null( P beg, P end, size_t& p, json_error* e )
+  P parser::parse_null( P beg, P end, size_t& p, json_error* e )
   {
     if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>( e, end );
@@ -75,22 +179,26 @@ public:
         return create_error<error_code::UnexpectedEndFragment>( e, end );
 
       return create_error<error_code::ExpectedOf>( e, end, "null", p );
-      
     }
 
     return create_error<error_code::InvalidNull>( e, end, p );
   }
 
-public:
+  template<typename P>
+  bool parser::is_bool( P beg, P end )  
+  { 
+    return beg!=end && (*beg=='t' || *beg=='f'); 
+  }
 
   template<typename P>
-  static bool is_bool( P beg, P end )  { return beg!=end && (*beg=='t' || *beg=='f'); }
+  P parser::parse_bool( P beg, P end, json_error* e  )
+  {
+    size_t p = 0;
+    return parse_bool(beg, end, p, e); 
+  }
 
   template<typename P>
-  static P parse_bool( P beg, P end, json_error* e  ) { size_t p = 0; return parse_bool(beg, end, p, e); }
-
-  template<typename P>
-  static P parse_bool( P beg, P end, size_t& p, json_error* e  )
+  P parser::parse_bool( P beg, P end, size_t& p, json_error* e  )
   {
     if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>( e, end );
@@ -124,17 +232,21 @@ public:
     return create_error<error_code::InvalidBool>( e, end, p );
   }
 
-
-public:
+  template<typename P>
+  bool parser::is_number( P beg, P end )  
+  {
+    return beg!=end && ( *beg=='-' || ( *beg>='0' && *beg<='9' ) ); 
+  }
 
   template<typename P>
-  static bool is_number( P beg, P end )  { return beg!=end && ( *beg=='-' || ( *beg>='0' && *beg<='9' ) ); }
+  P parser::parse_number( P beg, P end, json_error* e )
+  {
+    size_t p = 0;
+    return parser::parse_number(beg, end, p, e); 
+  }
 
   template<typename P>
-  static P parse_number( P beg, P end, json_error* e ) { size_t p = 0; return parse_number(beg, end, p, e); }
-
-  template<typename P>
-  static P parse_number( P beg, P end, size_t& p, json_error* e )
+  P parser::parse_number( P beg, P end, size_t& p, json_error* e )
   {
     if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>( e, end );
@@ -145,7 +257,7 @@ public:
 
     if ( *beg == '0') { ++beg; ++p; }
     else if ( *beg >='1' && *beg <='9' )
-      beg = _parse_digit(beg, end, p);
+      beg = parse_digit(beg, end, p);
     else
       return create_error<error_code::InvalidNumber>( e, end );
       
@@ -156,7 +268,7 @@ public:
       if ( beg==end )
         return create_error<error_code::UnexpectedEndFragment>( e, end );
       if ( *beg >='0' && *beg <='9')
-        beg = _parse_digit(beg, end, p);
+        beg = parse_digit(beg, end, p);
       else
         return create_error<error_code::InvalidNumber>( e, end );
     }
@@ -169,15 +281,13 @@ public:
         return create_error<error_code::UnexpectedEndFragment>( e, end );
       if ( *beg < '0' || *beg > '9' ) 
         return create_error<error_code::InvalidNumber>( e, end );
-      beg = _parse_digit(beg, end, p);
+      beg = parse_digit(beg, end, p);
     }
     return beg;
   }
 
-
-public:
   template<typename P>
-  static bool is_string( P beg, P end )
+  bool parser::is_string( P beg, P end )
   {
     if (beg==end)
       return false;
@@ -185,7 +295,7 @@ public:
   }
 
   template<typename P>
-  static P parse_string( P beg, P end, json_error* e )
+  P parser::parse_string( P beg, P end, json_error* e )
   {
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
@@ -229,7 +339,7 @@ public:
   }
 
   template<typename P>
-  static P parse_hex( P beg, P end, json_error* e )
+  P parser::parse_hex( P beg, P end, json_error* e )
   {
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
@@ -254,7 +364,7 @@ public:
 0x00010000 — 0x001FFFFF: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
 */
   template<typename P>
-  static P parse_symbol( P beg, P end, json_error* e )
+  P parser::parse_symbol( P beg, P end, json_error* e )
   {
     if ( (*beg & 128)==0 ) return ++beg;
     if ( (*beg & 224)==192 && ++beg!=end && (*beg & 192)==128 ) return ++beg;
@@ -265,7 +375,7 @@ public:
 
 
   template<typename P>
-  static bool is_object( P beg, P end )
+  bool parser::is_object( P beg, P end )
   {
     // [] <=> {} 
     if (beg==end) return false;
@@ -276,13 +386,13 @@ public:
   }
 
   template<typename P>
-  static bool is_array( P beg, P end )
+  bool parser::is_array( P beg, P end )
   {
     return beg!=end && *beg=='[';
   }
 
   template<typename P>
-  static P parse_value( P beg, P end, json_error* e )
+  P parser::parse_value( P beg, P end, json_error* e )
   {
     if ( is_null(beg, end) )
       return parse_null(beg, end, e);
@@ -301,7 +411,7 @@ public:
 
 
   template<typename P>
-  static P parse_member( P beg, P end, json_error* e )
+  P parser::parse_member( P beg, P end, json_error* e )
   {
     if ( !is_string(beg, end) )
       return create_error<error_code::InvalidMember>( e, end, std::distance(beg, end) );
@@ -324,7 +434,7 @@ public:
   }
 
   template<typename P>
-  static P parse_object( P beg, P end, json_error* e  )
+  P parser::parse_object( P beg, P end, json_error* e  )
   {
     if ( !is_object(beg, end) )
       return create_error<error_code::ExpectedOf>( e, end, "{", std::distance(beg, end) );
@@ -348,7 +458,7 @@ public:
   }
 
   template<typename P>
-  static P parse_array( P beg, P end, json_error* e )
+  P parser::parse_array( P beg, P end, json_error* e )
   {
     if ( !is_array(beg, end) )
       return create_error<error_code::ExpectedOf>( e, end, "[", std::distance(beg, end) );
@@ -371,19 +481,15 @@ public:
     return beg;
   }
 
-private:
-
   template<typename P>
-  static P _parse_digit( P beg, P end, size_t& p )
+  P parser::parse_digit( P beg, P end, size_t& p )
   {
     for ( ;beg!=end && *beg >= '0' && *beg <= '9'; ++beg, ++p );
     return beg;
   }
 
-public:
-
   template<typename T, typename P>
-  inline static P unserialize_integer( T& v, P beg, P end, json_error* e )
+  P parser::unserialize_integer( T& v, P beg, P end, json_error* e )
   {
     if( beg==end)
       return create_error<error_code::UnexpectedEndFragment>( e, end );
@@ -407,7 +513,6 @@ public:
    if (neg) v*=-1;
    return beg;
   }
-};
 
 }}
 

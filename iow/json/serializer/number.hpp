@@ -1,3 +1,8 @@
+#pragma once
+#include <iow/json/predef.hpp>
+#include <iow/json/error.hpp>
+#include <iow/json/parser.hpp>
+
 #include <sstream>
 
 namespace iow{ namespace json{

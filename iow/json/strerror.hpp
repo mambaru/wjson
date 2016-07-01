@@ -17,6 +17,7 @@ struct error_code_json
   JSON_NAME2(InvalidBool, "Invalid Bool")
   JSON_NAME2(InvalidString, "Invalid String")
   JSON_NAME2(InvalidMemberr, "Invalid Member")
+  JSON_NAME2(InvalidEnum, "Invalid Enum")
   
   typedef ::iow::json::enumerator<
     int, 
@@ -29,7 +30,8 @@ struct error_code_json
       enum_value<InvalidNumber, int, static_cast<int>(error_code::InvalidNumber)>,
       enum_value<InvalidBool, int, static_cast<int>(error_code::InvalidBool)>,
       enum_value<InvalidString, int, static_cast<int>(error_code::InvalidString)>,
-      enum_value<InvalidMemberr, int, static_cast<int>(error_code::InvalidMember)>
+      enum_value<InvalidMemberr, int, static_cast<int>(error_code::InvalidMember)>,
+      enum_value<InvalidEnum, int, static_cast<int>(error_code::InvalidEnum)>
     >
   > type;
 };

@@ -1,3 +1,6 @@
+#pragma once
+#include <iow/json/predef.hpp>
+#include <iow/json/error.hpp>
 
 namespace iow{ namespace json{
 

@@ -1,36 +1,41 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2008-2016
+//
+// Copyright: See COPYING file that comes with this distribution
+//
 
-// #define CHAR_TO_STRING(CH) #CH
+#pragma once
+
+#include <iow/json/predef.hpp>
+#include <iow/json/parser.hpp>
+#include <iow/json/error.hpp>
 
 namespace iow{ namespace json{
 
 template<typename C, typename R>
 struct array_r;
 
-namespace
-{
-
 template<char C>
 struct ch2str;
 
 template<>
-struct ch2str<'{'>{ static const char* get() { return "{"; } };
+struct ch2str<'{'>{ const char* operator()() const { return "{"; } };
 
 template<>
-struct ch2str<'}'>{ static const char* get() { return "}"; } };
+struct ch2str<'}'>{ const char* operator()() const { return "}"; } };
 
 template<>
-struct ch2str<'['>{ static const char* get() { return "["; } };
+struct ch2str<'['>{ const char* operator()() const { return "["; } };
 
 template<>
-struct ch2str<']'>{ static const char* get() { return "]"; } };
+struct ch2str<']'>{ const char* operator()() const { return "]"; } };
 
-}
 
 template<typename K, typename V>
-class serializerT< pair<K, V> >
+class serializerT< field<K, V> >
 {
 public:
-  typedef pair<K, V> pair_type;
+  typedef field<K, V> pair_type;
   typedef typename pair_type::target target;
   typedef typename pair_type::key_serializer key_serializer;
   typedef typename pair_type::value_serializer value_serializer;
@@ -51,9 +56,8 @@ public:
     beg = parser::parse_space(beg, end, e);
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    if (*beg!=':') 
-      return create_error<error_code::ExpectedOf>(e, end,":", std::distance(beg, end) );
-    ++beg;
+    if (*(beg++)!=':') 
+      return create_error<error_code::ExpectedOf>(e, end,":", std::distance(beg, end)+1 );
     beg = parser::parse_space(beg, end, e);
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
@@ -71,42 +75,34 @@ class serializerA
   typedef typename json_value::serializer serializer;
   typedef typename json_value::target target;
 
-
 public:
+  
   template<typename P>
   P operator()( target_container& t,  P beg, P end, json_error* e)
   {
-    
     t.clear();
-
     if ( parser::is_null(beg, end) )
-    {
-      // t = target_container();
       return parser::parse_null(beg, end, e);
-    }
 
     array_type().reserve(t);
-    
+
     typename array_type::inserter_iterator bitr = array_type::inserter(t);
 
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    
-    if (*beg!=L) 
-      return create_error<error_code::ExpectedOf>(e, end, ch2str<L>::get()/*std::string(1, L)*/, std::distance(beg, end) );
-    ++beg;
+
+    if (*(beg++)!=L) 
+      return create_error<error_code::ExpectedOf>(e, end, ch2str<L>()(), std::distance(beg, end)+1 );
+
     for (;beg!=end;)
     {
       beg = parser::parse_space(beg, end, e);
       if (beg==end) 
         return create_error<error_code::UnexpectedEndFragment>(e, end);
       if (*beg==R) break;
-      
       target tg;
       beg = serializer()( tg, beg, end, e);
       *(bitr++) = tg;
-      
-      //beg = serializer()( *(bitr++), beg, end);
       beg = parser::parse_space(beg, end, e);
       if (beg==end) 
         return create_error<error_code::UnexpectedEndFragment>(e, end);
@@ -118,7 +114,7 @@ public:
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
     if (*beg!=R) 
-      return create_error<error_code::ExpectedOf>(e, end, ch2str<R>::get(), std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>(e, end, ch2str<R>()(), std::distance(beg, end) );
     ++beg;
     return beg;
   }
@@ -163,7 +159,7 @@ public:
     {
       for (size_t i = 0; i < N ; ++i)
       {
-        //t[i] = target();
+        // null для каждого элемента
         serializer()(t[i], beg, end, e);
       }
       return parser::parse_null(beg, end, e);
@@ -174,33 +170,36 @@ public:
 
     if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    
-    if (*beg!=L) 
-      return create_error<error_code::ExpectedOf>(e, end, ch2str<L>::get(), std::distance(beg, end) );
-    
-    ++beg;
+
+    if (*(beg++)!=L) 
+      return create_error<error_code::ExpectedOf>(e, end, ch2str<L>()(), std::distance(beg, end) + 1 );
+
     for (;beg!=end && bitr!=eitr;)
     {
       beg = parser::parse_space(beg, end);
       if (beg==end) 
         return create_error<error_code::UnexpectedEndFragment>(e, end);
-      if (*beg==R) break;
+      if (*beg==R) 
+        break;
+
       target tg;
       beg = serializer()( tg, beg, end, e);
       *(bitr++) = tg;
       beg = parser::parse_space(beg, end);
       if (beg==end) 
         return create_error<error_code::UnexpectedEndFragment>(e, end);
-      if (*beg==R) break;
+      if (*beg==R) 
+        break;
       if (*beg!=',') 
         return create_error<error_code::ExpectedOf>(e, end, "", std::distance(beg, end) );
       ++beg;
     }
+
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    if (*beg!=R) 
-      return create_error<error_code::ExpectedOf>(e, end, ch2str<R>::get(), std::distance(beg, end) );
-    ++beg;
+
+    if (*(beg++)!=R) 
+      return create_error<error_code::ExpectedOf>(e, end, ch2str<R>()(), std::distance(beg, end) + 1 );
     return beg;
   }
 
@@ -230,8 +229,8 @@ class serializerA< array_r< J[N], RR>, L, R >
   typedef typename json_value::serializer serializer;
   typedef typename json_value::target target;
 
-
 public:
+
   template<typename P>
   P operator()( target_container& t,  P beg, P end, json_error* e)
   {
@@ -239,8 +238,7 @@ public:
     {
       for (int i = 0; i < N ; ++i)
       {
-        // #warning БЫЛО: t[i] = target();
-        // Подсовываем null каждому значению
+        // null для каждого элемента
         serializer()(t[i], beg, end, e);
       }
       return parser::parse_null(beg, end, e);
@@ -252,8 +250,8 @@ public:
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
     if (*beg!=L) 
-      return create_error<error_code::ExpectedOf>(e, end, ch2str<L>::get(), std::distance(beg, end) );
-      
+      return create_error<error_code::ExpectedOf>(e, end, ch2str<L>()(), std::distance(beg, end) );
+
     ++beg;
     for (;beg!=end && bitr!=eitr;)
     {
@@ -261,9 +259,7 @@ public:
       if (beg==end) 
         return create_error<error_code::UnexpectedEndFragment>(e, end);
       if (*beg==R) break;
-      //!!! target tg;
-      //!!! beg = serializer()( tg, beg, end, e);
-      //!!! *(bitr++) = tg;
+
       beg = serializer()( *(bitr++), beg, end, e);
       beg = parser::parse_space(beg, end, e);
       if (beg==end) 
@@ -275,11 +271,10 @@ public:
     }
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    
-    if (*beg!=R) 
-      return create_error<error_code::ExpectedOf>(e, end, ch2str<R>::get(), std::distance(beg, end) );
 
-    ++beg;
+    if (*(beg++)!=R) 
+      return create_error<error_code::ExpectedOf>(e, end, ch2str<R>()(), std::distance(beg, end) + 1 );
+
     return beg;
   }
 
@@ -301,5 +296,3 @@ public:
 };
 
 }}
-
-

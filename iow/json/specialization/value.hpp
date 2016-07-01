@@ -1,4 +1,8 @@
-#include <string>
+#pragma once
+
+#include <iow/json/predef.hpp>
+#include <iow/json/serializer/number.hpp>
+#include <iow/json/serializer/string.hpp>
 
 namespace iow{ namespace json{
 
@@ -123,21 +127,6 @@ struct value< char[N], -1 >
   typedef char target[N];
   typedef serializerT< value<char[N], -1>  > serializer;
 };
-
-template<typename J, bool SerQ, bool ReqQ>
-struct raw_quoted 
-{
-  typedef typename J::target target;
-  typedef serializerRQ< J, SerQ, ReqQ > serializer;
-};
-
-template<typename J, bool SerQ , bool ReqQ , int R >
-struct quoted
-{
-  typedef typename J::target target;
-  typedef serializerQ< J, value<std::string>, SerQ, ReqQ, R> serializer;
-};
-
 
 }}
 

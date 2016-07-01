@@ -45,7 +45,7 @@ UNIT(dict1, "")
 
   {
     std::vector< std::pair<std::string, std::string> > m;
-    dict< std::vector< pair< value<std::string>, value<std::string> > > >::serializer ser;
+    dict< std::vector< field< value<std::string>, value<std::string> > > >::serializer ser;
     m.push_back( std::make_pair("раз","раз") );
     m.push_back( std::make_pair("два","два") );
     std::string json;

@@ -1,4 +1,7 @@
+#pragma once
 
+#include <iow/json/predef.hpp>
+#include <iow/json/serializer/array.hpp>
 
 #include <fas/type_list.hpp>
 #include <fas/integral/int_.hpp>
@@ -78,18 +81,6 @@ struct array_base< std::list<J>, R>
   typedef typename json_value::target target;
   typedef std::list<target> target_container;
   typedef serializerT< array_r< json_container, R> > serializer;
-  typedef std::back_insert_iterator<target_container> inserter_iterator;
-  static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
-};
-
-template<typename K, typename V, typename R>
-struct array_base< std::vector< pair<K, V> >, R>
-{
-  typedef pair<K, V> json_value;
-  typedef std::vector< json_value > json_container;
-  typedef typename json_value::target target;
-  typedef std::vector<target> target_container;
-  typedef serializerA< array_r< json_container, R>, '{', '}' > serializer;
   typedef std::back_insert_iterator<target_container> inserter_iterator;
   static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
 };
@@ -178,17 +169,20 @@ struct array_r
 
 };
 
+/*
 template< typename T, typename L, typename R>
 struct array_r< object<T, L>, R>
   : array_r< std::vector< object<T, L> >, R>
 {
 };
-
+*/
+/*
 template< typename K, typename V, typename R>
 struct array_r< pair<K, V>, R>
   : array_r< std::vector< pair<K, V> >, R>
 {
 };
+*/
 
 template<typename C, int R>
 struct array: array_r<C, fas::int_<R> > {};
@@ -196,13 +190,13 @@ struct array: array_r<C, fas::int_<R> > {};
 template<typename C>
 struct array<C, -1>: array_r<C, fas::empty_type> {};
 
-template<int Reserve>
-struct vector_of_strings: array< std::vector< value< std::string > >,  Reserve> {};
+template<int R1, int R2>
+struct vector_of_strings: array< std::vector< value< std::string, R2 > >,  R1> {};
 
-template<int Reserve>
-struct deque_of_strings: array< std::deque< value< std::string > >,  Reserve> {};
+template<int R1, int R2>
+struct deque_of_strings: array< std::deque< value< std::string, R2> >, R1> {};
 
-template<int Reserve>
-struct list_of_strings: array< std::list< value< std::string > >,  Reserve> {};
+template<int R1, int R2>
+struct list_of_strings: array< std::list< value< std::string, R2 > >, R1> {};
 
 }}

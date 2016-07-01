@@ -1,3 +1,7 @@
+#pragma once
+
+#include <iow/json/predef.hpp>
+#include <iow/json/serializer/object.hpp>
 
 namespace iow{ namespace json{
 
