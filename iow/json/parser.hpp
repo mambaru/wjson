@@ -28,6 +28,14 @@ public:
   template<typename P>
   static bool is_string( P beg, P end );
 
+// #warning not impl 
+  template<typename P>
+  static bool is_utf8( P beg, P end );
+
+// #warning not impl 
+  template<typename P>
+  static bool is_hex( P beg, P end );
+
   template<typename P>
   static bool is_object( P beg, P end );
 
@@ -50,6 +58,12 @@ public:
 
   template<typename P>
   static P parse_string( P beg, P end, json_error* e );
+
+  template<typename P>
+  static P parse_utf8( P beg, P end, json_error* e );
+
+  template<typename P>
+  static P parse_hex( P beg, P end, json_error* e );
 
   template<typename P>
   static P parse_object( P beg, P end, json_error* e );
@@ -83,11 +97,11 @@ private:
   template<typename P>
   static P parse_digit( P beg, P end, size_t& p );
 
-  template<typename P>
-  static P parse_hex( P beg, P end, json_error* e );
 
+  /*
   template<typename P>
   static P parse_symbol( P beg, P end, json_error* e );
+  */
 };
 
 
@@ -343,7 +357,9 @@ private:
           ++beg;
       }
       else
-        beg = parser::parse_symbol(beg, end, e);
+      {
+        beg = parser::parse_utf8(beg, end, e);
+      }
     }
 
     if (beg==end) 
@@ -375,7 +391,7 @@ private:
   }
 
   template<typename P>
-  P parser::parse_symbol( P beg, P end, json_error* e )
+  P parser::parse_utf8( P beg, P end, json_error* e )
   {
     // utf-8
     // 0x00000000 — 0x0000007F: 0xxxxxxx
@@ -386,6 +402,7 @@ private:
     if ( (*beg & 128)==0 ) return ++beg;
     if ( (*beg & 224)==192 && ++beg!=end && (*beg & 192)==128 ) return ++beg;
     if ( (*beg & 240)==224 && ++beg!=end && (*beg & 192)==128 && ++beg!=end && (*beg & 192)==128 ) return ++beg;
+//#warning BUG: не до конца
     if ( (*beg & 248)==240 && ++beg!=end && (*beg & 192)==128 && ++beg!=end && (*beg & 192)==128 ) return ++beg;
     return create_error<error_code::InvalidString>( e, end, std::distance(beg, end) );
   }

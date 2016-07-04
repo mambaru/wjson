@@ -84,13 +84,13 @@ public:
           case 'r':  *(vitr++) = '\r'; ++beg; --n; break;
           case 'n':  *(vitr++) = '\n'; ++beg; --n; break;
           case 'f':  *(vitr++) = '\f'; ++beg; --n; break;
-          case 'u':  beg = _unserialize_uhex(++beg, end, &vitr, n, e); break;
+          case 'u':  beg = this->unserialize_uhex_(++beg, end, &vitr, n, e); break;
           default:
             return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
         }
       }
       else
-        beg = _unserialize_symbol(beg, end, &vitr, n, e);
+        beg = this->unserialize_symbol_(beg, end, &vitr, n, e);
     }
 
     if (beg==end) 
@@ -105,7 +105,7 @@ public:
 private:
 
   template<typename P, typename P1>
-  P _unserialize_symbol(P beg, P end, P1* vitr, int& n, json_error* e)
+  P unserialize_symbol_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
     if (beg == end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
@@ -116,18 +116,18 @@ private:
       --n;
     }
     else if ( (*beg & 224)==192 )
-      beg = _symbol_copy<2>(beg, end, vitr, n, e);
+      beg = this->symbol_copy_<2>(beg, end, vitr, n, e);
     else if ( (*beg & 240)==224 )
-      beg = _symbol_copy<3>(beg, end, vitr, n, e);
+      beg = this->symbol_copy_<3>(beg, end, vitr, n, e);
     else if ( (*beg & 248)==240 )
-      beg = _symbol_copy<4>(beg, end, vitr, n, e);
+      beg = this->symbol_copy_<4>(beg, end, vitr, n, e);
     else
       return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
     return beg;
   }
 
   template<int N, typename P, typename P1>
-  P _symbol_copy(P beg, P end, P1* vitr, int& n, json_error* e)
+  P symbol_copy_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
     for (register int i = 0; i < N && n!=0; ++i, --n)
     {
@@ -143,21 +143,21 @@ private:
   // 0x00000080 — 0x000007FF 	110xxxxx 10xxxxxx
   // 0x00000800 — 0x0000FFFF 	1110xxxx 10xxxxxx 10xxxxxx
   template<typename P, typename P1>
-  P _unserialize_uhex(P beg, P end, P1* vitr, int& n, json_error* e)
+  P unserialize_uhex_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
     unsigned short hex = 0;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= _toUShort(*(beg++), e) << 12;
+    hex |= this->toUShort_(*(beg++), e) << 12;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= _toUShort(*(beg++), e) << 8;
+    hex |= this->toUShort_(*(beg++), e) << 8;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= _toUShort(*(beg++), e) << 4;
+    hex |= this->toUShort_(*(beg++), e) << 4;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= _toUShort(*(beg++), e);
+    hex |= this->toUShort_(*(beg++), e);
 
     if ( hex <= 0x007F )
     {
@@ -189,7 +189,7 @@ private:
     return beg;
   }
 
-  unsigned short _toUShort(unsigned char c, json_error* e)
+  unsigned short toUShort_(unsigned char c, json_error* e)
   {
     if ( c >= '0' && c<='9' ) return c - '0';
     if ( c >= 'a' && c<='f' ) return (c - 'a') + 10;

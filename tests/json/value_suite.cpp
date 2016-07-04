@@ -135,9 +135,22 @@ UNIT(string_unit, "")
   value_serializer_test<T, std::string>(t, "привет", "\"привет\"", __LINE__);
 }
 
+UNIT(string1, "" )
+{
+  using namespace fas::testing;
+  using namespace iow::json;
+  std::string str="hello world";
+  std::vector<char> vstr(str.begin(), str.end() );
+  vstr[5]=char(130)/*'\0'*/;
+  std::string json;
+  value< std::vector<char> >::serializer()(vstr, std::back_inserter(json));
+  t << equal<expect>(json, "hello world") << FAS_FL;
+}
+
 BEGIN_SUITE(value, "")
   ADD_UNIT(bool_unit)
   ADD_UNIT(integer_unit)
   ADD_UNIT(float_unit)
   ADD_UNIT(string_unit)
+  ADD_UNIT(string1)
 END_SUITE(value)
