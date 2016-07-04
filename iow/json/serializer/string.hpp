@@ -1,10 +1,18 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2008-2016
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once
 #include <iow/json/predef.hpp>
 #include <iow/json/error.hpp>
 
+#include <fas/integral/bool_.hpp>
+
 #include <memory>
 #include <vector>
-#include <fas/integral/bool_.hpp>
+#include <cstdio>
 
 namespace iow{ namespace json{
 
@@ -38,7 +46,7 @@ public:
             *(itr++) = '\\';
             *(itr++) = 'u';
             char buf[5] = {0};
-            snprintf(buf, 5, "%04x", int(*beg) );
+            std::snprintf(buf, 5, "%04x", int(*beg) );
             for (int i=0; i < 4; ++i)
               *(itr++) = buf[i];
           }
@@ -130,17 +138,10 @@ private:
     return beg;
   }
 
-/*
-0x00000000 — 0x0000007F 	0xxxxxxx
-0x00000080 — 0x000007FF 	110xxxxx 10xxxxxx
-0x00000800 — 0x0000FFFF 	1110xxxx 10xxxxxx 10xxxxxx
 
-U+0439	й	d0 b9	CYRILLIC SMALL LETTER SHORT I
-00000100 00111001 -> 110_10000 10_111001
-
-// উ - U+0989 - 	e0 a6 89
-// 00001001 10001001 -> 11100000 10100110 10001001
-*/
+  // 0x00000000 — 0x0000007F 	0xxxxxxx
+  // 0x00000080 — 0x000007FF 	110xxxxx 10xxxxxx
+  // 0x00000800 — 0x0000FFFF 	1110xxxx 10xxxxxx 10xxxxxx
   template<typename P, typename P1>
   P _unserialize_uhex(P beg, P end, P1* vitr, int& n, json_error* e)
   {
@@ -242,23 +243,12 @@ public:
   P operator() ( std::string& v, P beg, P end, json_error* e )
   {
     v.clear();
-    //this->reserve( v, fas::bool_< (R>0) >() );
     v.reserve( (R >= 0) ? R : 64);
 
     if ( parser::is_null(beg, end) )
       return parser::parse_null(beg, end, e);
     return unserialize(beg, end, std::back_inserter(v), -1, e);
   }
- /* 
-  void reserve( std::string&, fas::false_){}
-
-  
-  void reserve( std::string& v, fas::true_)
-  {
-    v.reserve(R);
-  }
-  */
-
 };
 
 template<int R>
@@ -277,135 +267,12 @@ public:
   {
     v.clear();
     v.reserve( (R >= 0) ? R : 64);
-    //this->reserve( v, fas::bool_< (R>0) >() );
     if ( parser::is_null(beg, end) )
       return parser::parse_null(beg, end);
     return unserialize(beg, end, std::back_inserter(v), e);
   }
 
-  /*
-  void reserve( std::vector<char>&, fas::false_){}
-
-  void reserve( std::vector<char>& v, fas::true_)
-  {
-    v.reserve(R);
-  }
-  */
 };
-
-template<typename T>
-class serializerT< iterator_pair<T> >
-{
-public:
-  template<typename P>
-  P operator()( const T& v, P end )
-  {
-    if ( v.first != v.second )
-      return std::copy(v.first, v.second, end );
-    else
-    {
-      *(end++)='"';
-      *(end++)='"';
-      return end;
-    }
-  }
-
-  template<typename P>
-  P operator() ( T& v, P beg, P end, json_error* e )
-  {
-    v.first = beg;
-    beg = parser::parse_value(beg, end, e);
-    v.second = beg;
-    return beg;
-  }
-};
-
-
-template<typename T, int R>
-class serializerT< raw_value<T, R> >
-{
-public:
-  template<typename P>
-  P operator()( const T& v, P end)
-  {
-    if ( v.begin() != v.end() )
-    {
-      return std::copy(v.begin(), v.end(), end );
-    }
-    else
-    {
-      *(end++)='"';
-      *(end++)='"';
-      return end;
-    }
-  }
-
-  template<typename P>
-  P operator() ( T& v, P beg, P end, json_error* e )
-  {
-    v.clear();
-    P start = beg;
-    beg = parser::parse_value(beg, end, e);
-    std::copy( start, beg, std::back_inserter(v) );
-    return beg;
-  }
-};
-
-template<typename T, typename J>
-class serializerT< pointer<T, J> >
-{
-  //typedef typename T target;
-public:
-  template< typename P>
-  P operator()( const T& ptr, P end)
-  {
-    // Можно обычный указатель
-    if ( ptr!=0 )
-      return typename J::serializer()( *ptr, end);
-    
-    *(++end)='n';
-    *(++end)='u';
-    *(++end)='l';
-    *(++end)='l';
-    return end;
-  }
-
-  template< typename Type, typename P>
-  P operator() ( std::unique_ptr<Type>& ptr, P beg, P end, json_error* e )
-  {
-    // Только умный
-    if (beg!=end && *beg!='n')
-    {
-      ptr = std::unique_ptr<Type>(new Type());
-      return typename J::serializer()( *ptr, beg, end, e);
-    }
-    else
-    {
-      ptr=0;
-      for (int i=0; beg!=end && i<4; ++i, ++beg);
-    }
-    return beg;
-  }
-  
-  template< typename Type, typename P>
-  P operator() ( std::shared_ptr<Type>& ptr, P beg, P end, json_error* e )
-  {
-    // Только умный
-    if (beg!=end && *beg!='n')
-    {
-      ptr = std::make_shared<Type>();
-      return typename J::serializer()( *ptr, beg, end, e);
-    }
-    else
-    {
-      ptr=0;
-      for (int i=0; beg!=end && i<4; ++i, ++beg);
-    }
-    return beg;
-  }
-};
-
-
 
 }}
 

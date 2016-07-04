@@ -1,5 +1,14 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2008-2016
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once 
+
 #include <cstddef>
+#include <iterator>
+
 namespace iow{ namespace json{
 
 struct error_code
@@ -95,16 +104,15 @@ private:
     return "";
   }
 private:
-  error_code::type _code = error_code::ValidJSON;
+  error_code::type _code;
   const char* _what;
   std::ptrdiff_t _tail_of;
 };
 
-
 template<error_code::type code, typename Itr>
 inline Itr create_error(json_error* e, Itr end, size_t tail_of = 0)
 {
-  if ( e != nullptr && !*e )
+  if ( e != NULL && !*e )
     *e = json_error(code, tail_of);
   return end;
 }
@@ -112,7 +120,7 @@ inline Itr create_error(json_error* e, Itr end, size_t tail_of = 0)
 template<error_code::type code, typename Itr >
 inline Itr create_error(json_error* e, Itr end, const char* msg, size_t tail_of = 0)
 {
-  if ( e != nullptr && !*e)
+  if ( e != NULL && !*e)
     *e = json_error(code, msg, tail_of);
   return end;
 }

@@ -174,7 +174,9 @@ UNIT(array5, "std::deque< int >")
   using namespace iow::json;
 
   std::string json;
-  std::deque< int > dq = {1,2,3,4,5};
+  std::deque< int > dq;
+  for (int i=1;i != 6; ++i )
+    dq.push_back(i);
   array< std::deque< value<int> > >::serializer ser;
   ser(dq, std::back_inserter(json));
   t << equal<expect>(json, "[1,2,3,4,5]") << FAS_FL;
@@ -191,7 +193,9 @@ UNIT(array6, "std::list< int >")
   using namespace iow::json;
 
   std::string json;
-  std::list< int > dq = {1,2,3,4,5};
+  std::list< int > dq;
+  for (int i=1;i != 6; ++i )
+    dq.push_back(i);
   array< std::list< value<int> > >::serializer ser;
   ser(dq, std::back_inserter(json));
   t << equal<expect>(json, "[1,2,3,4,5]") << FAS_FL;
@@ -208,7 +212,9 @@ UNIT(array7, "std::set< int >")
   using namespace iow::json;
 
   std::string json;
-  std::set< int > dq = {1,2,3,4,5};
+  std::set< int > dq;
+  for (int i=1;i != 6; ++i )
+    dq.insert(i);
   array< std::set< value<int> > >::serializer ser;
   ser(dq, std::back_inserter(json));
   t << equal<expect>(json, "[1,2,3,4,5]") << FAS_FL;
@@ -225,7 +231,11 @@ UNIT(array8, "std::multiset< int >")
   using namespace iow::json;
 
   std::string json;
-  std::multiset< int > dq = {1,1,1,2,3,4,5};
+  std::multiset< int > dq;
+  for (int i=1;i != 6; ++i )
+    dq.insert(i);
+  dq.insert(1);
+  dq.insert(1);
   array< std::multiset< value<int> > >::serializer ser;
   ser(dq, std::back_inserter(json));
   t << equal<expect>(json, "[1,1,1,2,3,4,5]") << FAS_FL;
@@ -241,6 +251,7 @@ UNIT(array9, "std::unordered_set< int >")
   using namespace fas::testing;
   using namespace iow::json;
 
+#if __cplusplus >= 201103L
   std::string json;
   std::unordered_set< int > dq = {1,2,3,4,5};
   array< std::unordered_set< value<int> > >::serializer ser;
@@ -252,13 +263,16 @@ UNIT(array9, "std::unordered_set< int >")
   ser(dq2, json.begin(), json.end(), &e );
   t << is_false<expect>(e) << FAS_FL;
   t << equal<expect>(dq, dq2) << FAS_FL;
+#else
+  t << nothing;
+#endif
 }
 
 UNIT(array10, "std::unordered_multiset< int >")
 {
   using namespace fas::testing;
   using namespace iow::json;
-
+#if __cplusplus >= 201103L
   std::string json;
   std::unordered_multiset< int > dq = {1,2,3,4,5};
   array< std::unordered_multiset< value<int> > >::serializer ser;
@@ -270,6 +284,9 @@ UNIT(array10, "std::unordered_multiset< int >")
   ser(dq2, json.begin(), json.end(), &e );
   t << is_false<expect>(e) << FAS_FL;
   t << equal<expect>(dq, dq2) << FAS_FL;
+#else
+  t << nothing;
+#endif
 }
 
 

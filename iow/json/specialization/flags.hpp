@@ -6,18 +6,19 @@
 
 #pragma once
 
-#include <iow/json/predef.hpp>
-#include <iow/json/serializer/object.hpp>
+#include <iow/json/serializer/flags.hpp>
 #include <fas/type_list/normalize.hpp>
 
 namespace iow{ namespace json{
 
-template<typename T, typename L>
-struct object
+template< typename T, typename L, char Sep>
+struct flags
 {
   typedef T target;
-  typedef serializerT< object<T, L> > serializer;
-  typedef typename fas::normalize<L>::type member_list;
+  typedef typename fas::normalize<L>::type enum_list;
+  typedef serializerT< flags<T, enum_list, Sep> > serializer;
+  typedef enum_list member_list;
 };
 
 }}
+

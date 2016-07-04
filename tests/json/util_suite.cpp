@@ -34,18 +34,22 @@ UNIT(util2, "raw_range")
     ser( value, std::back_inserter(json) );
   t << equal<expect>(json, std::string(value.first, value.second) ) << FAS_FL;
 }
+namespace 
+{
+  struct foo
+  {
+    int value;
+    foo():value(12345){}
+  };
+
+  struct bar: foo{};
+}
 
 UNIT(util3, "member_value")
 {
   using namespace fas::testing;
   using namespace iow::json;
-  
-  struct foo
-  {
-    int value = 12345;
-  };
-  
-  struct bar: foo{};
+
   
   bar b;
   
@@ -75,6 +79,7 @@ UNIT(util4, "pointer")
     delete str;
   }
 
+#if __cplusplus >= 201103L
   {
     std::string json;
     pointer< std::shared_ptr<std::string>, value< std::string > >::serializer ser;
@@ -92,6 +97,7 @@ UNIT(util4, "pointer")
     t << equal<expect>( json, "null" ) << FAS_FL;
   }
 
+
   {
     std::string json;
     pointer< std::unique_ptr<std::string>, value< std::string > >::serializer ser;
@@ -108,6 +114,7 @@ UNIT(util4, "pointer")
     ser( str, std::back_inserter( json ) );
     t << equal<expect>( json, "null" ) << FAS_FL;
   }
+#endif
 
 }
 
@@ -143,14 +150,17 @@ UNIT(util6, "quoted")
   quoted<int_json, false, false, 1>::serializer()( val, json.begin(), json.end(), 0 );
   t << equal<expect>( val, 123456) <<  FAS_FL;
 
-  std::vector<int> arr={1,2,3};
+  std::vector<int> arr;
+  arr.push_back(1);arr.push_back(2);arr.push_back(3);
   typedef array< std::vector< value<int> > > arr_json;
   json.clear();
   quoted<arr_json>::serializer()( arr, std::back_inserter(json) );
   t << equal<expect>( json, "\"[1,2,3]\"") << FAS_FL;
   arr.clear();
   quoted<arr_json>::serializer()( arr, json.begin(), json.end(), 0 );
+#if __cplusplus >= 201103L
   t << equal<expect>( arr, std::vector<int>{1,2,3} ) <<  FAS_FL;
+#endif
   
   json = "\"[1,[1,2,3,4],3]\"";
   json_error e;

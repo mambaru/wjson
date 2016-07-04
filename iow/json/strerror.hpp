@@ -1,8 +1,14 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2008-2016
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
+#include <iow/json/name.hpp>
+#include <iow/json/predef.hpp>
+#include <iow/json/error.hpp>
 #include <string>
 #include <sstream>
-#include <iow/json/name.hpp>
-#include <iow/json/json.hpp>
-#include <iow/json/error.hpp>
 
 namespace iow{ namespace json{
 
@@ -21,7 +27,7 @@ struct error_code_json
   
   typedef ::iow::json::enumerator<
     int, 
-    member_list<
+    ::iow::json::member_list<
       enum_value<ValidJSON, int, static_cast<int>(error_code::ValidJSON)>,
       enum_value<InvalidJSON, int, static_cast<int>(error_code::InvalidJSON)>,
       enum_value<UnexpectedEndFragment, int, static_cast<int>(error_code::UnexpectedEndFragment)>,
@@ -34,6 +40,10 @@ struct error_code_json
       enum_value<InvalidEnum, int, static_cast<int>(error_code::InvalidEnum)>
     >
   > type;
+
+  typedef type::target target;
+  typedef type::serializer serializer;
+  typedef type::member_list member_list;
 };
 
 class strerror
@@ -41,7 +51,7 @@ class strerror
 public:
   static const char* what(const json_error& e)  
   {
-    return strerror::what_( e.code(), error_code_json::type::member_list() );
+    return strerror::what_( e.code(), error_code_json::member_list() );
   }
 
   static std::string message( const json_error& e )

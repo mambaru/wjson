@@ -1,22 +1,28 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2008-2016
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once
 
 #include <iow/json/predef.hpp>
 #include <iow/json/serializer/array.hpp>
+#include <iow/json/serializer/field.hpp>
 
 #include <fas/type_list.hpp>
 #include <fas/integral/int_.hpp>
 #include <fas/typemanip/empty_type.hpp>
 
 #include <vector>
-#include <array>
 #include <string>
 #include <deque>
 #include <list>
 #include <set>
 #include <map>
-#include <memory>
 
 #if __cplusplus >= 201103L
+#include <array>
 #include <unordered_map>
 #include <unordered_set>
 #endif

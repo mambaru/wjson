@@ -26,6 +26,7 @@ UNIT(dict1, "")
     t << equal<expect>(m["два"], "два" ) << FAS_FL;
   }
 
+#if __cplusplus >= 201103L
   {
     std::unordered_map<std::string, std::string> m;
     dict< std::unordered_map< value<std::string>, value<std::string> > >::serializer ser;
@@ -42,6 +43,7 @@ UNIT(dict1, "")
     t << equal<expect>(m["раз"], "раз" ) << FAS_FL;
     t << equal<expect>(m["два"], "два" ) << FAS_FL;
   }
+#endif
 
   {
     std::vector< std::pair<std::string, std::string> > m;

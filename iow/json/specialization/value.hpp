@@ -1,8 +1,19 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2008-2016
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once
 
 #include <iow/json/predef.hpp>
+#include <iow/json/serializer/bool.hpp>
 #include <iow/json/serializer/number.hpp>
+#include <iow/json/serializer/float.hpp>
 #include <iow/json/serializer/string.hpp>
+
+#include <vector>
+#include <string>
 
 namespace iow{ namespace json{
 
@@ -64,6 +75,8 @@ struct value<unsigned long, -1>
 };
 
 
+#if __cplusplus >= 201103L
+
 template<>
 struct value<long long, -1>
 {
@@ -77,6 +90,8 @@ struct value<unsigned long long, -1>
   typedef unsigned long long target;
   typedef serializerT< value<unsigned long long, -1> > serializer;
 };
+
+#endif
 
 template<int R>
 struct value<float, R>

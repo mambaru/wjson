@@ -3,14 +3,13 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
+
 #pragma once
 
 #include <fas/type_list.hpp>
 #include <string>
 
 namespace iow{ namespace json{
-
-/// /////////////////////////////////////////////////////
 
 template<typename T, int R = -1>
 struct value;
@@ -37,7 +36,7 @@ template< typename T, typename L>
 struct enumerator;
 
 template< typename T, typename L, char Sep = ','>
-struct flags_enumerator;
+struct flags;
 
 template<typename N, typename T, T v>
 struct enum_value;
@@ -86,32 +85,35 @@ struct field;
 template<typename T, typename V, typename M, M V::* m, typename W = value<M> >
 struct member_value;
 
-template<typename N,
-         typename T,
-         typename M,
-         typename G, // getter
-         typename W = value<M>
-        >
+template<typename N, typename T, typename M, typename G, typename W = value<M> >
 struct member_p;
 
 #if __cplusplus >= 201103L
 template<typename ...Args>
 using member_list = typename fas::type_list_n<Args...>::type;
+#else
+template< typename T1 = fas::empty_list,  typename T2 = fas::empty_list,  typename T3 = fas::empty_list,  
+          typename T4 = fas::empty_list,  typename T5 = fas::empty_list,  typename T6 = fas::empty_list,
+          typename T7 = fas::empty_list,  typename T8 = fas::empty_list,  typename T9 = fas::empty_list,  
+          typename T10 = fas::empty_list, typename T11 = fas::empty_list, typename T12 = fas::empty_list,
+          typename T13 = fas::empty_list, typename T14 = fas::empty_list, typename T15 = fas::empty_list, 
+          typename T16 = fas::empty_list, typename T17 = fas::empty_list, typename T18 = fas::empty_list,
+          typename T19 = fas::empty_list, typename T20 = fas::empty_list, typename T21 = fas::empty_list, 
+          typename T22 = fas::empty_list, typename T23 = fas::empty_list, typename T24 = fas::empty_list,
+          typename T25 = fas::empty_list, typename T26 = fas::empty_list
+>
+struct member_list
+ : public fas::type_list_n<
+    T1,   T2,   T3,   T4,
+    T5,   T6,   T7,   T8,
+    T9,   T10,  T11,  T12,
+    T13,  T14,  T15,  T16,
+    T17,  T18,  T19,  T20,
+    T21,  T22,  T23,  T24,
+    T25,  T26
+>::type {};
 #endif
 
-//typedef array< std::vector< binary > > array_of_binary;
-
-/** Ахтунг! замороченые правила:
-  * L и M типа member с одинаковыми N (именами)
-  * сериализация:
-  *   если значение мембера L не равно значению по умолчанию, то сериализуется L, в противном случае R
-  * десериализация:
-  *   всегда десереализуется в R, а L игнорируется
-  * Используется для чего-чего?:
-  *   L мембер типа raw_value (т.е. строка голого json как есть) и если он не пустой, то просто копируем в поток эту строку,
-  *   если L пустой, то применяем сериализацию R. Соответственно если попытатся десериализовать, то сразу десериализуется по правилам в R.
-  *   но если RU задать как false, то копируем в raw_value значение мембера
-  */
 template<typename L, typename R, bool RU = false >
 struct member_if;
 

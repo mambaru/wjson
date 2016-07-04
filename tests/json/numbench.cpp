@@ -1,7 +1,10 @@
+#include <iostream>
+
+#if __cplusplus >= 201103L
+
 #include <iow/json/json.hpp>
 #include <iow/json/name.hpp>
 #include <chrono>
-#include <iostream>
 #include <cstring>
 
 const size_t NUM_SIZE = 20;
@@ -200,3 +203,11 @@ int main()
   atoi_bench();
   json_bench();
 }
+#else
+
+int main()
+{
+  std::cout << "Benchmark for c++03 not impl" << std::endl;
+}
+
+#endif

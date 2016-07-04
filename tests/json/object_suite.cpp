@@ -7,11 +7,12 @@ namespace {
   
 struct foo
 {
-  int foo1 = 0;
+  int foo1;
   std::string foo2;
   std::vector<std::string> foo3;
   const std::vector<int>& get_foo4() const { return _foo4;}
   void set_foo4( const std::vector<int>& v ) { _foo4 = v;}
+  foo(): foo1(0) {}
 private:
   std::vector<int> _foo4;
 };
@@ -113,15 +114,18 @@ UNIT(object1, "")
   bar b2;
   b1.foo1 = +100500;
   b1.foo2 = "aqualung";
-  b1.foo3 = {"one", "two", "three"};
   b1.bar1.foo1 = -100500;
   b1.bar1.foo2 = "drowned";
-  b1.bar1.foo3 = {"three", "two", "one"};
   b1.bar2.push_back( b1 );
   b1.bar2.push_back( b1.bar1 );
   b1.bar3["Ingeborga"] = b1;
   b1.bar3["Dapkūnaitė"] = b1.bar1;
+
+#if __cplusplus >= 201103L
+  b1.foo3 = {"one", "two", "three"};
+  b1.bar1.foo3 = {"three", "two", "one"};
   b1.set_foo4({1,2,3,4,5});
+#endif
 
   std::string json1, json2;
   bar_json::serializer()( b1, std::back_inserter(json1) );
@@ -138,16 +142,20 @@ UNIT(object2, "")
   bar b2;
   b1.foo1 = +100500;
   b1.foo2 = "aqualung";
-  b1.foo3 = {"one", "two", "three"};
   b1.bar1.foo1 = -100500;
   b1.bar1.foo2 = "drowned";
-  b1.bar1.foo3 = {"three", "two", "one"};
+  
   b1.bar2.push_back( b1 );
   b1.bar2.push_back( b1.bar1 );
   b1.bar3["Ingeborga"] = b1;
   b1.bar3["Dapkūnaitė"] = b1.bar1;
-  b1.set_foo4({1,2,3,4,5});
   
+#if __cplusplus >= 201103L
+  b1.foo3 = {"one", "two", "three"};
+  b1.bar1.foo3 = {"three", "two", "one"};
+  b1.set_foo4({1,2,3,4,5});
+#endif
+
   std::string json1, json2;
   bar_array_json::serializer()( b1, std::back_inserter(json1) );
   t << message("json: ") << json1;
@@ -160,8 +168,9 @@ namespace {
   
 struct baz
 {
-  int foo1 = 0;
+  int foo1;
   std::string foo2;
+  baz(): foo1(0) {};
 };
 
 template<bool SecondPriority>

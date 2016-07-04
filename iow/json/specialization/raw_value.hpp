@@ -7,17 +7,16 @@
 #pragma once
 
 #include <iow/json/predef.hpp>
-#include <iow/json/serializer/object.hpp>
-#include <fas/type_list/normalize.hpp>
+#include <iow/json/serializer/raw_value.hpp>
 
 namespace iow{ namespace json{
 
-template<typename T, typename L>
-struct object
+template<typename T, int R>
+struct raw_value
 {
   typedef T target;
-  typedef serializerT< object<T, L> > serializer;
-  typedef typename fas::normalize<L>::type member_list;
+  typedef serializerT< raw_value< T, R > > serializer;
 };
 
 }}
+

@@ -4,20 +4,22 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 
+
 #pragma once
 
-#include <iow/json/predef.hpp>
-#include <iow/json/serializer/object.hpp>
+#include <iow/json/serializer/enumerator.hpp>
 #include <fas/type_list/normalize.hpp>
 
 namespace iow{ namespace json{
 
-template<typename T, typename L>
-struct object
+template< typename T, typename L>
+struct enumerator
 {
   typedef T target;
-  typedef serializerT< object<T, L> > serializer;
-  typedef typename fas::normalize<L>::type member_list;
+  typedef typename fas::normalize<L>::type enum_list;
+  typedef serializerT< enumerator<T, enum_list> > serializer;
+  typedef enum_list member_list;
 };
 
 }}
+

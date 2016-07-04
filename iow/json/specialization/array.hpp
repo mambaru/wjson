@@ -1,3 +1,9 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2008-2016
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once
 
 #include <iow/json/predef.hpp>
@@ -8,14 +14,13 @@
 #include <fas/typemanip/empty_type.hpp>
 
 #include <vector>
-#include <array>
 #include <string>
 #include <deque>
 #include <list>
 #include <set>
-#include <memory>
 
 #if __cplusplus >= 201103L
+#include <array>
 #include <unordered_set>
 #endif
 
@@ -168,21 +173,6 @@ struct array_r
   typedef typename base::serializer serializer;
 
 };
-
-/*
-template< typename T, typename L, typename R>
-struct array_r< object<T, L>, R>
-  : array_r< std::vector< object<T, L> >, R>
-{
-};
-*/
-/*
-template< typename K, typename V, typename R>
-struct array_r< pair<K, V>, R>
-  : array_r< std::vector< pair<K, V> >, R>
-{
-};
-*/
 
 template<typename C, int R>
 struct array: array_r<C, fas::int_<R> > {};

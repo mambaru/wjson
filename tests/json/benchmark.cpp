@@ -1,9 +1,10 @@
 #include <iow/json/json.hpp>
 #include <iow/json/name.hpp>
-#include <chrono>
 #include <cstring>
 #include <iostream>
-#include <boost/concept_check.hpp>
+
+#if __cplusplus >= 201103L
+#include <chrono>
 
 struct foo
 {
@@ -186,3 +187,13 @@ int main()
   std::cout << std::endl<< "sprintf benchmark:" << std::endl;
   sprintf_bench();
 }
+
+#else
+
+int main()
+{
+  std::cout << "Benchmark for c++03 not impl" << std::endl;
+}
+
+#endif
+

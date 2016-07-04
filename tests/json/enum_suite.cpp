@@ -5,22 +5,10 @@
 #include <iow/json/strerror.hpp>
 
 namespace {
-  
-enum class count1: int
+
+struct count1
 {
-  one   = 1,
-  two   = 2,
-  three = 4,
-  four  = 8,
-  five  = 16,
-  six   = 32
-};
-
-
-
-struct count2
-{
-  typedef enum: int
+  typedef enum
   {
     one = 1,
     two = 2,
@@ -31,13 +19,23 @@ struct count2
   } type;
 };
 
+
 struct foo
 {
-  int   flags = 0;
-  int   flags2 = 0;
-  int   counter2 = 0;
-  int   counter3 = 0;
-  count1 counter = count1::one; 
+  int   flags ;
+  int   flags2 ;
+  int   counter2 ;
+  int   counter3 ;
+
+  count1::type counter ; 
+
+  foo()
+    : flags(0)
+    , flags2(0)
+    , counter2(0)
+    , counter3(0)
+    , counter(count1::one)
+  {}
 };
 
 
@@ -51,12 +49,12 @@ struct enum_list1
   JSON_NAME(six)
 
   typedef ::iow::json::member_list<
-      ::iow::json::enum_value<n_one, count1, count1::one>,
-      ::iow::json::enum_value<n_two, count1, count1::two>,
-      ::iow::json::enum_value<n_three, count1, count1::three>,
-      ::iow::json::enum_value<n_four, count1, count1::four>,
-      ::iow::json::enum_value<n_five, count1, count1::five>,
-      ::iow::json::enum_value<n_six, count1, count1::six>
+      ::iow::json::enum_value<n_one, count1::type, count1::one>,
+      ::iow::json::enum_value<n_two, count1::type, count1::two>,
+      ::iow::json::enum_value<n_three, count1::type, count1::three>,
+      ::iow::json::enum_value<n_four, count1::type, count1::four>,
+      ::iow::json::enum_value<n_five, count1::type, count1::five>,
+      ::iow::json::enum_value<n_six, count1::type, count1::six>
   > type;
 };
 
@@ -103,7 +101,7 @@ struct enum_flags2
 
 struct count_json
 {
-  typedef ::iow::json::enumerator<count1, enum_list1::type > type;
+  typedef ::iow::json::enumerator<count1::type, enum_list1::type > type;
   typedef type::target target;
   typedef type::serializer serializer;
   typedef type::member_list member_list;
@@ -120,7 +118,7 @@ struct count2_json
 template<char Sep>
 struct flags1_json
 {
-  typedef ::iow::json::flags_enumerator<int, enum_flags1::type, Sep > type;
+  typedef ::iow::json::flags<int, enum_flags1::type, Sep > type;
   typedef typename type::target target;
   typedef typename type::serializer serializer;
   typedef typename type::member_list member_list;
@@ -129,7 +127,7 @@ struct flags1_json
 template<char Sep>
 struct flags2_json
 {
-  typedef ::iow::json::flags_enumerator<int, enum_flags2::type, Sep > type;
+  typedef ::iow::json::flags<int, enum_flags2::type, Sep > type;
   typedef typename type::target target;
   typedef typename type::serializer serializer;
   typedef typename type::member_list member_list;
@@ -146,7 +144,7 @@ struct foo_json
   typedef ::iow::json::object<
     foo,
     ::iow::json::member_list<
-      ::iow::json::member<n_counter, foo, count1, &foo::counter, count_json>,
+      ::iow::json::member<n_counter, foo, count1::type, &foo::counter, count_json>,
       ::iow::json::member<n_counter2, foo, int, &foo::counter2, count2_json>,
       ::iow::json::member<n_flags, foo, int, &foo::flags, flags1_json<Sep> >,
       ::iow::json::member<n_flags2, foo, int, &foo::flags2, flags2_json<Sep> >
@@ -247,8 +245,8 @@ UNIT(enum3, "")
             | static_cast<int>(count1::six);
   f.counter2 = 32 ;
   f.flags2  = static_cast<int>(count1::three);
-  
-            
+
+
   std::string json;
   foo_json<','>::serializer()(f, std::back_inserter(json));
   t << message("json:") << json;
@@ -277,7 +275,6 @@ UNIT(enum4, "")
   f.counter2 = 32 ;
   f.flags2  = static_cast<int>(count1::three);
   
-            
   std::string json;
   foo_json<'+'>::serializer()(f, std::back_inserter(json));
   t << message("json:") << json;

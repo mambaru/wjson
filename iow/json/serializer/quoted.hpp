@@ -1,43 +1,31 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2008-2016
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once
 
 #include <iow/json/predef.hpp>
 #include <iow/json/error.hpp>
-/*
- * json_quoted.hpp
- *
- *  Created on: Feb 24, 2014
- *      Author: raven
- */
 
 namespace iow{ namespace json{
 
-/**
- * сериализует с обязательным обрамлением кавычками
- * нужно для сериализации map{ int => value }
- * SerQ = сериализовывать с кавычками
- * ReqQ = только строки
- */
 template<typename J, bool SerQ, bool ReqQ>
 class serializerRQ {
 public:
   typedef J serializer;
   typedef typename J::target target;
-  
-  /** serialization:
-   * end - back inserter iterator
-   */
+
   template<typename P>
   P operator()( const target& t, P end)
   {
     if ( SerQ ) *(end++)='"';
-    end = serializer()(t, end);
+    end = this->serializer()(t, end);
     if ( SerQ ) *(end++)='"';
     return end;
   }
 
-  /** deserialization:
-   * beg, end - forward iterator
-   */
   template<typename P>
   P operator()( target& t, P beg, P end, json_error* e)
   {
@@ -49,7 +37,7 @@ public:
     else
       return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
     
-    beg = serializer()(t, beg, end, e);
+    beg = this->serializer()(t, beg, end, e);
 
     if ( ReqQ && beg == end)
       return create_error<error_code::UnexpectedEndFragment>(e, end);
@@ -68,19 +56,13 @@ class serializerQ {
 public:
   typedef typename J::serializer serializer_t;
   typedef typename J::target target;
-  
-  /** serialization:
-   * end - back inserter iterator
-   */
+
   template<typename P>
   P operator()( const target& t, P end)
   {
     return this->serialize(t, end, fas::bool_<SerQ>() );
   }
 
-  /** deserialization:
-   * beg, end - forward iterator
-   */
   template<typename P>
   P operator()( target& t, P beg, P end, json_error* e)
   {
@@ -129,7 +111,7 @@ private:
       return this->deserialize(t, beg, end, e, fas::true_() );
     return serializer_t()( t, beg, end, e );
   }
-
 };
+
 
 }}

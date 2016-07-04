@@ -8,16 +8,23 @@
 
 #include <iow/json/predef.hpp>
 #include <iow/json/serializer/object.hpp>
+#include <iow/json/serializer/member_value.hpp>
 #include <fas/type_list/normalize.hpp>
 
 namespace iow{ namespace json{
 
-template<typename T, typename L>
-struct object
+template<typename T, typename M, M T::* m>
+struct property
 {
-  typedef T target;
-  typedef serializerT< object<T, L> > serializer;
-  typedef typename fas::normalize<L>::type member_list;
+  void operator()(T& t, const M& value ) const
+  {
+    t.*m = value;
+  }
+
+  const M& operator()(const T& t) const
+  {
+    return t.*m;
+  }
 };
 
 }}

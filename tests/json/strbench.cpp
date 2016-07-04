@@ -1,7 +1,10 @@
+#include <iostream>
+
+#if __cplusplus >= 201103L
+
+#include <chrono>
 #include <iow/json/json.hpp>
 #include <iow/json/name.hpp>
-#include <chrono>
-#include <iostream>
 #include <cstring>
 
 #define TESTS 1000000
@@ -74,6 +77,14 @@ void str1_bench()
 
 int main()
 {
-  std::cout << "---" << std::endl << std::endl;
   str1_bench();
 }
+
+#else
+
+int main()
+{
+  std::cout << "Benchmark for c++03 not impl" << std::endl;
+}
+
+#endif

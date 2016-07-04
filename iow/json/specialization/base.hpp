@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include <fas/functional/tstring.hpp>
+namespace iow{ namespace json{
 
-#define JSON_NAME(X) FAS_NAME(X)
-#define JSON_NAME2(X, Y) FAS_STRING(X, Y)
+template<typename J>
+struct base: J::member_list {};
 
+}}
