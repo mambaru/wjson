@@ -84,7 +84,23 @@ public:
     ss  << std::string(beg, end - e.tail_of() ) << ( e.tail_of() ? ">>>" : "<<<") << std::string(end - e.tail_of(), end);
     return ss.str();
   }
-    
+
+  template<typename P>
+  static std::string message_trace( const json_error& e, P beg, P end ) 
+  {
+    std::stringstream ss;
+    ss << strerror::what(e);
+    if ( e.what() != 0 )
+      ss << " '" << e.what() << "'";
+    if ( e )
+    {
+      ss  << std::string(beg, end - e.tail_of() ) 
+          << ( e.tail_of() ? ">>>" : "<<<") 
+          << std::string(end - e.tail_of(), end);
+    }
+    return ss.str();
+  }
+
 private:
 
   template<typename L, typename R>

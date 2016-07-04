@@ -450,7 +450,18 @@ private:
     if ( !parser::is_object(beg, end) )
       return create_error<error_code::ExpectedOf>( e, end, "{", std::distance(beg, end) );
 
-    for ( ++beg; beg!=end && *beg!='}'; )
+    ++beg;
+    beg = parser::parse_space(beg, end, e);
+    if ( beg!=end && *beg==']' )
+    {
+        beg = parser::parse_space(++beg, end, e);
+        if (*beg!=']')
+          return create_error<error_code::ExpectedOf>(e, end, "]", std::distance(beg, end) );
+        // Фикс для php. {} <=> []
+        return ++beg;
+    }
+
+    for ( ; beg!=end && *beg!='}'; )
     {
       beg = parser::parse_space(beg, end, e);
       if ( *beg=='}' )
