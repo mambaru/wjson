@@ -1,5 +1,6 @@
 #include <fas/testing.hpp>
 #include <iow/json/json.hpp>
+#include <iow/json/strerror.hpp>
 #include <algorithm>
 
 /*
@@ -139,12 +140,28 @@ UNIT(string1, "" )
 {
   using namespace fas::testing;
   using namespace iow::json;
-  std::string str="hello world";
+  std::string str="hello world! Привет мир!";
+  str.push_back(static_cast<char>(132));
+  str.push_back(static_cast<char>(131));
+  str+="世界你好!";
   std::vector<char> vstr(str.begin(), str.end() );
-  vstr[5]=char(130)/*'\0'*/;
-  std::string json;
+  vstr[5]='\0';
+  vstr[12]=static_cast<char>(130);
+  std::string json, json2;
   value< std::vector<char> >::serializer()(vstr, std::back_inserter(json));
-  t << equal<expect>(json, "hello world") << FAS_FL;
+  json2="\"hello\\u0000world!\\u0082Привет мир!\\u8384世界你好!\"";
+  t << equal<expect>(json.size(), json2.size()) << FAS_FL;
+  t << equal<expect>(json, json2) << FAS_FL;
+  std::string str2;
+  json_error e;
+  value< std::string >::serializer()(str2, json.begin(), json.end(), &e );
+  t << is_false<expect>(e) << strerror::message_trace(e, json.begin(), json.end() ) << FAS_FL;
+  t << equal<expect>(str2, str) << FAS_FL;
+  //t << equal<expect>(str2, "hello\\u0000world!\\u0082Привет мир!\\u8384世界你好!") << FAS_FL;
+  
+  json = "\"\u4E16\u754C\u4F60\u597D\"";
+  value< std::string >::serializer()(str, json.begin(), json.end(), &e );
+  t << equal<expect>(str, "世界你好") << FAS_FL;
 }
 
 BEGIN_SUITE(value, "")

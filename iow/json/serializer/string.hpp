@@ -7,13 +7,16 @@
 #pragma once
 #include <iow/json/predef.hpp>
 #include <iow/json/error.hpp>
+#include <iow/json/parser.hpp>
 
 #include <fas/integral/bool_.hpp>
 
 #include <memory>
 #include <vector>
-#include <cstdio>
+#include <sstream>
+#include <iomanip>
 
+#include <iostream>
 namespace iow{ namespace json{
 
 template<typename T>
@@ -24,35 +27,102 @@ class serializerS<char>
 {
 public:
   template<typename P1,typename P>
+  P1 serialize_hex(P1 beg, P1 end, P itr)
+  {
+    // \uFFFF
+    std::stringstream ss;
+    const size_t bufsize = 8;
+    char buf[bufsize]={'\0'};
+    ss.rdbuf()->pubsetbuf(buf, bufsize);
+    ss << "\\u" << std::setfill('0') << std::setw(4) << std::hex;
+    //ss.precision(4);
+    //ss.setf ( std::ios::hex, std::ios::basefield );  // set hex as the basefield
+
+    if ( parser::is_utf8(beg+1, beg+2) || beg+1==end)
+      ss << static_cast<unsigned short>( static_cast<unsigned char>(*(beg++)) );
+    else
+    {
+      ss << *reinterpret_cast<const unsigned short*>( &*beg );
+      beg+=2;
+    }
+    /*
+    if ( parser::is_utf8(beg+1, beg+2) ) ss << "00";
+    else ss << std::hex << static_cast<unsigned char>( *(beg++) );
+    ss << std::hex << static_cast<unsigned short>( *(beg++) );
+    */
+    for (int i=0; i < 6; ++i)
+      *(itr++) = buf[i];
+    return beg;
+
+    /*
+    *(itr++) = '\\';
+    *(itr++) = 'u';
+    char buf[5] = {0};
+    std::snprintf(buf, 5, "%04x", static_cast<unsigned short>(*beg) );
+    std::cout << "-----hex----" << buf << ": " << int(*beg) << std::endl; 
+    for (int i=0; i < 4; ++i)
+      *(itr++) = buf[i];
+    return ++beg;
+    */
+  }
+
+  
+  
+  template<typename P1, typename P>
   P serialize(P1 beg, P1 end, P itr)
   {
     *(itr++)='"';
-    for (;beg!=end && *beg!='\0';++beg)
+    for (;beg!=end /*&& *beg!='\0'*/;/*++beg*/)
     {
-      switch (*beg)
+      if ( static_cast<unsigned char>(*beg) >=32 && static_cast<unsigned char>(*beg) < 127 )
       {
-        case '"' :
-        case '\\':
-        case '/' :  *(itr++)='\\'; *(itr++) = *beg; break;
-        case '\t':  *(itr++)='\\'; *(itr++) = 't'; break;
-        case '\b':  *(itr++)='\\'; *(itr++) = 'b'; break;
-        case '\r':  *(itr++)='\\'; *(itr++) = 'r'; break;
-        case '\n':  *(itr++)='\\'; *(itr++) = 'n'; break;
-        case '\f':  *(itr++)='\\'; *(itr++) = 'f'; break;
-        default:
+        //std::cout << "ascii: " << *beg << ":" << int(*beg) <<  std::endl;
+        // ascii
+        *(itr++) = *(beg++);
+      }
+      else if ( static_cast<unsigned char>(*beg) < 32 ) 
+      {
+        //std::cout << "space: " << *beg << ":" << int(*beg) <<  std::endl;
+        // space
+        switch (*beg)
         {
-          if ( *beg>=0 && *beg<32)
-          {
-            *(itr++) = '\\';
-            *(itr++) = 'u';
-            char buf[5] = {0};
-            std::snprintf(buf, 5, "%04x", int(*beg) );
-            for (int i=0; i < 4; ++i)
-              *(itr++) = buf[i];
+          case '"' :
+          case '\\':
+          case '/' :  *(itr++)='\\'; *(itr++) = *beg; break;
+          case '\t':  *(itr++)='\\'; *(itr++) = 't'; break;
+          case '\b':  *(itr++)='\\'; *(itr++) = 'b'; break;
+          case '\r':  *(itr++)='\\'; *(itr++) = 'r'; break;
+          case '\n':  *(itr++)='\\'; *(itr++) = 'n'; break;
+          case '\f':  *(itr++)='\\'; *(itr++) = 'f'; break;
+          default: {
+            beg = this->serialize_hex( beg, end, itr );
+            continue;
           }
-          else
-            *(itr++) = *beg;
         }
+        ++beg;
+      } 
+      else if ( parser::is_utf8(beg, end) )
+      {
+        json_error e;
+        P1 end8 = parser::parse_utf8(beg, end, &e);
+        if ( e )
+        {
+         // std::cout << "bad: " << *beg << std::endl;
+          // bad utf8 as hex
+          beg = this->serialize_hex( beg, end, itr );
+        }
+        else for ( ;beg!=end8; ) 
+        {
+          //std::cout << "utf8: " << *beg << std::endl;
+          // is utf8
+          *(itr++) = *(beg++);
+        }
+      }
+      else
+      {
+        //std::cout << "bin: " << *beg << std::endl;
+        // bin as hex
+        beg = this->serialize_hex( beg, end, itr );
       }
     }
     *(itr++)='"';
@@ -142,6 +212,7 @@ private:
   // 0x00000000 — 0x0000007F 	0xxxxxxx
   // 0x00000080 — 0x000007FF 	110xxxxx 10xxxxxx
   // 0x00000800 — 0x0000FFFF 	1110xxxx 10xxxxxx 10xxxxxx
+  // 0x00010000 — 0x001FFFFF    11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
   template<typename P, typename P1>
   P unserialize_uhex_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
@@ -164,7 +235,7 @@ private:
       *((*vitr)++) = static_cast<unsigned char>(hex);
       --n;
     }
-    else if ( hex <= 0x007FF )
+    else if ( hex <= 0x07FF )
     {
        *((*vitr)++) = 192 | static_cast<unsigned char>( hex >> 6 );
        --n;

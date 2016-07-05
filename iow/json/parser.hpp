@@ -7,6 +7,7 @@
 #pragma once
 
 #include <iow/json/error.hpp>
+#include <fas/integral/int_.hpp>
 
 namespace iow{ namespace json{
 
@@ -97,6 +98,12 @@ private:
   template<typename P>
   static P parse_digit( P beg, P end, size_t& p );
 
+
+  template<typename P, int N>
+  static P parse_utf8_part_(P beg, P end, json_error* e, fas::int_<N>);
+
+  template<typename P>
+  static P parse_utf8_part_(P beg, P end, json_error* e, fas::int_<0>);
 
   /*
   template<typename P>
@@ -391,6 +398,37 @@ private:
   }
 
   template<typename P>
+  P parser::parse_utf8_part_(P beg, P, json_error*, fas::int_<0>)
+  {
+    return beg;
+  }
+
+  template<typename P, int N>
+  P parser::parse_utf8_part_(P beg, P end, json_error* e, fas::int_<N>)
+  {
+    if (beg==end)
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
+
+    if ( (*beg & 192) !=128 )
+      return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
+
+    return parser::parse_utf8_part_( ++beg, end, e, fas::int_<N-1>() );
+  }
+
+  template<typename P>
+  bool parser::is_utf8( P beg, P end)
+  {
+    if (beg==end) return false;
+    return   (*beg & 128)==0 
+          || (*beg & 224)==192
+          || (*beg & 240)==224
+          || (*beg & 248)==240
+          || (*beg & 252)==248
+          || (*beg & 254)==252;
+  }
+
+
+  template<typename P>
   P parser::parse_utf8( P beg, P end, json_error* e )
   {
     // utf-8
@@ -398,13 +436,24 @@ private:
     // 0x00000080 — 0x000007FF: 110xxxxx 10xxxxxx
     // 0x00000800 — 0x0000FFFF: 1110xxxx 10xxxxxx 10xxxxxx
     // 0x00010000 — 0x001FFFFF: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+    //                          111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+    //                          1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
 
+         if ( ( *beg & 128 )==0 )  return ++beg;
+    else if ( ( *beg & 224)==192 ) return parser::parse_utf8_part_( ++beg, end, e, fas::int_<1>() );
+    else if ( ( *beg & 240)==224 ) return parser::parse_utf8_part_( ++beg, end, e, fas::int_<2>() );
+    else if ( ( *beg & 248)==240 ) return parser::parse_utf8_part_( ++beg, end, e, fas::int_<3>() );
+    else if ( ( *beg & 252)==248 ) return parser::parse_utf8_part_( ++beg, end, e, fas::int_<4>() );
+    else if ( ( *beg & 254)==252 ) return parser::parse_utf8_part_( ++beg, end, e, fas::int_<5>() );
+    return create_error<error_code::InvalidString>( e, end, std::distance(beg, end) );
+    /*
     if ( (*beg & 128)==0 ) return ++beg;
     if ( (*beg & 224)==192 && ++beg!=end && (*beg & 192)==128 ) return ++beg;
     if ( (*beg & 240)==224 && ++beg!=end && (*beg & 192)==128 && ++beg!=end && (*beg & 192)==128 ) return ++beg;
 //#warning BUG: не до конца
     if ( (*beg & 248)==240 && ++beg!=end && (*beg & 192)==128 && ++beg!=end && (*beg & 192)==128 ) return ++beg;
     return create_error<error_code::InvalidString>( e, end, std::distance(beg, end) );
+    */
   }
 
 
