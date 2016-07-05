@@ -84,19 +84,19 @@ public:
 private:
 
   template<typename P>
-  static P parse_space( P beg, P end, size_t& p, json_error* e);
+  static P parse_space( P beg, P end, std::ptrdiff_t& p, json_error* e);
 
   template<typename P>
-  static P parse_null( P beg, P end, size_t& p, json_error* e );
+  static P parse_null( P beg, P end, std::ptrdiff_t& p, json_error* e );
 
   template<typename P>
-  static P parse_bool( P beg, P end, size_t& p, json_error* e  );
+  static P parse_bool( P beg, P end, std::ptrdiff_t& p, json_error* e  );
 
   template<typename P>
-  static P parse_number( P beg, P end, size_t& p, json_error* e );
+  static P parse_number( P beg, P end, std::ptrdiff_t& p, json_error* e );
 
   template<typename P>
-  static P parse_digit( P beg, P end, size_t& p );
+  static P parse_digit( P beg, P end, std::ptrdiff_t& p );
 
 
   template<typename P, int N>
@@ -118,12 +118,12 @@ private:
   template<typename P>
   P parser::parse_space( P beg, P end, json_error* e) 
   {
-    size_t p = 0; 
+    std::ptrdiff_t p = 0; 
     return parser::parse_space(beg, end, p, e); 
   }
 
   template<typename P>
-  P parser::parse_space( P beg, P end, size_t& p, json_error* e)
+  P parser::parse_space( P beg, P end, std::ptrdiff_t& p, json_error* e)
   {
     bool start_comment = false;
 
@@ -186,12 +186,12 @@ private:
   template<typename P>
   P parser::parse_null( P beg, P end, json_error* e ) 
   {
-    size_t p = 0; 
+    std::ptrdiff_t p = 0; 
     return parser::parse_null(beg, end, p, e); 
   }
 
   template<typename P>
-  P parser::parse_null( P beg, P end, size_t& p, json_error* e )
+  P parser::parse_null( P beg, P end, std::ptrdiff_t& p, json_error* e )
   {
     if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>( e, end );
@@ -225,12 +225,12 @@ private:
   template<typename P>
   P parser::parse_bool( P beg, P end, json_error* e  )
   {
-    size_t p = 0;
+    std::ptrdiff_t p = 0;
     return parser::parse_bool(beg, end, p, e); 
   }
 
   template<typename P>
-  P parser::parse_bool( P beg, P end, size_t& p, json_error* e  )
+  P parser::parse_bool( P beg, P end, std::ptrdiff_t& p, json_error* e  )
   {
     if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>( e, end );
@@ -279,12 +279,12 @@ private:
   template<typename P>
   P parser::parse_number( P beg, P end, json_error* e )
   {
-    size_t p = 0;
+    std::ptrdiff_t p = 0;
     return parser::parse_number(beg, end, p, e); 
   }
 
   template<typename P>
-  P parser::parse_number( P beg, P end, size_t& p, json_error* e )
+  P parser::parse_number( P beg, P end, std::ptrdiff_t& p, json_error* e )
   {
     if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>( e, end );
@@ -570,7 +570,7 @@ private:
   }
 
   template<typename P>
-  P parser::parse_digit( P beg, P end, size_t& p )
+  P parser::parse_digit( P beg, P end, std::ptrdiff_t& p )
   {
     for ( ;beg!=end && *beg >= '0' && *beg <= '9'; ++beg, ++p );
     return beg;
@@ -598,7 +598,8 @@ private:
        break;
      v = v*10 + (*beg - '0');
    }
-   if (neg) v*=-1;
+   //if (neg) v*=-1;
+   if (neg) v=static_cast<T>(-v);
    return beg;
   }
 

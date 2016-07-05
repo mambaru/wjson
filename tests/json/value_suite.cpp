@@ -65,19 +65,19 @@ struct value<double>
 */
 
 
-template<typename T, typename V>
-void value_serializer_test(T& t, const V& v, const std::string& chk, int line)
+template<typename T, typename V, typename VV>
+void value_serializer_test(T& t, const VV& v, const std::string& chk, int line)
 {
   typedef typename ::iow::json::value<V>::serializer serializer_t;
   using namespace fas::testing;
-  V val = v;
+  V val = static_cast<V>(v);
   std::string json;
   serializer_t()(val, std::back_inserter(json) );
   t << equal_str<expect>(json, chk) << "Serialize. Line: " << line;
   val = V();
   ::iow::json::json_error e;
   serializer_t()(val, json.begin(), json.end(), &e );
-  t << equal<expect>(v, val) << "Unserialize. Line: " << line;
+  t << equal<expect, V>(v, val) << "Unserialize. Line: " << line;
 }
 
 template<typename T, typename V, int R>
@@ -115,6 +115,19 @@ UNIT(integer_unit, "")
   value_serializer_test<T, time_t>(t, 1199511627775, "1199511627775", __LINE__);
   value_serializer_test<T, size_t>(t, 1199511627775, "1199511627775", __LINE__);
   value_serializer_test<T, std::ptrdiff_t>(t, 1199511627775, "1199511627775", __LINE__);
+
+  value_serializer_test<T, char>(t, -10, "-10", __LINE__);
+  value_serializer_test<T, unsigned char>(t, -10, "246", __LINE__);
+  value_serializer_test<T, short>(t, -10, "-10", __LINE__);
+  value_serializer_test<T, unsigned short>(t, -10, "65526", __LINE__);
+  value_serializer_test<T, int>(t, -10, "-10", __LINE__);
+  value_serializer_test<T, unsigned int>(t, -10, "4294967286", __LINE__);
+  value_serializer_test<T, long>(t, -1199511627775, "-1199511627775", __LINE__);
+  value_serializer_test<T, unsigned long>(t, -1199511627775, "18446742874197923841", __LINE__);
+  value_serializer_test<T, time_t>(t, -1199511627775, "-1199511627775", __LINE__);
+  value_serializer_test<T, size_t>(t, -1199511627775, "18446742874197923841", __LINE__);
+  value_serializer_test<T, std::ptrdiff_t>(t, -1199511627775, "-1199511627775", __LINE__);
+
 }
 
 UNIT(float_unit, "")
@@ -149,7 +162,7 @@ UNIT(string1, "" )
   vstr[12]=static_cast<char>(130);
   std::string json, json2;
   value< std::vector<char> >::serializer()(vstr, std::back_inserter(json));
-  json2="\"hello\\u0000world!\\u0082Привет мир!\\u8384世界你好!\"";
+  json2="\"hello\\u0000world!\\x82Привет мир!\\x84\\x83世界你好!\"";
   t << equal<expect>(json.size(), json2.size()) << FAS_FL;
   t << equal<expect>(json, json2) << FAS_FL;
   std::string str2;

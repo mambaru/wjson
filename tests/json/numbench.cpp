@@ -15,6 +15,11 @@ numarr_t numarr;
 typedef int resarr_t[ARR_SIZE];
 resarr_t resarr;
 
+void json_bench();
+void atoi_bench();
+void ss_bench();
+
+
 void json_bench()
 {
   using namespace std::chrono;

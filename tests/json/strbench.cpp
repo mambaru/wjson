@@ -8,6 +8,10 @@
 #include <cstring>
 
 #define TESTS 1000000
+
+void str1_bench();
+
+
 void str1_bench()
 {
   using namespace std::chrono;

@@ -6,6 +6,8 @@
 #if __cplusplus >= 201103L
 #include <chrono>
 
+void sprintf_bench();
+
 struct foo
 {
   int field1 = 0;
@@ -60,6 +62,7 @@ const size_t TESTS = 1;
 const size_t SER_COUNT = 1;
 #endif
 
+void json_bench();
 
 void json_bench()
 {
@@ -87,7 +90,7 @@ void json_bench()
       stime = t;
 
     vf.resize(SER_COUNT);
-    int fi = 0;
+    size_t fi = 0;
     start = high_resolution_clock::now();
     beg = json;
     end = json + ARR_SIZE;
@@ -147,17 +150,17 @@ void sprintf_bench()
       stime = t;
 
     vf.resize(SER_COUNT);
-    int fi = 0;
+    size_t fi = 0;
     start = high_resolution_clock::now();
     beg = json;
     end = json + ARR_SIZE;
     while ( beg!=end && *beg!='\0')
     {
-      auto& f = vf[fi++];
+      auto& f2 = vf[fi++];
       ++dcount;
       
       sscanf( beg, "{\"field1\":%d,\"field2\":%d,\"field3\":%d,\"field5\":[%d,%d,%d,%d,%d]}",
-               &(f.field1), &(f.field2), &(f.field3), &(f.field5[0]), &(f.field5[1]), &(f.field5[2]), &(f.field5[3]), &(f.field5[4]) );
+               &(f2.field1), &(f2.field2), &(f2.field3), &(f2.field5[0]), &(f2.field5[1]), &(f2.field5[2]), &(f2.field5[3]), &(f2.field5[4]) );
       beg = iow::json::parser::parse_object(beg, end, 0);
     }
     finish = high_resolution_clock::now();

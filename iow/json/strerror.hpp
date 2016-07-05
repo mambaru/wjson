@@ -64,7 +64,7 @@ public:
   }
 
   template<typename P>
-  static size_t where( const json_error& e, P beg, P end)
+  static std::ptrdiff_t where( const json_error& e, P beg, P end)
   {
     if ( !e ) return 0;
 

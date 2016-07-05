@@ -27,32 +27,22 @@ class serializerS<char>
 {
 public:
   template<typename P1,typename P>
-  P1 serialize_hex(P1 beg, P1 end, P itr)
+  P1 serialize_hex_(P1 beg/*, P1 end*/, P& itr)
   {
     // \uFFFF
     std::stringstream ss;
     const size_t bufsize = 8;
     char buf[bufsize]={'\0'};
     ss.rdbuf()->pubsetbuf(buf, bufsize);
-    ss << "\\u" << std::setfill('0') << std::setw(4) << std::hex;
-    //ss.precision(4);
-    //ss.setf ( std::ios::hex, std::ios::basefield );  // set hex as the basefield
-
-    if ( parser::is_utf8(beg+1, beg+2) || beg+1==end)
-      ss << static_cast<unsigned short>( static_cast<unsigned char>(*(beg++)) );
+    if ( static_cast<unsigned char>(*beg) < 128 )
+      ss << "\\u" << std::setw(4) << std::setfill('0') << std::hex << static_cast<unsigned short>(*beg);
     else
-    {
-      ss << *reinterpret_cast<const unsigned short*>( &*beg );
-      beg+=2;
-    }
-    /*
-    if ( parser::is_utf8(beg+1, beg+2) ) ss << "00";
-    else ss << std::hex << static_cast<unsigned char>( *(beg++) );
-    ss << std::hex << static_cast<unsigned short>( *(beg++) );
-    */
-    for (int i=0; i < 6; ++i)
+      ss << "\\x" << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(static_cast<unsigned char>(*beg));
+    
+    //ss << std::setfill('0') << std::hex << static_cast<unsigned char>(*beg);
+    for (int i=0; i < bufsize && buf[i]!='\0'; ++i)
       *(itr++) = buf[i];
-    return beg;
+    return ++beg;
 
     /*
     *(itr++) = '\\';
@@ -95,7 +85,7 @@ public:
           case '\n':  *(itr++)='\\'; *(itr++) = 'n'; break;
           case '\f':  *(itr++)='\\'; *(itr++) = 'f'; break;
           default: {
-            beg = this->serialize_hex( beg, end, itr );
+            beg = this->serialize_hex_( beg, itr );
             continue;
           }
         }
@@ -109,7 +99,7 @@ public:
         {
          // std::cout << "bad: " << *beg << std::endl;
           // bad utf8 as hex
-          beg = this->serialize_hex( beg, end, itr );
+          beg = this->serialize_hex_( beg, itr );
         }
         else for ( ;beg!=end8; ) 
         {
@@ -122,7 +112,7 @@ public:
       {
         //std::cout << "bin: " << *beg << std::endl;
         // bin as hex
-        beg = this->serialize_hex( beg, end, itr );
+        beg = this->serialize_hex_( beg, itr );
       }
     }
     *(itr++)='"';
@@ -155,12 +145,13 @@ public:
           case 'n':  *(vitr++) = '\n'; ++beg; --n; break;
           case 'f':  *(vitr++) = '\f'; ++beg; --n; break;
           case 'u':  beg = this->unserialize_uhex_(++beg, end, &vitr, n, e); break;
+          case 'x':  beg = this->unserialize_xhex_(++beg, end, &vitr, n, e); break;
           default:
             return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
         }
       }
       else
-        beg = this->unserialize_symbol_(beg, end, &vitr, n, e);
+        beg = this->unserialize_utf8_(beg, end, &vitr, n, e);
     }
 
     if (beg==end) 
@@ -175,7 +166,7 @@ public:
 private:
 
   template<typename P, typename P1>
-  P unserialize_symbol_(P beg, P end, P1* vitr, int& n, json_error* e)
+  P unserialize_utf8_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
     if (beg == end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
@@ -186,18 +177,18 @@ private:
       --n;
     }
     else if ( (*beg & 224)==192 )
-      beg = this->symbol_copy_<2>(beg, end, vitr, n, e);
+      beg = this->utf8_copy_<2>(beg, end, vitr, n, e);
     else if ( (*beg & 240)==224 )
-      beg = this->symbol_copy_<3>(beg, end, vitr, n, e);
+      beg = this->utf8_copy_<3>(beg, end, vitr, n, e);
     else if ( (*beg & 248)==240 )
-      beg = this->symbol_copy_<4>(beg, end, vitr, n, e);
+      beg = this->utf8_copy_<4>(beg, end, vitr, n, e);
     else
       return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
     return beg;
   }
 
   template<int N, typename P, typename P1>
-  P symbol_copy_(P beg, P end, P1* vitr, int& n, json_error* e)
+  P utf8_copy_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
     for (register int i = 0; i < N && n!=0; ++i, --n)
     {
@@ -216,57 +207,95 @@ private:
   template<typename P, typename P1>
   P unserialize_uhex_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
+    P cur = beg;
     unsigned short hex = 0;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= this->toUShort_(*(beg++), e) << 12;
+    hex |= this->uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e) << 12;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= this->toUShort_(*(beg++), e) << 8;
+    hex |= this->uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e) << 8;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= this->toUShort_(*(beg++), e) << 4;
+    hex |= this->uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e) << 4;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= this->toUShort_(*(beg++), e);
+    hex |= this->uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e);
 
-    if ( hex <= 0x007F )
+    if ( hex < 32 )
     {
-      *((*vitr)++) = static_cast<unsigned char>(hex);
+      if (true)
+      {
+        *((*vitr)++) = '\\';
+        *((*vitr)++) = 'u';
+        *((*vitr)++) = '?';
+        for (; cur!=beg ; ++cur)
+          *((*vitr)++) = *cur;
+        
+      }
+      else
+      {
+        *((*vitr)++) = static_cast<char>(hex);
+        --n;
+      }
+    }
+    else if ( hex <= 0x007F )
+    {
+      *((*vitr)++) = static_cast<char>(hex);
       --n;
     }
     else if ( hex <= 0x07FF )
     {
-       *((*vitr)++) = 192 | static_cast<unsigned char>( hex >> 6 );
+       *((*vitr)++) = static_cast<char>(192 | static_cast<unsigned char>( hex >> 6 ));
        --n;
        if ( n==0) 
          return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
-       *((*vitr)++) = 128 | ( static_cast<unsigned char>( hex ) & 63 );
+       *((*vitr)++) = static_cast<char>( 128 | ( static_cast<unsigned char>( hex ) & 63 ) );
        --n;
     }
     else
     {
-       *((*vitr)++) = 224 | static_cast<unsigned char>( hex >> 12 );
+       *((*vitr)++) = static_cast<char>( 224 | static_cast<unsigned char>( hex >> 12 ) );
        --n;
        if ( n==0) 
          return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
-       *((*vitr)++) = 128 | ( static_cast<unsigned char>( hex >> 6 ) & 63 );
+       *((*vitr)++) = static_cast<char>( 128 | ( static_cast<unsigned char>( hex >> 6 ) & 63 ) );
        --n;
        if ( n==0)
          return create_error<error_code::error_code::InvalidString>(e, end, std::distance(beg, end));
-       *((*vitr)++) = 128 | ( static_cast<unsigned char>( hex ) & 63 );
+       *((*vitr)++) = static_cast<char>( 128 | ( static_cast<unsigned char>( hex ) & 63 ) );
        --n;
     }
     return beg;
   }
 
-  unsigned short toUShort_(unsigned char c, json_error* e)
+  template<typename P, typename P1>
+  P unserialize_xhex_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
-    if ( c >= '0' && c<='9' ) return c - '0';
-    if ( c >= 'a' && c<='f' ) return (c - 'a') + 10;
-    if ( c >= 'A' && c<='F' ) return (c - 'A') + 10;
-    create_error<error_code::error_code::InvalidString>(e, (char*)(0));
-    return 0;
+    unsigned char hex = 0;
+    if (beg == end ) 
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
+    hex |= this->uchar2_<unsigned char>( static_cast<unsigned char>(*(beg++)), e) << 8;
+    if ( --n==0) 
+      return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
+    if (beg == end ) 
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
+    --n;
+    hex |= this->uchar2_<unsigned char>( static_cast<unsigned char>(*(beg++)), e);
+
+    *((*vitr)++) = static_cast<char>(hex);
+    
+    return beg;
+  }
+  
+  template<typename Res>
+  Res uchar2_(unsigned char c, json_error* e)
+  {
+    if ( c >= '0' && c<='9' ) return static_cast<Res>(  c - '0');
+    if ( c >= 'a' && c<='f' ) return static_cast<Res>( (c - 'a') + 10 );
+    if ( c >= 'A' && c<='F' ) return static_cast<Res>( (c - 'A') + 10 );
+    create_error<error_code::error_code::InvalidString>(e, static_cast<char*>(0));
+    return static_cast<Res>(0);
   }
 };
 

@@ -38,16 +38,16 @@ public:
     , _tail_of(0) 
   {}
   
-  json_error(error_code::type code,  size_t tail_of = 0 )
-    : _code(code)
+  json_error(error_code::type code_,  std::ptrdiff_t tail_of_ = 0 )
+    : _code(code_)
     , _what(0)
-    , _tail_of(tail_of) 
+    , _tail_of(tail_of_) 
   {}
 
-  json_error(error_code::type code,  const char *sym, size_t tail_of = 0 )
-    : _code(code)
+  json_error(error_code::type code_,  const char *sym, std::ptrdiff_t tail_of_ = 0 )
+    : _code(code_)
     , _what(sym)
-    , _tail_of(tail_of) 
+    , _tail_of(tail_of_) 
   {}
   
   error_code::type code() const
@@ -60,7 +60,7 @@ public:
     return _what;
   }
 
-  size_t tail_of() const 
+  std::ptrdiff_t tail_of() const 
   {
     return _tail_of; 
   }
@@ -78,7 +78,7 @@ public:
   }
 
   template<typename P>
-  size_t where( P beg, P end) const
+  std::ptrdiff_t where( P beg, P end) const
   {
     if ( _what==0 )
       return 0;
@@ -111,7 +111,7 @@ private:
 };
 
 template<error_code::type code, typename Itr>
-inline Itr create_error(json_error* e, Itr end, size_t tail_of = 0)
+inline Itr create_error(json_error* e, Itr end, std::ptrdiff_t tail_of = 0)
 {
   if ( e != NULL && !*e )
     *e = json_error(code, tail_of);
@@ -119,7 +119,7 @@ inline Itr create_error(json_error* e, Itr end, size_t tail_of = 0)
 }
 
 template<error_code::type code, typename Itr >
-inline Itr create_error(json_error* e, Itr end, const char* msg, size_t tail_of = 0)
+inline Itr create_error(json_error* e, Itr end, const char* msg, std::ptrdiff_t tail_of = 0)
 {
   if ( e != NULL && !*e)
     *e = json_error(code, msg, tail_of);
