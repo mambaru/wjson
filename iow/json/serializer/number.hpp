@@ -70,20 +70,18 @@ namespace detail
       {
         if ( is_signed_integer<T>::is_less_zero(v) ) 
         {
-          *(end++)='-';
-          ++beg;
           for( ; v!=0 ; ++end, v/=10) 
             *end = '0' - v%10;
+          *(end++)='-';
         }
         else
+        {
           for( ; v!=0 ; ++end, v/=10) 
             *end = '0' + v%10;
+        }
       }
-      for ( register char* cur = end ; cur-beg > 1;--cur, ++beg) 
-      { *beg ^= *(cur-1); *(cur-1)^=*beg; *beg^=*(cur-1); }
 
-      for (beg = buf; beg!=end; ++beg)
-        *(itr++)=*beg;
+      do { *(itr++)=*(--end); } while( end != beg );
 
       return itr;
     }

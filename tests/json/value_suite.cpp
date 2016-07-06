@@ -127,7 +127,17 @@ UNIT(integer_unit, "")
   value_serializer_test<T, time_t>(t, -1199511627775, "-1199511627775", __LINE__);
   value_serializer_test<T, size_t>(t, -1199511627775, "18446742874197923841", __LINE__);
   value_serializer_test<T, std::ptrdiff_t>(t, -1199511627775, "-1199511627775", __LINE__);
+  for (int i = -256 ; i < 256; ++i)
+  {
+    std::stringstream ss;
+    ss << i;
+    value_serializer_test<T, int>(t, i, ss.str(), __LINE__);
+  }
 
+  /*
+  value_serializer_test<T, bool>(t, true, "true", __LINE__);
+  value_serializer_test<T, bool>(t, false, "false", __LINE__);
+  */
 }
 
 UNIT(float_unit, "")
@@ -169,12 +179,22 @@ UNIT(string1, "" )
   json_error e;
   value< std::string >::serializer()(str2, json.begin(), json.end(), &e );
   t << is_false<expect>(e) << strerror::message_trace(e, json.begin(), json.end() ) << FAS_FL;
-  t << equal<expect>(str2, str) << FAS_FL;
-  //t << equal<expect>(str2, "hello\\u0000world!\\u0082Привет мир!\\u8384世界你好!") << FAS_FL;
+  std::string str3="hello\\u0000world! Привет мир!";
+  str3.push_back(static_cast<char>(132));
+  str3.push_back(static_cast<char>(131));
+  str3+="世界你好!";
+  str3[17]=static_cast<char>(0x82);//static_cast<char>(130);
+
+  t << equal<expect>(str2, str3) << FAS_FL;
+  
+  for (int i=0 ; i < str2.size() ; ++i)
+    t << equal<expect, int>( static_cast<unsigned char>(str2[i]), static_cast<unsigned char>(str3[i])) << "i=" << i << ". " << FAS_FL;
+  
   
   json = "\"\u4E16\u754C\u4F60\u597D\"";
   value< std::string >::serializer()(str, json.begin(), json.end(), &e );
   t << equal<expect>(str, "世界你好") << FAS_FL;
+  value< std::vector<char> >::serializer()(vstr, json.begin(), json.end(), &e);
 }
 
 BEGIN_SUITE(value, "")

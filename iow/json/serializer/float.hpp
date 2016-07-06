@@ -55,12 +55,11 @@ public:
       v = T();
       return parser::parse_null(beg, end, e);
     }
-    
+
     if ( !parser::is_number(beg, end) )
     {
       return create_error<error_code::InvalidNumber>( e, end, std::distance(beg, end) );
     }
-      
 
     std::stringstream ss;
     ss.rdbuf()->pubsetbuf( &(*beg), std::distance(beg, end) );

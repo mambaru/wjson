@@ -20,8 +20,21 @@ public:
   template<typename P>
   P operator()( bool v, P beg)
   {
-    if ( v ) { *(beg++)='t'; *(beg++)='r';*(beg++)='u';*(beg++)='e'; }
-    else { *(beg++)='f'; *(beg++)='a';*(beg++)='l';*(beg++)='s'; *(beg++)='e'; }
+    if ( v ) 
+    { 
+      *(beg++)='t'; 
+      *(beg++)='r';
+      *(beg++)='u';
+      *(beg++)='e'; 
+    }
+    else 
+    { 
+      *(beg++)='f'; 
+      *(beg++)='a';
+      *(beg++)='l';
+      *(beg++)='s';
+      *(beg++)='e'; 
+    }
     return beg;
   }
 

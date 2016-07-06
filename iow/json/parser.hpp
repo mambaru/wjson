@@ -29,13 +29,8 @@ public:
   template<typename P>
   static bool is_string( P beg, P end );
 
-// #warning not impl 
   template<typename P>
   static bool is_utf8( P beg, P end );
-
-// #warning not impl 
-  template<typename P>
-  static bool is_hex( P beg, P end );
 
   template<typename P>
   static bool is_object( P beg, P end );
@@ -198,7 +193,7 @@ private:
 
     if ( *beg=='n' )
     {
-      if ( ++p && ++beg!=end && *beg=='u'
+      if (    ++p && ++beg!=end && *beg=='u'
            && ++p && ++beg!=end && *beg=='l'
            && ++p && ++beg!=end && *beg=='l'
          )
@@ -446,14 +441,6 @@ private:
     else if ( ( *beg & 252)==248 ) return parser::parse_utf8_part_( ++beg, end, e, fas::int_<4>() );
     else if ( ( *beg & 254)==252 ) return parser::parse_utf8_part_( ++beg, end, e, fas::int_<5>() );
     return create_error<error_code::InvalidString>( e, end, std::distance(beg, end) );
-    /*
-    if ( (*beg & 128)==0 ) return ++beg;
-    if ( (*beg & 224)==192 && ++beg!=end && (*beg & 192)==128 ) return ++beg;
-    if ( (*beg & 240)==224 && ++beg!=end && (*beg & 192)==128 && ++beg!=end && (*beg & 192)==128 ) return ++beg;
-//#warning BUG: не до конца
-    if ( (*beg & 248)==240 && ++beg!=end && (*beg & 192)==128 && ++beg!=end && (*beg & 192)==128 ) return ++beg;
-    return create_error<error_code::InvalidString>( e, end, std::distance(beg, end) );
-    */
   }
 
 
@@ -581,25 +568,27 @@ private:
   {
     if( beg==end)
       return create_error<error_code::UnexpectedEndFragment>( e, end );
+
     v = 0;
+    bool neg = *beg=='-';
+    if ( neg ) ++beg;
+    if ( beg == end || *beg < '0' || *beg > '9')
+      return create_error<error_code::InvalidNumber>( e, end, std::distance(beg, end) );
 
-   register bool neg = *beg=='-';
-   if ( neg ) ++beg;
-   if ( beg == end || *beg < '0' || *beg > '9')
-     return create_error<error_code::InvalidNumber>( e, end, std::distance(beg, end) );
+    // цифры с первым нулем запрещены (напр 001), только 0
+    if (*beg=='0')
+      return ++beg;
 
-   // цифры с первым нулем запрещены (напр 001), только 0
-   if (*beg=='0')
-     return ++beg;
+    for ( ;beg!=end; ++beg )
+    {
+      if (*beg < '0' || *beg > '9') 
+        break;
+      v = v*10 + (*beg - '0');
+    }
 
-   for ( ;beg!=end; ++beg )
-   {
-     if (*beg < '0' || *beg > '9') 
-       break;
-     v = v*10 + (*beg - '0');
-   }
-   //if (neg) v*=-1;
-   if (neg) v=static_cast<T>(-v);
+   if (neg)
+     v = static_cast<T>(-v);
+
    return beg;
   }
 

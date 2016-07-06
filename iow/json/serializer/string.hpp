@@ -15,8 +15,8 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <limits>
 
-#include <iostream>
 namespace iow{ namespace json{
 
 template<typename T>
@@ -26,54 +26,19 @@ template<>
 class serializerS<char>
 {
 public:
-  template<typename P1,typename P>
-  P1 serialize_hex_(P1 beg/*, P1 end*/, P& itr)
-  {
-    // \uFFFF
-    std::stringstream ss;
-    const size_t bufsize = 8;
-    char buf[bufsize]={'\0'};
-    ss.rdbuf()->pubsetbuf(buf, bufsize);
-    if ( static_cast<unsigned char>(*beg) < 128 )
-      ss << "\\u" << std::setw(4) << std::setfill('0') << std::hex << static_cast<unsigned short>(*beg);
-    else
-      ss << "\\x" << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(static_cast<unsigned char>(*beg));
-    
-    //ss << std::setfill('0') << std::hex << static_cast<unsigned char>(*beg);
-    for (int i=0; i < bufsize && buf[i]!='\0'; ++i)
-      *(itr++) = buf[i];
-    return ++beg;
-
-    /*
-    *(itr++) = '\\';
-    *(itr++) = 'u';
-    char buf[5] = {0};
-    std::snprintf(buf, 5, "%04x", static_cast<unsigned short>(*beg) );
-    std::cout << "-----hex----" << buf << ": " << int(*beg) << std::endl; 
-    for (int i=0; i < 4; ++i)
-      *(itr++) = buf[i];
-    return ++beg;
-    */
-  }
-
-  
-  
   template<typename P1, typename P>
   P serialize(P1 beg, P1 end, P itr)
   {
     *(itr++)='"';
-    for (;beg!=end /*&& *beg!='\0'*/;/*++beg*/)
+
+    for (;beg!=end;)
     {
       if ( static_cast<unsigned char>(*beg) >=32 && static_cast<unsigned char>(*beg) < 127 )
       {
-        //std::cout << "ascii: " << *beg << ":" << int(*beg) <<  std::endl;
-        // ascii
         *(itr++) = *(beg++);
       }
       else if ( static_cast<unsigned char>(*beg) < 32 ) 
       {
-        //std::cout << "space: " << *beg << ":" << int(*beg) <<  std::endl;
-        // space
         switch (*beg)
         {
           case '"' :
@@ -97,21 +62,15 @@ public:
         P1 end8 = parser::parse_utf8(beg, end, &e);
         if ( e )
         {
-         // std::cout << "bad: " << *beg << std::endl;
-          // bad utf8 as hex
           beg = this->serialize_hex_( beg, itr );
         }
         else for ( ;beg!=end8; ) 
         {
-          //std::cout << "utf8: " << *beg << std::endl;
-          // is utf8
           *(itr++) = *(beg++);
         }
       }
       else
       {
-        //std::cout << "bin: " << *beg << std::endl;
-        // bin as hex
         beg = this->serialize_hex_( beg, itr );
       }
     }
@@ -120,7 +79,7 @@ public:
   }
 
   template<typename P, typename P1>
-  P unserialize(P beg, P end, P1 vitr, int n /*= -1*/, json_error* e)
+  P unserialize(P beg, P end, P1 vitr, int n , json_error* e)
   {
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
@@ -128,7 +87,7 @@ public:
     if ( *(beg++) != '"' ) 
       return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) + 1);
 
-    for ( ;beg!=end && *beg!='"' && n!=0; )
+    for ( ;beg!=end && *beg!='"' && n!=0 ; )
     {
       if (*beg=='\\')
       {
@@ -164,6 +123,23 @@ public:
   }
 
 private:
+
+  template<typename P1,typename P>
+  P1 serialize_hex_(P1 beg, P& itr)
+  {
+    std::stringstream ss;
+    const size_t bufsize = 8;
+    char buf[bufsize]={'\0'};
+    ss.rdbuf()->pubsetbuf(buf, bufsize);
+    if ( static_cast<unsigned char>(*beg) < 128 )
+      ss << "\\u" << std::setw(4) << std::setfill('0') << std::hex << static_cast<unsigned short>(*beg);
+    else
+      ss << "\\x" << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(static_cast<unsigned char>(*beg));
+
+    for (int i=0; i < bufsize && buf[i]!='\0'; ++i)
+      *(itr++) = buf[i];
+    return ++beg;
+  }
 
   template<typename P, typename P1>
   P unserialize_utf8_(P beg, P end, P1* vitr, int& n, json_error* e)
@@ -207,6 +183,7 @@ private:
   template<typename P, typename P1>
   P unserialize_uhex_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
+    if ( n==0 ) return beg;
     P cur = beg;
     unsigned short hex = 0;
     if (beg == end ) 
@@ -224,19 +201,28 @@ private:
 
     if ( hex < 32 )
     {
-      if (true)
-      {
-        *((*vitr)++) = '\\';
-        *((*vitr)++) = 'u';
-        *((*vitr)++) = '?';
-        for (; cur!=beg ; ++cur)
-          *((*vitr)++) = *cur;
-        
-      }
-      else
+      if ( hex=='\t' || hex== '\r' || hex== '\n' || hex== '\b' || hex== '\f' )
       {
         *((*vitr)++) = static_cast<char>(hex);
         --n;
+      }
+      else
+      {
+        *((*vitr)++) = '\\';
+        --n;
+        if ( n==0 ) 
+          return beg;
+        *((*vitr)++) = 'u';
+        --n;
+        if ( n== 0 ) 
+          return beg;
+        for (; cur!=beg ; ++cur)
+        {
+          --n;
+          *((*vitr)++) = *cur;
+          if ( n == 0 ) 
+            return beg;
+        }
       }
     }
     else if ( hex <= 0x007F )
@@ -248,7 +234,7 @@ private:
     {
        *((*vitr)++) = static_cast<char>(192 | static_cast<unsigned char>( hex >> 6 ));
        --n;
-       if ( n==0) 
+       if ( n==0 )
          return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
        *((*vitr)++) = static_cast<char>( 128 | ( static_cast<unsigned char>( hex ) & 63 ) );
        --n;
@@ -275,19 +261,15 @@ private:
     unsigned char hex = 0;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= this->uchar2_<unsigned char>( static_cast<unsigned char>(*(beg++)), e) << 8;
-    if ( --n==0) 
-      return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
+    hex = this->uchar2_<unsigned char>( static_cast<unsigned char>(*(beg++)), e) << 4;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    --n;
     hex |= this->uchar2_<unsigned char>( static_cast<unsigned char>(*(beg++)), e);
-
     *((*vitr)++) = static_cast<char>(hex);
-    
+    --n;
     return beg;
   }
-  
+
   template<typename Res>
   Res uchar2_(unsigned char c, json_error* e)
   {
@@ -305,13 +287,12 @@ class serializerT< value< char[N]> >
   : serializerS<char>
 {
 public:
-
   typedef char value_type[N];
 
   template<typename P>
   P operator()( const value_type& v, P end)
   {
-    return serialize( v, v+N, end);
+    return this->serialize( v, v+N, end);
   }
 
   template<typename P>
@@ -336,7 +317,7 @@ public:
   template<typename P>
   P operator()( const std::string& v, P end)
   {
-    return serialize( v.begin(), v.end(), end);
+    return this->serialize( v.begin(), v.end(), end);
   }
 
   template<typename P>
@@ -347,7 +328,7 @@ public:
 
     if ( parser::is_null(beg, end) )
       return parser::parse_null(beg, end, e);
-    return unserialize(beg, end, std::back_inserter(v), -1, e);
+    return this->unserialize(beg, end, std::back_inserter(v), std::numeric_limits<int>::max(), e);
   }
 };
 
@@ -359,7 +340,7 @@ public:
   template<typename P>
   P operator()( const std::vector<char>& v, P end)
   {
-    return serialize( v.begin(), v.end(), end);
+    return this->serialize( v.begin(), v.end(), end);
   }
 
   template<typename P>
@@ -368,10 +349,9 @@ public:
     v.clear();
     v.reserve( (R >= 0) ? R : 64);
     if ( parser::is_null(beg, end) )
-      return parser::parse_null(beg, end);
-    return unserialize(beg, end, std::back_inserter(v), e);
+      return parser::parse_null(beg, end, e);
+    return this->unserialize(beg, end, std::back_inserter(v), std::numeric_limits<int>::max(), e);
   }
-
 };
 
 }}

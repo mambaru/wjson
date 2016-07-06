@@ -8,6 +8,8 @@
 
 #include <iow/json/predef.hpp>
 #include <iow/json/error.hpp>
+#include <iow/json/parser.hpp>
+#include <fas/integral/bool_.hpp>
 
 namespace iow{ namespace json{
 

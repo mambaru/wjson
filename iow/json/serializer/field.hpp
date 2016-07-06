@@ -36,12 +36,12 @@ public:
   {
     beg = key_serializer()(t.first, beg, end, e );
     beg = parser::parse_space(beg, end, e);
-    if (beg==end) 
+    if ( beg==end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    if (*(beg++)!=':') 
+    if ( *(beg++)!=':' ) 
       return create_error<error_code::ExpectedOf>(e, end, ":", std::distance(beg, end)+1 );
     beg = parser::parse_space(beg, end, e);
-    if (beg==end) 
+    if ( beg==end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
     beg = value_serializer()(t.second, beg, end, e );
     return beg;
