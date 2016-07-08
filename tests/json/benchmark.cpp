@@ -1,5 +1,5 @@
-#include <iow/json/json.hpp>
-#include <iow/json/name.hpp>
+#include <wjson/json.hpp>
+#include <wjson/name.hpp>
 #include <cstring>
 #include <iostream>
 
@@ -40,13 +40,13 @@ struct foo_json
   JSON_NAME(field2)
   JSON_NAME(field3)
   JSON_NAME(field5)
-  typedef ::iow::json::object<
+  typedef ::wjson::object<
     foo,
-    ::iow::json::member_list<
-      ::iow::json::member<n_field1, foo, int, &foo::field1>,
-      ::iow::json::member<n_field2, foo, int, &foo::field2>,
-      ::iow::json::member<n_field3, foo, int, &foo::field3>,
-      ::iow::json::member<n_field5, foo, std::vector<int>, &foo::field5, ::iow::json::array< std::vector< ::iow::json::value<int> > > >
+    ::wjson::member_list<
+      ::wjson::member<n_field1, foo, int, &foo::field1>,
+      ::wjson::member<n_field2, foo, int, &foo::field2>,
+      ::wjson::member<n_field3, foo, int, &foo::field3>,
+      ::wjson::member<n_field5, foo, std::vector<int>, &foo::field5, ::wjson::array< std::vector< ::wjson::value<int> > > >
     >
   > type;
   typedef type::target target;
@@ -76,7 +76,7 @@ void json_bench()
   time_t stime = std::numeric_limits< time_t >::max();
   time_t dtime = std::numeric_limits< time_t >::max();
   size_t dcount = 0;
-  ::iow::json::json_error e;
+  ::wjson::json_error e;
   for (size_t j=0; j < TESTS; ++j)
   {
     char* beg = json;
@@ -131,7 +131,7 @@ void sprintf_bench()
   time_t stime = std::numeric_limits< time_t >::max();
   time_t dtime = std::numeric_limits< time_t >::max();
   size_t dcount = 0;
-  ::iow::json::json_error e;
+  ::wjson::json_error e;
   for (size_t j=0; j < TESTS; ++j)
   {
     memset(json, 0, ARR_SIZE);
@@ -161,7 +161,7 @@ void sprintf_bench()
       
       sscanf( beg, "{\"field1\":%d,\"field2\":%d,\"field3\":%d,\"field5\":[%d,%d,%d,%d,%d]}",
                &(f2.field1), &(f2.field2), &(f2.field3), &(f2.field5[0]), &(f2.field5[1]), &(f2.field5[2]), &(f2.field5[3]), &(f2.field5[4]) );
-      beg = iow::json::parser::parse_object(beg, end, 0);
+      beg = ::wjson::parser::parse_object(beg, end, 0);
     }
     finish = high_resolution_clock::now();
 

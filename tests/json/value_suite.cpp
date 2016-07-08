@@ -1,6 +1,6 @@
 #include <fas/testing.hpp>
-#include <iow/json/json.hpp>
-#include <iow/json/strerror.hpp>
+#include <wjson/json.hpp>
+#include <wjson/strerror.hpp>
 #include <algorithm>
 
 /*
@@ -24,7 +24,7 @@ namespace detail
     }
 
     template<typename P>
-    P operator() ( T& v, P beg, P end, iow::json::json_error*  )
+    P operator() ( T& v, P beg, P end, ::wjson::json_error*  )
     {
       std::stringstream ss;
       ss << std::string(beg, end);
@@ -68,14 +68,14 @@ struct value<double>
 template<typename T, typename V, typename VV>
 void value_serializer_test(T& t, const VV& v, const std::string& chk, int line)
 {
-  typedef typename ::iow::json::value<V>::serializer serializer_t;
+  typedef typename ::wjson::value<V>::serializer serializer_t;
   using namespace fas::testing;
   V val = static_cast<V>(v);
   std::string json;
   serializer_t()(val, std::back_inserter(json) );
   t << equal_str<expect>(json, chk) << "Serialize. Line: " << line;
   val = V();
-  ::iow::json::json_error e;
+  ::wjson::json_error e;
   serializer_t()(val, json.begin(), json.end(), &e );
   t << equal<expect, V>(v, val) << "Unserialize. Line: " << line;
 }
@@ -83,14 +83,14 @@ void value_serializer_test(T& t, const VV& v, const std::string& chk, int line)
 template<typename T, typename V, int R>
 void real_serializer_test(T& t, const V& v, const std::string& chk, int line)
 {
-  typedef typename ::iow::json::value<V, R>::serializer serializer_t;
+  typedef typename ::wjson::value<V, R>::serializer serializer_t;
   using namespace fas::testing;
   V val = v;
   std::string json;
   serializer_t()(val, std::back_inserter(json) );
   t << equal_str<expect>(json, chk) << "Serialize. Line: " << line;
   val = V();
-  ::iow::json::json_error e;
+  ::wjson::json_error e;
   serializer_t()(val, json.begin(), json.end(), &e );
   t << less<expect>(v - val, 0.000001) << "Unserialize. Line: " << line;
 }

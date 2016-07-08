@@ -3,8 +3,8 @@
 #if __cplusplus >= 201103L
 
 #include <chrono>
-#include <iow/json/json.hpp>
-#include <iow/json/name.hpp>
+#include <wjson/json.hpp>
+#include <wjson/name.hpp>
 #include <cstring>
 
 #define TESTS 1000000

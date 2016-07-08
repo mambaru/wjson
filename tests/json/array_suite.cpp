@@ -1,7 +1,7 @@
 #include <fas/testing.hpp>
-#include <iow/json/json.hpp>
-#include <iow/json/error.hpp>
-#include <iow/json/strerror.hpp>
+#include <wjson/json.hpp>
+#include <wjson/error.hpp>
+#include <wjson/strerror.hpp>
 
 
 UNIT(array1, "Одномерный массив")
