@@ -7,30 +7,31 @@
 
 int main()
 {
-  typedef ::wjson::value<double>::serializer serializer_t;
-  double value = 12345;
+  typedef ::wjson::value<long double>::serializer serializer_t;
+  typedef ::wjson::value<long double, 4 >::serializer serializer4_t;
+  long double value = 0.00000001234501;
+  std::cout << value << std::endl;
 
   std::string json;
   serializer_t()(value, std::back_inserter(json)); 
   std::cout << json << std::endl;
-  json[ json.find('+') ]='*';
+  value=-1;
+  serializer_t()(value, json.begin(), json.end(), 0 ); 
+  std::cout << value << std::endl;
+  value=-1;
+  serializer4_t()(value, json.begin(), json.end(), 0 ); 
+  std::cout << value << std::endl;
+
+  std::cout << "---" << std::endl;
+  value=12345.12345;
+  json.clear();
+  serializer4_t()(value, std::back_inserter(json)); 
   std::cout << json << std::endl;
-  
-  value = 0.0;
-  wjson::json_error e;
-  serializer_t()(value, json.begin(), json.end(), &e ); 
-  if ( e )
-  {
-    std::cout << "Error code: " << e.code() << std::endl;
-    std::cout << "Error position: " << ::wjson::strerror::where( e, json.begin(), json.end() ) << std::endl;
-    std::cout << "Error tail of: " << e.tail_of() << std::endl;
-    //std::cout << "Error what: " << e.what() << std::endl;
-    std::cout << "Error message: " << ::wjson::strerror::message(e) << std::endl;
-    std::cout << "Error trace: " << ::wjson::strerror::trace(e, json.begin(), json.end()) << std::endl;
-    std::cout << "Error message & trace: " << ::wjson::strerror::message_trace(e, json.begin(), json.end()) << std::endl;
-  }
-  
-
-
+  value=-1;
+  serializer4_t()(value, json.begin(), json.end(), 0 ); 
+  std::cout << value << std::endl;
+  value=-1;
+  serializer_t()(value, json.begin(), json.end(), 0 ); 
+  std::cout << value << std::endl;
   return 0;
 }

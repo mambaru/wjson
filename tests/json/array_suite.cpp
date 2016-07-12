@@ -7,7 +7,7 @@
 UNIT(array1, "Одномерный массив")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 
   std::string json;
   int nums[5]={1,2,3,4,5};
@@ -18,7 +18,7 @@ UNIT(array1, "Одномерный массив")
   std::fill_n(nums, 5, 0);
   json_error e;
   ser(nums, json.begin(), json.end(), &e);
-  t << is_false<expect>(e) << e.where( json.begin(), json.end() ) << ": " << FAS_FL;
+  t << is_false<expect>(e) << strerror::where( e, json.begin(), json.end() ) << ": " << FAS_FL;
 
   json.clear();
   ser(nums, std::back_inserter(json) );
@@ -31,7 +31,7 @@ UNIT(array1, "Одномерный массив")
   
   t << message("Test JSON error: ") << strerror::message(e) << strerror::trace(e, json.begin(), json.end() );
   t << is_true<expect>(e) << FAS_FL;
-  t << equal<expect>( e.where( json.begin(), json.end()  ), 0) << FAS_FL;
+  t << equal<expect>( strerror::where( e, json.begin(), json.end()  ), 0) << FAS_FL;
   t << equal<expect>( strerror::message(e), "Expected Of '['") << FAS_FL;
   t << equal<expect>( strerror::trace(e, json.begin(), json.end() ), ">>>1,2,3,4,5]") << FAS_FL;
   
@@ -77,7 +77,7 @@ UNIT(array1, "Одномерный массив")
 UNIT(array2, "Двумерный массив")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 
   std::string json;
   int nums[2][2]={{1,2},{3,4}};
@@ -99,7 +99,7 @@ UNIT(array2, "Двумерный массив")
 UNIT(array3, "Трехмерный массив")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 
   std::string json;
   int nums[2][2][1]={{{1},{2}},{{3},{4}}};
@@ -146,7 +146,7 @@ UNIT(array3, "Трехмерный массив")
 UNIT(array4, "std::vector< std::string >")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 
   std::string json;
   std::vector< std::string > vs;
@@ -171,7 +171,7 @@ UNIT(array4, "std::vector< std::string >")
 UNIT(array5, "std::deque< int >")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 
   std::string json;
   std::deque< int > dq;
@@ -190,7 +190,7 @@ UNIT(array5, "std::deque< int >")
 UNIT(array6, "std::list< int >")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 
   std::string json;
   std::list< int > dq;
@@ -209,7 +209,7 @@ UNIT(array6, "std::list< int >")
 UNIT(array7, "std::set< int >")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 
   std::string json;
   std::set< int > dq;
@@ -228,7 +228,7 @@ UNIT(array7, "std::set< int >")
 UNIT(array8, "std::multiset< int >")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 
   std::string json;
   std::multiset< int > dq;
@@ -249,7 +249,7 @@ UNIT(array8, "std::multiset< int >")
 UNIT(array9, "std::unordered_set< int >")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 
 #if __cplusplus >= 201103L
   std::string json;
@@ -271,7 +271,7 @@ UNIT(array9, "std::unordered_set< int >")
 UNIT(array10, "std::unordered_multiset< int >")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 #if __cplusplus >= 201103L
   std::string json;
   std::unordered_multiset< int > dq = {1,2,3,4,5};

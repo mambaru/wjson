@@ -160,7 +160,7 @@ struct foo_json
 UNIT(enum1, "")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
   int flags = static_cast<int>(count1::one)
             | static_cast<int>(count1::three)
             | static_cast<int>(count1::six);
@@ -197,7 +197,7 @@ UNIT(enum1, "")
 UNIT(enum2, "")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
   int flags = static_cast<int>(count1::one)
             | static_cast<int>(count1::three)
             | static_cast<int>(count1::six);

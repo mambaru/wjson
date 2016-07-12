@@ -162,7 +162,7 @@ UNIT(string_unit, "")
 UNIT(string1, "" )
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
   std::string str="hello world! Привет мир!";
   str.push_back(static_cast<char>(132));
   str.push_back(static_cast<char>(131));

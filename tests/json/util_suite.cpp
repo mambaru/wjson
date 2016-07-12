@@ -7,7 +7,7 @@
 UNIT(util1, "raw_value")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 
   std::string json="\"Привет мир!\"";
   std::string value;
@@ -22,7 +22,7 @@ UNIT(util1, "raw_value")
 UNIT(util2, "raw_range")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 
   std::string json="\"Привет мир!\"";
   typedef std::pair<std::string::iterator, std::string::iterator> range_t;
@@ -48,7 +48,7 @@ namespace
 UNIT(util3, "member_value")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 
   
   bar b;
@@ -66,7 +66,7 @@ UNIT(util3, "member_value")
 UNIT(util4, "pointer")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
   
   {
     std::string *str = new std::string;
@@ -121,7 +121,7 @@ UNIT(util4, "pointer")
 UNIT(util5, "pair")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
   
   std::pair<std::string, int> p("foo", 12345 );
   field< value< std::string>, value<int> >::serializer ser;
@@ -133,7 +133,7 @@ UNIT(util5, "pair")
 UNIT(util6, "quoted")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
   int val = 123456;
   std::string json;
   typedef value<int> int_json;

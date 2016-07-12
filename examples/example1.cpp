@@ -28,9 +28,11 @@ int main()
   std::cout << std::endl;
 
   std::cout << "--- unserializer ---" << std::endl;
+  
   value = 0;
   serializer_t()(value, bufjson, bufjson + strlen(bufjson), 0 );
   std::cout << value << std::endl;
+  
   value = 0;
   serializer_t()(value, strjson.begin(), strjson.end(), 0 );
   std::cout << value << std::endl;

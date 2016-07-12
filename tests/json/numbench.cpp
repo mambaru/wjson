@@ -23,7 +23,7 @@ void ss_bench();
 void json_bench()
 {
   using namespace std::chrono;
-  using namespace iow::json;
+  using namespace ::wjson;
 
   std::cout << "JSON benchmark: " << std::endl;
   memset( numarr, 0, sizeof(numarr) );
@@ -75,7 +75,7 @@ void json_bench()
 void atoi_bench()
 {
   using namespace std::chrono;
-  using namespace iow::json;
+  using namespace wjson;
 
   std::cout << "sprintf/atoi benchmark: " << std::endl;
   memset( numarr, 0, sizeof(numarr) );
@@ -142,7 +142,7 @@ struct ostreambuf : public std::basic_streambuf<char, std::char_traits<char> >
 void ss_bench()
 {
   using namespace std::chrono;
-  using namespace iow::json;
+  using namespace wjson;
 
 
   std::cout << "stringstream benchmark: " << std::endl;
