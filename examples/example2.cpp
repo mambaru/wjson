@@ -15,10 +15,11 @@ int main()
   std::cout << json << std::endl;
   json[ json.find('+') ]='*';
   std::cout << json << std::endl;
-  
+
   value = 0.0;
   wjson::json_error e;
   serializer_t()(value, json.begin(), json.end(), &e ); 
+
   if ( e )
   {
     std::cout << "Error code: " << e.code() << std::endl;
@@ -29,8 +30,5 @@ int main()
     std::cout << "Error trace: " << ::wjson::strerror::trace(e, json.begin(), json.end()) << std::endl;
     std::cout << "Error message & trace: " << ::wjson::strerror::message_trace(e, json.begin(), json.end()) << std::endl;
   }
-  
-
-
   return 0;
 }

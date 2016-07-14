@@ -3,66 +3,7 @@
 #include <wjson/strerror.hpp>
 #include <algorithm>
 
-/*
-namespace iow{ namespace json{
 
-
-namespace detail
-{
-  template<typename T>
-  class serializerF
-  {
-  public:
-    template<typename P>
-    P operator()( T v, P end)
-    {
-      std::stringstream ss;
-      ss << v;
-      auto str = ss.str();
-      std::copy( str.begin(), str.end(), end );
-      return end;
-    }
-
-    template<typename P>
-    P operator() ( T& v, P beg, P end, ::wjson::json_error*  )
-    {
-      std::stringstream ss;
-      ss << std::string(beg, end);
-      ss >> v;
-      return end; //!!! нет
-    }
-  };
-}
-
-template<>
-class serializerT< value<float> >
-  : public detail::serializerF<float>
-{
-};
-
-template<>
-class serializerT< value<double> >
-  : public detail::serializerF<double>
-{
-};
-
-template<>
-struct value<float>
-{
-  typedef float target;
-  typedef serializerT< value<float> > serializer;
-};
-
-template<>
-struct value<double>
-{
-  typedef double target;
-  typedef serializerT< value<double> > serializer;
-};
-
-
-}}
-*/
 
 
 template<typename T, typename V, typename VV>
@@ -133,11 +74,6 @@ UNIT(integer_unit, "")
     ss << i;
     value_serializer_test<T, int>(t, i, ss.str(), __LINE__);
   }
-
-  /*
-  value_serializer_test<T, bool>(t, true, "true", __LINE__);
-  value_serializer_test<T, bool>(t, false, "false", __LINE__);
-  */
 }
 
 UNIT(float_unit, "")
@@ -150,7 +86,6 @@ UNIT(float_unit, "")
   real_serializer_test<T, float, 0>(t, 10.0, "10", __LINE__);
   real_serializer_test<T, double, 2>(t, 10.1, "10.10", __LINE__);
   real_serializer_test<T, long double, 10>(t, 10.1, "10.1000000000", __LINE__);
-  
 }
 
 UNIT(string_unit, "")

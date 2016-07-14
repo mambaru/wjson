@@ -22,8 +22,5 @@ int main()
     std::cout << "Error trace: " << ::wjson::strerror::trace(e, json.begin(), json.end()) << std::endl;
     std::cout << "Error message & trace: " << ::wjson::strerror::message_trace(e, json.begin(), json.end()) << std::endl;
   }
-  
-
-
   return 0;
 }
