@@ -58,8 +58,8 @@ public:
   {
     std::stringstream ss;
     ss << strerror::what(e);
-    if ( e.what() != 0 )
-      ss << " '" << e.what() << "'";
+    if ( e.expected_of() != 0 )
+      ss << " '" << e.expected_of() << "'";
     return ss.str();
   }
 
@@ -90,8 +90,8 @@ public:
   {
     std::stringstream ss;
     ss << strerror::what(e);
-    if ( e.what() != 0 )
-      ss << " '" << e.what() << "'";
+    if ( e.expected_of() != 0 )
+      ss << " '" << e.expected_of() << "'";
     if ( e )
     {
       ss  << ": "

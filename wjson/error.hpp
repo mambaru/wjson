@@ -27,26 +27,25 @@ struct error_code
   } type;
 };
 
-
 class json_error
 {
 public:
       
   json_error()
     : _code(error_code::ValidJSON)
-    , _what(0)
+    , _expected_of(0)
     , _tail_of(0) 
   {}
   
   json_error(error_code::type code_,  std::ptrdiff_t tail_of_ = 0 )
     : _code(code_)
-    , _what(0)
+    , _expected_of(0)
     , _tail_of(tail_of_) 
   {}
 
   json_error(error_code::type code_,  const char *sym, std::ptrdiff_t tail_of_ = 0 )
     : _code(code_)
-    , _what(sym)
+    , _expected_of(sym)
     , _tail_of(tail_of_) 
   {}
   
@@ -55,9 +54,9 @@ public:
     return _code;
   }
 
-  const char* what() const 
+  const char* expected_of() const 
   {
-    return _what;
+    return _expected_of;
   }
 
   std::ptrdiff_t tail_of() const 
@@ -73,41 +72,13 @@ public:
   void reset() 
   { 
     _code = error_code::ValidJSON;
-    _what=0;
+    _expected_of=0;
     _tail_of=0;
   }
-
-  /*
-  template<typename P>
-  std::ptrdiff_t where( P beg, P end) const
-  {
-    if ( _what==0 )
-      return 0;
-
-    if (std::distance(beg, end) < _tail_of )
-      return 0;
-
-    return std::distance(beg, end) - _tail_of;
-  }
-  */
   
 private:
-
-  template<typename L, typename R>
-  const char* what_( fas::type_list<L, R> )
-  {
-    if ( _code == static_cast<int>(L::value) )
-      return L();
-    return this->what_(R());
-  }
-
-  const char* what_( fas::empty_list )
-  {
-    return "";
-  }
-private:
   error_code::type _code;
-  const char* _what;
+  const char* _expected_of;
   std::ptrdiff_t _tail_of;
 };
 

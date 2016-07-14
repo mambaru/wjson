@@ -15,7 +15,7 @@ void str1_bench();
 void str1_bench()
 {
   using namespace std::chrono;
-  using namespace iow::json;
+  using namespace wjson;
 
   std::cout << "String benchmark: " << std::endl;
   std::string str="Привет";

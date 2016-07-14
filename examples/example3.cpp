@@ -17,7 +17,7 @@ int main()
     std::cout << "Error code: " << e.code() << std::endl;
     std::cout << "Error tail of: " << e.tail_of() << std::endl;
     std::cout << "Error position: " << ::wjson::strerror::where(e, json.begin(), json.end() ) << std::endl;
-    //std::cout << "Error what: " << e.what() << std::endl;
+    std::cout << "Error expected_of: " << e.expected_of() << std::endl;
     std::cout << "Error message: " << ::wjson::strerror::message(e) << std::endl;
     std::cout << "Error trace: " << ::wjson::strerror::trace(e, json.begin(), json.end()) << std::endl;
     std::cout << "Error message & trace: " << ::wjson::strerror::message_trace(e, json.begin(), json.end()) << std::endl;
