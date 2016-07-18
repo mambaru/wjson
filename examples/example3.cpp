@@ -14,7 +14,7 @@ int main()
   serializer_t()(value, json.begin(), json.end(), &e ); 
   if ( e )
   {
-    std::cout << "Error code: " << e.code() << std::endl;
+    std::cout << "Error code: " << static_cast<int>( e.code() ) << std::endl;
     std::cout << "Error tail of: " << e.tail_of() << std::endl;
     std::cout << "Error position: " << ::wjson::strerror::where(e, json.begin(), json.end() ) << std::endl;
     std::cout << "Error expected_of: " << e.expected_of() << std::endl;
