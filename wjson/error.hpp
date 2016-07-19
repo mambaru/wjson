@@ -48,10 +48,15 @@ public:
     , _expected_of(sym)
     , _tail_of(tail_of_) 
   {}
-  
-  error_code::type code() const
+
+  error_code::type type() const
   {
     return _code;
+  }
+
+  int code() const
+  {
+    return static_cast<int>(_code);
   }
 
   const char* expected_of() const 

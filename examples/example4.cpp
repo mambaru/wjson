@@ -1,37 +1,27 @@
 #include <wjson/json.hpp>
 #include <wjson/strerror.hpp>
 #include <iostream>
+#include <sstream>
+#include <iterator>
+#include <cstring>
 
 int main()
 {
-  typedef wjson::value<int> int_json;
-  typedef std::vector<int> vint_t;
-  typedef wjson::array< std::vector<int_json> > vint_json;
-  
-  std::string json="[     1,\t2,\r3,\n4, /*пять*/ 5 ]";
-  vint_t vint;
-  vint_json::serializer()(vint, json.begin(), json.end(), NULL);
-  json.clear();
-  vint_json::serializer()(vint, std::back_inserter(json));
-  std::cout << json << std::endl;
-  
-  typedef std::vector< vint_t > vvint_t;
-  typedef wjson::array< std::vector<vint_json> > vvint_json;
-  json="[ [], [1], [2, 3], [4, 5, 6] ]";
-  vvint_t vvint;
-  vvint_json::serializer()(vvint, json.begin(), json.end(), NULL);
-  json.clear();
-  vvint_json::serializer()(vvint, std::back_inserter(json));
-  std::cout << json << std::endl;
-  
-  typedef std::vector< vvint_t > vvvint_t;
-  typedef wjson::array< std::vector<vvint_json> > vvvint_json;
-  json="[ [[]], [[1]], [[2], [3]], [[4], [5, 6] ] ]";
-  vvvint_t vvvint;
-  vvvint_json::serializer()(vvvint, json.begin(), json.end(), NULL);
-  json.clear();
-  vvvint_json::serializer()(vvvint, std::back_inserter(json));
-  std::cout << json << std::endl;
-  
+  typedef ::wjson::array< std::vector< ::wjson::value<int>  > >::serializer serializer_t;
+  std::vector< int > value;
+  std::string json = "[1,2,3,'error',5,6]";
+  ::wjson::json_error e;
+  serializer_t()(value, json.begin(), json.end(), &e ); 
+  if ( e )
+  {
+    std::cout << "Error code: " << e.code() << std::endl;
+    std::cout << "Error tail of: " << e.tail_of() << std::endl;
+    std::cout << "Error position: " << ::wjson::strerror::where(e, json.begin(), json.end() ) << std::endl;
+    if ( e.expected_of() != NULL )
+      std::cout << "Error expected_of: " << e.expected_of() << std::endl;
+    std::cout << "Error message: " << ::wjson::strerror::message(e) << std::endl;
+    std::cout << "Error trace: " << ::wjson::strerror::trace(e, json.begin(), json.end()) << std::endl;
+    std::cout << "Error message & trace: " << ::wjson::strerror::message_trace(e, json.begin(), json.end()) << std::endl;
+  }
   return 0;
 }

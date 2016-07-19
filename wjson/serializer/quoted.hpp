@@ -100,7 +100,7 @@ private:
     serializer_t()( t, buf.begin(), buf.end(), &e2 );
     if (e && e2)
     {
-      *e = json_error( e2.code(), std::distance(beg, end) + e2.tail_of() + 1 );
+      *e = json_error( e2.type(), std::distance(beg, end) + e2.tail_of() + 1 );
       return end;
     }
     return beg;

@@ -19,11 +19,11 @@
 
 namespace wjson{
 
-template<typename T>
+template<typename T, bool NullTerm>
 class serializerS;
 
-template<>
-class serializerS<char>
+template<bool NullTerm>
+class serializerS<char, NullTerm>
 {
 public:
   template<typename P1, typename P>
@@ -31,7 +31,7 @@ public:
   {
     *(itr++)='"';
 
-    for (;beg!=end;)
+    for (;beg!=end && ( !NullTerm || *beg!='\0' ) ;)
     {
       if ( static_cast<unsigned char>(*beg) >=32 && static_cast<unsigned char>(*beg) < 127 )
       {
@@ -284,7 +284,7 @@ private:
 
 template<int N>
 class serializerT< value< char[N]> >
-  : serializerS<char>
+  : serializerS<char, true>
 {
 public:
   typedef char value_type[N];
@@ -296,22 +296,22 @@ public:
   }
 
   template<typename P>
-  P operator() ( value_type& v, P beg, P end )
+  P operator() ( value_type& v, P beg, P end, json_error* e )
   {
     for ( register int i =0 ; i < N; ++i)
       v[i]=0;
 
     if ( parser::is_null(beg, end) )
-      return parser::parse_null(beg, end);
+      return parser::parse_null(beg, end, e);
 
-    return this->unserialize(beg, end, &(v[0]), N);
+    return this->unserialize(beg, end, &(v[0]), N, e);
   }
 };
 
 
 template<int R>
 class serializerT< value<std::string, R> >
-  : serializerS<char>
+  : serializerS<char, false>
 {
 public:
   template<typename P>
@@ -334,7 +334,7 @@ public:
 
 template<int R>
 class serializerT< value<std::vector<char>, R > >
-  : serializerS<char>
+  : serializerS<char, false>
 {
 public:
   template<typename P>
