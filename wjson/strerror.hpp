@@ -4,6 +4,8 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 
+#pragma once
+
 #include <wjson/name.hpp>
 #include <wjson/predef.hpp>
 #include <wjson/error.hpp>
