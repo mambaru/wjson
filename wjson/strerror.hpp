@@ -26,6 +26,7 @@ struct error_code_json
   JSON_NAME2(InvalidString, "Invalid String")
   JSON_NAME2(InvalidMemberr, "Invalid Member")
   JSON_NAME2(InvalidEnum, "Invalid Enum")
+  JSON_NAME2(InvalidRequest, "Invalid JSON-RPC Request")
   
   typedef ::wjson::enumerator<
     int, 
@@ -39,7 +40,8 @@ struct error_code_json
       enum_value<InvalidBool, int, static_cast<int>(error_code::InvalidBool)>,
       enum_value<InvalidString, int, static_cast<int>(error_code::InvalidString)>,
       enum_value<InvalidMemberr, int, static_cast<int>(error_code::InvalidMember)>,
-      enum_value<InvalidEnum, int, static_cast<int>(error_code::InvalidEnum)>
+      enum_value<InvalidEnum, int, static_cast<int>(error_code::InvalidEnum)>,
+      enum_value<InvalidRequest, int, static_cast<int>(error_code::InvalidRequest)>
     >
   > type;
 

@@ -23,7 +23,8 @@ struct error_code
     InvalidBool = 6,
     InvalidString = 7,
     InvalidMember = 8,
-    InvalidEnum = 9
+    InvalidEnum = 9, 
+    InvalidRequest = 10
   } type;
 };
 

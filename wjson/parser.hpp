@@ -434,7 +434,7 @@ private:
     //                          111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
     //                          1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
 
-         if ( ( *beg & 128 )==0 )  return ++beg;
+         if ( ( *beg & 128)==0   ) return ++beg;
     else if ( ( *beg & 224)==192 ) return parser::parse_utf8_part_( ++beg, end, e, fas::int_<1>() );
     else if ( ( *beg & 240)==224 ) return parser::parse_utf8_part_( ++beg, end, e, fas::int_<2>() );
     else if ( ( *beg & 248)==240 ) return parser::parse_utf8_part_( ++beg, end, e, fas::int_<3>() );
@@ -464,12 +464,12 @@ private:
   template<typename P>
   P parser::parse_value( P beg, P end, json_error* e )
   {
-         if ( parser::is_null(beg, end) )   return parser::parse_null(beg, end, e);
-    else if ( parser::is_bool(beg, end) )   return parser::parse_bool(beg, end, e);
+         if ( parser::is_null(beg, end)   ) return parser::parse_null(beg, end, e);
+    else if ( parser::is_bool(beg, end)   ) return parser::parse_bool(beg, end, e);
     else if ( parser::is_number(beg, end) ) return parser::parse_number(beg, end, e);
     else if ( parser::is_string(beg, end) ) return parser::parse_string(beg, end, e);
     else if ( parser::is_object(beg, end) ) return parser::parse_object(beg, end, e);
-    else if ( parser::is_array(beg, end) )  return parser::parse_array(beg, end, e);
+    else if ( parser::is_array(beg, end)  ) return parser::parse_array(beg, end, e);
 
     return create_error<error_code::InvalidJSON>( e, end, std::distance(beg, end) );
   }
@@ -507,9 +507,6 @@ private:
     beg = parser::parse_space(beg, end, e);
     if ( beg!=end && *beg==']' )
     {
-        beg = parser::parse_space(++beg, end, e);
-        if (*beg!=']')
-          return create_error<error_code::ExpectedOf>(e, end, "]", std::distance(beg, end) );
         // Фикс для php. {} <=> []
         return ++beg;
     }
