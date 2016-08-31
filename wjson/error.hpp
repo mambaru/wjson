@@ -31,7 +31,6 @@ struct error_code
 class json_error
 {
 public:
-      
   json_error()
     : _code(error_code::ValidJSON)
     , _expected_of(0)
