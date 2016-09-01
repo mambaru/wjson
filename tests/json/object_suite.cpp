@@ -1,7 +1,7 @@
 #include <fas/testing.hpp>
-#include <iow/json/json.hpp>
-#include <iow/json/name.hpp>
-#include <iow/json/strerror.hpp>
+#include <wjson/json.hpp>
+#include <wjson/name.hpp>
+#include <wjson/strerror.hpp>
 
 namespace {
   
@@ -43,13 +43,13 @@ struct foo_json
     }
   };
   
-  typedef ::iow::json::object<
+  typedef ::wjson::object<
     foo,
-    ::iow::json::member_list<
-      ::iow::json::member<n_foo1, foo, int, &foo::foo1>,
-      ::iow::json::member<n_foo2, foo, std::string, &foo::foo2>,
-      ::iow::json::member<n_foo3, foo, std::vector<std::string>, &foo::foo3, iow::json::vector_of_strings<10> >,
-      ::iow::json::member_p<n_foo4, foo, std::vector<int>, foo4, iow::json::array< std::vector< iow::json::value<int> > > >
+    ::wjson::member_list<
+      ::wjson::member<n_foo1, foo, int, &foo::foo1>,
+      ::wjson::member<n_foo2, foo, std::string, &foo::foo2>,
+      ::wjson::member<n_foo3, foo, std::vector<std::string>, &foo::foo3, ::wjson::vector_of_strings<10> >,
+      ::wjson::member_p<n_foo4, foo, std::vector<int>, foo4, ::wjson::array< std::vector< ::wjson::value<int> > > >
     >
   > type;
 
@@ -63,13 +63,13 @@ struct bar_json
   JSON_NAME(bar1)
   JSON_NAME(bar2)
   JSON_NAME(bar3)
-  typedef ::iow::json::object<
+  typedef ::wjson::object<
     bar,
-    ::iow::json::member_list<
-      ::iow::json::base< foo_json >,
-      ::iow::json::member<n_bar1, bar, foo, &bar::bar1, foo_json>,
-      ::iow::json::member<n_bar2, bar, std::list<foo>, &bar::bar2, iow::json::array< std::list<foo_json> > >,
-      ::iow::json::member<n_bar3, bar, std::map<std::string, foo>, &bar::bar3, iow::json::dict< std::map< iow::json::value< std::string >, foo_json  >  > >
+    ::wjson::member_list<
+      ::wjson::base< foo_json >,
+      ::wjson::member<n_bar1, bar, foo, &bar::bar1, foo_json>,
+      ::wjson::member<n_bar2, bar, std::list<foo>, &bar::bar2, ::wjson::array< std::list<foo_json> > >,
+      ::wjson::member<n_bar3, bar, std::map<std::string, foo>, &bar::bar3, ::wjson::dict< std::map< ::wjson::value< std::string >, foo_json  >  > >
     >
   > type;
   typedef type::target target;
@@ -79,7 +79,7 @@ struct bar_json
 
 struct foo_array_json
 {
-  typedef ::iow::json::object_array<
+  typedef ::wjson::object_array<
     foo,
     foo_json::member_list
   > type;
@@ -91,13 +91,13 @@ struct foo_array_json
 
 struct bar_array_json
 {
-  typedef ::iow::json::object_array<
+  typedef ::wjson::object_array<
     bar,
-    ::iow::json::member_list<
-      ::iow::json::base< foo_json >,
-      ::iow::json::member_array<bar, foo, &bar::bar1, foo_array_json>,
-      ::iow::json::member_array<bar, std::list<foo>, &bar::bar2, iow::json::array< std::list<foo_array_json> > >,
-      ::iow::json::member_array<bar, std::map<std::string, foo>, &bar::bar3, iow::json::dict< std::map< iow::json::value< std::string >, foo_array_json  >  > >
+    ::wjson::member_list<
+      ::wjson::base< foo_json >,
+      ::wjson::member_array<bar, foo, &bar::bar1, foo_array_json>,
+      ::wjson::member_array<bar, std::list<foo>, &bar::bar2, ::wjson::array< std::list<foo_array_json> > >,
+      ::wjson::member_array<bar, std::map<std::string, foo>, &bar::bar3, ::wjson::dict< std::map< ::wjson::value< std::string >, foo_array_json  >  > >
     >
   > type;
   typedef type::target target;
@@ -177,14 +177,14 @@ template<bool SecondPriority>
 struct baz_json
 {
   JSON_NAME(foo)
-  typedef ::iow::json::object<
+  typedef ::wjson::object<
     baz,
-    ::iow::json::member_list
+    ::wjson::member_list
     <
-      ::iow::json::member_if
+      ::wjson::member_if
       <
-        ::iow::json::member<n_foo, baz, int, &baz::foo1>,
-        ::iow::json::member<n_foo, baz, std::string, &baz::foo2>,
+        ::wjson::member<n_foo, baz, int, &baz::foo1>,
+        ::wjson::member<n_foo, baz, std::string, &baz::foo2>,
         SecondPriority
       >
     >
@@ -207,9 +207,9 @@ void object3_toster( T& t )
   t << equal<expect>( json, "{\"foo\":\"hello\"}" ) << FAS_FL;
   b.foo2.clear();
   b.foo1=10;
-  iow::json::json_error e;
+  ::wjson::json_error e;
   typename baz_json<Pri>::serializer()(b, json.begin(), json.end(), &e );
-  if ( e ) t << message("ERROR:") << iow::json::strerror::message(e);
+  if ( e ) t << message("ERROR:") << ::wjson::strerror::message(e);
   t << equal<expect>( b.foo2, "hello" ) << FAS_FL;
   t << equal<expect>( b.foo1, 0 ) << FAS_FL;
   
@@ -222,7 +222,7 @@ void object3_toster( T& t )
   b.foo1=10;
   e.reset();
   typename baz_json<Pri>::serializer()(b, json.begin(), json.end(), &e );
-  if ( e ) t << message("ERROR:") << iow::json::strerror::message(e);
+  if ( e ) t << message("ERROR:") << ::wjson::strerror::message(e);
   t << equal<expect>( b.foo2, "" ) << FAS_FL;
   t << equal<expect>( b.foo1, 123 ) << FAS_FL;
 }

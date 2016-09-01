@@ -40,7 +40,7 @@ struct foo_json
   JSON_NAME(field2)
   JSON_NAME(field3)
   JSON_NAME(field5)
-  typedef ::wjson::object<
+  typedef ::wjson::object_array<
     foo,
     ::wjson::member_list<
       ::wjson::member<n_field1, foo, int, &foo::field1>,
@@ -141,7 +141,7 @@ void sprintf_bench()
     auto start = high_resolution_clock::now();
     for (size_t i = 0; i < SER_COUNT; ++i)
     {
-      beg+=sprintf( beg, "{\"field1\":%d,\"field2\":%d,\"field3\":%d,\"field5\":[%d,%d,%d,%d,%d]}",
+      beg+=sprintf( beg, "[%d,%d,%d,[%d,%d,%d,%d,%d]]",
                    f.field1, f.field2, f.field3, f.field5[0], f.field5[1], f.field5[2], f.field5[3], f.field5[4]);
     }
     auto finish = high_resolution_clock::now();
@@ -158,19 +158,29 @@ void sprintf_bench()
     {
       auto& f2 = vf[fi++];
       ++dcount;
-      
-      sscanf( beg, "{\"field1\":%d,\"field2\":%d,\"field3\":%d,\"field5\":[%d,%d,%d,%d,%d]}",
+      // beg = [10,20,30,[1,2,3,4,5]] ....
+      int sres = sscanf( beg, "[%d,%d,%d,[%d,%d,%d,%d,%d]]",
                &(f2.field1), &(f2.field2), &(f2.field3), &(f2.field5[0]), &(f2.field5[1]), &(f2.field5[2]), &(f2.field5[3]), &(f2.field5[4]) );
-      beg = ::wjson::parser::parse_object(beg, end, 0);
+      beg = ::wjson::parser::parse_array(beg, end, 0);
     }
     finish = high_resolution_clock::now();
 
     t = duration_cast<nanoseconds>(finish - start).count();
     if ( dtime==0 || t < dtime )
       dtime = t;
-    for (auto v : vf)
+    for (auto& v : vf)
       if ( !f.check(v) )
+      {
+        std::cout << v.field1 << std::endl;
+        std::cout << v.field2 << std::endl;
+        std::cout << v.field3 << std::endl;
+        std::cout << v.field5[0] << std::endl;
+        std::cout << v.field5[1] << std::endl;
+        std::cout << v.field5[2] << std::endl;
+        std::cout << v.field5[3] << std::endl;
+        std::cout << v.field5[4] << std::endl;
         abort();
+      }
     std::vector<foo>().swap(vf);
   }
 

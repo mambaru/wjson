@@ -1,5 +1,5 @@
 #include <fas/testing.hpp>
-#include <iow/json.old/json.hpp>
+#include <wjson.old/json.hpp>
 #include <algorithm>
 
 namespace iow{ namespace json{
@@ -65,7 +65,7 @@ struct value<double>
 template<typename T, typename V>
 void value_serializer_test(T& t, const V& v, const std::string& chk, int line)
 {
-  typedef typename ::iow::json::value<V>::serializer serializer_t;
+  typedef typename ::wjson::value<V>::serializer serializer_t;
   using namespace fas::testing;
   V val = v;
   std::string json;

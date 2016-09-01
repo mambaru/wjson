@@ -1,5 +1,5 @@
-#include <iow/json.old/json.hpp>
-#include <iow/json.old/name.hpp>
+#include <wjson.old/json.hpp>
+#include <wjson.old/name.hpp>
 #include <chrono>
 #include <iostream>
 
@@ -19,14 +19,14 @@ struct foo_json
   JSON_NAME(field3)
   JSON_NAME(field4)
   JSON_NAME(field5)
-  typedef ::iow::json::object<
+  typedef ::wjson::object<
     foo,
-    ::iow::json::member_list<
-      ::iow::json::member<n_field1, foo, char, &foo::field1>,
-      ::iow::json::member<n_field2, foo, int, &foo::field2>,
-      ::iow::json::member<n_field3, foo, size_t, &foo::field3>,
-      ::iow::json::member<n_field4, foo, std::string, &foo::field4>,
-      ::iow::json::member<n_field5, foo, std::vector<int>, &foo::field5, ::iow::json::array< std::vector< ::iow::json::value<int> > > >
+    ::wjson::member_list<
+      ::wjson::member<n_field1, foo, char, &foo::field1>,
+      ::wjson::member<n_field2, foo, int, &foo::field2>,
+      ::wjson::member<n_field3, foo, size_t, &foo::field3>,
+      ::wjson::member<n_field4, foo, std::string, &foo::field4>,
+      ::wjson::member<n_field5, foo, std::vector<int>, &foo::field5, ::wjson::array< std::vector< ::wjson::value<int> > > >
     >
   > type;
   typedef type::target target;

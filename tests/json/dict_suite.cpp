@@ -1,13 +1,13 @@
 #include <fas/testing.hpp>
-#include <iow/json/json.hpp>
-#include <iow/json/name.hpp>
+#include <wjson/json.hpp>
+#include <wjson/name.hpp>
 
 
 
 UNIT(dict1, "")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
 
   {
     std::map<std::string, std::string> m;
@@ -66,7 +66,7 @@ UNIT(dict1, "")
 UNIT(dict2, "")
 {
   using namespace fas::testing;
-  using namespace iow::json;
+  using namespace wjson;
   typedef dict_vector< value<std::string> > dv_t;
   typedef dv_t::target dict;
   dict d;
