@@ -27,3 +27,25 @@
 *.exe
 *.out
 *.app
+
+# ---
+*~
+*.kdev4
+*.pyc
+.cproject
+.project
+*.cmake
+*/debug
+*/release
+*/build
+build
+.tup
+*.kch
+autom4te.cache
+*.deps
+CMakeFiles
+CMakeCache.txt
+*.kate-swp
+*build_info.h
+config.h
+Makefile
