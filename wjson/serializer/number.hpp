@@ -18,17 +18,14 @@ namespace detail
   struct is_signed_integer_base
   {
     enum { value = 1 };
-    static bool is_less_zero(T v)
-    {
-      return v < 0;
-    }
+    static bool is_less_zero(T v) { return v < 0; }
   };
 
   template<typename T>
   struct is_signed_integer_base<T, false>
   {
     enum { value = 0 };
-    static bool is_less_zero(T ){ return false; }
+    static bool is_less_zero(T ) { return false; }
   };
 
   template<typename T>
@@ -44,10 +41,11 @@ namespace detail
     // ffff 65535 5
     // ffffffff 4294967295 10
     // ffffffffffffffff 18446744073709551615 20
-    // 1 - 3  -> 1*2 + 1/2
+    // 1 - 3  -> 1*2 + 1%2
     // 2 - 5  -> 2*2 + 2/1
     // 4 - 10 -> 4*2 + 4/2
     // 8 - 20 -> 8*2 + 8/2
+    // 16 - 40 -> 16*2 + 16/2
     enum { value = sizeof(T)*2 + sizeof(T)/2 + sizeof(T)%2 + is_signed_integer<T>::value };
   };
 
