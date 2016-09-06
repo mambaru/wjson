@@ -7,8 +7,7 @@ int main()
   typedef wjson::value<int> int_json;
   typedef int vint_t[3];
   typedef wjson::array< int_json[3] > vint_json;
-  
-  
+
   std::string json="[     1,\t2,\n3,\n4,  5 ]";
   std::cout << json << " -> ";
   vint_t vint={100, 200, 300};

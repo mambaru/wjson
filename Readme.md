@@ -1,4 +1,7 @@
 # JSON сериализатор
+
+[Подробнее...](http://github.lan/cpp/wjson/wikis/home)
+
 Простой в использовани, быстрый, декларативный сериализатор/десериализатор непосредственно в структуры данных. 
 Например для структуры:
 ```cpp
@@ -48,16 +51,15 @@ foo_json::serializer()( f, json.begin(), json.end(), &e );
 ```
 Если есть ошибка:
 ```cpp
-if ( e )
-{
-  // Сообщение об ошибке
-  std::cout << e.message() << std::endl;
-  // Позиция в строке
-  std::cout << e.where( json.begin(), json.end() ) << std::endl;
-  // Исходная строка с указанием места ошибки символами 
-  std::cout << e.trace( json.begin(), json.end() ) << std::endl;
-}
+  if ( e )
+  {
+    std::cout << "Error code: " << e.code() << std::endl;
+    std::cout << "Error tail of: " << e.tail_of() << std::endl;
+    std::cout << "Error position: " << ::wjson::strerror::where(e, json.begin(), json.end() ) << std::endl;
+    std::cout << "Error expected of: " << e.expected_of() << std::endl;
+    std::cout << "Error message: " << ::wjson::strerror::message(e) << std::endl;
+    std::cout << "Error trace: " << ::wjson::strerror::trace(e, json.begin(), json.end()) << std::endl;
+  }
 ```
 
-[ДОКУМЕНТАЦИЯ](http://github.lan/cpp/wjson/wikis/home)
-
+[Подробнее...](http://github.lan/cpp/wjson/wikis/home)
