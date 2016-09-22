@@ -111,7 +111,7 @@ void json_bench()
     std::vector<foo>().swap(vf);
 
   }
-  std::cout << json << std::endl;
+  //std::cout << json << std::endl;
   std::cout << "serialization time: " << stime << " ns" << std::endl;
   std::cout << "serialization rate: " << size_t(( 1000000000.0/stime ) * SER_COUNT) << " persec" << std::endl;
   std::cout << "deserialization time: " << dtime << " ns" << std::endl;

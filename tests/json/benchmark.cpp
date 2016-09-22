@@ -6,6 +6,8 @@
 #if __cplusplus >= 201103L
 #include <chrono>
 
+void json_bench();
+void json_bench2();
 void sprintf_bench();
 
 struct foo
@@ -36,10 +38,10 @@ struct foo
 
 struct foo_json
 {
-  JSON_NAME(field1)
-  JSON_NAME(field2)
-  JSON_NAME(field3)
-  JSON_NAME(field5)
+  JSON_NAME2(n_field1, "field1")
+  JSON_NAME2(n_field2, "field2")
+  JSON_NAME2(n_field3, "field3")
+  JSON_NAME2(n_field5, "field5")
   typedef ::wjson::object<
     foo,
     ::wjson::member_list<
@@ -62,7 +64,6 @@ const size_t TESTS = 1;
 const size_t SER_COUNT = 1;
 #endif
 
-void json_bench();
 
 void json_bench()
 {
@@ -70,6 +71,7 @@ void json_bench()
   typedef foo_json::serializer serializer;
   char* json = new char[ARR_SIZE];
   std::fill_n(json, ARR_SIZE, '\0' );
+
   foo f;
   f.init();
   std::vector<foo> vf;
@@ -111,9 +113,75 @@ void json_bench()
     std::vector<foo>().swap(vf);
 
   }
-  std::cout << json << std::endl;
+  //std::cout << json << std::endl;
+  serializer()(f, std::ostream_iterator<char>(std::cout) ); std::cout << std::endl;
   std::cout << "serialization time: " << stime << " ns" << std::endl;
   std::cout << "serialization rate: " << size_t(( 1000000000.0/stime ) * SER_COUNT) << " persec" << std::endl;
+  std::cout << "deserialization time: " << dtime << " ns" << std::endl;
+  std::cout << "deserialization rate: " << size_t(( 1000000000.0/dtime ) * SER_COUNT) << " persec" << std::endl;
+  std::cout << "deserialization count: " << dcount << std::endl;
+  delete[] json;
+}
+
+void json_bench2()
+{
+  using namespace std::chrono;
+  typedef foo_json::serializer serializer;
+  char* json = new char[ARR_SIZE];
+  std::fill_n(json, ARR_SIZE, '\0' );
+  
+  const char* jsons = "{\"field5\":[1,2,3,4,5],\"field3\":30,\"field2\":20,\"field1\":10}";
+  strcpy( json, jsons );
+  
+  foo f;
+  f.init();
+  std::vector<foo> vf;
+  time_t stime = std::numeric_limits< time_t >::max();
+  time_t dtime = std::numeric_limits< time_t >::max();
+  size_t dcount = 0;
+  ::wjson::json_error e;
+  for (size_t j=0; j < TESTS; ++j)
+  {
+    char* beg = json;
+    char* end = json + ARR_SIZE;
+    auto start = high_resolution_clock::now();
+    for (size_t i = 0; i < SER_COUNT; ++i)
+    {
+      strcpy(beg, jsons);
+      beg+=strlen(jsons);
+    }
+    auto finish = high_resolution_clock::now();
+    serializer()(f, json, json + ARR_SIZE, 0 );
+    auto t = duration_cast<nanoseconds>(finish - start).count();
+    if ( stime==0 || t < stime )
+      stime = t;
+
+    vf.resize(SER_COUNT);
+    size_t fi = 0;
+    start = high_resolution_clock::now();
+    beg = json;
+    end = json + ARR_SIZE;
+    while ( beg!=end && *beg!='\0')
+    {
+      ++dcount;
+      beg = serializer()(vf[fi++], beg, end, &e );
+    }
+    finish = high_resolution_clock::now();
+
+    t = duration_cast<nanoseconds>(finish - start).count();
+    if ( dtime==0 || t < dtime )
+      dtime = t;
+
+    /*
+    for (auto v : vf)
+      if ( !f.check(v) )
+        abort();*/
+    std::vector<foo>().swap(vf);
+
+  }
+  //std::cout << json << std::endl;
+  std::cout << "copy time: " << stime << " ns" << std::endl;
+  std::cout << "copy rate: " << size_t(( 1000000000.0/stime ) * SER_COUNT) << " persec" << std::endl;
   std::cout << "deserialization time: " << dtime << " ns" << std::endl;
   std::cout << "deserialization rate: " << size_t(( 1000000000.0/dtime ) * SER_COUNT) << " persec" << std::endl;
   std::cout << "deserialization count: " << dcount << std::endl;
@@ -187,6 +255,8 @@ int main()
 {
   std::cout << std::endl<< "JSON benchmark:" << std::endl;
   json_bench();
+  std::cout << std::endl<< "JSON shaffle benchmark:" << std::endl;
+  json_bench2();
   std::cout << std::endl<< "sprintf benchmark:" << std::endl;
   sprintf_bench();
 }
