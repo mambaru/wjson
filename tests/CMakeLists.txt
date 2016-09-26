@@ -24,4 +24,5 @@ if ( NOT FAS_TESTING_CPP )
   include_directories(${CMAKE_SOURCE_DIR}/../faslib)
 endif()
 
+enable_testing()
 add_subdirectory(json)
