@@ -35,20 +35,22 @@ int main()
   std::string json = "\"жил был серенький козлик\"";
   int val = 0;
   flags_json<' '>::serializer()(val, json.begin(), json.end(), 0 );
-  std::cout << val << std::endl;
+  std::cout << json << " = " << val << std::endl;
 
+  std::cout << 63 << " = ";
   flags_json<' '>::serializer()(63, std::ostream_iterator<char>(std::cout) );
   std::cout << std::endl;
 
+  std::cout << 48 << " = ";
   flags_json<','>::serializer()(48, std::ostream_iterator<char>(std::cout) );
   std::cout << std::endl;
 
-  flags_json<'|'>::serializer()(51, std::ostream_iterator<char>(std::cout) );
+  std::cout << 49 << " = ";
+  flags_json<'|'>::serializer()(49, std::ostream_iterator<char>(std::cout) );
   std::cout << std::endl;
 
-  // 51
-  // "жил был у бабушки серенький козлик"
-  // ["серенький","козлик"]
-  // "жил|был|серенький|козлик"
-
+  // "жил был серенький козлик" = 51
+  // 63 = "жил был у бабушки серенький козлик"
+  // 48 = ["серенький","козлик"]
+  // 49 = "жил|серенький|козлик"
 }

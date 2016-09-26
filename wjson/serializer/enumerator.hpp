@@ -49,7 +49,8 @@ public:
     if (*beg!='"') 
       return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
 
-    this->deserialize(v, enum_list(), first, beg);
+    if ( !this->deserialize(v, enum_list(), first, beg) )
+      return create_error<error_code::InvalidEnum>(e, end, std::distance(first, end) );
     ++beg;
     return beg;
   }
@@ -80,7 +81,7 @@ private:
 
 
   template<typename LL, typename RR, typename P>
-  void deserialize( T& v, fas::type_list<LL, RR>, P beg, P end)
+  bool deserialize( T& v, fas::type_list<LL, RR>, P beg, P end)
   {
     P first = beg;
     const char *pstr = LL()();
@@ -88,14 +89,15 @@ private:
     if ( beg==end && *pstr=='\0')
     {
       v = LL::value;
+      return true;
     }
-    else
-      this->deserialize(v, RR(), first, end);
+    return this->deserialize(v, RR(), first, end);
   }
 
   template<typename P>
-  void deserialize( T& , fas::empty_list,P,P)
+  bool deserialize( T& , fas::empty_list, P , P )
   {
+    return false;
   }
 };
 

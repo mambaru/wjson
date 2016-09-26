@@ -27,6 +27,7 @@ int main()
   std::string json="{\"flag\":false,\"value\":0,\"string\":\"Привет Мир\"}";
   foo f;
   foo_json::serializer()( f, json.begin(), json.end(), nullptr );
+
   f.flag = true;
   f.string = "Пока Мир";
   std::cout << json << std::endl;

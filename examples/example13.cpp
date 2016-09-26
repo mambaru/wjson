@@ -49,7 +49,7 @@ int main()
   std::string json = "[\"one\",\"two\",\"three\"]";
   std::cout << json << std::endl;
   
-  array_counter_json::serializer()( cl, json.begin(), json.end(), nullptr );
+  array_counter_json::serializer()( cl, json.begin(), json.end(), 0 );
   cl.push_back(counter::four);
   cl.push_back(counter::five);
   cl.push_back(counter::six);

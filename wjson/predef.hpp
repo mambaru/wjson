@@ -20,13 +20,13 @@ struct array;
 template<typename T, typename L>
 struct object;
 
-template<typename N, typename T, typename M, M T::* m, typename W = value<M> >
+template<typename N, typename T, typename M, M T::* m, typename J = value<M> >
 struct member;
 
 template<typename T, typename L>
 struct object_array;
 
-template<typename T, typename M, M T::* m, typename W = value<M> >
+template<typename T, typename M, M T::* m, typename J = value<M> >
 struct member_array;
 
 template<typename J>

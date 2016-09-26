@@ -2,11 +2,10 @@ cmake_minimum_required(VERSION 2.6)
 
 project(wjson)
 
-if ( IOW_BUILD_TEST OR IOW_BUILD_ALL )
-  if( IOW_BUILD_TEST)
-    enable_testing()
-    add_subdirectory(tests)
-  endif() # IOW_BUILD_TEST
-  add_subdirectory(examples)
+if ( WJSON_BUILD_TEST OR WJSON_BUILD_ALL )
+  add_subdirectory(tests)
+  if( WJSON_BUILD_ALL )
+    add_subdirectory(examples)
+  endif() # WJSON_BUILD_TEST
 endif()
 
