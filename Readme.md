@@ -1,6 +1,6 @@
 # JSON сериализатор
 
-[Подробнее...](http://github.lan/cpp/wjson/wikis/home)
+[Подробнее...](/cpp/wjson/wikis/home)
 
 Простой в использовани, быстрый, декларативный сериализатор/десериализатор непосредственно в структуры данных. 
 Например для структуры:
@@ -62,4 +62,4 @@ foo_json::serializer()( f, json.begin(), json.end(), &e );
   }
 ```
 
-[Подробнее...](http://github.lan/cpp/wjson/wikis/home)
+[Подробнее...](/cpp/wjson/wikis/home)
