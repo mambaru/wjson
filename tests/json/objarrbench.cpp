@@ -159,7 +159,7 @@ void sprintf_bench()
       auto& f2 = vf[fi++];
       ++dcount;
       // beg = [10,20,30,[1,2,3,4,5]] ....
-      int sres = sscanf( beg, "[%d,%d,%d,[%d,%d,%d,%d,%d]]",
+      /*int sres = */sscanf( beg, "[%d,%d,%d,[%d,%d,%d,%d,%d]]",
                &(f2.field1), &(f2.field2), &(f2.field3), &(f2.field5[0]), &(f2.field5[1]), &(f2.field5[2]), &(f2.field5[3]), &(f2.field5[4]) );
       beg = ::wjson::parser::parse_array(beg, end, 0);
     }

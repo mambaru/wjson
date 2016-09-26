@@ -15,8 +15,8 @@ struct bar: foo
   std::vector<foo> vfoo;
 };
 
-struct foo_json
-{
+/*struct foo_json
+{*/
   JSON_NAME(flag)
   JSON_NAME(value)
   JSON_NAME(string)
@@ -28,11 +28,11 @@ struct foo_json
       wjson::member<n_value, foo,int,  &foo::value>,
       wjson::member<n_string, foo,std::string,  &foo::string>
     >
-  > type;
+  > foo_json;/*type;
   typedef type::serializer serializer;
   typedef type::target target;
   typedef type::member_list member_list; 
-};
+};*/
 
 struct bar_json
 {
@@ -54,11 +54,20 @@ struct bar_json
   typedef type::member_list member_list; 
 };
 
+template<typename J>
+struct deserealizer
+{
+  typedef typename J::deserializer type;
+};
+
 int main()
 {
+  // typedef deserealizer<bar_json::type>::type deser;
+
   std::string json="{\"flag\":true,\"value\":0,\"string\":\"Привет Мир\",\"vfoo\":[],\"pfoo\":null}";
   bar b;
   bar_json::serializer()( b, json.begin(), json.end(), nullptr );
+  
   b.flag = true;
   b.vfoo.push_back( static_cast<const foo&>(b));
   b.pfoo = std::make_shared<foo>(static_cast<const foo&>(b));
