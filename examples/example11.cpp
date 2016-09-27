@@ -4,46 +4,54 @@
 
 int main()
 {
-  typedef std::vector< std::pair<std::string, std::string> > dict;
-  typedef std::map< std::string, int > dict2;
-  typedef ::wjson::dict_vector< ::wjson::raw_value<> > dict_json;
-  typedef ::wjson::dict_map< ::wjson::value<int> > dict2_json;
+  typedef std::vector< std::string > vect_t;
+  typedef ::wjson::array< std::vector< ::wjson::raw_value<std::string> > > vect_json;
+ 
+  vect_t inv;
+  vect_t outv;
   
-  dict d;
-  dict2 d2;
-  std::string json = "{\"один\":1,\"два\":\"2\",\"три\":[3]}";
+  std::string json = "[1,\"2\",[3]]";
+  
   std::cout << json << std::endl;
-  dict_json::serializer()( d, json.begin(), json.end(), 0 );
-  for ( auto& v : d )
+  vect_json::serializer()( inv, json.begin(), json.end(), 0 );
+  for ( auto& v : inv )
   {
-    if ( wjson::parser::is_number(v.second.begin(), v.second.end()) )
+    outv.push_back("");
+    if ( wjson::parser::is_number(v.begin(), v.end()) )
     {
       int num = 0;
-      wjson::value<int>::serializer()( num, v.second.begin(), v.second.end(), 0);
+      wjson::value<int>::serializer()( num, v.begin(), v.end(), 0);
       ++num;
-      d2[v.first]=num;
+      wjson::value<int>::serializer()( num, std::back_inserter(outv.back()) );
     }
-    else if ( wjson::parser::is_string(v.second.begin(), v.second.end()) )
+    else if ( wjson::parser::is_string(v.begin(), v.end()) )
     {
       std::string snum;
-      wjson::value<std::string>::serializer()( snum, v.second.begin(), v.second.end(), 0);
+      wjson::value<std::string>::serializer()( snum, v.begin(), v.end(), 0);
       int num = 0;
       wjson::value<int>::serializer()( num, snum.begin(), snum.end(), 0);
       ++num;
-      d2[v.first]=num;
+      snum.clear();
+      wjson::value<int>::serializer()( num, std::back_inserter(snum) );
+      wjson::value<std::string>::serializer()( snum, std::back_inserter(outv.back()) );
+      
     }
-    else if ( wjson::parser::is_array(v.second.begin(), v.second.end()) )
+    else if ( wjson::parser::is_array(v.begin(), v.end()) )
     {
       std::vector<int> vnum;
-      wjson::array< std::vector< wjson::value<int> > >::serializer()( vnum, v.second.begin(), v.second.end(), 0);
+      wjson::array< std::vector< wjson::value<int> > >::serializer()( vnum, v.begin(), v.end(), 0);
       ++vnum[0];
-      d2[v.first]=vnum[0];
+      wjson::array< std::vector< wjson::value<int> > >::serializer()( vnum, std::back_inserter(outv.back()) );
+    }
+    else
+    {
+      outv.back()="null";
     }
   }
   
   json.clear();
-  dict2_json::serializer()( d2, std::back_inserter(json) );
+  vect_json::serializer()( outv, std::back_inserter(json) );
   std::cout << json << std::endl;
-  // {"один":1,"два":2,"три":3}
-  // {"один":1,"два":2,"три":3,"четыре":4}
+  // [1,"2",[3]]
+  // [2,"3",[4]]
 }
