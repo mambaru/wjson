@@ -46,7 +46,7 @@ foo_json::serializer()( f, std::ostreambuf_iterator<char>(std::cout) );
 ```
 Для десериализации нужна пара итераторов произвольного доступа:
 ```cpp
-::iow::json::error e;
+wjson::error e;
 foo_json::serializer()( f, json.begin(), json.end(), &e );
 ```
 Если есть ошибка:
