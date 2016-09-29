@@ -22,10 +22,10 @@ struct foo_json
 
   typedef ::iow::json::object<
     foo,
-    ::iow::json::member_list<
-      ::iow::json::member<n_foo1, foo, int, &foo::foo1>,
-      ::iow::json::member<n_foo2, foo, std::string, &foo::foo2>,
-      ::iow::json::member<n_foo3, foo, std::vector<std::string>, &foo::foo3, iow::json::vector_of_strings<10> >
+    wjson::member_list<
+      wjson::member<n_foo1, foo, int, &foo::foo1>,
+      wjson::member<n_foo2, foo, std::string, &foo::foo2>,
+      wjson::member<n_foo3, foo, std::vector<std::string>, &foo::foo3, iow::json::vector_of_strings<10> >
     >
   > type;
 
