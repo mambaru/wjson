@@ -1,4 +1,3 @@
-enable_testing()
 
 if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type selected, default to Release")
@@ -18,7 +17,6 @@ elseif(MSVC)
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO  "/Yd /O2 /DNDEBUG")
 else(UNIX)
 endif(UNIX)
-
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/../faslib)
