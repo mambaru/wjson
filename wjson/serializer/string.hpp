@@ -136,7 +136,7 @@ private:
     else
       ss << "\\x" << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(static_cast<unsigned char>(*beg));
 
-    for (int i=0; i < bufsize && buf[i]!='\0'; ++i)
+    for (size_t i=0; i < bufsize && buf[i]!='\0'; ++i)
       *(itr++) = buf[i];
     return ++beg;
   }
