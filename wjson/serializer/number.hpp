@@ -62,7 +62,7 @@ namespace detail
       char buf[integer_buffer_size<T>::value];
       char *beg = buf;
       char *end = buf;
-      if (v==0)
+      if ( v==0 )
         *(end++) = '0';
       else
       {
