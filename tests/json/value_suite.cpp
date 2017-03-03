@@ -98,7 +98,7 @@ UNIT(string1, "" )
 {
   using namespace fas::testing;
   using namespace wjson;
-  std::string str="hello world! Привет мир!";
+  std::string str="hello world! Привет\"мир!";
   str.push_back(static_cast<char>(132));
   str.push_back(static_cast<char>(131));
   str+="世界你好!";
@@ -107,14 +107,15 @@ UNIT(string1, "" )
   vstr[12]=static_cast<char>(130);
   std::string json, json2;
   value< std::vector<char> >::serializer()(vstr, std::back_inserter(json));
-  json2="\"hello\\u0000world!\\x82Привет мир!\\x84\\x83世界你好!\"";
+  json2="\"hello\\u0000world!\\x82Привет\\\"мир!\\x84\\x83世界你好!\"";
   t << equal<expect>(json.size(), json2.size()) << FAS_FL;
   t << equal<expect>(json, json2) << FAS_FL;
   std::string str2;
   json_error e;
+  t << message("JSON: ") << json;
   value< std::string >::serializer()(str2, json.begin(), json.end(), &e );
   t << is_false<expect>(e) << strerror::message_trace(e, json.begin(), json.end() ) << FAS_FL;
-  std::string str3="hello\\u0000world! Привет мир!";
+  std::string str3="hello\\u0000world! Привет\"мир!";
   str3.push_back(static_cast<char>(132));
   str3.push_back(static_cast<char>(131));
   str3+="世界你好!";
