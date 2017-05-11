@@ -205,6 +205,7 @@ void object3_toster( T& t )
 
   typename baz_json<Pri>::serializer()(b, std::back_inserter(json) );
   t << equal<expect>( json, "{\"foo\":\"hello\"}" ) << FAS_FL;
+  t << equal<expect>( json, "{'foo':'hello'}"_wjson ) << FAS_FL;
   b.foo2.clear();
   b.foo1=10;
   ::wjson::json_error e;
