@@ -11,6 +11,7 @@
 #include <wjson/parser.hpp>
 
 #include <sstream>
+#include <cstring>
 
 namespace wjson{
 
@@ -18,11 +19,12 @@ template<typename T, int R>
 class serializerF
 {
 public:
+  static const size_t bufsize = ( R == -1 ? 20 : 20 + R ) ;
+
   template<typename P>
   P operator()( T v, P end)
   {
     std::stringstream ss;
-    const size_t bufsize = ( R == -1 ? 20 : 20 + R ) ;
     char buf[bufsize]={'\0'};
     ss.rdbuf()->pubsetbuf(buf, bufsize);
     if ( R == -1 ) 
@@ -37,7 +39,7 @@ public:
 
     ss << v ;
 
-    for (int i = 0; i < bufsize && buf[i]!='\0'; ++i)
+    for (size_t i = 0; i < bufsize && buf[i]!='\0'; ++i)
     {
       *(end++) = buf[i];
     }
@@ -61,8 +63,12 @@ public:
       return create_error<error_code::InvalidNumber>( e, end, std::distance(beg, end) );
     }
 
-    std::stringstream ss;
-    ss.rdbuf()->pubsetbuf( &(*beg), std::distance(beg, end) );
+    std::ptrdiff_t dist = std::distance(beg, end);
+    char buf[bufsize+1]={'\0'};
+    if ( dist > bufsize )  dist = bufsize;
+    std::memcpy(buf, &(*beg), dist);
+    std::stringstream ss( buf );
+    //ss.rdbuf()->pubsetbuf( &(*beg), std::distance(beg, end) );
     ss >> v;
     return parser::parse_number(beg, end, e);
   }

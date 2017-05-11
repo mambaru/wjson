@@ -100,10 +100,6 @@ private:
   template<typename P>
   static P parse_utf8_part_(P beg, P end, json_error* e, fas::int_<0>);
 
-  /*
-  template<typename P>
-  static P parse_symbol( P beg, P end, json_error* e );
-  */
 };
 
 
