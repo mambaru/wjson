@@ -19,7 +19,7 @@ template<typename T, int R>
 class serializerF
 {
 public:
-  static const size_t bufsize = ( R == -1 ? 20 : 20 + R ) ;
+  static const std::ptrdiff_t bufsize = ( R == -1 ? 20 : 20 + R ) ;
 
   template<typename P>
   P operator()( T v, P end)
