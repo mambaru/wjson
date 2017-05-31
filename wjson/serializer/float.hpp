@@ -39,7 +39,7 @@ public:
 
     ss << v ;
 
-    for (size_t i = 0; i < bufsize && buf[i]!='\0'; ++i)
+    for (std::ptrdiff_t i = 0; i < bufsize && buf[i]!='\0'; ++i)
     {
       *(end++) = buf[i];
     }
