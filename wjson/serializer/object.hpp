@@ -12,10 +12,10 @@
 
 namespace wjson{
 
-template<typename T, typename L>
-class serializerT< object<T, L> >
+template<typename T, typename L, typename Mode>
+class serializerT< object<T, L, Mode> >
 {
-  typedef object<T, L> object_type;
+  typedef object<T, L, Mode> object_type;
 
 public:
 
@@ -217,13 +217,22 @@ private:
         beg = parser::parse_space(beg, end, e);
       }
     }
-    else
+    else if ( fas::same_type<Mode, nonstrict_mode>::value  )
     {
       // если организован поиск и не нашли то пропускаем
 
       beg = parser::parse_member(beg, end, e);
       beg = parser::parse_space(beg, end, e);
       return beg;
+    }
+    else
+    {
+      if ( beg==end ) 
+        return create_error<error_code::UnexpectedEndFragment>(e, end);
+      if ( *beg=='}' ) 
+        return beg;
+      // Ошибка, неизвестный метод, для srict_mode
+      return create_error<error_code::InvalidMember>(e, end, std::distance(beg, end));
     }
   }
 

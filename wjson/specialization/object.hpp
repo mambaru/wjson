@@ -12,11 +12,11 @@
 
 namespace wjson{
 
-template<typename T, typename L>
+template<typename T, typename L, typename Mode>
 struct object
 {
   typedef T target;
-  typedef serializerT< object<T, L> > serializer;
+  typedef serializerT< object<T, L, Mode> > serializer;
   typedef typename fas::normalize<L>::type member_list;
 };
 

@@ -27,7 +27,10 @@ struct value;
 template<typename T, int R = -1>
 struct array;
 
-template<typename T, typename L>
+struct strict_mode;
+struct nonstrict_mode;
+
+template<typename T, typename L, typename Mode = nonstrict_mode>
 struct object;
 
 template<typename N, typename T, typename M, M T::* m, typename J = value<M> >
