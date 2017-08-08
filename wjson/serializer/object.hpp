@@ -205,11 +205,18 @@ private:
       if ( *beg=='}' ) return beg;
       for(;;)
       {
+        P member_beg = beg;
         beg = parser::parse_member(beg, end, e);
         beg = parser::parse_space(beg, end, e);
         if ( beg==end ) 
           return create_error<error_code::UnexpectedEndFragment>(e, end);
-        if ( *beg=='}' ) return beg;
+        if ( *beg=='}' ) 
+        {
+          if ( fas::same_type<Mode, nonstrict_mode>::value  )
+            return beg;
+          // Ошибка, неизвестный метод, для srict_mode
+          return create_error<error_code::InvalidMember>(e, end, std::distance(member_beg, end));
+        }
         if ( *beg!=',' ) 
           return create_error<error_code::ExpectedOf>(e, end, ",", std::distance(beg, end) );
 
