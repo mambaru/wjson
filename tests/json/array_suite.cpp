@@ -31,7 +31,7 @@ UNIT(array1, "Одномерный массив")
   
   t << message("Test JSON error: ") << strerror::message(e) << strerror::trace(e, json.begin(), json.end() );
   t << is_true<expect>(e) << FAS_FL;
-  t << equal<expect>( strerror::where( e, json.begin(), json.end()  ), 0) << FAS_FL;
+  t << equal<expect>( strerror::where( e, json.begin(), json.end()  ), 0ul) << FAS_FL;
   t << equal<expect>( strerror::message(e), "Expected Of '['") << FAS_FL;
   t << equal<expect>( strerror::trace(e, json.begin(), json.end() ), ">>>1,2,3,4,5]") << FAS_FL;
   
@@ -50,7 +50,7 @@ UNIT(array1, "Одномерный массив")
   ser(nums, json.begin(), json.end(), &e);
   t << message("Test JSON error: ") << strerror::message(e) << strerror::trace(e, json.begin(), json.end() );
   t << is_true<expect>(e) << FAS_FL;
-  t << equal<expect>(strerror::where(e, json.begin(), json.end()), 7) << FAS_FL;
+  t << equal<expect>(strerror::where(e, json.begin(), json.end()), 7ul) << FAS_FL;
   t << equal<expect>(strerror::message(e), "Invalid Number") << FAS_FL;
   t << equal<expect>(strerror::trace( e, json.begin(), json.end() ), "[1,2,3,>>>[4,5]") << FAS_FL;
 
@@ -60,7 +60,7 @@ UNIT(array1, "Одномерный массив")
   ser(nums, json.begin(), json.end(), &e);
   t << message("Test JSON error: ") << strerror::message(e) << strerror::trace(e, json.begin(), json.end() );
   t << is_true<expect>(e) << FAS_FL;
-  t << equal<expect>(strerror::where(e, json.begin(), json.end()), 7) << FAS_FL;
+  t << equal<expect>(strerror::where(e, json.begin(), json.end()), 7ul) << FAS_FL;
   t << equal<expect>(strerror::message(e), "Expected Of ','") << FAS_FL;
   t << equal<expect>(strerror::trace(e, json.begin(), json.end() ), "[1,2,3 >>>4,5]") << FAS_FL;
 
@@ -69,7 +69,7 @@ UNIT(array1, "Одномерный массив")
   ser(nums, json.begin(), json.end(), &e);
   t << message("Test JSON error: ") << strerror::message(e) << strerror::trace(e, json.begin(), json.end() );
   t << is_true<expect>(e) << FAS_FL;
-  t << equal<expect>(strerror::where(e, json.begin(), json.end()), 5) << FAS_FL;
+  t << equal<expect>(strerror::where(e, json.begin(), json.end()), 5ul) << FAS_FL;
   t << equal<expect>(strerror::message(e), "Invalid Number") << FAS_FL;
   t << equal<expect>(strerror::trace(e, json.begin(), json.end() ), "[1,2,>>>'3 4',5]") << FAS_FL;
 }

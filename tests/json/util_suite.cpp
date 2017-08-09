@@ -169,6 +169,50 @@ UNIT(util6, "quoted")
   t << message("error: ") << strerror::message(e);
   t << message("trace: ") << strerror::trace(e, json.begin(), json.end());
   t << is_true<expect>(e) << FAS_FL;
+}
+
+UNIT(util7, "raw_quoted")
+{
+  using namespace fas::testing;
+  using namespace wjson;
+  std::string val = "123456";
+  std::string json;
+  
+  raw_quoted<std::string>::serializer()( val, std::back_inserter(json) );
+  t << equal<expect>( json, "\"123456\"") << FAS_FL;
+  val="0";
+  json_error e;
+  raw_quoted<std::string>::serializer()( val, json.begin(), json.end(), &e );
+  t << is_false<assert>(e) << strerror::message(e) << FAS_FL;
+  t << equal<expect>( val, "123456") <<  FAS_FL;
+
+  val="123456";
+  json.clear();
+  raw_quoted<std::string, false, false, 1>::serializer()( val, std::back_inserter(json) );
+  t << equal<expect>( json, "123456") << FAS_FL;
+  
+  val="0";
+  raw_quoted<std::string, false, false, 1>::serializer()( val, json.begin(), json.end(), &e );
+  t << is_false<assert>(e) << strerror::message(e) << FAS_FL;
+  t << equal<expect, std::string>( val, "123456") <<  FAS_FL;
+
+  std::string arr="[1,2,3]";
+  json.clear();
+  raw_quoted<std::string>::serializer()( arr, std::back_inserter(json) );
+  t << equal<expect>( json, "\"[1,2,3]\"") << FAS_FL;
+  arr.clear();
+  raw_quoted<std::string>::serializer()( arr, json.begin(), json.end(), &e );
+  t << is_false<assert>(e) << strerror::message(e) << FAS_FL;
+#if __cplusplus >= 201103L
+  t << equal<expect>( arr, "[1,2,3]" ) <<  FAS_FL;
+#endif
+  
+  json = "\"[1,[1,2,3,4],3]\"";
+  
+  arr.clear();
+  raw_quoted<std::string>::serializer()( arr, json.begin(), json.end(), &e );
+  t << is_false<assert>(e) << strerror::message(e) << FAS_FL;
+  t << equal<expect>( arr, "[1,[1,2,3,4],3]") << FAS_FL;
   
 }
 
@@ -179,4 +223,5 @@ BEGIN_SUITE(util, "")
   ADD_UNIT(util4)
   ADD_UNIT(util5)
   ADD_UNIT(util6)
+  ADD_UNIT(util7)
 END_SUITE(util)

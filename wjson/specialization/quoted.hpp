@@ -12,14 +12,14 @@
 
 namespace wjson{
 
-template<typename J, bool SerQ, bool ReqQ>
+template<typename V, bool SerQ, bool ReqQ, int R>
 struct raw_quoted 
 {
-  typedef typename J::target target;
-  typedef serializerRQ< J, SerQ, ReqQ > serializer;
+  typedef V target;
+  typedef serializerRQ< V, SerQ, ReqQ, R > serializer;
 };
 
-template<typename J, bool SerQ , bool ReqQ , int R >
+template<typename J, bool SerQ , bool ReqQ, int R>
 struct quoted
 {
   typedef typename J::target target;

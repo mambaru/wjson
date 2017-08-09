@@ -65,8 +65,8 @@ public:
 
     std::ptrdiff_t dist = std::distance(beg, end);
     char buf[bufsize+1]={'\0'};
-    if ( dist > bufsize )  dist = bufsize;
-    std::memcpy(buf, &(*beg), dist);
+    if ( static_cast<size_t>(dist) > bufsize )  dist = bufsize;
+    std::memcpy(buf, &(*beg), static_cast<size_t>(dist) );
     std::stringstream ss( buf );
     //ss.rdbuf()->pubsetbuf( &(*beg), std::distance(beg, end) );
     ss >> v;

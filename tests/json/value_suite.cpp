@@ -123,7 +123,7 @@ UNIT(string1, "" )
 
   t << equal<expect>(str2, str3) << FAS_FL;
   
-  for (int i=0 ; i < str2.size() ; ++i)
+  for (size_t i=0 ; i < str2.size() ; ++i)
     t << equal<expect, int>( static_cast<unsigned char>(str2[i]), static_cast<unsigned char>(str3[i])) << "i=" << i << ". " << FAS_FL;
   
   

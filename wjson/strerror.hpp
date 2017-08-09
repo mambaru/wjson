@@ -68,14 +68,14 @@ public:
   }
 
   template<typename P>
-  static std::ptrdiff_t where( const json_error& e, P beg, P end)
+  static size_t where( const json_error& e, P beg, P end)
   {
-    if ( !e ) return 0;
+    if ( !e ) return 0ul;
 
-    if (std::distance(beg, end) < e.tail_of() )
-      return 0;
+    if ( std::distance(beg, end) < e.tail_of() )
+      return 0ul;
 
-    return std::distance(beg, end) - e.tail_of();
+    return static_cast<size_t>( std::distance(beg, end) - e.tail_of() );
   }
 
   template<typename P>

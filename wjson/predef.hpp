@@ -74,7 +74,7 @@ struct raw_value;
 template<typename Itr>
 struct iterator_pair;
 
-template<typename J, bool SerQ = true, bool ReqQ = true>
+template<typename J, bool SerQ = true, bool ReqQ = true, int R = -1>
 struct raw_quoted;
 
 template<typename J, bool SerQ = true, bool ReqQ = true, int R = -1>

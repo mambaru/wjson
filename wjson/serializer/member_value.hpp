@@ -8,17 +8,17 @@
 
 namespace wjson{
 
-  template<typename T, typename V, typename M, M V::* m, typename W >
+template<typename T, typename V, typename M, M V::* m, typename W >
 struct serializerT< member_value<T, V, M, m, W> >
 {
   template<typename P>
-  P operator()( const T& t, P end)
+  P operator()( const T& t, P end) const
   {
     return typename W::serializer()( static_cast<const V&>(t).*m, end);
   }
 
   template<typename P>
-  P operator()( T& t, P beg, P end, json_error* e)
+  P operator()( T& t, P beg, P end, json_error* e) const
   {
     return typename W::serializer()( static_cast<V&>(t).*m, beg, end, e);
   }

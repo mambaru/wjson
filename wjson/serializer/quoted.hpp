@@ -13,29 +13,74 @@
 
 namespace wjson{
 
+template<typename V, bool SerQ, bool ReqQ, int R>
+class serializerRQ {
+public:
+  typedef V target;
+
+  template<typename P>
+  P operator()( const target& t, P end) const
+  {
+    if ( SerQ ) *(end++)='"';
+    std::copy( t.begin(), t.end(), end );
+    if ( SerQ ) *(end++)='"';
+    return end;
+  }
+
+  template<typename P>
+  P operator()( target& t, P beg, P end, json_error* e) const
+  {
+    if (beg == end)
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
+
+    if ( ReqQ && *beg == '"')
+      ++beg;
+    else if ( ReqQ )
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
+    
+    t.clear();
+    t.reserve( (R >= 0) ? R : 64 );
+    P start = beg;
+    beg = parser::parse_value(beg, end, e);
+    if ( e && *e )
+      return beg;
+    std::copy( start, beg, std::back_inserter(t) );
+
+    if ( ReqQ && beg == end)
+      return create_error<error_code::UnexpectedEndFragment>(e, end);
+
+    if ( ReqQ && *beg == '"')
+      ++beg;
+    else if ( ReqQ )
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
+
+    return beg;
+  }
+};
 
 template<typename J, typename SJ, bool SerQ, bool ReqQ, int R>
 class serializerQ {
 public:
+  typedef serializerQ self;
   typedef typename J::serializer serializer_t;
   typedef typename J::target target;
 
   template<typename P>
-  P operator()( const target& t, P end)
+  P operator()( const target& t, P end) const
   {
-    return this->serialize(t, end, fas::bool_<SerQ>() );
+    return self::serialize(t, end, fas::bool_<SerQ>() );
   }
 
   template<typename P>
-  P operator()( target& t, P beg, P end, json_error* e)
+  P operator()( target& t, P beg, P end, json_error* e) const
   {
-    return this->deserialize(t, beg, end, e, fas::bool_<ReqQ>() );
+    return self::deserialize(t, beg, end, e, fas::bool_<ReqQ>() );
   }
 
 private:
 
   template<typename P>
-  P serialize( const target& t, P end, fas::true_)
+  static P serialize( const target& t, P end, fas::true_)
   {
     typename SJ::target buf;
     buf.reserve( (R >= 0) ? R : 64 );
@@ -44,13 +89,13 @@ private:
   }
 
   template<typename P>
-  P serialize( const target& t, P end, fas::false_)
+  static P serialize( const target& t, P end, fas::false_)
   {
     return serializer_t()( t, end );
   }
 
   template<typename P>
-  P deserialize( target& t, P beg, P end, json_error* e, fas::true_)
+  static P deserialize( target& t, P beg, P end, json_error* e, fas::true_)
   {
     typename SJ::target buf;
     buf.reserve( (R >= 0) ? R : 64 );
@@ -68,56 +113,12 @@ private:
   }
 
   template<typename P>
-  P deserialize( target& t, P beg, P end, json_error* e, fas::false_)
+  static P deserialize( target& t, P beg, P end, json_error* e, fas::false_)
   {
     if ( parser::is_string(beg, end) )
-      return this->deserialize(t, beg, end, e, fas::true_() );
+      return self::deserialize(t, beg, end, e, fas::true_() );
     return serializer_t()( t, beg, end, e );
   }
 };
-
-template<typename J, bool SerQ, bool ReqQ>
-class serializerRQ
-  : serializerQ< J, value<std::string>, SerQ, ReqQ, -1 >
-{
-public:
-  typedef J serializer;
-  typedef typename J::target target;
-
-  template<typename P>
-  P operator()( const target& t, P end)
-  {
-    if ( SerQ ) *(end++)='"';
-    //end = this->serializer()(t, end);
-    end = this->serialize(t, end, fas::bool_<SerQ>() );
-    if ( SerQ ) *(end++)='"';
-    return end;
-  }
-
-  template<typename P>
-  P operator()( target& t, P beg, P end, json_error* e)
-  {
-    if (beg == end)
-      return create_error<error_code::UnexpectedEndFragment>(e, end);
-
-    if ( ReqQ && *beg == '"')
-      ++beg;
-    else
-      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
-    
-    beg = this->deserialize(t, beg, end, e, fas::bool_<ReqQ>() );
-
-    if ( ReqQ && beg == end)
-      return create_error<error_code::UnexpectedEndFragment>(e, end);
-
-    if ( ReqQ && *beg == '"')
-      ++beg;
-    else
-      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
-
-    return beg;
-  }
-};
-
 
 }

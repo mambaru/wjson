@@ -23,7 +23,7 @@ public:
   typedef typename pair_type::value_serializer value_serializer;
 
   template<typename P>
-  P operator()( const target& t, P end)
+  P operator()( const target& t, P end) const
   {
     end = key_serializer()(t.first, end );
     *(end++)=':';
@@ -32,7 +32,7 @@ public:
   }
 
   template<typename P>
-  P operator()( target& t,  P beg, P end, json_error* e)
+  P operator()( target& t,  P beg, P end, json_error* e) const
   {
     beg = key_serializer()(t.first, beg, end, e );
     beg = parser::parse_space(beg, end, e);
