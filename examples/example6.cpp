@@ -11,19 +11,22 @@ int main()
   std::string json="[     1,\t2,\n3,\n4,  5 ]";
   std::cout << json << " -> ";
   vint_t vint={100, 200, 300};
-  vint_json::serializer()(vint, json.begin(), json.end(), NULL);
+  vint_json::serializer vint_ser;
+  vint_ser(vint, json.begin(), json.end(), NULL);
   json.clear();
-  vint_json::serializer()(vint, std::back_inserter(json));
+  vint_ser(vint, std::back_inserter(json));
   std::cout << json << std::endl << std::endl;
   
   typedef vint_t vvint_t[3];
   typedef wjson::array< vint_json[3] > vvint_json;
   json="[ [], [1], [2, 3], [4, 5, 6] ]";
   std::cout << json << " -> ";
-  vvint_t vvint={{100,100,100},{200, 200, 200}, {300, 300, 300}};
-  vvint_json::serializer()(vvint, json.begin(), json.end(), NULL);
+  vvint_t vvint1={{100,100,100},{200, 200, 200}, {300, 300, 300}};
+    // cppcheck-suppress duplicateExpression
+  vvint_json::serializer()(vvint1, json.begin(), json.end(), NULL);
   json.clear();
-  vvint_json::serializer()(vvint, std::back_inserter(json));
+  // cppcheck-suppress duplicateExpression
+  vvint_json::serializer()(vvint1, std::back_inserter(json));
   std::cout << json << std::endl << std::endl;
 
 
@@ -48,9 +51,10 @@ int main()
       {320, 321, 322}
     }
   };
-
+  // cppcheck-suppress duplicateExpression
   vvvint_json::serializer()(vvvint, json.begin(), json.end(), NULL);
   json.clear();
+  // cppcheck-suppress duplicateExpression
   vvvint_json::serializer()(vvvint, std::back_inserter(json));
   std::cout << json << std::endl;
   

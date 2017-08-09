@@ -22,7 +22,7 @@ public:
   static const std::ptrdiff_t bufsize = ( R == -1 ? 20 : 20 + R ) ;
 
   template<typename P>
-  P operator()( T v, P end)
+  P operator()( T v, P end) const
   {
     std::stringstream ss;
     char buf[bufsize]={'\0'};
@@ -47,7 +47,7 @@ public:
   }
   
   template<typename P>
-  P operator() ( T& v, P beg, P end, json_error* e )
+  P operator() ( T& v, P beg, P end, json_error* e ) const
   {
     if( beg==end)
       return create_error<error_code::UnexpectedEndFragment>( e, end );

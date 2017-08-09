@@ -18,7 +18,7 @@ class serializerT< iterator_pair<T> >
 {
 public:
   template<typename P>
-  P operator()( const T& v, P end )
+  P operator()( const T& v, P end ) const
   {
     if ( v.first != v.second )
       return std::copy(v.first, v.second, end );
@@ -31,7 +31,7 @@ public:
   }
 
   template<typename P>
-  P operator() ( T& v, P beg, P end, json_error* e )
+  P operator() ( T& v, P beg, P end, json_error* e ) const
   {
     v.first = beg;
     beg = parser::parse_value(beg, end, e);

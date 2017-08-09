@@ -57,7 +57,7 @@ namespace detail
     integer_serializer() {}
 
     template<typename P>
-    P serialize(T v, P itr)
+    static P serialize(T v, P itr)
     {
       char buf[integer_buffer_size<T>::value];
       char *beg = buf;
@@ -85,7 +85,7 @@ namespace detail
     }
 
     template<typename P>
-    P unserialize ( T& v, P beg, P end, json_error* e )
+    static P unserialize ( T& v, P beg, P end, json_error* e )
     {
       return parser::unserialize_integer(v, beg, end, e);
     }

@@ -16,7 +16,7 @@ class serializerT< pointer<T, J> >
 {
 public:
   template< typename P>
-  P operator()( const T& ptr, P end)
+  P operator()( const T& ptr, P end) const 
   {
     // Можно обычный указатель
     if ( ptr!=0 )
@@ -32,7 +32,7 @@ public:
 #if __cplusplus >= 201103L
 
   template< typename Type, typename P>
-  P operator() ( std::unique_ptr<Type>& ptr, P beg, P end, json_error* e )
+  P operator() ( std::unique_ptr<Type>& ptr, P beg, P end, json_error* e ) const
   {
     // Только умный
     if (beg!=end && *beg!='n')
@@ -49,7 +49,7 @@ public:
   }
   
   template< typename Type, typename P>
-  P operator() ( std::shared_ptr<Type>& ptr, P beg, P end, json_error* e )
+  P operator() ( std::shared_ptr<Type>& ptr, P beg, P end, json_error* e ) const
   {
     // Только умный
     if (beg!=end && *beg!='n')

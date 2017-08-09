@@ -42,7 +42,7 @@ class serializerA
 public:
   
   template<typename P>
-  P operator()( target_container& t,  P beg, P end, json_error* e)
+  P operator()( target_container& t,  P beg, P end, json_error* e) const
   {
     t.clear();
     if ( parser::is_null(beg, end) )
@@ -84,7 +84,7 @@ public:
   }
 
   template<typename P>
-  P operator()( const target_container& t, P end)
+  P operator()( const target_container& t, P end) const
   {
     *(end++)=L;
     typename target_container::const_iterator itr = t.begin();
@@ -119,7 +119,7 @@ class serializerA< array_r< std::array<J,N>, RR>, L, R >
 public:
 
   template<typename P>
-  P operator()( target_container& t,  P beg, P end, json_error* e)
+  P operator()( target_container& t,  P beg, P end, json_error* e) const
   {
     if ( parser::is_null(beg, end) )
     {
@@ -170,7 +170,7 @@ public:
   }
 
   template<typename P>
-  P operator()( const target_container& t, P end)
+  P operator()( const target_container& t, P end) const
   {
     *(end++)=L;
     const target* itr = &t[0];
@@ -199,7 +199,7 @@ class serializerA< array_r< J[N], RR>, L, R >
 public:
 
   template<typename P>
-  P operator()( target_container& t,  P beg, P end, json_error* e)
+  P operator()( target_container& t,  P beg, P end, json_error* e) const
   {
     if ( parser::is_null(beg, end) )
     {
@@ -246,7 +246,7 @@ public:
   }
 
   template<typename P>
-  P operator()( const target_container& t, P end)
+  P operator()( const target_container& t, P end) const
   {
     *(end++)=L;
     const target* itr = t;

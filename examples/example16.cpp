@@ -19,10 +19,10 @@ int main()
     }
     else if ( wjson::parser::is_bool(i.begin(),i.end()) )
     {
-      bool val = 0;
+      bool val = false;
       wjson::value<bool>::serializer()(val, i.begin(),i.end(), 0);
       std::cout << "Bool " << std::boolalpha << val << " from " << i << std::endl;
-      val=!val;
+      val=true;
       raw_out.push_back(std::string());
       wjson::value<bool>::serializer()( val, std::back_inserter(raw_out.back()) );
     }

@@ -16,7 +16,7 @@ template<typename T, typename L>
 class serializerT< enumerator<T, L> >
 {
   typedef typename enumerator<T, L>::enum_list enum_list;
-  
+  typedef serializerT< enumerator<T, L> > self;
 public:
 
   template<typename P>
@@ -58,7 +58,7 @@ public:
 private:
 
   template<typename LL, typename RR, typename P>
-  P serialize( const T& v, fas::type_list<LL, RR>, P end)
+  static P serialize( const T& v, fas::type_list<LL, RR>, P end)
   {
     if (LL::value == v)
     {
@@ -69,19 +69,19 @@ private:
     }
     else
     {
-      return this->serialize(v, RR(), end);
+      return self::serialize(v, RR(), end);
     }
   }
 
   template<typename P>
-  P serialize( const T& , fas::empty_list, P end)
+  static P serialize( const T& , fas::empty_list, P end)
   {
     return end;
   }
 
 
   template<typename LL, typename RR, typename P>
-  bool deserialize( T& v, fas::type_list<LL, RR>, P beg, P end)
+  static bool deserialize( T& v, fas::type_list<LL, RR>, P beg, P end)
   {
     P first = beg;
     const char *pstr = LL()();
@@ -91,11 +91,11 @@ private:
       v = LL::value;
       return true;
     }
-    return this->deserialize(v, RR(), first, end);
+    return self::deserialize(v, RR(), first, end);
   }
 
   template<typename P>
-  bool deserialize( T& , fas::empty_list, P , P )
+  static bool deserialize( T& , fas::empty_list, P , P )
   {
     return false;
   }

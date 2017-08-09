@@ -18,7 +18,7 @@ class serializerT< raw_value<T, R> >
 {
 public:
   template<typename P>
-  P operator()( const T& v, P end)
+  P operator()( const T& v, P end) const
   {
     if ( v.begin() != v.end() )
     {
@@ -33,7 +33,7 @@ public:
   }
 
   template<typename P>
-  P operator() ( T& v, P beg, P end, json_error* e )
+  P operator() ( T& v, P beg, P end, json_error* e ) const
   {
     v.clear();
     P start = beg;

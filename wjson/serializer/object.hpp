@@ -16,20 +16,20 @@ template<typename T, typename L, typename Mode>
 class serializerT< object<T, L, Mode> >
 {
   typedef object<T, L, Mode> object_type;
-
+  typedef serializerT< object<T, L, Mode> > self;
 public:
 
   template<typename P>
-  P operator()( const T& t, P end)
+  P operator()( const T& t, P end) const
   {
     *(end++)='{';
-    end = this->serialize_members(t, end, L() );
+    end = self::serialize_members(t, end, L() );
     *(end++)='}';
     return end;
   }
 
   template<typename P>
-  P operator()( T& t, P beg, P end, json_error* e)
+  P operator()( T& t, P beg, P end, json_error* e) const
   {
     if ( parser::is_null(beg, end) )
     {
@@ -61,7 +61,7 @@ public:
     
     if ( *beg != '}')
     {
-       beg = this->unserialize_members(t, beg, end, L(), false, e );
+       beg = self::unserialize_members(t, beg, end, L(), false, e );
        if ( beg==end ) 
          return create_error<error_code::UnexpectedEndFragment>(e, end);
        beg = parser::parse_space(beg, end, e);
@@ -81,27 +81,27 @@ public:
 private:
 
   template<typename P, typename C, typename R>
-  P serialize_members( const T& t, P end, fas::type_list<C, R> )
+  static P serialize_members( const T& t, P end, fas::type_list<C, R> )
   {
-    end = this->serialize_member(t, end, C());
+    end = self::serialize_member(t, end, C());
     *(end++)=',';
-    return this->serialize_members(t, end, R() );
+    return self::serialize_members(t, end, R() );
   }
 
   template<typename P, typename C>
-  P serialize_members( const T& t, P end, fas::type_list<C, fas::empty_list> )
+  static P serialize_members( const T& t, P end, fas::type_list<C, fas::empty_list> )
   {
-    return this->serialize_member(t, end, C());
+    return self::serialize_member(t, end, C());
   }
 
   template<typename P>
-  P serialize_members( const T&, P end, fas::empty_list )
+  static P serialize_members( const T&, P end, fas::empty_list )
   {
     return end;
   }
 
   template<typename P, typename M >
-  P serialize_member_name( const T& , P end, M memb )
+  static P serialize_member_name( const T& , P end, M memb )
   {
     const char* name = memb();
     *(end++)='"';
@@ -112,58 +112,58 @@ private:
   }
 
   template<typename P, typename N, typename G, typename M, M G::* m, typename W >
-  P serialize_member( const T& t, P end, const member<N, G, M, m, W>& memb )
+  static P serialize_member( const T& t, P end, const member<N, G, M, m, W>& memb )
   {
-    end = this->serialize_member_name(t, end, memb);
+    end = self::serialize_member_name(t, end, memb);
 
     typedef typename member<N, G, M, m, W>::serializer serializer;
     return serializer()( memb.ref(t), end );
   }
 
   template<typename P, typename N, typename G, typename M, typename GT, typename W >
-  P serialize_member( const T& t, P end, const member_p<N, G, M, GT, W>& memb )
+  static P serialize_member( const T& t, P end, const member_p<N, G, M, GT, W>& memb )
   {
-    end = this->serialize_member_name(t, end, memb);
+    end = self::serialize_member_name(t, end, memb);
     typedef typename member_p<N, G, M, GT, W>::serializer serializer;
     return serializer()( memb.get(t), end );
   }
 
 
   template<typename P, typename ML, typename MR, bool RU >
-  P serialize_member( const T& t, P end, const member_if<ML, MR, RU>&  )
+  static P serialize_member( const T& t, P end, const member_if<ML, MR, RU>&  )
   {
     typedef typename ML::type typeL;
-    if ( !( this->get_value_(t, ML()) == typeL() ) )
-      return this->serialize_member( t, end, ML() );
-    return  this->serialize_member( t, end, MR() );
+    if ( !( self::get_value_(t, ML()) == typeL() ) )
+      return self::serialize_member( t, end, ML() );
+    return  self::serialize_member( t, end, MR() );
   }
 
 private:
 
   template<typename N, typename G, typename M, M G::* m, typename W >
-  M get_value_( const T& t, member<N, G, M, m, W> memb )
+  static M get_value_( const T& t, member<N, G, M, m, W> memb )
   {
     return memb.ref(t);
   }
 
   template<typename N, typename G, typename M, typename GT, typename W >
-  M get_value_( const T& t, member_p<N, G, M, GT, W> memb )
+  static M get_value_( const T& t, member_p<N, G, M, GT, W> memb )
   {
     return memb.get(t);
   }
 
   template<typename P, typename C, typename R>
-  P unserialize_members( T& t, P beg, P end, fas::type_list<C, R>, bool search /*= false*/, json_error* e )
+  static P unserialize_members( T& t, P beg, P end, fas::type_list<C, R>, bool search /*= false*/, json_error* e )
   {
     bool unserialized = false;
-    beg = this->unserialize_member( t, beg, end, C(), unserialized, e );
+    beg = self::unserialize_member( t, beg, end, C(), unserialized, e );
 
     if ( !unserialized )
     {
       if ( !search ) // Организуем поиск с начала списка
-        beg = this->unserialize_members( t, beg, end, L(), true, e );
+        beg = self::unserialize_members( t, beg, end, L(), true, e );
       else // Продолжаем поиск
-        return this->unserialize_members( t, beg, end, R(), true, e );
+        return self::unserialize_members( t, beg, end, R(), true, e );
     }
     else if (search)
       return beg;
@@ -179,9 +179,9 @@ private:
       beg = parser::parse_space(beg, end, e);
 
       if ( unserialized )
-        beg = this->unserialize_members( t, beg, end, R(), false, e );
+        beg = self::unserialize_members( t, beg, end, R(), false, e );
       else
-        beg = this->unserialize_members( t, beg, end, fas::type_list<C, R>() , false, e );
+        beg = self::unserialize_members( t, beg, end, fas::type_list<C, R>() , false, e );
     }
 
     if (beg==end) 
@@ -194,7 +194,7 @@ private:
   }
 
   template<typename P>
-  P unserialize_members( T& , P beg, P end, fas::empty_list, bool search /*= false*/, json_error* e )
+  static P unserialize_members( T& , P beg, P end, fas::empty_list, bool search /*= false*/, json_error* e )
   {
     if ( !search )
     {
@@ -244,7 +244,7 @@ private:
   }
 
   template<typename P, typename M >
-  P unserialize_member_name( T& , P beg, P end, M memb, bool& unserialized, json_error* e )
+  static P unserialize_member_name( T& , P beg, P end, M memb, bool& unserialized, json_error* e )
   {
     const char* name = memb();
     P start = beg;
@@ -290,9 +290,9 @@ private:
 
 
   template<typename P, typename N, typename G, typename M, M G::* m, typename W >
-  P unserialize_member( T& t, P beg, P end, member<N, G, M, m, W> memb, bool& unserialized, json_error* e )
+  static P unserialize_member( T& t, P beg, P end, member<N, G, M, m, W> memb, bool& unserialized, json_error* e )
   {
-    beg = this->unserialize_member_name(t, beg, end, memb, unserialized, e);
+    beg = self::unserialize_member_name(t, beg, end, memb, unserialized, e);
     if ( !unserialized )
       return beg;
     typedef typename member<N, G, M, m, W>::serializer serializer;
@@ -300,9 +300,9 @@ private:
   }
 
   template<typename P, typename N, typename G, typename M, typename GT, typename W >
-  P unserialize_member( T& t, P beg, P end, member_p<N, G, M, GT, W> memb, bool& unserialized, json_error* e )
+  static P unserialize_member( T& t, P beg, P end, member_p<N, G, M, GT, W> memb, bool& unserialized, json_error* e )
   {
-    beg = this->unserialize_member_name(t, beg, end, memb, unserialized, e);
+    beg = self::unserialize_member_name(t, beg, end, memb, unserialized, e);
     if ( !unserialized )
       return beg;
     typedef typename member_p<N, G, M, GT, W>::serializer serializer;
@@ -313,26 +313,26 @@ private:
   }
 
   template<typename P, typename ML, typename MR >
-  P unserialize_member( T& t, P beg, P end, member_if<ML, MR, true>, bool& unserialized, json_error* e )
+  static P unserialize_member( T& t, P beg, P end, member_if<ML, MR, true>, bool& unserialized, json_error* e )
   {
     static const char *snull = "null";
     json_error ee;
-    P itr = this->unserialize_member(t, beg, end, MR(), unserialized, &ee);
+    P itr = self::unserialize_member(t, beg, end, MR(), unserialized, &ee);
     if ( !ee )
     {
       typename ML::serializer()(ML().ref(t), snull, snull+4, 0);
       return itr;
     }
     typename MR::serializer()(MR().ref(t), snull, snull+4, 0);
-    return this->unserialize_member(t, beg, end, ML(), unserialized, e);
+    return self::unserialize_member(t, beg, end, ML(), unserialized, e);
   }
 
   template<typename P, typename ML, typename MR >
-  P unserialize_member( T& t, P beg, P end, member_if<ML, MR, false>, bool& unserialized, json_error* e )
+  static P unserialize_member( T& t, P beg, P end, member_if<ML, MR, false>, bool& unserialized, json_error* e )
   {
     static const char *snull = "null";
     json_error ee;
-    P itr = this->unserialize_member(t, beg, end, ML(), unserialized, &ee);
+    P itr = self::unserialize_member(t, beg, end, ML(), unserialized, &ee);
     if ( !ee )
     {
       typename MR::serializer()(MR().ref(t), snull, snull+4, 0);
@@ -340,7 +340,7 @@ private:
     }
 
     typename ML::serializer()(ML().ref(t), snull, snull+4, 0);
-    return this->unserialize_member(t, beg, end, MR(), unserialized, e);
+    return self::unserialize_member(t, beg, end, MR(), unserialized, e);
   }
 };
 

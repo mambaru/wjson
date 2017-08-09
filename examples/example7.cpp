@@ -30,11 +30,12 @@ int main()
 
   f.flag = true;
   f.string = "Пока Мир";
+  f.value = 1;
   std::cout << json << std::endl;
   foo_json::serializer()( f, std::ostream_iterator<char>(std::cout) );
 
   // Out:
   // {"flag":false,"value":0,"string":"Привет Мир"}
-  // {"flag":true,"value":0,"string":"Пока Мир"}
+  // {"flag":true,"value":1,"string":"Пока Мир"}
   return 0;
 }

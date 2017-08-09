@@ -25,9 +25,10 @@ class serializerS;
 template<bool NullTerm>
 class serializerS<char, NullTerm>
 {
+  typedef serializerS<char, NullTerm> self;
 public:
   template<typename P1, typename P>
-  P serialize(P1 beg, P1 end, P itr)
+  static P serialize(P1 beg, P1 end, P itr)
   {
     *(itr++)='"';
 
@@ -46,7 +47,7 @@ public:
           case '\n':  *(itr++)='\\'; *(itr++) = 'n'; break;
           case '\f':  *(itr++)='\\'; *(itr++) = 'f'; break;
           default: {
-            beg = this->serialize_hex_( beg, itr );
+            beg = self::serialize_hex_( beg, itr );
             continue;
           }
         }
@@ -62,7 +63,7 @@ public:
         P1 end8 = parser::parse_utf8(beg, end, &e);
         if ( e )
         {
-          beg = this->serialize_hex_( beg, itr );
+          beg = self::serialize_hex_( beg, itr );
         }
         else for ( ;beg!=end8; ) 
         {
@@ -71,7 +72,7 @@ public:
       }
       else
       {
-        beg = this->serialize_hex_( beg, itr );
+        beg = self::serialize_hex_( beg, itr );
       }
     }
     *(itr++)='"';
@@ -79,7 +80,7 @@ public:
   }
 
   template<typename P, typename P1>
-  P unserialize(P beg, P end, P1 vitr, int n , json_error* e)
+  static P unserialize(P beg, P end, P1 vitr, int n , json_error* e)
   {
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
@@ -103,14 +104,14 @@ public:
           case 'r':  *(vitr++) = '\r'; ++beg; --n; break;
           case 'n':  *(vitr++) = '\n'; ++beg; --n; break;
           case 'f':  *(vitr++) = '\f'; ++beg; --n; break;
-          case 'u':  beg = this->unserialize_uhex_(++beg, end, &vitr, n, e); break;
-          case 'x':  beg = this->unserialize_xhex_(++beg, end, &vitr, n, e); break;
+          case 'u':  beg = self::unserialize_uhex_(++beg, end, &vitr, n, e); break;
+          case 'x':  beg = self::unserialize_xhex_(++beg, end, &vitr, n, e); break;
           default:
             return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
         }
       }
       else
-        beg = this->unserialize_utf8_(beg, end, &vitr, n, e);
+        beg = self::unserialize_utf8_(beg, end, &vitr, n, e);
     }
 
     if (beg==end) 
@@ -125,7 +126,7 @@ public:
 private:
 
   template<typename P1,typename P>
-  P1 serialize_hex_(P1 beg, P& itr)
+  static P1 serialize_hex_(P1 beg, P& itr)
   {
     std::stringstream ss;
     const size_t bufsize = 8;
@@ -142,7 +143,7 @@ private:
   }
 
   template<typename P, typename P1>
-  P unserialize_utf8_(P beg, P end, P1* vitr, int& n, json_error* e)
+  static P unserialize_utf8_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
     if (beg == end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
@@ -153,18 +154,18 @@ private:
       --n;
     }
     else if ( (*beg & 224)==192 )
-      beg = this->utf8_copy_<2>(beg, end, vitr, n, e);
+      beg = self::utf8_copy_<2>(beg, end, vitr, n, e);
     else if ( (*beg & 240)==224 )
-      beg = this->utf8_copy_<3>(beg, end, vitr, n, e);
+      beg = self::utf8_copy_<3>(beg, end, vitr, n, e);
     else if ( (*beg & 248)==240 )
-      beg = this->utf8_copy_<4>(beg, end, vitr, n, e);
+      beg = self::utf8_copy_<4>(beg, end, vitr, n, e);
     else
       return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
     return beg;
   }
 
   template<int N, typename P, typename P1>
-  P utf8_copy_(P beg, P end, P1* vitr, int& n, json_error* e)
+  static P utf8_copy_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
     for (register int i = 0; i < N && n!=0; ++i, --n)
     {
@@ -181,23 +182,23 @@ private:
   // 0x00000800 — 0x0000FFFF 	1110xxxx 10xxxxxx 10xxxxxx
   // 0x00010000 — 0x001FFFFF    11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
   template<typename P, typename P1>
-  P unserialize_uhex_(P beg, P end, P1* vitr, int& n, json_error* e)
+  static P unserialize_uhex_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
     if ( n==0 ) return beg;
     P cur = beg;
     unsigned short hex = 0;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= this->uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e) << 12;
+    hex |= self::uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e) << 12;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= this->uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e) << 8;
+    hex |= self::uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e) << 8;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= this->uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e) << 4;
+    hex |= self::uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e) << 4;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= this->uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e);
+    hex |= self::uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e);
 
     if ( hex < 32 )
     {
@@ -256,22 +257,22 @@ private:
   }
 
   template<typename P, typename P1>
-  P unserialize_xhex_(P beg, P end, P1* vitr, int& n, json_error* e)
+  static P unserialize_xhex_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
     unsigned char hex = 0;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex = this->uchar2_<unsigned char>( static_cast<unsigned char>(*(beg++)), e) << 4;
+    hex = self::uchar2_<unsigned char>( static_cast<unsigned char>(*(beg++)), e) << 4;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= this->uchar2_<unsigned char>( static_cast<unsigned char>(*(beg++)), e);
+    hex |= self::uchar2_<unsigned char>( static_cast<unsigned char>(*(beg++)), e);
     *((*vitr)++) = static_cast<char>(hex);
     --n;
     return beg;
   }
 
   template<typename Res>
-  Res uchar2_(unsigned char c, json_error* e)
+  static Res uchar2_(unsigned char c, json_error* e)
   {
     if ( c >= '0' && c<='9' ) return static_cast<Res>(  c - '0');
     if ( c >= 'a' && c<='f' ) return static_cast<Res>( (c - 'a') + 10 );
@@ -286,17 +287,18 @@ template<int N>
 class serializerT< value< char[N]> >
   : serializerS<char, true>
 {
+  typedef serializerT< value< char[N]> > self;
 public:
   typedef char value_type[N];
 
   template<typename P>
-  P operator()( const value_type& v, P end)
+  P operator()( const value_type& v, P end) const
   {
-    return this->serialize( v, v+N, end);
+    return self::serialize( v, v+N, end);
   }
 
   template<typename P>
-  P operator() ( value_type& v, P beg, P end, json_error* e )
+  P operator() ( value_type& v, P beg, P end, json_error* e ) const
   {
     for ( register int i =0 ; i < N; ++i)
       v[i]=0;
@@ -304,7 +306,7 @@ public:
     if ( parser::is_null(beg, end) )
       return parser::parse_null(beg, end, e);
 
-    return this->unserialize(beg, end, &(v[0]), N, e);
+    return self::unserialize(beg, end, &(v[0]), N, e);
   }
 };
 
@@ -313,22 +315,23 @@ template<int R>
 class serializerT< value<std::string, R> >
   : serializerS<char, false>
 {
+  typedef serializerT< value<std::string, R> > self;
 public:
   template<typename P>
-  P operator()( const std::string& v, P end)
+  P operator()( const std::string& v, P end) const 
   {
-    return this->serialize( v.begin(), v.end(), end);
+    return self::serialize( v.begin(), v.end(), end);
   }
 
   template<typename P>
-  P operator() ( std::string& v, P beg, P end, json_error* e )
+  P operator() ( std::string& v, P beg, P end, json_error* e ) const
   {
     v.clear();
     v.reserve( (R >= 0) ? R : 64);
 
     if ( parser::is_null(beg, end) )
       return parser::parse_null(beg, end, e);
-    return this->unserialize(beg, end, std::back_inserter(v), std::numeric_limits<int>::max(), e);
+    return self::unserialize(beg, end, std::back_inserter(v), std::numeric_limits<int>::max(), e);
   }
 };
 
@@ -336,21 +339,22 @@ template<int R>
 class serializerT< value<std::vector<char>, R > >
   : serializerS<char, false>
 {
+  typedef serializerT< value<std::vector<char>, R > > self;
 public:
   template<typename P>
-  P operator()( const std::vector<char>& v, P end)
+  P operator()( const std::vector<char>& v, P end) const
   {
-    return this->serialize( v.begin(), v.end(), end);
+    return self::serialize( v.begin(), v.end(), end);
   }
 
   template<typename P>
-  P operator() ( std::vector<char>& v, P beg, P end, json_error* e )
+  P operator() ( std::vector<char>& v, P beg, P end, json_error* e ) const
   {
     v.clear();
     v.reserve( (R >= 0) ? R : 64);
     if ( parser::is_null(beg, end) )
       return parser::parse_null(beg, end, e);
-    return this->unserialize(beg, end, std::back_inserter(v), std::numeric_limits<int>::max(), e);
+    return self::unserialize(beg, end, std::back_inserter(v), std::numeric_limits<int>::max(), e);
   }
 };
 

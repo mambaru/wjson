@@ -55,7 +55,7 @@ template<typename C, typename R>
 struct dict_reserve
 {
   template<typename T>
-  inline void reserve(T& t)
+  inline static void reserve(T& t)
   {
     t.reserve(R::value);
   }
@@ -65,7 +65,7 @@ template<typename C>
 struct dict_reserve<C, fas::empty_type>
 {
   template<typename T>
-  inline void reserve(T&)
+  inline static void reserve(T&)
   {
   }
 };
