@@ -5,15 +5,15 @@ wjson:
   script:
     - rm -rf faslib | true
     - rm -rf ../faslib | true
+    - pushd `pwd`
+    - cd ..
     - git clone http://github.lan/cpp/faslib.git
     - cd faslib
     - git checkout devel-0.6
     - mkdir build
     - cd build
     - cmake ..
-    - cd ../../
-    - ln -s `pwd`/faslib ../faslib
-    - ls -l ..
+    - popd
     - mkdir build
     - cd build
     - cmake -I ./faslib -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON ..
