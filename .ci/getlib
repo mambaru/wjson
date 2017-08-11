@@ -1,0 +1,28 @@
+#!/bin/bash
+script_name=$(realpath $0)
+script_dir=$(dirname $script_name)
+curdir=$script_dir/../..
+
+name=$1
+branch=$2
+if [ -z $branch ]; then
+  branch=master
+fi
+
+pushd `pwd`
+cd $curdir
+fail=1
+if [ -d $name ]; then
+  cd $name
+  git checkout $branch
+  git pull origin $branch
+else
+  git clone http://github.lan/cpp/$name.git
+  cd $name
+  git checkout $branch
+  mkdir build
+fi
+cd build
+cmake ..
+cmake --build .
+popd
