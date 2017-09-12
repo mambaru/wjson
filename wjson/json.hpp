@@ -26,3 +26,4 @@
 #include <wjson/specialization/pointer.hpp>
 #include <wjson/specialization/raw_value.hpp>
 #include <wjson/specialization/member_value.hpp>
+#include <wjson/_json.hpp>
