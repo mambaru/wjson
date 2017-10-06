@@ -66,7 +66,11 @@ public:
       if (*beg==R) break;
       target tg;
       beg = serializer()( tg, beg, end, e);
+#if __cplusplus >= 201103L
+      *(bitr++) = std::move(tg);
+#else
       *(bitr++) = tg;
+#endif
       beg = parser::parse_space(beg, end, e);
       if (beg==end) 
         return create_error<error_code::UnexpectedEndFragment>(e, end);
