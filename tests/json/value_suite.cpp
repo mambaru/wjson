@@ -92,6 +92,8 @@ UNIT(string_unit, "")
 {
   using namespace fas::testing;
   value_serializer_test<T, std::string>(t, "привет", "\"привет\"", __LINE__);
+  value_serializer_test<T, std::string>(t, "😶☺😇🙄🤗😇🙄☺😎🙄", "\"😶☺😇🙄🤗😇🙄☺😎🙄\"", __LINE__);
+  
 }
 
 UNIT(string1, "" )
