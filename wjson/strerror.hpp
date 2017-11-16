@@ -8,6 +8,8 @@
 
 #include <wjson/name.hpp>
 #include <wjson/predef.hpp>
+#include <wjson/specialization/enumerator.hpp>
+#include <wjson/specialization/enum_value.hpp>
 #include <wjson/error.hpp>
 #include <string>
 #include <sstream>
@@ -28,7 +30,7 @@ struct error_code_json
   JSON_NAME2(InvalidEnum, "Invalid Enum")
   JSON_NAME2(InvalidRequest, "Invalid JSON-RPC Request")
   
-  typedef ::wjson::enumerator<
+  typedef enumerator<
     int, 
     ::wjson::member_list<
       enum_value<ValidJSON, int, static_cast<int>(error_code::ValidJSON)>,
