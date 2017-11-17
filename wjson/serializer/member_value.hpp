@@ -9,8 +9,9 @@
 namespace wjson{
 
 template<typename T, typename V, typename M, M V::* m, typename W >
-struct serializerT< member_value<T, V, M, m, W> >
+class serializerT< member_value<T, V, M, m, W> >
 {
+public:
   template<typename P>
   P operator()( const T& t, P end) const
   {

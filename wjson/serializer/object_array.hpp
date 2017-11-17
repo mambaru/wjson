@@ -113,7 +113,7 @@ private:
   }
 
   template<typename P, typename ML, typename MR, bool RU >
-  static P serialize_member( const T& t, P end, const member_if<ML, MR, RU>& memb )
+  static P serialize_member( const T& t, P end, const member_if<ML, MR, RU>& )
   {
     typedef typename ML::type typeL;
     if ( !( self::_get_value(t, ML()) == typeL() ) )

@@ -4,9 +4,10 @@
 
 struct foo
 {
-  bool flag = false;
-  int value = 0;
+  bool flag;
+  int value;
   std::string string;
+  foo(): flag(false), value(0) {}
 };
 
 struct bar: foo
@@ -56,7 +57,7 @@ int main()
 {
   std::string json="[true,0,\"Привет Мир\",[],\"pfoo\":null]";
   bar b;
-  bar_json::serializer()( b, json.begin(), json.end(), nullptr );
+  bar_json::serializer()( b, json.begin(), json.end(), NULL );
   b.flag = true;
   b.vfoo.push_back( static_cast<const foo&>(b));
   b.pfoo = std::make_shared<foo>(static_cast<const foo&>(b));

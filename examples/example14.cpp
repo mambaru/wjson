@@ -2,17 +2,21 @@
 #include <wjson/strerror.hpp>
 #include <iostream>
 
-enum class error_code
+struct error_code
 {
-  None = -1,
-  ValidJSON = 0,
-  InvalidJSON = 1,
-  ParseError = 2
+  enum 
+  {
+    None = -1,
+    ValidJSON = 0,
+    InvalidJSON = 1,
+    ParseError = 2
+  };
 };
 
 struct error
 {
-  int code = -1;
+  int code;
+  error(): code(-1) {}
 };
 
 struct code_json
@@ -68,5 +72,5 @@ int main()
   if ( ec )
     std::cout << wjson::strerror::message_trace(ec, json.begin(), json.end()) << std::endl;
   else
-    std::cout << /*e.code*/ int(error_code()) << std::endl;
+    std::cout << /*e.code*/ int(error_code::None) << std::endl;
 }

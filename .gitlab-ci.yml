@@ -1,32 +1,20 @@
 wjson:
   only:
-#    - master
-#    - devel
+    - master
+    - devel
   script:
     - ./.ci/getlib faslib master
-    - mkdir build
-    - cd build
-    - cmake -I ./faslib -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON ..
-    - cmake --build .
-    - ctest --output-on-failure
-    - cd ..
-    - ./.ci/cppcheck.sh
-
-#    - rm -rf faslib | true
-#    - rm -rf ../faslib | true
-#    - pushd `pwd`
-#    - cd ..
-#    - git clone http://github.lan/cpp/faslib.git
-#    - cd faslib
-#    - git checkout devel-0.6
-#    - mkdir build
-#    - cd build
-#    - cmake ..
-#    - popd
-#    - mkdir build
-#    - cd build
-#    - cmake -I ./faslib -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON ..
-#    - cmake --build .
-#    - ctest --output-on-failure
-#    - cd ..
-#    - ./.ci/cppcheck.sh
+    - ./.ci/build-and-test.sh g++ 98 Debug
+    - ./.ci/build-and-test.sh g++ 11 Debug
+    - ./.ci/build-and-test.sh g++ 11 DebWithRelInfo
+    - ./.ci/build-and-test.sh g++ 98 Release
+    - ./.ci/build-and-test.sh g++ 11 Release
+    - ./.ci/build-and-test.sh g++ 14 Release
+    - ./.ci/build-and-test.sh g++ 17 Release
+    - ./.ci/build-and-test.sh clang++ 98 Release
+    - ./.ci/build-and-test.sh clang++ 11 Release
+    - ./.ci/build-and-test.sh clang++ 14 Release
+    - ./.ci/build-and-test.sh clang++ 17 Release
+    - ./.ci/cppcheck.sh --std=c++03
+    - ./.ci/cppcheck.sh --std=c++11
+    - ./.ci/cppcheck.sh --std=c++14

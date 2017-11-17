@@ -253,15 +253,8 @@ private:
       
     ++beg;
     unserialized = true;
-    for ( ; beg!=end && *name!='\0' && *beg==*name && *beg!='"'; ++name, ++beg)
-    {
-      if (*name!=*beg) 
-      {
-        unserialized = false;
-        break;
-      }
-    }
-
+    for ( ; beg!=end && *name!='\0' && *beg==*name && *beg!='"'; ++name, ++beg);
+  
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
 

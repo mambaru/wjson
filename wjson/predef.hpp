@@ -9,16 +9,6 @@
 #include <fas/type_list.hpp>
 #include <string>
 
-#if __cplusplus >= 201103L
-#include <algorithm>
-inline std::string operator "" _wjson(const char* str, size_t size)
-{
-  std::string res(str, size);
-  std::replace( res.begin(), res.end(), '\'', '"'); 
-  return std::move(res);
-}
-#endif
-
 namespace wjson{
 
 template<typename T, int R = -1>

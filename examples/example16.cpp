@@ -11,8 +11,10 @@ int main()
   std::string json = "[ 42, null, \"абракадабра\", [1,2], {\"x\":[3,4]}, 7, true ]";
   typedef wjson::array< std::vector< wjson::raw_value<std::string> > > raw_json;
   raw_json::serializer()(raw_in, json.begin(), json.end(), 0);
-  for ( auto i : raw_in)
+  //for ( auto i : raw_in)
+  for (size_t k=0; k < raw_in.size(); ++k)
   {
+    const std::string& i = raw_in[k];
     if ( wjson::parser::is_null(i.begin(),i.end()) )
     {
       raw_out.push_back(i);

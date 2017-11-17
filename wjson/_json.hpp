@@ -6,12 +6,13 @@
 
 #pragma once
 
+#if __cplusplus >= 201103L
 #include <string>
 #include <algorithm>
-
-inline std::string operator "" _json(const char* str, size_t size)
+inline std::string operator "" _wjson(const char* str, size_t size)
 {
-  std::string ss( str, str + size);
-  std::replace( ss.begin(), ss.end(), '\'', '\"');
-  return ss;
+  std::string res(str, size);
+  std::replace( res.begin(), res.end(), '\'', '"'); 
+  return res;
 }
+#endif

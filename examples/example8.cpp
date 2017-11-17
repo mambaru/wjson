@@ -4,9 +4,10 @@
 
 struct foo
 {
-  bool flag = false;
-  int value = 0;
+  bool flag;
+  int value;
   std::string string;
+  foo(): flag(false), value(0) {}
 };
 
 struct bar: foo
@@ -51,7 +52,7 @@ int main()
 {
   std::string json="{\"flag\":false,\"value\":0,\"string\":\"Привет Мир\",\"data\":[1,2]";
   bar b;
-  bar_json::serializer()( b, json.begin(), json.end(), nullptr );
+  bar_json::serializer()( b, json.begin(), json.end(), NULL );
   b.flag = true;
   b.data.push_back(3);
   std::cout << json << std::endl;

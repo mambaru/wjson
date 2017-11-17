@@ -134,11 +134,6 @@ private:
     const char fin = ( Sep == ',' ) ? ']' : '"';
     while ( beg!=end && *beg!=fin )
     {
-      if ( beg == end )
-        return create_error<error_code::UnexpectedEndFragment>(e, end);
-      if ( *beg == fin )
-        return beg;
-
       P cur = beg;
       beg = self::deserialize_one(v, beg, end, e, enum_list() );
       if ( cur == beg )

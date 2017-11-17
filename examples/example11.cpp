@@ -14,8 +14,10 @@ int main()
   
   std::cout << json << std::endl;
   vect_json::serializer()( inv, json.begin(), json.end(), 0 );
-  for ( auto& v : inv )
+  //for ( auto& v : inv )
+  for (size_t i = 0; i < inv.size(); ++i)
   {
+    const std::string& v = inv[i];
     outv.push_back("");
     if ( wjson::parser::is_number(v.begin(), v.end()) )
     {

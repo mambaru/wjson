@@ -22,10 +22,8 @@ int main()
   json="[ [], [1], [2, 3], [4, 5, 6] ]";
   std::cout << json << " -> ";
   vvint_t vvint1={{100,100,100},{200, 200, 200}, {300, 300, 300}};
-    // cppcheck-suppress duplicateExpression
   vvint_json::serializer()(vvint1, json.begin(), json.end(), NULL);
   json.clear();
-  // cppcheck-suppress duplicateExpression
   vvint_json::serializer()(vvint1, std::back_inserter(json));
   std::cout << json << std::endl << std::endl;
 
@@ -51,10 +49,8 @@ int main()
       {320, 321, 322}
     }
   };
-  // cppcheck-suppress duplicateExpression
   vvvint_json::serializer()(vvvint, json.begin(), json.end(), NULL);
   json.clear();
-  // cppcheck-suppress duplicateExpression
   vvvint_json::serializer()(vvvint, std::back_inserter(json));
   std::cout << json << std::endl;
   

@@ -167,7 +167,7 @@ private:
   template<int N, typename P, typename P1>
   static P utf8_copy_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
-    for (register int i = 0; i < N && n!=0; ++i, --n)
+    for (int i = 0; i < N && n!=0; ++i, --n)
     {
       if (beg == end) 
         return create_error<error_code::UnexpectedEndFragment>(e, end);
@@ -300,7 +300,7 @@ public:
   template<typename P>
   P operator() ( value_type& v, P beg, P end, json_error* e ) const
   {
-    for ( register int i =0 ; i < N; ++i)
+    for ( int i =0 ; i < N; ++i)
       v[i]=0;
 
     if ( parser::is_null(beg, end) )
@@ -327,7 +327,7 @@ public:
   P operator() ( std::string& v, P beg, P end, json_error* e ) const
   {
     v.clear();
-    v.reserve( (R >= 0) ? R : 64);
+    v.reserve( std::string::size_type(R>=0?R:64) );
 
     if ( parser::is_null(beg, end) )
       return parser::parse_null(beg, end, e);
@@ -351,7 +351,7 @@ public:
   P operator() ( std::vector<char>& v, P beg, P end, json_error* e ) const
   {
     v.clear();
-    v.reserve( (R >= 0) ? R : 64);
+    v.reserve( std::string::size_type(R>=0?R:64) );
     if ( parser::is_null(beg, end) )
       return parser::parse_null(beg, end, e);
     return self::unserialize(beg, end, std::back_inserter(v), std::numeric_limits<int>::max(), e);

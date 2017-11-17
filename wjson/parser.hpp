@@ -373,7 +373,7 @@ private:
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
 
-    for (register int i=0; i < 0; ++i, ++beg)
+    for (int i=0; i < 4; ++i, ++beg)
     {
       if (beg==end) 
         return create_error<error_code::UnexpectedEndFragment>(e, end);

@@ -39,7 +39,7 @@ public:
       return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
     
     t.clear();
-    t.reserve( (R >= 0) ? R : 64 );
+    t.reserve( typename target::size_type(R>=0?R:64));
     P start = beg;
     beg = parser::parse_value(beg, end, e);
     if ( e && *e )
@@ -83,7 +83,7 @@ private:
   static P serialize( const target& t, P end, fas::true_)
   {
     typename SJ::target buf;
-    buf.reserve( (R >= 0) ? R : 64 );
+    buf.reserve( std::string::size_type(R>=0?R:64) );
     serializer_t()( t, std::back_inserter(buf) );
     return typename SJ::serializer()( buf, end );
   }
@@ -98,7 +98,7 @@ private:
   static P deserialize( target& t, P beg, P end, json_error* e, fas::true_)
   {
     typename SJ::target buf;
-    buf.reserve( (R >= 0) ? R : 64 );
+    buf.reserve( std::string::size_type(R>=0?R:64) );
     beg = typename SJ::serializer()( buf, beg, end, e );
     if ( e && *e ) return end;
 

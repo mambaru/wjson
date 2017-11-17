@@ -7,7 +7,7 @@
 #include <chrono>
 #include <cstring>
 
-const size_t NUM_SIZE = 20;
+//const size_t NUM_SIZE = 20;
 const size_t ARR_SIZE = 10000000;
 typedef char numstr_t[20];
 typedef numstr_t numarr_t[ARR_SIZE];
