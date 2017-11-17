@@ -14,7 +14,6 @@ wjson:
     - ./.ci/build-and-test.sh clang++ 98 Release
     - ./.ci/build-and-test.sh clang++ 11 Release
     - ./.ci/build-and-test.sh clang++ 14 Release
-    - ./.ci/build-and-test.sh clang++ 17 Release
     - ./.ci/cppcheck.sh --std=c++03
     - ./.ci/cppcheck.sh --std=c++11
     - ./.ci/cppcheck.sh --std=c++14
