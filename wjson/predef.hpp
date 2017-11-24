@@ -73,13 +73,23 @@ struct quoted;
 template<typename T, typename J>
 struct pointer;
 
-template<int R1=-1, int R2=-1>
+template<typename J, int Reserve = -1>
+struct vector_of;
+
+template<typename J>
+struct deque_of;
+
+template<typename J>
+struct list_of;
+
+
+template<int VectorReserve=-1, int StringReserve=-1>
 struct vector_of_strings;
 
-template<int R1=-1, int R2=-1>
+template<int StringReserve=-1>
 struct deque_of_strings;
 
-template<int R1=-1, int R2=-1>
+template<int StringReserve=-1>
 struct list_of_strings;
 
 template<typename K, typename V>

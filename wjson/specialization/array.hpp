@@ -180,13 +180,22 @@ struct array: array_r<C, fas::int_<R> > {};
 template<typename C>
 struct array<C, -1>: array_r<C, fas::empty_type> {};
 
-template<int R1, int R2>
-struct vector_of_strings: array< std::vector< value< std::string, R2 > >,  R1> {};
+template<typename J, int VectReserve>
+struct vector_of: array< std::vector< J >,  VectReserve> {};
 
-template<int R1, int R2>
-struct deque_of_strings: array< std::deque< value< std::string, R2> >, R1> {};
+template<typename J>
+struct deque_of: array< std::deque< J >, -1> {};
 
-template<int R1, int R2>
-struct list_of_strings: array< std::list< value< std::string, R2 > >, R1> {};
+template<typename J>
+struct list_of: array< std::list< J >, -1> {};
+
+template<int VectReserve, int StrReserve>
+struct vector_of_strings: vector_of< value< std::string, StrReserve >,  VectReserve> {};
+
+template<int StrReserve>
+struct deque_of_strings: deque_of< value< std::string, StrReserve> > {};
+
+template<int StrReserve>
+struct list_of_strings: list_of< value< std::string, StrReserve > >{};
 
 }
