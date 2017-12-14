@@ -11,6 +11,7 @@ namespace wjson{
 template<typename N, typename T, T v>
 struct enum_value: N
 {
+  typedef T value_type;
   static const T value = v;
   const char* operator()() const { return N::operator()(); }
 };
