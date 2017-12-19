@@ -62,7 +62,7 @@ private:
   template<typename LL, typename RR, typename P>
   static P serialize( const T& v, fas::type_list<LL, RR>, P end, bool isFirst)
   {
-    if (LL::value & v)
+    if ( bool(LL::value & v) )
     {
       if (!isFirst) 
         *(end++) = Sep;
