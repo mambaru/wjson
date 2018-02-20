@@ -43,7 +43,7 @@ public:
     else
     {
       ptr=0;
-      for (int i=0; beg!=end && i<4; ++i, ++beg);
+      for (int i=0; (i < 4) && ( beg!=end ); ++i, ++beg);
     }
     return beg;
   }
@@ -60,7 +60,7 @@ public:
     else
     {
       ptr=0;
-      for (int i=0; beg!=end && i<4; ++i, ++beg);
+      for (int i=0; (i < 4) && (beg!=end); ++i, ++beg);
     }
     return beg;
   }
