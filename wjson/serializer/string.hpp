@@ -34,7 +34,10 @@ public:
 
     for (;beg!=end && ( !NullTerm || *beg!='\0' ) ;)
     {
-      if ( static_cast<unsigned char>(*beg) < 32 || *beg=='"' || *beg=='\\' || *beg=='/' ) 
+      if ( static_cast<unsigned char>(*beg) < 32 ||
+           static_cast<unsigned char>(*beg) == '"' || 
+           static_cast<unsigned char>(*beg) == '\\' || 
+           static_cast<unsigned char>(*beg) == '/') 
       {
         switch (*beg)
         {

@@ -1,17 +1,45 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# ---
 *~
 *.kdev4
 *.pyc
 .cproject
 .project
-*.o
 *.cmake
 */debug
 */release
 */build
 build
 .tup
-btp/server/debug
-btp/server/release
 *.kch
 autom4te.cache
 *.deps
