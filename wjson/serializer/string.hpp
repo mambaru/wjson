@@ -33,11 +33,10 @@ public:
 
     for (;beg!=end && ( !NullTerm || *beg!='\0' ) ;)
     {
-      if ( static_cast<unsigned char>(*beg) >=32 && static_cast<unsigned char>(*beg) < 127 )
-      {
-        *(itr++) = *(beg++);
-      }
-      else if ( static_cast<unsigned char>(*beg) < 32 ) 
+      if ( static_cast<unsigned char>(*beg) < 32 ||
+           static_cast<unsigned char>(*beg) == '"' || 
+           static_cast<unsigned char>(*beg) == '\\' || 
+           static_cast<unsigned char>(*beg) == '/') 
       {
         switch (*beg)
         {
@@ -56,6 +55,10 @@ public:
         }
         ++beg;
       } 
+      else if ( static_cast<unsigned char>(*beg) >=32 && static_cast<unsigned char>(*beg) < 127 )
+      {
+        *(itr++) = *(beg++);
+      }
       else if ( parser::is_utf8(beg, end) )
       {
         json_error e;
