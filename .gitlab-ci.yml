@@ -10,12 +10,6 @@ stages:
   - release
   - publish
 
-before_script:
-  - ./.ci/getlib faslib
-
-after_script:
-  - rm -rf ../faslib
-  
 base-build:
   stage: build
   script:
@@ -56,8 +50,8 @@ cppcheck:
 release-branch:
   stage: release
   script:
-    - echo git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${RELEASE_BRANCH}
-    - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:refs/heads/${RELEASE_BRANCH}
+    - echo git push -f ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:refs/heads/${RELEASE_BRANCH}
+    - git push -f ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:refs/heads/${RELEASE_BRANCH}
   only:
     - tags
 
@@ -65,7 +59,7 @@ make-merge-request:
   stage: release
   script:
     - if [ "${RELEASE_BRANCH}" != "${CI_COMMIT_REF_NAME}" ]; then exit 1; fi
-    - ./.ci/headtag.sh ${CI_COMMIT_REF_NAME}
+#    - ./.ci/headtag.sh ${CI_COMMIT_REF_NAME}
     - HOST=${CI_PROJECT_URL}  CI_PROJECT_ID=${CI_PROJECT_ID} GITLAB_USER_ID=${GITLAB_USER_ID} PRIVATE_TOKEN=${PRIVATE_TOKEN} ./.ci/automr.sh
   only:
     - /^release.*$/
