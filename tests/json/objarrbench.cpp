@@ -113,9 +113,9 @@ void json_bench()
   }
   //std::cout << json << std::endl;
   std::cout << "serialization time: " << stime << " ns" << std::endl;
-  std::cout << "serialization rate: " << size_t(( 1000000000.0/stime ) * SER_COUNT) << " persec" << std::endl;
+  std::cout << "serialization rate: " << size_t( (1000000000.0f/float(stime) ) * SER_COUNT) << " persec" << std::endl;
   std::cout << "deserialization time: " << dtime << " ns" << std::endl;
-  std::cout << "deserialization rate: " << size_t(( 1000000000.0/dtime ) * SER_COUNT) << " persec" << std::endl;
+  std::cout << "deserialization rate: " << size_t(( 1000000000.0f/float(dtime) ) * SER_COUNT) << " persec" << std::endl;
   std::cout << "deserialization count: " << dcount << std::endl;
   delete[] json;
 }
@@ -185,9 +185,9 @@ void sprintf_bench()
   }
 
   std::cout << "serialization time: " << stime << " ns" << std::endl;
-  std::cout << "serialization rate: " << size_t(( 1000000000.0/stime ) * SER_COUNT) << " persec" << std::endl;
+  std::cout << "serialization rate: " << size_t(( 1000000000.0f/float(stime) ) * SER_COUNT) << " persec" << std::endl;
   std::cout << "deserialization time: " << dtime << " ns" << std::endl;
-  std::cout << "deserialization rate: " << size_t(( 1000000000.0/dtime ) * SER_COUNT) << " persec" << std::endl;
+  std::cout << "deserialization rate: " << size_t(( 1000000000.0f/float(dtime) ) * SER_COUNT) << " persec" << std::endl;
   std::cout << "deserialization count: " << dcount << std::endl;
   delete[] json;
 }
