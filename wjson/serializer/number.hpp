@@ -69,13 +69,13 @@ namespace detail
         if ( is_signed_integer<T>::is_less_zero(v) ) 
         {
           for( ; v!=0 ; ++end, v/=10) 
-            *end = '0' - v%10;
+            *end = static_cast<char>( '0' - static_cast<char>(v%10) );
           *(end++)='-';
         }
         else
         {
           for( ; v!=0 ; ++end, v/=10) 
-            *end = '0' + v%10;
+            *end = static_cast<char>( '0' + static_cast<char>(v%10) );
         }
       }
 
@@ -167,7 +167,7 @@ class serializerT< value<unsigned long> >
 };
 
 
-#if __cplusplus >= 201103L
+#ifdef WJSON_ENABLE_LONG_LONG
 
 template<>
 class serializerT< value<long long> >
@@ -180,7 +180,7 @@ class serializerT< value<unsigned long long> >
   : public serializerN<unsigned long long>
 {
 };
+#endif 
 
-#endif // __cplusplus >= 201103L
 
 }

@@ -7,7 +7,6 @@
 
 int main()
 {
-  
   typedef ::wjson::value<int>::serializer serializer_t;
   int value = 12345;
 

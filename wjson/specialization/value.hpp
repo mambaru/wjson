@@ -75,7 +75,7 @@ struct value<unsigned long, -1>
 };
 
 
-#if __cplusplus >= 201103L
+#ifdef WJSON_ENABLE_LONG_LONG
 
 template<>
 struct value<long long, -1>

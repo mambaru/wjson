@@ -5,17 +5,27 @@ project(wjson)
 if ( BUILD_TESTING )
   if (PARANOID_WARNING)
     if(UNIX)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-align \
-                         -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization\
-                         -Wformat=2 -Winit-self -Wmissing-declarations \
-                         -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual \
-                         -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo \
-                         -Wstrict-overflow=5 -Wswitch-default -Wundef -Werror")
-      # -Wlogical-op -Wnoexcept -Wstrict-null-sentinel
+      set(CMAKE_CXX_FLAGS "-Wall -pedantic -Wextra -ftemplate-depth=1400 -Wcast-align -Winvalid-pch -pedantic-errors  -Wformat-nonliteral -Wchar-subscripts ")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcomment -Wconversion -Wformat-security -Wimport")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat-y2k")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlong-long -Wmissing-braces -Wmissing-field-initializers")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wparentheses -Wpointer-arith")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wreturn-type -Wsequence-point -Wsign-compare -Wstack-protector -Wuninitialized")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch-enum -Wtrigraphs -Wunknown-pragmas")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wfloat-equal  -Wformat -Wformat=2 -Winit-self  -Wmissing-declarations")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunreachable-code -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable  -Wvariadic-macros -Wvolatile-register-var  -Wwrite-strings")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wstrict-overflow=5 -Wswitch -Wswitch-default -Wundef -Werror")
+      #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weffc++ -Wnon-virtual-dtor")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ")
+      if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlogical-op -Wunsafe-loop-optimizations -Wnoexcept -Wstrict-null-sentinel")
+      endif()
     endif()
-  endif()
+  endif ()
   enable_testing()
   add_subdirectory(tests)
   add_subdirectory(examples)
 endif()
-

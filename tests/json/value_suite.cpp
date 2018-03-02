@@ -79,7 +79,7 @@ UNIT(integer_unit, "")
 UNIT(float_unit, "")
 {
   using namespace fas::testing;
-  real_serializer_test<T, float, -1>(t, 10.1, "1.010000e+01", __LINE__);
+  real_serializer_test<T, float, -1>(t, 10.1f, "1.010000e+01", __LINE__);
   real_serializer_test<T, double, -1>(t, 10.1, "1.010000e+01", __LINE__);
   real_serializer_test<T, long double, -1>(t, 10.1, "1.010000e+01", __LINE__);
 
