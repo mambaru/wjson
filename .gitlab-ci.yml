@@ -10,6 +10,12 @@ stages:
   - release
   - publish
 
+before_script:
+  - ./.ci/getlib faslib
+
+after_script:
+  - rm -rf ../faslib
+  
 base-build:
   stage: build
   script:

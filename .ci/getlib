@@ -11,17 +11,12 @@ fi
 
 pushd `pwd`
 cd $curdir
-fail=1
-if [ -d $name ]; then
-  cd $name
-  git checkout $branch
-  git pull origin $branch
-else
-  git clone http://github.lan/cpp/$name.git
-  cd $name
-  git checkout $branch
-  mkdir build
-fi
+rm -rf $name
+git clone http://github.lan/cpp/$name.git
+cd $name
+git checkout $branch
+mkdir build
+
 cd build
 cmake ..
 cmake --build .
