@@ -3,6 +3,20 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+get_property(cur_dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+
+include(ConfigureLibrary)
+CONFIGURE_LIBRARY( fas/aop.hpp "${cur_dirs} \
+                                ${CMAKE_CURRENT_SOURCE_DIR}/../faslib \
+                                ${PROJECT_BINARY_DIR}/faslib \
+                                /usr/include/faslib\
+                                /usr/local/include/faslib" 
+                  faslib "" )
+if ( NOT HAVE_INCLUDE_faslib )
+  message(WARNING "faslib not found! Use 'git clone https://github.com/migashko/faslib.git' \
+                   in parent directory or install to system and set path in you project")
+endif()
+
 
 if ( ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") 
       OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") )
@@ -40,11 +54,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 endif()
 
 if ( NOT FASLIB_DIR )
-  include(ConfigureLibrary)
-  CONFIGURE_LIBRARY( faslib/fas/aop.hpp  "/usr/include /usr/local/include ${CMAKE_CURRENT_SOURCE_DIR}/.. ${PROJECT_BINARY_DIR}" faslib "" )
   if ( HAVE_INCLUDE_faslib )
-    set(FASLIB_DIR "${HAVE_INCLUDE_faslib}/faslib")
-  else()
+    set(FASLIB_DIR "${HAVE_INCLUDE_faslib}")
+  elseif ( BUILD_TESTING )
     execute_process(COMMAND git clone https://github.com/migashko/faslib.git WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
     execute_process(COMMAND mkdir -p build WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/faslib")
     execute_process(COMMAND cmake .. WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/faslib/build")
