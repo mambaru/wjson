@@ -576,7 +576,7 @@ private:
     {
       if (*beg < '0' || *beg > '9') 
         break;
-      v = v*10 + static_cast<T>(*beg - '0');
+      v = static_cast<T>(v*10 + static_cast<T>(*beg - '0') );
     }
 
    if (neg)
