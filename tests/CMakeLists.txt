@@ -17,3 +17,4 @@ add_executable(
 )
 
 add_test( test_json test_json)
+add_test(NAME test_json-leak COMMAND valgrind --tool=memcheck --leak-check=full ./test_json)

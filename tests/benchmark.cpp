@@ -143,8 +143,8 @@ void json_bench()
     if ( dtime==0 || t < dtime )
       dtime = t;
 
-    for (auto v : vf)
-      if ( !f.check(v) )
+    for (size_t i = 0; i != vf.size(); ++i)
+      if ( !f.check(vf[i]) )
         abort();
     std::vector<foo>().swap(vf);
 
@@ -344,8 +344,8 @@ void json_bench4()
     if ( dtime==0 || t < dtime )
       dtime = t;
 
-    for (auto v : vf)
-      if ( !f.check(v) )
+    for (size_t i = 0; i != vf.size(); ++i)
+      if ( !f.check(vf[i]) )
         abort();
     std::vector<foo>().swap(vf);
 
@@ -395,7 +395,7 @@ void sprintf_bench()
     start = high_resolution_clock::now();
     beg = json;
     end = json + ARR_SIZE;
-    while ( beg!=end && *beg!='\0')
+    while ( beg!=end && *beg!='\0' && fi!=vf.size() )
     {
       auto& f2 = vf[fi++];
       ++dcount;
@@ -409,8 +409,9 @@ void sprintf_bench()
     t = duration_cast<nanoseconds>(finish - start).count();
     if ( dtime==0 || t < dtime )
       dtime = t;
-    for (auto v : vf)
-      if ( !f.check(v) )
+    //for (const auto& v : vf)
+    for (size_t i = 0; i != vf.size(); ++i)
+      if ( !f.check(vf[i]) )
         abort();
     std::vector<foo>().swap(vf);
   }

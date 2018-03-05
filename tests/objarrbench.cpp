@@ -23,7 +23,7 @@ struct foo
     this->field5={1,2,3,4,5};
   }
 
-  bool check(const foo& f)
+  bool check(const foo& f) const
   {
     return 
        this->field1 == f.field1
@@ -105,8 +105,8 @@ void json_bench()
     if ( dtime==0 || t < dtime )
       dtime = t;
 
-    for (auto v : vf)
-      if ( !f.check(v) )
+    for (size_t i = 0; i != vf.size(); ++i)
+      if ( !f.check(vf[i]) )
         abort();
     std::vector<foo>().swap(vf);
 
@@ -149,12 +149,13 @@ void sprintf_bench()
     if ( stime==0 || t < stime )
       stime = t;
 
+    vf.clear();
     vf.resize(SER_COUNT);
     size_t fi = 0;
     start = high_resolution_clock::now();
     beg = json;
     end = json + ARR_SIZE;
-    while ( beg!=end && *beg!='\0')
+    while ( beg!=end && *beg!='\0' && fi!=vf.size() )
     {
       auto& f2 = vf[fi++];
       ++dcount;
@@ -168,7 +169,10 @@ void sprintf_bench()
     t = duration_cast<nanoseconds>(finish - start).count();
     if ( dtime==0 || t < dtime )
       dtime = t;
-    for (auto& v : vf)
+    //for (const foo& v : vf)
+    for (size_t i = 0; i != vf.size() ; ++i)
+    {
+      const foo& v = vf[i];
       if ( !f.check(v) )
       {
         std::cout << v.field1 << std::endl;
@@ -179,8 +183,10 @@ void sprintf_bench()
         std::cout << v.field5[2] << std::endl;
         std::cout << v.field5[3] << std::endl;
         std::cout << v.field5[4] << std::endl;
-        abort();
+        //abort();
       }
+    }
+    vf.clear();
     std::vector<foo>().swap(vf);
   }
 
