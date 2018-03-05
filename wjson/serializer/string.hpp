@@ -189,19 +189,19 @@ private:
   {
     if ( n==0 ) return beg;
     P cur = beg;
-    unsigned short hex = 0;
+    unsigned int hex = 0;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= self::uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e) << 12;
+    hex |= self::uchar2_<unsigned int>( static_cast<unsigned char>(*(beg++)), e) << 12;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= self::uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e) << 8;
+    hex |= self::uchar2_<unsigned int>( static_cast<unsigned char>(*(beg++)), e) << 8;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= self::uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e) << 4;
+    hex |= self::uchar2_<unsigned int>( static_cast<unsigned char>(*(beg++)), e) << 4;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex |= self::uchar2_<unsigned short>( static_cast<unsigned char>(*(beg++)), e);
+    hex |= self::uchar2_<unsigned int>( static_cast<unsigned char>(*(beg++)), e);
 
     if ( hex < 32 )
     {
@@ -262,10 +262,10 @@ private:
   template<typename P, typename P1>
   static P unserialize_xhex_(P beg, P end, P1* vitr, int& n, json_error* e)
   {
-    unsigned char hex = 0;
+    unsigned int hex = 0;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    hex = self::uchar2_<unsigned char>( static_cast<unsigned char>(*(beg++)), e) << 4;
+    hex = self::uchar2_<unsigned int>( static_cast<unsigned char>(*(beg++)), e) << 4;
     if (beg == end ) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
     hex |= self::uchar2_<unsigned char>( static_cast<unsigned char>(*(beg++)), e);
