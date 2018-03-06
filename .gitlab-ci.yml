@@ -77,7 +77,5 @@ faslib-push:
   only:
     - master
   script:
-    - git fetch
-    - git fetch --tags
     - git push -f ${REMOTE_SSH} master:mambaru
     - git push -f --tags ${REMOTE_SSH} master:mambaru
