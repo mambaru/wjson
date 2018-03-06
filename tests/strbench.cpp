@@ -71,11 +71,11 @@ void str1_bench()
   }
 
   std::cout << "serialization time: " << stime << " ns" << std::endl;
-  std::cout << "serialization rate: " << size_t(( 1000000000.0/stime ) * TESTS) << " persec" << std::endl;
+  std::cout << "serialization rate: " << size_t(( 1000000000.0f/float(stime) ) * TESTS) << " persec" << std::endl;
   std::cout << "deserialization time 1: " << dtime1 << " ns" << std::endl;
-  std::cout << "deserialization rate 1: " << size_t(( 1000000000.0/dtime1 ) * TESTS) << " persec" << std::endl;
+  std::cout << "deserialization rate 1: " << size_t(( 1000000000.0f/float(dtime1) ) * TESTS) << " persec" << std::endl;
   std::cout << "deserialization time 2: " << dtime2 << " ns" << std::endl;
-  std::cout << "deserialization rate 2: " << size_t(( 1000000000.0/dtime2 ) * TESTS) << " persec" << std::endl;
+  std::cout << "deserialization rate 2: " << size_t(( 1000000000.0f/float(dtime2) ) * TESTS) << " persec" << std::endl;
   std::cout << std::endl;
 }
 

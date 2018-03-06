@@ -34,7 +34,6 @@
 *.pyc
 .cproject
 .project
-*.cmake
 */debug
 */release
 */build

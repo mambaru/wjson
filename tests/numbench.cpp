@@ -8,7 +8,7 @@
 #include <cstring>
 
 //const size_t NUM_SIZE = 20;
-const size_t ARR_SIZE = 10000000;
+const int ARR_SIZE = 10000000;
 typedef char numstr_t[20];
 typedef numstr_t numarr_t[ARR_SIZE];
 numarr_t numarr;
@@ -36,7 +36,7 @@ void json_bench()
   for (int x=0; x < 5; ++x) 
   {
     auto start = high_resolution_clock::now();
-    for (size_t i = 0; i < ARR_SIZE; i++)
+    for (int i = 0; i < ARR_SIZE; i++)
     {
       value<int>::serializer()( i, numarr[i] );
     }
@@ -50,7 +50,7 @@ void json_bench()
   for (int x=0; x < 5; ++x) 
   {
     auto start = high_resolution_clock::now();
-    for (size_t i = 0; i < ARR_SIZE; i++)
+    for (int i = 0; i < ARR_SIZE; i++)
     {
       value<int>::serializer()( resarr[i], std::begin(numarr[i]), std::end(numarr[i]), 0 );
     }
@@ -66,9 +66,9 @@ void json_bench()
   std::cout << std::endl;*/
 
   std::cout << "serialization time: " << stime << " ns" << std::endl;
-  std::cout << "serialization rate: " << size_t(( 1000000000.0/stime ) * ARR_SIZE) << " persec" << std::endl;
+  std::cout << "serialization rate: " << size_t(( 1000000000.0f/ float(stime) ) * ARR_SIZE) << " persec" << std::endl;
   std::cout << "deserialization time: " << dtime << " ns" << std::endl;
-  std::cout << "deserialization rate: " << size_t(( 1000000000.0/dtime ) * ARR_SIZE) << " persec" << std::endl;
+  std::cout << "deserialization rate: " << size_t(( 1000000000.0f/ float(dtime) ) * ARR_SIZE) << " persec" << std::endl;
   std::cout << std::endl;
 }
 
@@ -121,9 +121,9 @@ void atoi_bench()
   
 
   std::cout << "serialization time: " << stime << " ns" << std::endl;
-  std::cout << "serialization rate: " << size_t(( 1000000000.0/stime ) * ARR_SIZE) << " persec" << std::endl;
+  std::cout << "serialization rate: " << size_t(( 1000000000.0f/float(stime) ) * ARR_SIZE) << " persec" << std::endl;
   std::cout << "deserialization time: " << dtime << " ns" << std::endl;
-  std::cout << "deserialization rate: " << size_t(( 1000000000.0/dtime ) * ARR_SIZE) << " persec" << std::endl;
+  std::cout << "deserialization rate: " << size_t(( 1000000000.0/float(dtime) ) * ARR_SIZE) << " persec" << std::endl;
   std::cout << std::endl;
 }
 
@@ -195,9 +195,9 @@ void ss_bench()
   */
 
   std::cout << "serialization time: " << stime << " ns" << std::endl;
-  std::cout << "serialization rate: " << size_t(( 1000000000.0/stime ) * ARR_SIZE) << " persec" << std::endl;
+  std::cout << "serialization rate: " << size_t(( 1000000000.0f/float(stime) ) * ARR_SIZE) << " persec" << std::endl;
   std::cout << "deserialization time: " << dtime << " ns" << std::endl;
-  std::cout << "deserialization rate: " << size_t(( 1000000000.0/dtime ) * ARR_SIZE) << " persec" << std::endl;
+  std::cout << "deserialization rate: " << size_t(( 1000000000.0f/float(dtime) ) * ARR_SIZE) << " persec" << std::endl;
   std::cout << std::endl;
 }
 
