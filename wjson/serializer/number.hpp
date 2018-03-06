@@ -46,7 +46,12 @@ namespace detail
     // 4 - 10 -> 4*2 + 4/2
     // 8 - 20 -> 8*2 + 8/2
     // 16 - 40 -> 16*2 + 16/2
-    enum { value = sizeof(T)*2 + sizeof(T)/2 + sizeof(T)%2 + is_signed_integer<T>::value };
+    enum 
+    {
+      value = sizeof(T)==1 
+        ? 4 
+        : sizeof(T)*2 + sizeof(T)/2 + sizeof(T)%2 + is_signed_integer<T>::value 
+    };
   };
 
   template<typename T>
