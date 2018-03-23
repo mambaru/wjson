@@ -77,5 +77,7 @@ faslib-push:
   only:
     - master
   script:
-    - git push -f ${REMOTE_SSH} master:mambaru
-    - git push -f --tags ${REMOTE_SSH} master:mambaru
+    - git branch -f mambaru
+    - git checkout mambaru
+    - git push -f ${REMOTE_SSH} mambaru
+    - git push -f --tags ${REMOTE_SSH} mambaru
