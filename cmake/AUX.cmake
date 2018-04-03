@@ -8,6 +8,7 @@ get_property(cur_dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIR
 include(ConfigureLibrary)
 CONFIGURE_LIBRARY( fas/aop.hpp "${cur_dirs} \
                                 ${CMAKE_CURRENT_SOURCE_DIR}/../faslib \
+                                ${CMAKE_SOURCE_DIR}/../faslib \
                                 ${PROJECT_BINARY_DIR}/faslib \
                                 /usr/include/faslib\
                                 /usr/local/include/faslib" 
