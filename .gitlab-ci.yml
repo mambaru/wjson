@@ -15,19 +15,30 @@ base-build:
   script:
     - ./.ci/build-and-test.sh g++ 98 Release
     - ./.ci/build-and-test.sh g++ 11 Release
-  except:
-    - /^draft.*$/
+  only:
+    - devel
+    - master
+    - tags
+    - /^build.*$/
 
-full-build:
+g++-build:
+  stage: build
+  script:
+    - ./.ci/build-and-test.sh g++ 98 Debug
+    - ./.ci/build-and-test.sh g++ 11 Debug
+    - ./.ci/build-and-test.sh g++ 14 Debug
+    - ./.ci/build-and-test.sh g++ 14 Release
+  only:
+    - master
+    - tags
+    - /^build.*$/
+
+clang++-build:
   stage: build
   script:
     - ./.ci/build-and-test.sh clang++ 98 Release
     - ./.ci/build-and-test.sh clang++ 11 Release
-    - ./.ci/build-and-test.sh g++ 14 Release
     - ./.ci/build-and-test.sh clang++ 14 Release
-    - ./.ci/build-and-test.sh g++ 98 Debug
-    - ./.ci/build-and-test.sh g++ 11 Debug
-    - ./.ci/build-and-test.sh g++ 14 Debug
     - ./.ci/build-and-test.sh clang++ 98 Debug
     - ./.ci/build-and-test.sh clang++ 11 Debug
     - ./.ci/build-and-test.sh clang++ 14 Debug
@@ -35,7 +46,7 @@ full-build:
     - master
     - tags
     - /^build.*$/
-  
+
 cppcheck:
   stage: check
   script:

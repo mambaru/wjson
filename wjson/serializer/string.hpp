@@ -132,16 +132,23 @@ private:
   static P1 serialize_hex_(P1 beg, P& itr)
   {
     std::stringstream ss;
+#ifdef __GLIBCXX__
     const size_t bufsize = 8;
     char buf[bufsize]={'\0'};
     ss.rdbuf()->pubsetbuf(buf, bufsize);
+#endif
     if ( static_cast<unsigned char>(*beg) < 128 )
       ss << "\\u" << std::setw(4) << std::setfill('0') << std::hex << static_cast<unsigned short>(*beg);
     else
       ss << "\\x" << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(static_cast<unsigned char>(*beg));
 
+#ifdef __GLIBCXX__
     for (size_t i=0; i < bufsize && buf[i]!='\0'; ++i)
       *(itr++) = buf[i];
+#else
+    std::string str = ss.str();
+    itr = std::copy(str.begin(), str.end(), itr);
+#endif
     return ++beg;
   }
 

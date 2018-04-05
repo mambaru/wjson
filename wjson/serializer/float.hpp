@@ -25,8 +25,10 @@ public:
   P operator()( T v, P end) const
   {
     std::stringstream ss;
+#ifdef __GLIBCXX__
     char buf[bufsize]={'\0'};
     ss.rdbuf()->pubsetbuf(buf, bufsize);
+#endif
     if ( R == -1 ) 
     {
       ss << std::scientific;
@@ -39,10 +41,15 @@ public:
 
     ss << v ;
 
+#ifdef __GLIBCXX__
     for (std::ptrdiff_t i = 0; i < bufsize && buf[i]!='\0'; ++i)
     {
       *(end++) = buf[i];
     }
+#else
+    std::string str = ss.str();
+    end = std::copy(str.begin(), str.end(), end);
+#endif
     return end;
   }
   
@@ -68,7 +75,6 @@ public:
     if ( static_cast<size_t>(dist) > bufsize )  dist = bufsize;
     std::memcpy(buf, &(*beg), static_cast<size_t>(dist) );
     std::stringstream ss( buf );
-    //ss.rdbuf()->pubsetbuf( &(*beg), std::distance(beg, end) );
     ss >> v;
     return parser::parse_number(beg, end, e);
   }
