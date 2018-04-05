@@ -29,11 +29,11 @@ void real_serializer_test(T& t, const V& v, const std::string& chk, int line)
   V val = v;
   std::string json;
   serializer_t()(val, std::back_inserter(json) );
-  t << equal_str<expect>(json, chk) << "Serialize. Line: " << line;
+  t << equal_str<expect>(json, chk) << v << " Serialize. Line: " << line << FAS_FL;
   val = V();
   ::wjson::json_error e;
   serializer_t()(val, json.begin(), json.end(), &e );
-  t << less<expect>(v - val, 0.000001) << "Unserialize. Line: " << line;
+  t << less<expect>(v - val, 0.000001) << "Unserialize. Line: " << line << FAS_FL;
 }
 
 UNIT(bool_unit, "")
