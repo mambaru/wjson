@@ -17,23 +17,29 @@ compiler:
   - clang++ 
 
 env:
-  - BUILD_TYPE=Debug STANDARD=98 
-  - BUILD_TYPE=Release STANDARD=98 
-  - BUILD_TYPE=Debug STANDARD=11 
-  - BUILD_TYPE=Release STANDARD=11 
-  - BUILD_TYPE=Release STANDARD=14 
+  - BUILD_TYPE=Debug STANDARD=98
+  - BUILD_TYPE=Release STANDARD=98
+  - BUILD_TYPE=Debug STANDARD=11
+  - BUILD_TYPE=Release STANDARD=11
+  - BUILD_TYPE=Debug STANDARD=14
+  - BUILD_TYPE=Release STANDARD=14
+  - BUILD_TYPE=Debug STANDARD=17
   - BUILD_TYPE=Release STANDARD=17
 
 matrix:
   exclude:
   - compiler: g++
+    env: BUILD_TYPE=Debug STANDARD=14
+  - compiler: g++
     env: BUILD_TYPE=Release STANDARD=14
   - compiler: g++
     env: BUILD_TYPE=Debug STANDARD=17
+  - compiler: g++
+    env: BUILD_TYPE=Release STANDARD=17
   
 script:
     - mkdir build
     - cd build
-    - cmake .. -DBUILD_TESTING=ON -DPARANOID_WARNING=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=$STANDARD -DCMAKE_CXX_FLAGS=$STDLIB
+    - cmake .. -DBUILD_TESTING=ON -DPARANOID_WARNING=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=$STANDARD
     - cmake --build .
     - ctest --output-on-failure
