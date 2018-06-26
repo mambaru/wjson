@@ -209,7 +209,8 @@ void object3_toster( T& t )
   typename baz_json<Pri>::serializer()(b, std::back_inserter(json) );
   t << equal<expect>( json, "{\"foo\":\"hello\"}" ) << FAS_FL;
 #if __cplusplus >= 201103L
-  t << equal<expect>( json, "{'foo':'hello'}"_wjson ) << FAS_FL;
+  using namespace wjson::literals;
+  t << equal<expect>( json, "{'foo':'hello'}"_json ) << FAS_FL;
 #endif
   b.foo2.clear();
   b.foo1=10;
