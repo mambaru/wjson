@@ -9,10 +9,12 @@
 #if __cplusplus >= 201103L
 #include <string>
 #include <algorithm>
-inline std::string operator "" _wjson(const char* str, size_t size)
-{
-  std::string res(str, size);
-  std::replace( res.begin(), res.end(), '\'', '"'); 
-  return res;
-}
+namespace wjson{ namespace literals{
+  inline std::string operator "" _json(const char* str, size_t size)
+  {
+    std::string res(str, size);
+    std::replace( res.begin(), res.end(), '\'', '"'); 
+    return res;
+  }
+}}
 #endif
