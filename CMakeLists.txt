@@ -3,7 +3,6 @@ project(wjson)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(mambaru)
-get_faslib()
 
 include_directories(.)
 if ( BUILD_TESTING )
