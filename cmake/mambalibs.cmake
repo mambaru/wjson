@@ -12,6 +12,8 @@ MACRO(CLONE_LIBRARY LIBNAME VARDIR LIBURI )
         set(store_BUILD_TESTING ${BUILD_TESTING})
         unset(BUILD_TESTING)
         execute_process(COMMAND git clone "${LIBURI}" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build")
+        message(COMMAND "DEBUG VERSION! checkout devel!!!")
+        execute_process(COMMAND git checkout devel WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
         execute_process(COMMAND cmake . WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
         execute_process(COMMAND make WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
         set(BUILD_TESTING ${store_BUILD_TESTING})
@@ -26,7 +28,7 @@ MACRO(get_faslib)
   find_path( 
     FASLIB_DIR NAMES "fas/aop.hpp"
     PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" 
-    PATH_SUFFIXES "build/faslib" "../build/faslib" "faslib" "../faslib"
+    PATH_SUFFIXES "../faslib" "faslib" "build/faslib" "../build/faslib" 
   )
   if ( "${FASLIB_DIR}" STREQUAL "FASLIB_DIR-NOTFOUND") 
     unset(FASLIB_DIR CACHE)
