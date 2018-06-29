@@ -26,7 +26,7 @@ MACRO(get_faslib)
   find_path( 
     FASLIB_DIR NAMES "fas/aop.hpp"
     PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" 
-    PATH_SUFFIXES "../faslib" "faslib" "build/faslib" "../build/faslib" 
+    PATH_SUFFIXES "build/faslib" "../build/faslib" "faslib" "../faslib"
   )
   if ( "${FASLIB_DIR}" STREQUAL "FASLIB_DIR-NOTFOUND") 
     unset(FASLIB_DIR CACHE)
