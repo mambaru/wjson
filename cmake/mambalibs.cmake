@@ -28,11 +28,19 @@ MACRO(get_faslib)
   find_path( 
     FASLIB_DIR NAMES "fas/aop.hpp"
     PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" 
-    PATH_SUFFIXES "../faslib" "faslib" "build/faslib" "../build/faslib" 
+    PATH_SUFFIXES "build/faslib" "../build/faslib" "faslib" "../faslib" 
   )
   if ( "${FASLIB_DIR}" STREQUAL "FASLIB_DIR-NOTFOUND") 
     unset(FASLIB_DIR CACHE)
-    clone_library(faslib "FASLIB_DIR" "https://github.com/migashko/faslib.git" "")
+    execute_process(COMMAND bash -c "git remote -v | head -q -n 1" 
+                    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE remote_url )
+    if ( "${remote_url}" MATCHES "github\.lan" )
+      message(STATUS "Clone from LAN repositary")
+      clone_library(faslib "FASLIB_DIR" "git@github.lan:cpp/faslib.git" "")
+    else()
+      message(STATUS "Clone from github.com")
+      clone_library(faslib "FASLIB_DIR" "https://github.com/migashko/faslib.git" "")
+    endif()
   endif()
   include_directories("${FASLIB_DIR}")
   set(FAS_TESTING_CPP "${FASLIB_DIR}/fas/testing/testing.cpp")
@@ -50,7 +58,7 @@ MACRO(get_mambaru LIBNAME LIBDIR LIBBIN PARAMS_FOR_CMAKE)
     execute_process(COMMAND bash -c "git remote -v | head -q -n 1" 
                     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE remote_url )
     message(STATUS "remote_url=${remote_url}")
-    if ( "${remote_url}" MATCHES "github\.lan1" )
+    if ( "${remote_url}" MATCHES "github\.lan" )
       message(STATUS "Clone from LAN repositary")
       clone_library(${LIBNAME} ${LIBDIR} "git@github.lan:cpp/${LIBNAME}.git" "${PARAMS_FOR_CMAKE}")
     else()
