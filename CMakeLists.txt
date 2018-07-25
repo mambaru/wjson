@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 project(wjson)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-include(AUX)
+include(mambaru)
 
-include_directories(.)
 if ( BUILD_TESTING )
   enable_testing()
   add_subdirectory(tests)
@@ -18,8 +17,6 @@ set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 set(CPACK_PACKAGE_CONTACT "migashko@gmail.com")
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 install(DIRECTORY wjson DESTINATION include
   PATTERN "*.cmake" EXCLUDE
