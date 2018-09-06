@@ -43,9 +43,8 @@ build
 autom4te.cache
 *.deps
 CMakeFiles
+Testing
 CMakeCache.txt
 *.kate-swp
-*build_info.h
 config.h
-Makefile
-docs
+doc

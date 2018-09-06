@@ -8,6 +8,9 @@ MACRO(CLONE_LIBRARY LIBNAME VARDIR LIBURI PARAMS_FOR_CMAKE)
     if ( HAVE_INCLUDE_${LIBNAME} )
       set(${VARDIR} "${HAVE_INCLUDE_${LIBNAME}}")
     else()
+      if ( NOT EXISTS "${CMAKE_SOURCE_DIR}/build" )
+        execute_process(COMMAND mkdir build WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+      endif()
       if ( NOT EXISTS "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
         execute_process(COMMAND git rev-parse --abbrev-ref HEAD WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE current_branch )
         execute_process(COMMAND git clone "${LIBURI}" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build")
@@ -15,8 +18,10 @@ MACRO(CLONE_LIBRARY LIBNAME VARDIR LIBURI PARAMS_FOR_CMAKE)
           message(STATUS "DEBUG VERSION! checkout devel!!!")
           execute_process(COMMAND git checkout devel WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
         endif()
-        execute_process(COMMAND cmake . ${PARAMS_FOR_CMAKE} WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
-        execute_process(COMMAND make WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
+        
+        execute_process(COMMAND mkdir build WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
+        execute_process(COMMAND cmake ${PARAMS_FOR_CMAKE1} ..  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}/build")
+        execute_process(COMMAND cmake --build . --config Release WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}/build")
       endif()
       set(${VARDIR} "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
     endif()
@@ -28,13 +33,18 @@ MACRO(get_faslib)
   find_path( 
     FASLIB_DIR NAMES "fas/aop.hpp"
     PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" 
-    PATH_SUFFIXES "build/faslib" "../build/faslib" "faslib" "../faslib" 
+    PATH_SUFFIXES 
+      "build/faslib" 
+      "faslib" 
+      "../faslib" 
+      "../../faslib" 
+      "../../../faslib" 
   )
   if ( "${FASLIB_DIR}" STREQUAL "FASLIB_DIR-NOTFOUND") 
     unset(FASLIB_DIR CACHE)
     execute_process(COMMAND bash -c "git remote -v | head -q -n 1" 
                     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE remote_url )
-    if ( "${remote_url}" MATCHES "github\.lan" )
+    if ( "${remote_url}" MATCHES "\.lan" )
       message(STATUS "Clone from LAN repositary")
       clone_library(faslib "FASLIB_DIR" "git@github.lan:cpp/faslib.git" "")
     else()
@@ -51,7 +61,12 @@ MACRO(get_mambaru LIBNAME LIBDIR LIBBIN PARAMS_FOR_CMAKE)
   find_path( 
     ${LIBDIR} NAMES "${LIBNAME}/${LIBNAME}.hpp"
     PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" 
-    PATH_SUFFIXES "build/${LIBNAME}" "../build/${LIBNAME}" "${LIBNAME}" "../${LIBNAME}"
+    PATH_SUFFIXES
+      "build/${LIBNAME}" 
+      "${LIBNAME}" 
+      "../${LIBNAME}"  
+      "../../${LIBNAME}" 
+      "../../../${LIBNAME}" 
   )
   if ( "${${LIBDIR}}" STREQUAL "${LIBDIR}-NOTFOUND") 
     unset(${LIBDIR} CACHE)
@@ -73,7 +88,12 @@ MACRO(get_mambaru LIBNAME LIBDIR LIBBIN PARAMS_FOR_CMAKE)
   find_library( 
     ${LIBBIN} NAMES "${LIBNAME}"
     PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" 
-    PATH_SUFFIXES "build/${LIBNAME}" "../build/${LIBNAME}" "${LIBNAME}" "../${LIBNAME}" "${LIBNAME}/build" "../${LIBNAME}/build"
+    PATH_SUFFIXES 
+      "build/${LIBNAME}/build" 
+      "${LIBNAME}/build" 
+      "../${LIBNAME}/build" 
+      "../../${LIBNAME}/build" 
+      "../../../${LIBNAME}/build"
   )
   if ( ${${LIBBIN}} )
     link_directories("${${LIBBIN}}")
