@@ -47,4 +47,5 @@ Testing
 CMakeCache.txt
 *.kate-swp
 config.h
-doc
+docs
+
