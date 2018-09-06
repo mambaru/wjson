@@ -8,7 +8,7 @@ sed -i -- "s#\:\.\/#\:$prj_dir\/#g" "$script_dir/suppressions.lst"
 
 opt="--inconclusive --error-exitcode=1 --force --max-configs=128 \
 --quiet --enable=all --suppress=missingIncludeSystem --suppressions-list=$script_dir/suppressions.lst \
---template={id}:{file}:{line}:[{severity}]:{message} -I $prj_dir"
+--template={id}:{file}:{line}:[{severity}]:{message}"
 
 cppcheck $opt $@
 res=$?

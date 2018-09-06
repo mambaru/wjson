@@ -17,7 +17,6 @@ base-build:
     - ./.ci/build-and-test.sh g++ 11 Release
   only:
     - devel
-    - master
     - tags
     - /^build.*$/
 
@@ -29,7 +28,6 @@ g++-build:
     - ./.ci/build-and-test.sh g++ 14 Debug
     - ./.ci/build-and-test.sh g++ 14 Release
   only:
-    - master
     - tags
     - /^build.*$/
 
@@ -43,7 +41,6 @@ clang++-build:
     - ./.ci/build-and-test.sh clang++ 11 Debug
     - ./.ci/build-and-test.sh clang++ 14 Debug
   only:
-    - master
     - tags
     - /^build.*$/
 
@@ -54,7 +51,6 @@ cppcheck:
     - ./.ci/cppcheck.sh --std=c++11
     - ./.ci/cppcheck.sh --std=c++14
   only:
-    - master
     - tags
     - /^check.*$/
 
@@ -91,3 +87,10 @@ push-to-github:
     - git checkout mambaru
     - git push -f ${REMOTE_SSH} mambaru
     - git push -f --tags ${REMOTE_SSH} mambaru
+    - doxygen
+    - cd docs/html
+    - git init 
+    - git add .
+    - git commit -m "doxygen"
+    - git push -f ${REMOTE_SSH} master:gh-pages
+
