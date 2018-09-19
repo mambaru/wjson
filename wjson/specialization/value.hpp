@@ -143,5 +143,9 @@ struct value< char[N], -1 >
   typedef serializerT< value<char[N], -1>  > serializer;
 };
 
+template<int R>
+struct string: value<std::string, R> {};
+
+
 }
 

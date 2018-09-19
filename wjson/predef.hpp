@@ -14,6 +14,9 @@ namespace wjson{
 template<typename T, int R = -1>
 struct value;
 
+template<int R = -1>
+struct string;
+
 template<typename T, int R = -1>
 struct array;
 
@@ -82,6 +85,11 @@ struct deque_of;
 template<typename J>
 struct list_of;
 
+template<typename J>
+struct set_of;
+
+template<typename J>
+struct multiset_of;
 
 template<int VectorReserve=-1, int StringReserve=-1>
 struct vector_of_strings;

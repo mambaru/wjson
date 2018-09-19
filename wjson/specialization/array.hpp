@@ -189,6 +189,13 @@ struct deque_of: array< std::deque< J >, -1> {};
 template<typename J>
 struct list_of: array< std::list< J >, -1> {};
 
+template<typename J>
+struct set_of: array< std::set< J >, -1> {};
+
+template<typename J>
+struct multiset_of: array< std::multiset< J >, -1> {};
+
+
 template<int VectReserve, int StrReserve>
 struct vector_of_strings: vector_of< value< std::string, StrReserve >,  VectReserve> {};
 
