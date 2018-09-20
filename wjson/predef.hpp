@@ -59,6 +59,9 @@ struct dict_deque;
 template<typename VJ>
 struct dict_map;
 
+template<typename VJ>
+struct dict_multimap;
+
 /// 
 
 template<typename T = std::string, int R = -1>

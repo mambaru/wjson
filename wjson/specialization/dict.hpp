@@ -118,6 +118,18 @@ struct dict_base< std::set< field<K, V> >, R>
   static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
 };
 
+template<typename K, typename V, typename R>
+struct dict_base< std::multiset< field<K, V> >, R>
+{
+  typedef field<K, V> json_value;
+  typedef std::multiset< json_value > json_container;
+  typedef typename json_value::target target;
+  typedef std::multiset<target> target_container;
+  typedef serializerA< dict_r< json_container, R>, '{', '}' > serializer;
+  typedef std::back_insert_iterator<target_container> inserter_iterator;
+  static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
+};
+
 template<typename JK, typename JV, typename R>
 struct dict_base< std::map<JK, JV>, R >
 {
@@ -137,13 +149,13 @@ struct dict_base< std::map<JK, JV>, R >
 template<typename JK, typename JV, typename R>
 struct dict_base< std::multimap<JK, JV>, R >
 {
-  typedef std::map<JK, JV> json_container;
+  typedef std::multimap<JK, JV> json_container;
   typedef typename JK::target key;
   typedef typename JV::target value;
   typedef std::pair<key, value> pair_type;
   typedef field< JK , JV > json_value;
   typedef typename json_value::target target;
-  typedef std::map< key, value > target_container;
+  typedef std::multimap< key, value > target_container;
   typedef serializerA< dict_r< json_container, R >, '{', '}' > serializer;
 
   typedef std::insert_iterator<target_container> inserter_iterator;
@@ -198,9 +210,21 @@ template<typename K, typename V, typename R>
 struct dict_base< std::unordered_set< field<K, V> >, R>
 {
   typedef field<K, V> json_value;
-  typedef std::set< json_value > json_container;
+  typedef std::unordered_set< json_value > json_container;
   typedef typename json_value::target target;
-  typedef std::set<target> target_container;
+  typedef std::unordered_set<target> target_container;
+  typedef serializerA< dict_r< json_container, R>, '{', '}' > serializer;
+  typedef std::back_insert_iterator<target_container> inserter_iterator;
+  static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
+};
+
+template<typename K, typename V, typename R>
+struct dict_base< std::unordered_multiset< field<K, V> >, R>
+{
+  typedef field<K, V> json_value;
+  typedef std::unordered_multiset< json_value > json_container;
+  typedef typename json_value::target target;
+  typedef std::unordered_multiset<target> target_container;
   typedef serializerA< dict_r< json_container, R>, '{', '}' > serializer;
   typedef std::back_insert_iterator<target_container> inserter_iterator;
   static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
@@ -233,5 +257,8 @@ struct dict_deque: dict< std::deque< field< value<std::string>,VJ > >, R > {};
 
 template<typename VJ>
 struct dict_map: dict< std::map< value<std::string>, VJ >, -1 > {};
+
+template<typename VJ>
+struct dict_multimap: dict< std::multimap< value<std::string>, VJ >, -1 > {};
 
 }
