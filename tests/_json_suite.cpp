@@ -1,14 +1,12 @@
 #include <fas/testing.hpp>
-#include <wjson/json.hpp>
-#include <wjson/error.hpp>
-#include <wjson/strerror.hpp>
+#include <wjson/_json.hpp>
 
 
 UNIT(_json1, "")
 {
   using namespace fas::testing;
-  using namespace wjson;
-  t << fail("test");
+  using namespace wjson::literals;
+  t << equal<assert, std::string>("'test'"_json, "\"test\"");
 }
 
 BEGIN_SUITE(_json, "")
