@@ -14,6 +14,12 @@ endif()
 if ( ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") 
       OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") )
       
+  if ( BUILD_COVERAGE )
+#    set(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} --coverage -fprofile-arcs -ftest-coverage")
+#    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -lgcov ")
+    set(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+  endif()
+  
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Werror -pedantic -ftemplate-backtrace-limit=0 -fpic")
   set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG ")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO  "-O2 -g -DNDEBUG")

@@ -9,3 +9,7 @@
 #include <wjson/json.hpp>
 #include <wjson/name.hpp>
 
+inline void temp()
+{
+  std::cout << "temp" << std::endl;
+}
