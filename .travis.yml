@@ -46,5 +46,5 @@ script:
   - ctest --output-on-failure
 
 after_success:
-  if: env(BUILD_TYPE) = Debug AND env(STANDARD) = 11
     - ./.ci/build-and-test-cov.sh g++ 11
+    if: env(BUILD_TYPE) = Debug AND env(STANDARD) = 11
