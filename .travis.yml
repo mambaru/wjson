@@ -39,13 +39,14 @@ matrix:
     env: BUILD_TYPE=Release STANDARD=17
   
 script:
-    - mkdir build
-    - cd build
-    - cmake .. -DBUILD_TESTING=ON -DPARANOID_WARNING=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=$STANDARD -DBUILD_COVERAGE=$COVERAGE
-    - cmake --build .
-    - ctest --output-on-failure
+  - mkdir build
+  - cd build
+  - cmake .. -DBUILD_TESTING=ON -DPARANOID_WARNING=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=$STANDARD
+  - cmake --build .
+  - ctest --output-on-failure
 
 after_success:
-  ./.ci/build-and-test-cov.sh g++ 11
-  coveralls -r build/tests/CMakeFiles/test_json.dir/  --gcov-options '\-lpr'
+  - ./.ci/build-and-test-cov.sh g++ 11
+  if: env(BUILD_TYPE) = Debug AND env(STANDARD) = 11
+
   
