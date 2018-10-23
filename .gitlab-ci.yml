@@ -24,7 +24,7 @@ g++-build:
   stage: build
   script:
     - ./.ci/build-and-test.sh g++ 98 Debug
-    - ./.ci/build-and-test.sh g++ 11 Debug
+    - ./.ci/build-and-test.sh g++ 11 Debug 
     - ./.ci/build-and-test.sh g++ 14 Debug
     - ./.ci/build-and-test.sh g++ 14 Release
   only:

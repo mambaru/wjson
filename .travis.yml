@@ -18,14 +18,14 @@ compiler:
   - clang++ 
 
 env:
-  - BUILD_TYPE=Debug STANDARD=98 COVERAGE=ON
-  - BUILD_TYPE=Release STANDARD=98 COVERAGE=OFF
-  - BUILD_TYPE=Debug STANDARD=11 COVERAGE=ON
-  - BUILD_TYPE=Release STANDARD=11 COVERAGE=OFF
-  - BUILD_TYPE=Debug STANDARD=14 COVERAGE=OFF
-  - BUILD_TYPE=Release STANDARD=14 COVERAGE=OFF
-  - BUILD_TYPE=Debug STANDARD=17 COVERAGE=OFF
-  - BUILD_TYPE=Release STANDARD=17 COVERAGE=OFF
+  - BUILD_TYPE=Debug STANDARD=98
+  - BUILD_TYPE=Release STANDARD=98
+  - BUILD_TYPE=Debug STANDARD=11
+  - BUILD_TYPE=Release STANDARD=11
+  - BUILD_TYPE=Debug STANDARD=14
+  - BUILD_TYPE=Release STANDARD=14 
+  - BUILD_TYPE=Debug STANDARD=17
+  - BUILD_TYPE=Release STANDARD=17
 
 matrix:
   exclude:
@@ -46,4 +46,6 @@ script:
     - ctest --output-on-failure
 
 after_success:
-  - coveralls --exclude lib --exclude tests --gcov-options '\-lp'
+  ./.ci/build-and-test-cov.sh g++ 11
+  coveralls -r build/tests/CMakeFiles/test_json.dir/  --gcov-options '\-lpr'
+  

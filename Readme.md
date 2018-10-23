@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/mambaru/wjson/badge.svg?branch=master)](https://coveralls.io/github/mambaru/wjson?branch=master)
+
 # JSON сериализатор
 
 Статья на [хабре](https://habrahabr.ru/post/311262/) с примерами и бенчмарками.
