@@ -1,0 +1,1 @@
+../external/cmake-ci/ci/cppcheck-ci.sh
