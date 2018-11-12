@@ -1,3 +1,6 @@
 [submodule "external/cmake-ci"]
 	path = external/cmake-ci
 	url = git@github.lan:cpp/cmake-ci.git
+[submodule "external/faslib"]
+	path = external/faslib
+	url = git@github.lan:cpp/faslib.git
