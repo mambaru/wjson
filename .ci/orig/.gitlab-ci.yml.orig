@@ -10,8 +10,8 @@ variables:
 # wip-devel
 
 before_script:
-  - git checkout -f ${CI_COMMIT_REF_NAME}
-  - git pull
+  - git checkout --force ${CI_COMMIT_REF_NAME}
+  - git pull --force origin ${CI_COMMIT_REF_NAME}
   - git submodule sync
   - git submodule update --init --force
 
