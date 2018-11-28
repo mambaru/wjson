@@ -29,9 +29,10 @@ clean:
 	rm -r docs
 	cd build && make clean
 update: external
-	git submodule foreach git checkout master
-	git submodule foreach git pull origin master
+	rm -f update.sh
+	wget http://github.lan/cpp/cmake-ci/raw/master/update.sh
+	bash update.sh
 upgrade: update
 	rm -f upgrade.sh
-	wget http://github.lan/cpp/cmake-ci/raw/master/upgrade.sh
-	bash upgrade.sh
+	wget http://github.lan/cpp/cmake-ci/raw/master/upgrade.sh 
+	bash upgrade.sh public
