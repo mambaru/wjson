@@ -33,7 +33,6 @@ update-submodules:
     - if git commit -am "night build all submodules update autocommit"; then
     -   echo "Submodules Update Succeed!!"
     - fi
-    - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:night-build
   only:
     - night-build
 
