@@ -139,6 +139,7 @@ devel-any:
 pre-release:
   stage: merge
   script:
+    - git log | head
     - echo git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:pre-release
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:pre-release
   only:
