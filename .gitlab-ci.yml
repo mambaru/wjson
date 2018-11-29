@@ -10,8 +10,6 @@ variables:
 # wip-devel
 
 before_script:
-#  - git checkout --force ${CI_COMMIT_REF_NAME}
-#  - git pull --force origin ${CI_COMMIT_REF_NAME}
   - git submodule deinit --force .
   - git submodule sync
   - git submodule update --init
@@ -27,7 +25,6 @@ stages:
 update-submodules:
   stage: pre-build
   script:
-    #- git submodule foreach git checkout master
     - git submodule foreach git pull origin master
     - git add .
     - if git commit -am "night build all submodules update autocommit"; then
