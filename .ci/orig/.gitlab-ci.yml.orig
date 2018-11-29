@@ -91,7 +91,6 @@ build-clang++14:
     - /^build.*$/
     - pre-release
     - night-build
-    
 
 #
 # ###########################################
@@ -115,7 +114,11 @@ cppcheck:
 devel-wip:
   stage: merge
   script:
-    - HOST=${CI_PROJECT_URL}  CI_PROJECT_ID=${CI_PROJECT_ID} GITLAB_USER_ID=${GITLAB_USER_ID} PRIVATE_TOKEN=${PRIVATE_TOKEN} ./.ci/automr.sh devel false
+    - HOST=${CI_PROJECT_URL}  
+    - CI_PROJECT_ID=${CI_PROJECT_ID} 
+    - GITLAB_USER_ID=${GITLAB_USER_ID} 
+    - PRIVATE_TOKEN=${PRIVATE_TOKEN} 
+    - ./.ci/automr.sh devel false
   only:
     - wip-devel
     - night-build
@@ -124,7 +127,11 @@ devel-wip:
 devel-any:
   stage: merge
   script:
-    - HOST=${CI_PROJECT_URL}  CI_PROJECT_ID=${CI_PROJECT_ID} GITLAB_USER_ID=${GITLAB_USER_ID} PRIVATE_TOKEN=${PRIVATE_TOKEN} ./.ci/automr.sh devel true
+    - HOST=${CI_PROJECT_URL}  
+    - CI_PROJECT_ID=${CI_PROJECT_ID} 
+    - GITLAB_USER_ID=${GITLAB_USER_ID} 
+    - PRIVATE_TOKEN=${PRIVATE_TOKEN} 
+    - ./.ci/automr.sh devel true
   only:
     - /^devel-.*$/
     
@@ -138,14 +145,22 @@ pre-release:
 master-release:
   stage: merge
   script:
-    - HOST=${CI_PROJECT_URL}  CI_PROJECT_ID=${CI_PROJECT_ID} GITLAB_USER_ID=${GITLAB_USER_ID} PRIVATE_TOKEN=${PRIVATE_TOKEN} ./.ci/automr.sh master false
+    - HOST=${CI_PROJECT_URL} 
+    - CI_PROJECT_ID=${CI_PROJECT_ID} 
+    - GITLAB_USER_ID=${GITLAB_USER_ID} 
+    - PRIVATE_TOKEN=${PRIVATE_TOKEN} 
+    - ./.ci/automr.sh master false
   only:
     - pre-release
 
 master-hotfix:
   stage: merge
   script:
-    - HOST=${CI_PROJECT_URL}  CI_PROJECT_ID=${CI_PROJECT_ID} GITLAB_USER_ID=${GITLAB_USER_ID} PRIVATE_TOKEN=${PRIVATE_TOKEN} ./.ci/automr.sh master true
+    - HOST=${CI_PROJECT_URL}  
+    - CI_PROJECT_ID=${CI_PROJECT_ID} 
+    - GITLAB_USER_ID=${GITLAB_USER_ID} 
+    - PRIVATE_TOKEN=${PRIVATE_TOKEN} 
+    - ./.ci/automr.sh master true
   only:
     - /^hotfix-.*$/
 
@@ -163,7 +178,6 @@ delete-branches:
   only:
     - /^build.*$/
     - /^check.*$/
- 
     
 push-to-github:
   stage: publish
