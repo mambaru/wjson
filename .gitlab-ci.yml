@@ -27,7 +27,7 @@ stages:
 update-submodules:
   stage: pre-build
   script:
-    - git submodule foreach git checkout master
+    #- git submodule foreach git checkout master
     - git submodule foreach git pull origin master
     - git add .
     - if git commit -am "night build all submodules update autocommit"; then
