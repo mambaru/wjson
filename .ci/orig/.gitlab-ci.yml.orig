@@ -10,6 +10,7 @@ variables:
 # wip-devel
 
 before_script:
+  - git pull ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}
   - git submodule deinit --force .
   - git submodule sync
   - git submodule update --init
@@ -138,6 +139,7 @@ devel-any:
 pre-release:
   stage: merge
   script:
+    - echo git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:pre-release
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:pre-release
   only:
     - devel
