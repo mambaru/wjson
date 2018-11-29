@@ -16,12 +16,28 @@ before_script:
   - git submodule update --init --force
 
 stages:
+  - pre-build
   - build
   - check
   - merge
   - publish
   - clean
   
+update-submodules:
+  stage: pre-build
+  script:
+    - git pull --force origin devel
+    - git submodule sync
+    - git submodule foreach git checkout master
+    - git submodule foreach git pull origin master
+    - git add .
+    - if git commit -am "night build all submodules update autocommit"; then
+    -   echo "Submodules Update Succeed!!"
+    - fi
+    - git push --force origin night-build
+  only:
+    - night-build
+
 main-build:
   stage: build
   script:
@@ -36,6 +52,7 @@ main-build:
     - /^devel-.*$/
     - /^release-.*$/
     - /^hotfix-.*$/
+    - night-build
 
 build-g++11:
   stage: build
@@ -45,6 +62,7 @@ build-g++11:
     - tags
     - /^build.*$/
     - pre-release
+    - night-build
 
 build-g++14:
   stage: build
@@ -55,6 +73,7 @@ build-g++14:
     - tags
     - /^build.*$/
     - pre-release
+    - night-build
 
 build-clang++11:
   stage: build
@@ -65,6 +84,7 @@ build-clang++11:
     - tags
     - /^build.*$/
     - pre-release
+    - night-build
 
 build-clang++14:
   stage: build
@@ -75,6 +95,12 @@ build-clang++14:
     - tags
     - /^build.*$/
     - pre-release
+    - night-build
+    
+
+#
+# ###########################################
+# 
 
 cppcheck:
   stage: check
@@ -85,6 +111,7 @@ cppcheck:
     - tags
     - /^check.*$/
     - pre-release
+    - night-build
     
 #
 # ###########################################
@@ -96,6 +123,8 @@ devel-wip:
     - HOST=${CI_PROJECT_URL}  CI_PROJECT_ID=${CI_PROJECT_ID} GITLAB_USER_ID=${GITLAB_USER_ID} PRIVATE_TOKEN=${PRIVATE_TOKEN} ./.ci/automr.sh devel false
   only:
     - wip-devel
+    - night-build
+
 
 devel-any:
   stage: merge
@@ -139,7 +168,7 @@ delete-branches:
   only:
     - /^build.*$/
     - /^check.*$/
-   
+ 
     
 push-to-github:
   stage: publish

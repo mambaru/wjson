@@ -15,6 +15,12 @@ else
   suppressions_txt=$2
 fi
 
+if [ -z "$3" ]; then
+  exclude_txt="$project_dir/.ci/exclude_folders.txt"
+else
+  exclude_txt=$3
+fi
+
 if [ ! -f $suppressions_txt ]; then
     echo "ERROR: File $suppressions_txt not found!"
     exit 1
@@ -28,9 +34,14 @@ suppressions_lst="$suppressions_dir/suppressions.lst"
 cp "$suppressions_txt" "$suppressions_lst"
 sed -i -- "s#\:\.\/#\:$project_dir\/#g" "$suppressions_lst"
 
+
+while read i; do
+  exclude_args="$exclude_args -i $i"
+done < $exclude_txt
+
 opt="--inconclusive --error-exitcode=1 --force --max-configs=128 \
 --quiet --enable=all --suppress=missingIncludeSystem --suppressions-list=$suppressions_lst \
---template={id}:{file}:{line}:[{severity}]:{message} -i $project_dir/external" 
+--template={id}:{file}:{line}:[{severity}]:{message} -i $project_dir/external -i $project_dir/build $exclude_args" 
 
 cppcheck $opt "${@:3}" $project_dir
 res=$?
