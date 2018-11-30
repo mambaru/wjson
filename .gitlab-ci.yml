@@ -2,6 +2,7 @@ variables:
   RELEASE_BRANCH: 'release-0.7'
   PROJECT_SSH: "git@github.lan:${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}.git"
   REMOTE_SSH:  "git@github.com:mambaru/${CI_PROJECT_NAME}.git"
+  DEVEL_DENY: "false"
 
 # master
 # release-0.7
@@ -17,20 +18,22 @@ before_script:
   - git submodule update --init
 
 stages:
-  - pre-build
   - build
   - check
   - merge
   - publish
   - clean
   
-update-submodules:
-  stage: pre-build
+night-build:
+  stage: build
   script:
+    - git pull origin devel
+    - git pull origin wip-devel
     - git submodule foreach git pull origin master
     - git add .
     - if git commit -am "night build all submodules update autocommit"; then
     -   echo "Submodules Update Succeed!!"
+    -   git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:wip-devel
     - fi
   only:
     - night-build
@@ -49,7 +52,6 @@ main-build:
     - /^devel-.*$/
     - /^release-.*$/
     - /^hotfix-.*$/
-    - night-build
 
 build-g++11:
   stage: build
@@ -59,7 +61,6 @@ build-g++11:
     - tags
     - /^build.*$/
     - pre-release
-    - night-build
 
 build-g++14:
   stage: build
@@ -70,7 +71,6 @@ build-g++14:
     - tags
     - /^build.*$/
     - pre-release
-    - night-build
 
 build-clang++11:
   stage: build
@@ -81,7 +81,6 @@ build-clang++11:
     - tags
     - /^build.*$/
     - pre-release
-    - night-build
 
 build-clang++14:
   stage: build
@@ -92,7 +91,6 @@ build-clang++14:
     - tags
     - /^build.*$/
     - pre-release
-    - night-build
 
 #
 # ###########################################
@@ -107,7 +105,6 @@ cppcheck:
     - tags
     - /^check.*$/
     - pre-release
-    - night-build
     
 #
 # ###########################################
@@ -123,8 +120,6 @@ devel-wip:
     - ./.ci/automr.sh devel false
   only:
     - wip-devel
-    - night-build
-
 
 devel-any:
   stage: merge
