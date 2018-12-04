@@ -176,12 +176,14 @@ deploy:
     - cmake ..
     - cmake --build . -- -j4
     - popd
-    - mkdir -p /monamour/${CI_PROJECT_NAME}
-    - mkdir -p /monamour/${CI_PROJECT_NAME}/${CI_COMMIT_REF_NAME}
-    - rm -rf /monamour/${CI_PROJECT_NAME}/${CI_COMMIT_REF_NAME}/*
-    - cp -r ./build/Release/bin/* /monamour/${CI_PROJECT_NAME}/${CI_COMMIT_REF_NAME}/
-    - tar -zcvf "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}.tar.gz" -C "/build/Release/bin/" .
-    - cp -f "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}.tar.gz" /monamour/
+    - if [ -z "$(ls -A ./build/Release/bin/)" ]; then
+    -   mkdir -p /monamour/${CI_PROJECT_NAME}
+    -   mkdir -p /monamour/${CI_PROJECT_NAME}/${CI_COMMIT_REF_NAME}
+    -   rm -rf /monamour/${CI_PROJECT_NAME}/${CI_COMMIT_REF_NAME}/*
+    -   cp -r ./build/Release/bin/* /monamour/${CI_PROJECT_NAME}/${CI_COMMIT_REF_NAME}/
+    -   tar -zcvf "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}.tar.gz" -C "./build/Release/bin/" .
+    -   cp -f "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}.tar.gz" /monamour/
+    - fi
   only:
     - tags
     - /^release-.*$/
