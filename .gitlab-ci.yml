@@ -23,6 +23,7 @@ stages:
   - merge
   - publish
   - clean
+  - deploy
   
 night-build:
   stage: build
@@ -41,13 +42,12 @@ night-build:
 main-build:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 11 Release
+    - ./.ci/build-and-test.sh g++ 11 
   only:
     - master
     - devel
     - wip-devel
     - pre-release
-    - tags
     - /^build.*$/
     - /^devel-.*$/
     - /^release-.*$/
@@ -58,7 +58,6 @@ build-g++11:
   script:
     - ./.ci/build-and-test.sh g++ 11 Debug
   only:
-    - tags
     - /^build.*$/
     - pre-release
 
@@ -68,7 +67,6 @@ build-g++14:
     - ./.ci/build-and-test.sh g++ 14 Release
     - ./.ci/build-and-test.sh g++ 14 Debug
   only:
-    - tags
     - /^build.*$/
     - pre-release
 
@@ -78,7 +76,6 @@ build-clang++11:
     - ./.ci/build-and-test.sh clang++ 11 Release
     - ./.ci/build-and-test.sh clang++ 11 Debug
   only:
-    - tags
     - /^build.*$/
     - pre-release
 
@@ -88,7 +85,6 @@ build-clang++14:
     - ./.ci/build-and-test.sh clang++ 14 Release
     - ./.ci/build-and-test.sh clang++ 14 Debug
   only:
-    - tags
     - /^build.*$/
     - pre-release
 
@@ -102,7 +98,6 @@ cppcheck:
     - ./.ci/cppcheck-ci.sh --std=c++11
     - ./.ci/cppcheck-ci.sh --std=c++14
   only:
-    - tags
     - /^check.*$/
     - pre-release
     
@@ -127,7 +122,7 @@ devel-any:
     - export HOST=${CI_PROJECT_URL}  
     - export CI_PROJECT_ID=${CI_PROJECT_ID} 
     - export GITLAB_USER_ID=${GITLAB_USER_ID} 
-    - export PRIVATE_TOKEN=${PRIVATE_TOKEN} 
+    - export PRIVATE_TOKEN=${PRIVATE_TOKEN}
     - ./.ci/automr.sh devel true
   only:
     - /^devel-.*$/
@@ -168,6 +163,28 @@ release:
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${RELEASE_BRANCH}
   only:
     - master
+    
+deploy:
+  stage: deploy
+  artifacts:
+    paths:
+      - "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}.tar.gz"
+  script:
+    - mkdir -p ./build
+    - pushd ./build
+    - rm -rf *
+    - cmake ..
+    - cmake --build . -- -j4
+    - popd
+    - mkdir -p /monamour/${CI_PROJECT_NAME}
+    - mkdir -p /monamour/${CI_PROJECT_NAME}/${CI_COMMIT_REF_NAME}
+    - rm -rf /monamour/${CI_PROJECT_NAME}/${CI_COMMIT_REF_NAME}/*
+    - cp -r ./build/Release/bin/* /monamour/${CI_PROJECT_NAME}/${CI_COMMIT_REF_NAME}/
+    - tar -zcvf "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}.tar.gz" -C "/build/Release/bin/" .
+    - cp -f "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}.tar.gz" /monamour/
+  only:
+    - tags
+    - /^release-.*$/
 
 delete-branches:
   stage: clean
