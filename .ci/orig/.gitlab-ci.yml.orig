@@ -11,6 +11,10 @@ variables:
 # wip-devel
 
 before_script:
+  - export LC_ALL='ru_RU.UTF-8'
+  - export LANG='ru_RU.UTF-8'
+  - export RELEASE_BRANCH="$(python3 ./.ci/wamba-ci.py get release release-0.7)"
+  - echo "RELEASE_BRANCH=${RELEASE_BRANCH}"
   - git checkout ${CI_COMMIT_REF_NAME}
   - git pull ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}
   - git submodule deinit --force .
@@ -21,9 +25,10 @@ stages:
   - build
   - check
   - merge
-  - publish
   - clean
+  - publish
   - deploy
+  
   
 night-build:
   stage: build
@@ -44,13 +49,11 @@ main-build:
   script:
     - ./.ci/build-and-test.sh g++ 11 
   only:
-    - master
     - devel
     - wip-devel
     - pre-release
     - /^build.*$/
     - /^devel-.*$/
-    - /^release-.*$/
     - /^hotfix-.*$/
 
 build-g++11:
@@ -160,6 +163,7 @@ master-hotfix:
 release:
   stage: merge
   script:
+    - echo "RELEASE_BRANCH=${RELEASE_BRANCH}"
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${RELEASE_BRANCH}
   only:
     - master
@@ -168,21 +172,18 @@ deploy:
   stage: deploy
   artifacts:
     paths:
-      - "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}.tar.gz"
+      - "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}-static-Release-production.tar.gz"
+      - "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}-static-RelWithDebInfo-loads.tar.gz"
+      - "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}-static-Debug-devel.tar.gz"
+    expire_in: 1 week
   script:
-    - mkdir -p ./build
-    - pushd ./build
-    - rm -rf *
-    - cmake ..
-    - cmake --build . -- -j4
-    - popd
-    - if [ -z "$(ls -A ./build/Release/bin/)" ]; then
-    -   mkdir -p /monamour/${CI_PROJECT_NAME}
-    -   mkdir -p /monamour/${CI_PROJECT_NAME}/${CI_COMMIT_REF_NAME}
-    -   rm -rf /monamour/${CI_PROJECT_NAME}/${CI_COMMIT_REF_NAME}/*
-    -   cp -r ./build/Release/bin/* /monamour/${CI_PROJECT_NAME}/${CI_COMMIT_REF_NAME}/
-    -   tar -zcvf "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}.tar.gz" -C "./build/Release/bin/" .
-    -   cp -f "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}.tar.gz" /monamour/
+    - if [ -d wfcroot ]; then
+    -   ./.ci/build-and-deploy.sh Release static
+    -   ./.ci/build-and-deploy.sh Release shared
+    -   ./.ci/build-and-deploy.sh Debug static
+    -   ./.ci/build-and-deploy.sh Debug shared
+    -   ./.ci/build-and-deploy.sh RelWithDebInfo static
+    -   ./.ci/build-and-deploy.sh RelWithDebInfo shared
     - fi
   only:
     - tags
@@ -201,18 +202,20 @@ push-to-github:
   only:
     - master
   script:
-    - git branch -f mambaru
-    - git checkout mambaru
-    - git submodule deinit -f .
-    - rm -rf .git/modules
-    - git rm -rf external 
-    - git submodule add --force https://github.com/mambaru/cmake-ci.git external/cmake-ci
-    - git commit -m "autocommit github.com export"
-    - git push -f ${REMOTE_SSH} mambaru
-    - git push -f --tags ${REMOTE_SSH} mambaru
-    - doxygen
-    - cd docs/html
-    - git init 
-    - git add .
-    - git commit -m "doxygen"
-    - git push -f ${REMOTE_SSH} master:gh-pages
+    - if [[ "$(python3 ./.ci/wamba-ci.py enabled public)" == "1" ]; then
+    -   git branch -f mambaru
+    -   git checkout mambaru
+    -   git submodule deinit -f .
+    -   rm -rf .git/modules
+    -   git rm -rf external 
+    -   git submodule add --force https://github.com/mambaru/cmake-ci.git external/cmake-ci
+    -   git commit -m "autocommit github.com export"
+    -   git push -f ${REMOTE_SSH} mambaru
+    -   git push -f --tags ${REMOTE_SSH} mambaru
+    -   doxygen
+    -   cd docs/html
+    -   git init 
+    -   git add .
+    -   git commit -m "doxygen"
+    -   git push -f ${REMOTE_SSH} master:gh-pages
+    - fi

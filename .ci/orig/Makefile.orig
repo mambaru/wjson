@@ -35,4 +35,4 @@ update: external
 upgrade: update
 	rm -f upgrade.sh
 	wget http://github.lan/cpp/cmake-ci/raw/master/upgrade.sh 
-	bash upgrade.sh public
+	bash upgrade.sh
