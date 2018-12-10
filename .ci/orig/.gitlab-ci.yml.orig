@@ -202,12 +202,14 @@ push-to-github:
   only:
     - master
   script:
-    - if [[ "$(python3 ./.ci/wamba-ci.py enabled public)" == "1" ]; then
+    - if [[ "$(python3 ./.ci/wamba-ci.py enabled public)" == "1" ]]; then
     -   git branch -f mambaru
     -   git checkout mambaru
     -   git submodule deinit -f .
     -   rm -rf .git/modules
-    -   git rm -rf external 
+    -   git rm -rf external
+    -   git rm gitlab-ci.yml
+    -   git rm wamba-ci.json
     -   git submodule add --force https://github.com/mambaru/cmake-ci.git external/cmake-ci
     -   git commit -m "autocommit github.com export"
     -   git push -f ${REMOTE_SSH} mambaru
