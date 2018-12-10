@@ -208,7 +208,7 @@ push-to-github:
     -   git submodule deinit -f .
     -   rm -rf .git/modules
     -   git rm -rf external
-    -   git rm gitlab-ci.yml
+    -   git rm .gitlab-ci.yml
     -   git rm wamba-ci.json
     -   git submodule add --force https://github.com/mambaru/cmake-ci.git external/cmake-ci
     -   git commit -m "autocommit github.com export"
