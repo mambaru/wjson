@@ -1,6 +1,6 @@
 {
   /* Open source проект (публикация на github.com) */
-  "public":false,
+  "public":true,
   /* Текущий релиз бранч  */
   "release":"release-0.7",
 
