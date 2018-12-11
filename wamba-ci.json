@@ -21,39 +21,5 @@
       "14":true,
       "17":false
     }
-  },
-  /* Следующие опции работают только для финальной сборки демонов для деплоя */
-  "deploy": 
-  {
-    "standard":11,
-    "compiler":"g++",
-    
-    "Release":{
-      "static":true,
-      "shared":true,
-      
-      "production":true,
-      "loads":true,
-      "stress":true,
-      "devel":true
-    },
-    "RelWithDebInfo":{
-      "static":true,
-      "shared":true,
-      
-      "production":true,
-      "loads":true,
-      "stress":true,
-      "devel":true
-    },
-    "RelWithDebInfo":{
-      "static":true,
-      "shared":true,
-      
-      "production":true,
-      "loads":true,
-      "stress":true,
-      "devel":true
-    }
   }
 }
