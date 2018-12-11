@@ -26,5 +26,10 @@ branches:
 script:
   - git submodule sync
   - git submodule update --init --force
-  - bash .ci/build-and-test.sh g++ 11 Release
-  - bash .ci/build-and-test.sh clang++ 11 Release
+  - mkdir -p build 
+  - pushd build 
+  -   cmake .. -DCMAKE_CXX_COMPILER=$TRAVIS_COMPILER -DCMAKE_CXX_STANDARD=11 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DPARANOID_WARNING=ON
+  -   cmake --build .
+  -   ctest --output-on-failure
+  -   make clean
+  - popd

@@ -29,13 +29,15 @@ fi
 
 standard="$(python3 ./.ci/wamba-ci.py get deploy.standard 11)"
 compiler="$(python3 ./.ci/wamba-ci.py get deploy.compiler g++)"
+build_threads="$(python3 ./.ci/wamba-ci.py get build_threads 4)"
+
 mkdir -p build
 pushd build
   #rm -rf *
   echo cmake .. -DCMAKE_BUILD_TYPE=$buildtype -DBUILD_SHARED_LIBS=$shared -DCMAKE_CXX_STANDARD=$standard "${@:3}" || exit $?
   cmake .. -DCMAKE_BUILD_TYPE=$buildtype -DBUILD_SHARED_LIBS=$shared \
            -DCMAKE_CXX_STANDARD=$standard -DCMAKE_CXX_COMPILER=$compiler "${@:3}" || exit $?
-  cmake --build . -- -j4 || exit $?
+  cmake --build . -- -j$build_threads || exit $?
 popd
 
 function deploy()
