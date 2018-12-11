@@ -14,6 +14,9 @@ before_script:
   - export LC_ALL='ru_RU.UTF-8'
   - export LANG='ru_RU.UTF-8'
   - export RELEASE_BRANCH="$(python3 ./.ci/wamba-ci.py get release release-0.7)"
+  - export DEPLOY_STANDARD="$(python3 ./.ci/wamba-ci.py get deploy.standard 11)"
+  - export DEPLOY_COMPILER="$(python3 ./.ci/wamba-ci.py get deploy.compiler g++)"
+  - export DEPLOY_PREF="${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}-${DEPLOY_COMPILER}${DEPLOY_STANDARD}"
   - echo "RELEASE_BRANCH=${RELEASE_BRANCH}"
   - git checkout ${CI_COMMIT_REF_NAME}
   - git pull ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}
@@ -37,7 +40,7 @@ night-build:
     - git pull origin wip-devel
     - git submodule foreach git pull origin master
     - git add .
-    - if git commit -am "night build all submodules update autocommit"; then
+    - if git commit -am "Night build all submodules update autocommit"; then
     -   echo "Submodules Update Succeed!!"
     -   git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:wip-devel
     - fi
@@ -73,6 +76,16 @@ build-g++14:
     - /^build.*$/
     - pre-release
 
+build-g++17:
+  stage: build
+  script:
+    - ./.ci/build-and-test.sh g++ 17 Release
+    - ./.ci/build-and-test.sh g++ 17 Debug
+  only:
+    - /^build.*$/
+    - pre-release
+
+    
 build-clang++11:
   stage: build
   script:
@@ -87,6 +100,15 @@ build-clang++14:
   script:
     - ./.ci/build-and-test.sh clang++ 14 Release
     - ./.ci/build-and-test.sh clang++ 14 Debug
+  only:
+    - /^build.*$/
+    - pre-release
+
+build-clang++17:
+  stage: build
+  script:
+    - ./.ci/build-and-test.sh clang++ 17 Release
+    - ./.ci/build-and-test.sh clang++ 17 Debug
   only:
     - /^build.*$/
     - pre-release
@@ -167,24 +189,94 @@ release:
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${RELEASE_BRANCH}
   only:
     - master
+
     
-deploy:
+deploy-Release-static:
   stage: deploy
   artifacts:
     paths:
-      - "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}-static-Release-production.tar.gz"
-      - "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}-static-RelWithDebInfo-loads.tar.gz"
-      - "${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}-static-Debug-devel.tar.gz"
+      - "${DEPLOY_PREF}-static-Release-production.tar.gz"
+      - "${DEPLOY_PREF}-static-Release-stress.tar.gz"
+      - "${DEPLOY_PREF}-static-Release-loads.tar.gz"
+      - "${DEPLOY_PREF}-static-Release-devel.tar.gz"
     expire_in: 1 week
   script:
-    - if [ -d wfcroot ]; then
-    -   ./.ci/build-and-deploy.sh Release static
-    -   ./.ci/build-and-deploy.sh Release shared
-    -   ./.ci/build-and-deploy.sh Debug static
-    -   ./.ci/build-and-deploy.sh Debug shared
-    -   ./.ci/build-and-deploy.sh RelWithDebInfo static
-    -   ./.ci/build-and-deploy.sh RelWithDebInfo shared
-    - fi
+    - ./.ci/build-and-deploy.sh Release static
+  only:
+    - tags
+    - /^release-.*$/
+
+deploy-Release-shared:
+  stage: deploy
+  artifacts:
+    paths:
+      - "${DEPLOY_PREF}-shared-Release-production.tar.gz"
+      - "${DEPLOY_PREF}-shared-Release-stress.tar.gz"
+      - "${DEPLOY_PREF}-shared-Release-loads.tar.gz"
+      - "${DEPLOY_PREF}-shared-Release-devel.tar.gz"
+    expire_in: 1 week
+  script:
+    - ./.ci/build-and-deploy.sh Release shared
+  only:
+    - tags
+    - /^release-.*$/
+    
+deploy-RelWithDebInfo-static:
+  stage: deploy
+  artifacts:
+    paths:
+      - "${DEPLOY_PREF}-static-RelWithDebInfo-production.tar.gz"
+      - "${DEPLOY_PREF}-static-RelWithDebInfo-stress.tar.gz"
+      - "${DEPLOY_PREF}-static-RelWithDebInfo-loads.tar.gz"
+      - "${DEPLOY_PREF}-static-RelWithDebInfo-devel.tar.gz"
+    expire_in: 1 week
+  script:
+    - ./.ci/build-and-deploy.sh RelWithDebInfo static
+  only:
+    - tags
+    - /^release-.*$/
+
+deploy-RelWithDebInfo-shared:
+  stage: deploy
+  artifacts:
+    paths:
+      - "${DEPLOY_PREF}-shared-RelWithDebInfo-production.tar.gz"
+      - "${DEPLOY_PREF}-shared-RelWithDebInfo-stress.tar.gz"
+      - "${DEPLOY_PREF}-shared-RelWithDebInfo-loads.tar.gz"
+      - "${DEPLOY_PREF}-shared-RelWithDebInfo-devel.tar.gz"
+    expire_in: 1 week
+  script:
+    - ./.ci/build-and-deploy.sh RelWithDebInfo shared
+  only:
+    - tags
+    - /^release-.*$/
+
+deploy-Debug-static:
+  stage: deploy
+  artifacts:
+    paths:
+      - "${DEPLOY_PREF}-static-Debug-production.tar.gz"
+      - "${DEPLOY_PREF}-static-Debug-stress.tar.gz"
+      - "${DEPLOY_PREF}-static-Debug-loads.tar.gz"
+      - "${DEPLOY_PREF}-static-Debug-devel.tar.gz"
+    expire_in: 1 week
+  script:
+    - ./.ci/build-and-deploy.sh Debug static
+  only:
+    - tags
+    - /^release-.*$/
+
+deploy-Debug-shared:
+  stage: deploy
+  artifacts:
+    paths:
+      - "${DEPLOY_PREF}-shared-Debug-production.tar.gz"
+      - "${DEPLOY_PREF}-shared-Debug-stress.tar.gz"
+      - "${DEPLOY_PREF}-shared-Debug-loads.tar.gz"
+      - "${DEPLOY_PREF}-shared-Debug-devel.tar.gz"
+    expire_in: 1 week
+  script:
+    - ./.ci/build-and-deploy.sh Debug shared
   only:
     - tags
     - /^release-.*$/
@@ -207,6 +299,7 @@ push-to-github:
     -   git branch -f mambaru
     -   git checkout mambaru
     -   git submodule deinit -f .
+    -   rm -rf .ci
     -   rm -rf .git/modules
     -   git rm -rf external
     -   git rm .gitlab-ci.yml
