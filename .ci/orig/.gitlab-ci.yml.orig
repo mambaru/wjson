@@ -50,7 +50,7 @@ night-build:
 main-build:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 11 
+    - ./.ci/build-and-test.sh g++ 11 Release
   only:
     - devel
     - wip-devel
