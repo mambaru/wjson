@@ -283,7 +283,6 @@ delete-branches:
   only:
     - /^build.*$/
     - /^check.*$/
-    
 push-to-github:
   stage: publish
   only:
@@ -295,8 +294,8 @@ push-to-github:
     -   git branch -f mambaru
     -   git checkout mambaru
     -   git submodule deinit -f .
-    -   rm -rf .ci
     -   rm -rf .git/modules
+    -   git rm -rf .ci
     -   git rm -rf external
     -   git rm .gitlab-ci.yml
     -   git rm wamba-ci.json
