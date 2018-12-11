@@ -201,6 +201,7 @@ push-to-github:
   stage: publish
   only:
     - master
+    - tags
   script:
     - if [[ "$(python3 ./.ci/wamba-ci.py enabled public)" == "1" ]]; then
     -   git branch -f mambaru
