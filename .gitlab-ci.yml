@@ -14,6 +14,7 @@ before_script:
   - export LC_ALL='ru_RU.UTF-8'
   - export LANG='ru_RU.UTF-8'
   - export RELEASE_BRANCH="$(python3 ./.ci/wamba-ci.py get release release-0.7)"
+  - export RELEASE_TAG="$(python3 ./.ci/wamba-ci.py get tag 0.7.1)"
   - export DEPLOY_STANDARD="$(python3 ./.ci/wamba-ci.py get deploy.standard 11)"
   - export DEPLOY_COMPILER="$(python3 ./.ci/wamba-ci.py get deploy.compiler g++)"
   - export DEPLOY_PREF="${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}-${DEPLOY_COMPILER}${DEPLOY_STANDARD}"
@@ -203,7 +204,6 @@ deploy-Release-static:
   script:
     - ./.ci/build-and-deploy.sh Release static
   only:
-    - tags
     - /^release-.*$/
 
 deploy-Release-shared:
@@ -218,7 +218,6 @@ deploy-Release-shared:
   script:
     - ./.ci/build-and-deploy.sh Release shared
   only:
-    - tags
     - /^release-.*$/
     
 deploy-RelWithDebInfo-static:
@@ -233,7 +232,6 @@ deploy-RelWithDebInfo-static:
   script:
     - ./.ci/build-and-deploy.sh RelWithDebInfo static
   only:
-    - tags
     - /^release-.*$/
 
 deploy-RelWithDebInfo-shared:
@@ -248,7 +246,6 @@ deploy-RelWithDebInfo-shared:
   script:
     - ./.ci/build-and-deploy.sh RelWithDebInfo shared
   only:
-    - tags
     - /^release-.*$/
 
 deploy-Debug-static:
@@ -263,7 +260,6 @@ deploy-Debug-static:
   script:
     - ./.ci/build-and-deploy.sh Debug static
   only:
-    - tags
     - /^release-.*$/
 
 deploy-Debug-shared:
@@ -278,7 +274,6 @@ deploy-Debug-shared:
   script:
     - ./.ci/build-and-deploy.sh Debug shared
   only:
-    - tags
     - /^release-.*$/
 
 delete-branches:
@@ -293,8 +288,9 @@ push-to-github:
   stage: publish
   only:
     - master
-    - tags
   script:
+    - git tag -f ${RELEASE_TAG}
+    - git push -f --tags ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}
     - if [[ "$(python3 ./.ci/wamba-ci.py enabled public)" == "1" ]]; then
     -   git branch -f mambaru
     -   git checkout mambaru
