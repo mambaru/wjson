@@ -43,8 +43,8 @@ night-build:
     - git add .
     - if git commit -am "Night build all submodules update autocommit"; then
     -   echo "Submodules Update Succeed!!"
-    -   git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:wip-devel
     - fi
+    - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:wip-devel
   only:
     - night-build
 
