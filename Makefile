@@ -8,7 +8,7 @@ help:
 	@echo "	make update"
 	@echo "	make upgrade"
 doc:
-	rm -rf ./docs
+	rm -rf docs
 	if hash doxygen 2>/dev/null; then doxygen; fi
 external:
 	git submodule update --init
@@ -26,7 +26,7 @@ tests: 	external build
 	cmake --build ./build 
 	cd build && ctest 
 clean:
-	rm -r docs
+	rm -rf docs
 	cd build && make clean
 update: external
 	rm -f update.sh

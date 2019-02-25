@@ -39,11 +39,10 @@ night-build:
   script:
     - git pull origin devel
     - git pull origin wip-devel
-    - git submodule foreach git pull origin master
-    - git add .
-    - if git commit -am "Night build all submodules update autocommit"; then
-    -   echo "Submodules Update Succeed!!"
-    - fi
+    - rm -f update.sh
+    - wget http://github.lan/cpp/cmake-ci/raw/master/update.sh
+    - bash update.sh "Night build: "
+    - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${CI_COMMIT_REF_NAME}
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:wip-devel
   only:
     - night-build
