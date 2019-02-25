@@ -41,7 +41,7 @@ night-build:
     - git pull origin wip-devel
     - rm -f update.sh
     - wget http://github.lan/cpp/cmake-ci/raw/master/update.sh
-    - bash update.sh "Night build: "
+    - bash update.sh "Night build&#58; "
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${CI_COMMIT_REF_NAME}
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:wip-devel
   only:
