@@ -1,12 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
 project(wjson)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-include(ci)
-
-rootlibs(faslib)
-
 if ( BUILD_TESTING )
+  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+  include(ci)
+  rootlibs(faslib)
   enable_testing()
   include_directories(.)
   add_subdirectory(tests)
@@ -15,8 +13,8 @@ endif()
 
 set(CPACK_PACKAGE_NAME "wjson")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "7")
-set(CPACK_PACKAGE_VERSION_PATCH "1")
+set(CPACK_PACKAGE_VERSION_MINOR "8")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/Readme.md")
 set(CPACK_PACKAGE_CONTACT "migashko@gmail.com")
