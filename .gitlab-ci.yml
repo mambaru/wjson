@@ -1,11 +1,10 @@
 variables:
-  RELEASE_BRANCH: 'release-0.7'
   PROJECT_SSH: "git@github.lan:${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}.git"
   REMOTE_SSH:  "git@github.com:mambaru/${CI_PROJECT_NAME}.git"
   DEVEL_DENY: "false"
 
 # master
-# release-0.7
+# release-0.8
 # pre-release
 # devel
 # wip-devel
@@ -13,8 +12,8 @@ variables:
 before_script:
   - export LC_ALL='ru_RU.UTF-8'
   - export LANG='ru_RU.UTF-8'
-  - export RELEASE_BRANCH="$(python3 ./.ci/wamba-ci.py get release release-0.7)"
-  - export RELEASE_TAG="$(python3 ./.ci/wamba-ci.py get tag 0.7.1)"
+  - export RELEASE_BRANCH="$(python3 ./.ci/wamba-ci.py get release release-0.8)"
+  - export RELEASE_TAG="$(python3 ./.ci/wamba-ci.py get tag 0.8.0)"
   - export DEPLOY_STANDARD="$(python3 ./.ci/wamba-ci.py get deploy.standard 11)"
   - export DEPLOY_COMPILER="$(python3 ./.ci/wamba-ci.py get deploy.compiler g++)"
   - export DEPLOY_PREF="${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}-${DEPLOY_COMPILER}${DEPLOY_STANDARD}"
@@ -292,13 +291,10 @@ push-to-github:
     - if [[ "$(python3 ./.ci/wamba-ci.py enabled public)" == "1" ]]; then
     -   git branch -f mambaru
     -   git checkout mambaru
-    -   git submodule deinit -f .
-    -   rm -rf .git/modules
     -   git rm -rf .ci
-    -   git rm -rf external
     -   git rm .gitlab-ci.yml
     -   git rm wamba-ci.json
-    -   git submodule add --force https://github.com/mambaru/cmake-ci.git external/cmake-ci
+    -   ./external/cmake-ci/migrate.sh https://github.com/mambaru/cmake-ci.git
     -   git commit -m "autocommit github.com export"
     -   git push -f ${REMOTE_SSH} mambaru
     -   git push -f --tags ${REMOTE_SSH} mambaru

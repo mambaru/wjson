@@ -5,7 +5,8 @@ else()
 endif()
 
 if ( STANDALONE )
-  if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/external/cmake-ci/ci.cmake)
+
+  if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/external/cmake-ci/cmake/ci.cmake)
     execute_process(
       COMMAND 
         git submodule update --init -- "external/cmake-ci"
@@ -17,5 +18,7 @@ if ( STANDALONE )
   endif()
   list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/external/cmake-ci/cmake)
   include(opt)
+  include(repos)
   include(getlibs)
+
 endif()
