@@ -1,8 +1,9 @@
 {
   /* Open source проект (публикация на github.com) */
   "public":true,
+  "tag":"0.8.0",
   /* Текущий релиз бранч  */
-  "release":"release-0.7",
+  "release":"release-0.8",
 
   /* Сборка и тестирование*/
   "build-and-test":{
