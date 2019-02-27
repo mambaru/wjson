@@ -1,3 +1,5 @@
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${UNIT_TEST_BIN_OUTPUT_DIR})
+
 add_executable(benchmark benchmark.cpp)
 add_executable(numbench  numbench.cpp)
 add_executable(strbench  strbench.cpp)
