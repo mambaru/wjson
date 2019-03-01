@@ -301,6 +301,7 @@ push-to-github:
   stage: publish
   only:
     - master
+    
   script:
     - git tag -f ${RELEASE_TAG}
     - git push -f --tags ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}
