@@ -16,14 +16,14 @@ build:
 	mkdir -p build
 static: external build
 	cd build && cmake .. -DBUILD_SHARED_LIBS=OFF 
-	cmake --build ./build 
+	cmake --build ./build -- -j4
 shared: external build
 	mkdir -p build
-	cd build && cmake .. -DBUILD_SHARED_LIBS=ON
-	cmake --build ./build 
+	cd build && cmake .. -DBUILD_SHARED_LIBS=ON 
+	cmake --build ./build -- -j4
 tests: 	external build
 	cd build && cmake .. -DBUILD_TESTING=ON 
-	cmake --build ./build 
+	cmake --build ./build -- -j4
 	cd build && ctest 
 clean:
 	rm -rf docs
