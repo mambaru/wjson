@@ -1,14 +1,16 @@
 cmake_minimum_required(VERSION 3.1)
 project(wjson)
 
+include(cmake/ci.cmake)
+
 if ( BUILD_TESTING )
-  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-  include(ci)
   rootlibs(faslib)
   enable_testing()
   include_directories(.)
   add_subdirectory(tests)
-  add_subdirectory(examples)
+  if ( WITH_SAMPLES )
+    add_subdirectory(examples)
+  endif()
 endif()
 
 set(CPACK_PACKAGE_NAME "wjson")

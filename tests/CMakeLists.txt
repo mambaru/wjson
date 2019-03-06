@@ -32,6 +32,6 @@ add_executable(
 )
 
 add_test( NAME test_json COMMAND test_json WORKING_DIRECTORY ${UNIT_TEST_BIN_OUTPUT_DIR})
-if ( NOT BUILD_COVERAGE )
+if ( NOT CODE_COVERAGE )
   add_test(NAME test_json-leak COMMAND valgrind --tool=memcheck --leak-check=full --error-exitcode=1 ./test_json WORKING_DIRECTORY ${UNIT_TEST_BIN_OUTPUT_DIR})
 endif()
