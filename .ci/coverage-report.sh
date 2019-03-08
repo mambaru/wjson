@@ -1,4 +1,5 @@
 #!/bin/bash
+# Генаратор отчета покрытия тестами
 
 script_path=$(readlink -e $0)
 script_dir=$(dirname $script_path)
@@ -6,18 +7,18 @@ project_dir=$(dirname $script_dir)
 project_name=$(basename $project_dir)
 build_dir="$project_dir/build"
 
-#rm -r $prj_dir/build/report
-#lcov --no-external -t "$prj" -o $prj_dir/build/$prj.info -c -d $prj_dir/build/ 
-#lcov --no-external --directory src --capture --output-file postgresql.info
-
-#genhtml -o $prj_dir/build/report $prj_dir/build/$prj.info
-#google-chrome $prj_dir/build/report/index.html
-
+if [ -z "$1" ]; then
+  cov_report=$build_dir/cov-report
+else
+  cov_report="$1"
+fi
+  
 if [ ! -d "$build_dir" ]; then
   echo "Для построения отчета нужно собрать проект с опцией CODE_COVERAGE=ON и запустить тесты"
   exit 1
 fi
 
+# Проверяем, что созданы необходимые файлы
 gcda_count="$(find ./ -type f -iname '*.gcda' | wc -l)"
 
 if [ "$gcda_count" = "0" ]; then
@@ -26,10 +27,21 @@ if [ "$gcda_count" = "0" ]; then
   exit 1
 fi
 
-rm -rf $build_dir/cov-report
-rm -f $build_dir/$project_name-coverage.info
+cov_info=$build_dir/$project_name-coverage.info
 
-lcov --directory $build_dir --capture --output-file $build_dir/$project_name-coverage.info
-mkdir $build_dir/cov-report
-genhtml -o $build_dir/cov-report/ $build_dir/$project_name-coverage.info
-google-chrome $build_dir/cov-report/index.html
+
+rm -rf $cov_report
+rm -f $cov_info
+
+echo "Собираем данные для отчета"
+lcov --quiet --capture --directory $build_dir --base-directory $project_dir --no-external --output-file $cov_info || exit 1
+echo "Удаляем данные для субмодулей"
+lcov --quiet --remove $cov_info 'external/*' --output-file $cov_info || exit 2
+
+echo "Создаем html-отчет"
+mkdir $cov_report
+genhtml --quiet -o $cov_report $cov_info || exit 3
+
+lcov --summary $cov_info
+echo "Для просмотра отчета запустите:"
+echo -e "\tgoogle-chrome $cov_report/index.html"

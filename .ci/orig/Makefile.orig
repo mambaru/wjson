@@ -30,11 +30,11 @@ paranoid: external build
 debug: external build
 	cd build && cmake .. -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE="Debug"
 	cmake --build ./build -- -j4
-coverage:	external build
+coverage:	external build doc
 	cd build && cmake .. -DCODE_COVERAGE=ON 
 	cmake --build ./build -- -j4
 	cd build && ctest 
-	./.ci/coverage-report.sh
+	if [ -f "./.ci/coverage-report.sh" ]; then ./.ci/coverage-report.sh docs/html/cov-report ; fi
 clean:
 	rm -rf docs
 	cd build && make clean
