@@ -67,8 +67,10 @@ wip-build:
   script:
     # Регулярка для настроек: .*\.\.\:\s\d+\.\d+%.*
     - ./.ci/wip-build-and-test.sh -DCODE_COVERAGE=$COVERAGE
-    - ./.ci/coverage-report.sh --
-    - lcov --summary build/${CI_PROJECT_NAME}-coverage.info
+    - if [[ "$COVERAGE" == "ON" ]]; then
+    -   ./.ci/coverage-report.sh --
+    -   lcov --summary build/${CI_PROJECT_NAME}-coverage.info
+    - fi
   only:
     - wip-devel
 
@@ -84,7 +86,11 @@ main-build:
 build-g++11:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 11 Debug -DPARANOID_WARNING=$PARANOID
+    - ./.ci/build-and-test.sh g++ 11 Debug -DPARANOID_WARNING=$PARANOID -DCODE_COVERAGE=$COVERAGE
+    - if [[ "$COVERAGE" == "ON" ]]; then
+    -   ./.ci/coverage-report.sh --
+    -   lcov --summary build/${CI_PROJECT_NAME}-coverage.info
+    - fi
   only:
     - /^build.*$/
     - pre-release
@@ -218,8 +224,6 @@ deploy-Release-static:
   artifacts:
     paths:
       - "${DEPLOY_PREF}-static-Release-production.tar.gz"
-      - "${DEPLOY_PREF}-static-Release-stress.tar.gz"
-      - "${DEPLOY_PREF}-static-Release-loads.tar.gz"
       - "${DEPLOY_PREF}-static-Release-devel.tar.gz"
     expire_in: 1 week
   script:
@@ -232,8 +236,6 @@ deploy-Release-shared:
   artifacts:
     paths:
       - "${DEPLOY_PREF}-shared-Release-production.tar.gz"
-      - "${DEPLOY_PREF}-shared-Release-stress.tar.gz"
-      - "${DEPLOY_PREF}-shared-Release-loads.tar.gz"
       - "${DEPLOY_PREF}-shared-Release-devel.tar.gz"
     expire_in: 1 week
   script:
@@ -246,8 +248,6 @@ deploy-RelWithDebInfo-static:
   artifacts:
     paths:
       - "${DEPLOY_PREF}-static-RelWithDebInfo-production.tar.gz"
-      - "${DEPLOY_PREF}-static-RelWithDebInfo-stress.tar.gz"
-      - "${DEPLOY_PREF}-static-RelWithDebInfo-loads.tar.gz"
       - "${DEPLOY_PREF}-static-RelWithDebInfo-devel.tar.gz"
     expire_in: 1 week
   script:
@@ -260,8 +260,6 @@ deploy-RelWithDebInfo-shared:
   artifacts:
     paths:
       - "${DEPLOY_PREF}-shared-RelWithDebInfo-production.tar.gz"
-      - "${DEPLOY_PREF}-shared-RelWithDebInfo-stress.tar.gz"
-      - "${DEPLOY_PREF}-shared-RelWithDebInfo-loads.tar.gz"
       - "${DEPLOY_PREF}-shared-RelWithDebInfo-devel.tar.gz"
     expire_in: 1 week
   script:
@@ -274,8 +272,6 @@ deploy-Debug-static:
   artifacts:
     paths:
       - "${DEPLOY_PREF}-static-Debug-production.tar.gz"
-      - "${DEPLOY_PREF}-static-Debug-stress.tar.gz"
-      - "${DEPLOY_PREF}-static-Debug-loads.tar.gz"
       - "${DEPLOY_PREF}-static-Debug-devel.tar.gz"
     expire_in: 1 week
   script:
@@ -288,8 +284,6 @@ deploy-Debug-shared:
   artifacts:
     paths:
       - "${DEPLOY_PREF}-shared-Debug-production.tar.gz"
-      - "${DEPLOY_PREF}-shared-Debug-stress.tar.gz"
-      - "${DEPLOY_PREF}-shared-Debug-loads.tar.gz"
       - "${DEPLOY_PREF}-shared-Debug-devel.tar.gz"
     expire_in: 1 week
   script:

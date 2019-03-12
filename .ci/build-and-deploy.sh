@@ -49,19 +49,25 @@ function deploy()
 
   rm -rf ./build/deploy/lead-up/*
   cp -rf ./build/$buildtype/bin/* ./build/deploy/lead-up/
-  cp -rfH ./configurations/$prjname/common/* ./build/deploy/lead-up/ 2>/dev/null || true
-  cp -rfH ./configurations/$prjname/$1/* ./build/deploy/lead-up/ 2>/dev/null || true
-  arname="./build/deploy/$prjname-$refname-$compiler$standard-$shared_static-$buildtype-$1.tar.gz"
-  tar -zcvf "$arname" -C "./build/deploy/lead-up/" .
+  cp ./configurations/* ./build/deploy/lead-up/ 2>/dev/null || true
+  cp -rfH ./configurations/common/* ./build/deploy/lead-up/ 2>/dev/null || true
+  cp -rfH ./configurations/$1/* ./build/deploy/lead-up/ 2>/dev/null || true
+  cp ./.ci/start.sh "./build/deploy/lead-up/${prjname}.sh" 2>/dev/null || true
+  arname="$prjname-$refname-$compiler$standard-$shared_static-$buildtype-$1.tar.gz"
+  escaped_arname=$(printf '%s\n' "$arname" | sed 's:[\/&]:\\&:g;$!s/$/\\/')
+  cat ./.ci/deploy.sh | sed -e 's/replaceme/${escaped_arname}/g' > ./build/deploy/lead-up/deploy.sh
+  chmod +x ./build/deploy/lead-up/deploy.sh
+  chmod +x ./build/deploy/lead-up/${prjname}.sh
+  
+  arpath="./build/deploy/$arname"
+  tar -zcvf "$arpath" -C "./build/deploy/lead-up/" .
   mkdir -p /monamour/$prjname
-  cp -f "$arname" /monamour/$prjname
+  cp -f "$arpath" /monamour/$prjname
 }
 
 if [ ! -z "$(ls -A ./build/$buildtype/bin/)" ]; then
   mkdir -p ./build/deploy
   mkdir -p ./build/deploy/lead-up/
   deploy production
-  deploy loads
-  deploy stress
   deploy devel
 fi

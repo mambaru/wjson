@@ -43,7 +43,7 @@ opt="--inconclusive --error-exitcode=1 --force --max-configs=128 \
 --quiet --enable=all --suppress=missingIncludeSystem --suppressions-list=$suppressions_lst \
 --template={id}:{file}:{line}:[{severity}]:{message} -i $project_dir/external -i $project_dir/build $exclude_args" 
 
-cppcheck $opt "${@:3}" $project_dir
+cppcheck $opt "${@:4}" $project_dir
 res=$?
 
 rm --force $suppressions_lst

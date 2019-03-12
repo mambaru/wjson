@@ -35,8 +35,6 @@
       "shared":false,
       
       "production":false,
-      "loads":false,
-      "stress":false,
       "devel":false
     },
     "RelWithDebInfo":{
@@ -44,8 +42,6 @@
       "shared":false,
       
       "production":false,
-      "loads":false,
-      "stress":false,
       "devel":false
     },
     "Debug":{
@@ -53,8 +49,6 @@
       "shared":false,
       
       "production":false,
-      "loads":false,
-      "stress":false,
       "devel":false
     }
   }
