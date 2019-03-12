@@ -301,12 +301,13 @@ delete-branches:
   only:
     - /^build.*$/
     - /^check.*$/
+    
 push-to-github:
   stage: publish
   only:
     - master
-    
   script:
+    - make coverage
     - git tag -f ${RELEASE_TAG}
     - git push -f --tags ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}
     - if [[ "$(python3 ./.ci/wamba-ci.py option public OFF)" == "ON" ]]; then
