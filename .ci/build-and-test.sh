@@ -22,4 +22,3 @@ rm -rf *
 cmake -DCMAKE_CXX_COMPILER=$compiler -DCMAKE_CXX_STANDARD=$standard -DCMAKE_BUILD_TYPE=$buildtype -DBUILD_TESTING=ON  "${@:3}" .. || exit $?
 cmake --build . -- -j$build_threads || exit $?
 ctest --output-on-failure || exit $?
-make clean

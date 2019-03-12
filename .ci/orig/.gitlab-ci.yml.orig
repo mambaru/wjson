@@ -65,7 +65,10 @@ basic-build:
 wip-build:
   stage: build
   script:
-    - ./.ci/wip-build-and-test.sh
+    # Регулярка для настроек: .*\.\.\:\s\d+\.\d+%.*
+    - ./.ci/wip-build-and-test.sh -DCODE_COVERAGE=$COVERAGE
+    - ./.ci/coverage-report.sh --
+    - lcov --summary build/${CI_PROJECT_NAME}-coverage.info
   only:
     - wip-devel
 
@@ -81,7 +84,7 @@ main-build:
 build-g++11:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 11 Debug -DPARANOID_WARNING=$PARANOID -DCODE_COVERAGE=$COVERAGE
+    - ./.ci/build-and-test.sh g++ 11 Debug -DPARANOID_WARNING=$PARANOID
   only:
     - /^build.*$/
     - pre-release

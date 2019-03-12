@@ -29,8 +29,6 @@ fi
 
 cov_info=$build_dir/$project_name-coverage.info
 
-
-rm -rf $cov_report
 rm -f $cov_info
 
 echo "Собираем данные для отчета"
@@ -38,10 +36,13 @@ lcov --quiet --capture --directory $build_dir --base-directory $project_dir --no
 echo "Удаляем данные для субмодулей"
 lcov --quiet --remove $cov_info 'external/*' --output-file $cov_info || exit 2
 
-echo "Создаем html-отчет"
-mkdir $cov_report
-genhtml --quiet -o $cov_report $cov_info || exit 3
+if [ "$cov_report" != "--" ]; then
+  rm -rf $cov_report
+  echo "Создаем html-отчет"
+  mkdir $cov_report
+  genhtml --quiet -o $cov_report $cov_info || exit 3
 
-lcov --summary $cov_info
-echo "Для просмотра отчета запустите:"
-echo -e "\tgoogle-chrome $cov_report/index.html"
+  lcov --summary $cov_info
+  echo "Для просмотра отчета запустите:"
+  echo -e "\tgoogle-chrome $cov_report/index.html"
+fi

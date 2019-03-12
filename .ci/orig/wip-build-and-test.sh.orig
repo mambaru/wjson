@@ -9,4 +9,3 @@ rm -rf *
 cmake -DBUILD_TESTING=ON "${@}" .. || exit $?
 cmake --build . -- -j$build_threads || exit $?
 ctest --output-on-failure || exit $?
-make clean

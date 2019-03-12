@@ -8,4 +8,3 @@ cd build || exit $?
 rm -rf *
 cmake "${@}" .. || exit $?
 cmake --build . -- -j$build_threads || exit $?
-make clean
