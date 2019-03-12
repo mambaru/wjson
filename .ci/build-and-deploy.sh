@@ -6,19 +6,19 @@ buildtype=$1
 shared_static=$2
 shared="ON"
 
-if [[ "$(python3 ./.ci/wamba-ci.py has deploy.$buildtype )" != "1" ]]; then
+if [[ "$(python3 ./.ci/wamba-ci.py has deploy.$buildtype )" == "OFF" ]]; then
   echo "Do not deploy for build type $buildtype"
   exit 0
 fi
 
 if [[ "$shared_static" == "static" ]]; then
-  if [[ "$(python3 ./.ci/wamba-ci.py enabled deploy.$buildtype.static )" != "1" ]]; then
+  if [[ "$(python3 ./.ci/wamba-ci.py option deploy.$buildtype.static )" == "OFF" ]]; then
     echo "Do not deploy for $buildtype-static"
     exit 0
   fi
   shared="OFF"
 elif [[ "$shared_static" == "shared" ]]; then
-  if [[ "$(python3 ./.ci/wamba-ci.py enabled deploy.$buildtype.shared )" != "1" ]]; then
+  if [[ "$(python3 ./.ci/wamba-ci.py option deploy.$buildtype.shared )" == "OFF" ]]; then
     echo "Do not deploy for $buildtype-shared"
     exit 0
   fi
@@ -42,7 +42,7 @@ popd
 
 function deploy()
 {
-  if [[ "$(python3 ./.ci/wamba-ci.py enabled deploy.$buildtype.$1 )" != "1" ]]; then
+  if [[ "$(python3 ./.ci/wamba-ci.py option deploy.$buildtype.$1 )" == "OFF" ]]; then
     echo "Do not deploy for configurations $shared_static-$buildtype-$1"
     return
   fi

@@ -16,9 +16,9 @@ if ( STANDALONE )
         EXIT_CODE
     )
   endif()
+  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
   list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/external/cmake-ci/cmake)
   include(opt)
   include(repos)
   include(getlibs)
-
 endif()

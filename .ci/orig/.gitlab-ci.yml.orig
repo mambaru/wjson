@@ -10,19 +10,21 @@ variables:
 # wip-devel
 
 before_script:
+  - git checkout ${CI_COMMIT_REF_NAME}
+  - git pull ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}
+  - git submodule deinit --force .
+  - git submodule sync
+  - git submodule update --init
   - export LC_ALL='ru_RU.UTF-8'
   - export LANG='ru_RU.UTF-8'
   - export RELEASE_BRANCH="$(python3 ./.ci/wamba-ci.py get release release-0.8)"
   - export RELEASE_TAG="$(python3 ./.ci/wamba-ci.py get tag 0.8.0)"
   - export DEPLOY_STANDARD="$(python3 ./.ci/wamba-ci.py get deploy.standard 11)"
   - export DEPLOY_COMPILER="$(python3 ./.ci/wamba-ci.py get deploy.compiler g++)"
+  - export PARANOID="$(python3 ./.ci/wamba-ci.py option paranoid ON)"
+  - export COVERAGE="$(python3 ./.ci/wamba-ci.py option coverage ON)"
   - export DEPLOY_PREF="${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}-${DEPLOY_COMPILER}${DEPLOY_STANDARD}"
   - echo "RELEASE_BRANCH=${RELEASE_BRANCH}"
-  - git checkout ${CI_COMMIT_REF_NAME}
-  - git pull ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}
-  - git submodule deinit --force .
-  - git submodule sync
-  - git submodule update --init
 
 after_script:
   - rm -f /tmp/migrate-${CI_JOB_ID}.sh
@@ -36,12 +38,14 @@ stages:
   - publish
   - deploy
   
-  
 night-build:
   stage: build
   script:
     - git pull origin devel
     - git pull origin wip-devel
+    - rm -f upgrade.sh
+    - wget http://github.lan/cpp/cmake-ci/raw/master/upgrade.sh
+    - bash upgrade.sh "auto" "master" "Night build&#58; "
     - rm -f update.sh
     - wget http://github.lan/cpp/cmake-ci/raw/master/update.sh
     - bash update.sh "Night build&#58; "
@@ -68,7 +72,7 @@ wip-build:
 main-build:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 11 Release
+    - ./.ci/build-and-test.sh g++ 11 Release -DPARANOID_WARNING=$PARANOID
   only:
     - devel
     - pre-release
@@ -77,7 +81,7 @@ main-build:
 build-g++11:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 11 Debug
+    - ./.ci/build-and-test.sh g++ 11 Debug -DPARANOID_WARNING=$PARANOID -DCODE_COVERAGE=$COVERAGE
   only:
     - /^build.*$/
     - pre-release
@@ -85,8 +89,8 @@ build-g++11:
 build-g++14:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 14 Release
-    - ./.ci/build-and-test.sh g++ 14 Debug
+    - ./.ci/build-and-test.sh g++ 14 Release  -DPARANOID_WARNING=$PARANOID
+    - ./.ci/build-and-test.sh g++ 14 Debug  -DPARANOID_WARNING=$PARANOID
   only:
     - /^build.*$/
     - pre-release
@@ -94,8 +98,8 @@ build-g++14:
 build-g++17:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 17 Release
-    - ./.ci/build-and-test.sh g++ 17 Debug
+    - ./.ci/build-and-test.sh g++ 17 Release  -DPARANOID_WARNING=$PARANOID
+    - ./.ci/build-and-test.sh g++ 17 Debug  -DPARANOID_WARNING=$PARANOID
   only:
     - /^build.*$/
     - pre-release
@@ -104,8 +108,8 @@ build-g++17:
 build-clang++11:
   stage: build
   script:
-    - ./.ci/build-and-test.sh clang++ 11 Release
-    - ./.ci/build-and-test.sh clang++ 11 Debug
+    - ./.ci/build-and-test.sh clang++ 11 Release -DPARANOID_WARNING=$PARANOID
+    - ./.ci/build-and-test.sh clang++ 11 Debug  -DPARANOID_WARNING=$PARANOID
   only:
     - /^build.*$/
     - pre-release
@@ -113,8 +117,8 @@ build-clang++11:
 build-clang++14:
   stage: build
   script:
-    - ./.ci/build-and-test.sh clang++ 14 Release
-    - ./.ci/build-and-test.sh clang++ 14 Debug
+    - ./.ci/build-and-test.sh clang++ 14 Release  -DPARANOID_WARNING=$PARANOID
+    - ./.ci/build-and-test.sh clang++ 14 Debug  -DPARANOID_WARNING=$PARANOID
   only:
     - /^build.*$/
     - pre-release
@@ -152,7 +156,7 @@ devel-wip:
     - export CI_PROJECT_ID=${CI_PROJECT_ID} 
     - export GITLAB_USER_ID=${GITLAB_USER_ID} 
     - export PRIVATE_TOKEN=${PRIVATE_TOKEN} 
-    - ./.ci/automr.sh devel false
+    - ./.ci/wip-automr.sh devel false
   only:
     - wip-devel
 
@@ -193,7 +197,7 @@ master-hotfix:
     - export CI_PROJECT_ID=${CI_PROJECT_ID} 
     - export GITLAB_USER_ID=${GITLAB_USER_ID} 
     - export PRIVATE_TOKEN=${PRIVATE_TOKEN} 
-    - ./.ci/automr.sh master true
+    - ./.ci/wip-automr.sh master true
   only:
     - /^hotfix-.*$/
 
@@ -305,7 +309,7 @@ push-to-github:
   script:
     - git tag -f ${RELEASE_TAG}
     - git push -f --tags ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}
-    - if [[ "$(python3 ./.ci/wamba-ci.py enabled public)" == "1" ]]; then
+    - if [[ "$(python3 ./.ci/wamba-ci.py option public OFF)" == "ON" ]]; then
     -   cp "./external/cmake-ci/migrate.sh" "/tmp/migrate-${CI_JOB_ID}.sh"
     -   cp "./external/cmake-ci/export.sh" "/tmp/export-${CI_JOB_ID}.sh"
     -   git branch -f mambaru

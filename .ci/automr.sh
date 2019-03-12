@@ -28,7 +28,7 @@ BODY="{
     \"source_branch\": \"${CI_COMMIT_REF_NAME}\",
     \"target_branch\": \"${TARGET_BRANCH}\",
     \"remove_source_branch\": ${remove_source_branch},
-    \"title\": \"WIP: ${CI_COMMIT_REF_NAME}\",
+    \"title\": \"${CI_COMMIT_REF_NAME}\",
     \"assignee_id\":\"${GITLAB_USER_ID}\"
 }";
 
@@ -50,7 +50,7 @@ if [ ${COUNTBRANCHES} -eq "0" ]; then
     echo ${RESULT} | python3 -c "import sys, json; exit(json.load(sys.stdin).get('state','error')!='opened')";
     ret=$?;
     echo "ret=${ret}";
-    echo "Opened a new merge request: WIP: ${CI_COMMIT_REF_NAME} and assigned to you";
+    echo "Opened a new merge request: ${CI_COMMIT_REF_NAME} and assigned to you";
     exit ${ret};
 fi
 
