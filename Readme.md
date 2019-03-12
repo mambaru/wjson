@@ -5,6 +5,7 @@
 Статья на [хабре](https://habrahabr.ru/post/311262/) с примерами и бенчмарками.
 Документация [doxygen](https://mambaru.github.io/wjson/index.html)
 Репозитарий на [github.com](https://github.com/mambaru/wjson)
+Отчет [doxygen](https://mambaru.github.io/wjson/cov-report/index.html)
 
 Простой в использовании, быстрый, декларативный сериализатор/десериализатор непосредственно в структуры данных. 
 Например для структуры:
