@@ -1,12 +1,15 @@
 [![Coverage Status](https://coveralls.io/repos/github/mambaru/wjson/badge.svg?branch=master)](https://coveralls.io/github/mambaru/wjson?branch=master)
+[![pipeline status](http://github.lan/cpp/wjson/badges/wip-devel/pipeline.svg)](http://github.lan/cpp/wjson/commits/wip-devel)
+[![coverage report](http://gitlab7.lan/cpp/wjson/badges/wip-devel/coverage.svg)](http://github.lan/cpp/wjson/commits/wip-devel)
+
 
 # JSON сериализатор
 
-Статья на [хабре](https://habrahabr.ru/post/311262/) с примерами и бенчмарками.
-Репозитарий на [github.com](https://github.com/mambaru/wjson)
-Документация [wiki](https://github.com/mambaru/wjson/wiki)
-Документация [doxygen](https://mambaru.github.io/wjson/index.html)
-Отчет [coverage](https://mambaru.github.io/wjson/cov-report/index.html)
+* Статья на [хабре](https://habrahabr.ru/post/311262/) с примерами и бенчмарками.
+* Репозитарий на [github.com](https://github.com/mambaru/wjson)
+* Документация [wiki](https://github.com/mambaru/wjson/wiki)
+* Документация [doxygen](https://mambaru.github.io/wjson/index.html)
+* Отчет [coverage](https://mambaru.github.io/wjson/cov-report/index.html)
 
 Простой в использовании, быстрый, декларативный сериализатор/десериализатор непосредственно в структуры данных. 
 Например для структуры:
