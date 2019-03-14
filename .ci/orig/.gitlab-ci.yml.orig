@@ -43,12 +43,12 @@ night-build:
   script:
     - git pull origin devel
     - git pull origin wip-devel
-    - rm -f upgrade.sh
-    - wget http://github.lan/cpp/cmake-ci/raw/master/upgrade.sh
-    - bash upgrade.sh "auto" "master" "Night build&#58; "
     - rm -f update.sh
     - wget http://github.lan/cpp/cmake-ci/raw/master/update.sh
     - bash update.sh "Night build&#58; "
+    - rm -f upgrade.sh
+    - wget http://github.lan/cpp/cmake-ci/raw/master/upgrade.sh
+    - bash upgrade.sh "auto" "master" "Night build&#58; "
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${CI_COMMIT_REF_NAME}
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:wip-devel
   only:
