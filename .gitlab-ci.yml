@@ -34,9 +34,9 @@ stages:
   - build
   - check
   - merge
-  - clean
   - publish
   - deploy
+  - clean
   
 night-build:
   stage: build
@@ -218,8 +218,35 @@ release:
   only:
     - master
 
-    
-deploy-Release-static:
+release-deploy:
+  stage: deploy
+  artifacts:
+    paths:
+      - "${DEPLOY_PREF}-static-Release-production.tar.gz"
+      - "${DEPLOY_PREF}-static-Release-devel.tar.gz"
+      - "${DEPLOY_PREF}-shared-Release-production.tar.gz"
+      - "${DEPLOY_PREF}-shared-Release-devel.tar.gz"
+      - "${DEPLOY_PREF}-static-RelWithDebInfo-production.tar.gz"
+      - "${DEPLOY_PREF}-static-RelWithDebInfo-devel.tar.gz"
+      - "${DEPLOY_PREF}-shared-RelWithDebInfo-production.tar.gz"
+      - "${DEPLOY_PREF}-shared-RelWithDebInfo-devel.tar.gz"
+      - "${DEPLOY_PREF}-static-Debug-production.tar.gz"
+      - "${DEPLOY_PREF}-static-Debug-devel.tar.gz"
+      - "${DEPLOY_PREF}-shared-Debug-production.tar.gz"
+      - "${DEPLOY_PREF}-shared-Debug-devel.tar.gz"
+    expire_in: 1 week
+  script:
+    - ./.ci/build-and-deploy.sh Release static
+    - ./.ci/build-and-deploy.sh Release shared
+    - ./.ci/build-and-deploy.sh RelWithDebInfo static
+    - ./.ci/build-and-deploy.sh RelWithDebInfo shared
+    - ./.ci/build-and-deploy.sh Debug static
+    - ./.ci/build-and-deploy.sh Debug shared
+  only:
+    - /^release-.*$/
+    - deploy
+
+deploy-rel:
   stage: deploy
   artifacts:
     paths:
@@ -229,45 +256,9 @@ deploy-Release-static:
   script:
     - ./.ci/build-and-deploy.sh Release static
   only:
-    - /^release-.*$/
+    - /^deploy-rel.*$/
 
-deploy-Release-shared:
-  stage: deploy
-  artifacts:
-    paths:
-      - "${DEPLOY_PREF}-shared-Release-production.tar.gz"
-      - "${DEPLOY_PREF}-shared-Release-devel.tar.gz"
-    expire_in: 1 week
-  script:
-    - ./.ci/build-and-deploy.sh Release shared
-  only:
-    - /^release-.*$/
-    
-deploy-RelWithDebInfo-static:
-  stage: deploy
-  artifacts:
-    paths:
-      - "${DEPLOY_PREF}-static-RelWithDebInfo-production.tar.gz"
-      - "${DEPLOY_PREF}-static-RelWithDebInfo-devel.tar.gz"
-    expire_in: 1 week
-  script:
-    - ./.ci/build-and-deploy.sh RelWithDebInfo static
-  only:
-    - /^release-.*$/
-
-deploy-RelWithDebInfo-shared:
-  stage: deploy
-  artifacts:
-    paths:
-      - "${DEPLOY_PREF}-shared-RelWithDebInfo-production.tar.gz"
-      - "${DEPLOY_PREF}-shared-RelWithDebInfo-devel.tar.gz"
-    expire_in: 1 week
-  script:
-    - ./.ci/build-and-deploy.sh RelWithDebInfo shared
-  only:
-    - /^release-.*$/
-
-deploy-Debug-static:
+deploy-deb:
   stage: deploy
   artifacts:
     paths:
@@ -277,19 +268,7 @@ deploy-Debug-static:
   script:
     - ./.ci/build-and-deploy.sh Debug static
   only:
-    - /^release-.*$/
-
-deploy-Debug-shared:
-  stage: deploy
-  artifacts:
-    paths:
-      - "${DEPLOY_PREF}-shared-Debug-production.tar.gz"
-      - "${DEPLOY_PREF}-shared-Debug-devel.tar.gz"
-    expire_in: 1 week
-  script:
-    - ./.ci/build-and-deploy.sh Debug shared
-  only:
-    - /^release-.*$/
+    - /^deploy-deb.*$/
 
 delete-branches:
   stage: clean
@@ -298,6 +277,7 @@ delete-branches:
   only:
     - /^build.*$/
     - /^check.*$/
+    - /^deploy.*$/
     
 push-to-github:
   stage: publish
