@@ -171,9 +171,6 @@ class serializerT< value<unsigned long> >
 {
 };
 
-
-#ifdef WJSON_ENABLE_LONG_LONG
-
 template<>
 class serializerT< value<long long> >
   : public serializerN<long long>
@@ -185,7 +182,5 @@ class serializerT< value<unsigned long long> >
   : public serializerN<unsigned long long>
 {
 };
-#endif 
-
 
 }

@@ -74,9 +74,6 @@ struct value<unsigned long, -1>
   typedef serializerT< value<unsigned long, -1> > serializer;
 };
 
-
-#ifdef WJSON_ENABLE_LONG_LONG
-
 template<>
 struct value<long long, -1>
 {
@@ -91,7 +88,6 @@ struct value<unsigned long long, -1>
   typedef serializerT< value<unsigned long long, -1> > serializer;
 };
 
-#endif
 
 template<int R>
 struct value<float, R>
