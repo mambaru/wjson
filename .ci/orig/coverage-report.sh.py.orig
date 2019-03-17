@@ -1,5 +1,4 @@
 #!/bin/bash
-# Генаратор отчета покрытия тестами
 
 script_path=$(readlink -e $0)
 script_dir=$(dirname $script_path)
@@ -14,7 +13,7 @@ else
 fi
   
 if [ ! -d "$build_dir" ]; then
-  echo "Для построения отчета нужно собрать проект с опцией CODE_COVERAGE=ON и запустить тесты"
+  echo "You need to build a project with the option -DCODE_COVERAGE=ON and run tests"
   exit 1
 fi
 
@@ -22,8 +21,8 @@ fi
 gcda_count="$(find ./ -type f -iname '*.gcda' | wc -l)"
 
 if [ "$gcda_count" = "0" ]; then
-  echo "Не найдены *.gcda файлы"
-  echo "Для построения отчета нужно пересобрать проект с опцией CODE_COVERAGE=ON и запустить тесты"
+  echo "Not found * .gcda files"
+  echo "You need to build a project with the option -DCODE_COVERAGE=ON and run tests"
   exit 1
 fi
 
@@ -31,18 +30,18 @@ cov_info=$build_dir/$project_name-coverage.info
 
 rm -f $cov_info
 
-echo "Собираем данные для отчета"
+echo "We collect data for the report..."
 lcov --quiet --capture --directory $build_dir --base-directory $project_dir --no-external --output-file $cov_info || exit 1
-echo "Удаляем данные для субмодулей"
+echo "Delete data for submodules..."
 lcov --quiet --remove $cov_info 'external/*' --output-file $cov_info || exit 2
 
 if [ "$cov_report" != "--" ]; then
   rm -rf $cov_report
-  echo "Создаем html-отчет"
+  echo "Create html report..."
   mkdir $cov_report
   genhtml --quiet -o $cov_report $cov_info || exit 3
 
   lcov --summary $cov_info
-  echo "Для просмотра отчета запустите:"
+  echo "To view the report run:"
   echo -e "\tgoogle-chrome $cov_report/index.html"
 fi

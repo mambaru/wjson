@@ -5,6 +5,10 @@ help:
 	@echo "	make static"
 	@echo "	make tests"
 	@echo "	make doc"
+	@echo "	make debug"
+	@echo "	make paranoid"
+	@echo "	make coverage"
+	@echo "	make clean"
 	@echo "	make update"
 	@echo "	make upgrade"
 doc:

@@ -292,9 +292,13 @@ push-to-github:
     -   cp "./external/cmake-ci/export.sh" "/tmp/export-${CI_JOB_ID}.sh"
     -   git branch -f mambaru
     -   git checkout mambaru
+    #   Удалем все ненужное для github.com
     -   git rm -rf .ci
     -   git rm .gitlab-ci.yml
     -   git rm wamba-ci.json
+    -   cp -f ./external/cmake-ci/root/Makefile-public Makefile
+    #   Поготавливаем к миграции в другой репо
     -   /tmp/migrate-${CI_JOB_ID}.sh https://github.com/mambaru/cmake-ci.git
+    #   Отправляем в github.com
     -   /tmp/export-${CI_JOB_ID}.sh ${REMOTE_SSH}
     - fi
