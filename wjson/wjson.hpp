@@ -8,3 +8,4 @@
 
 #include <wjson/json.hpp>
 #include <wjson/name.hpp>
+#include <wjson/strerror.hpp>
