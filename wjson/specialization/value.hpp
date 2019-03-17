@@ -74,6 +74,8 @@ struct value<unsigned long, -1>
   typedef serializerT< value<unsigned long, -1> > serializer;
 };
 
+#ifndef DISABLE_LONG_LONG_98
+
 template<>
 struct value<long long, -1>
 {
@@ -88,6 +90,7 @@ struct value<unsigned long long, -1>
   typedef serializerT< value<unsigned long long, -1> > serializer;
 };
 
+#endif 
 
 template<int R>
 struct value<float, R>

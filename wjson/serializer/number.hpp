@@ -171,6 +171,8 @@ class serializerT< value<unsigned long> >
 {
 };
 
+#ifndef DISABLE_LONG_LONG_98
+
 template<>
 class serializerT< value<long long> >
   : public serializerN<long long>
@@ -182,5 +184,7 @@ class serializerT< value<unsigned long long> >
   : public serializerN<unsigned long long>
 {
 };
+
+#endif
 
 }
