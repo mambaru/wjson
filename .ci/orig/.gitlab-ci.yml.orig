@@ -41,8 +41,9 @@ stages:
 night-build:
   stage: build
   script:
-    - git pull origin devel
-    - git pull origin wip-devel
+    - git pull --ff-only origin devel
+    - git pull --ff-only origin wip-devel
+    - git submodule update
     - rm -f update.sh
     - wget http://github.lan/cpp/cmake-ci/raw/master/update.sh
     - bash update.sh "Night build&#58; "
