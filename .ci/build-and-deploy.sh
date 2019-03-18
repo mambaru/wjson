@@ -56,7 +56,7 @@ function deploy()
   cp ./.ci/start.sh "./build/deploy/lead-up/${prjname}.sh" 2>/dev/null || true
   arname="$prefix$prjname-$refname-$compiler$standard-$shared_static-$buildtype-$1.tar.gz"
   escaped_arname=$(printf '%s\n' "$arname" | sed 's:[\/&]:\\&:g;$!s/$/\\/')
-  cat ./.ci/deploy.sh | sed -e 's/replaceme/${escaped_arname}/g' > ./build/deploy/lead-up/deploy.sh
+  cat ./.ci/deploy.sh | sed -e "s/replaceme/${escaped_arname}/g" > ./build/deploy/lead-up/deploy.sh
   chmod +x ./build/deploy/lead-up/deploy.sh
   chmod +x ./build/deploy/lead-up/${prjname}.sh
   
