@@ -6,7 +6,8 @@
   "paranoid":true,
   "coverage":true,
   "build_threads": 4,
-
+  "gc": true,
+  
   "build-and-test":{
     "Release":true,
     "Debug":true,

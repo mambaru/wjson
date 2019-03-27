@@ -29,6 +29,11 @@ before_script:
 after_script:
   - rm -f /tmp/migrate-${CI_JOB_ID}.sh
   - rm -f /tmp/export-${CI_JOB_ID}.sh
+  - if [[ "$(python3 ./.ci/wamba-ci.py option gc ON)" == "ON" ]]; then
+  -   echo "Полностью все удаляем после сборки из-за жадных админов"
+  -   echo "Если что-то сломалось и нужно посмотреть это на месте, то установите gc=true в wamba-ci.json в корне проекта"
+  -   rm -rf *
+  - fi
 
 stages:
   - build
