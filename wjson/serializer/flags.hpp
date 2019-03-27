@@ -41,16 +41,18 @@ public:
         return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );*/
     }
     else if ( *beg != '"' )
-      return create_error<error_code::ExpectedOf>(e, end, "[", std::distance(beg, end) );
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
 
-    beg = parser::parse_space(++beg, end, e);
+    /*beg = parser::parse_space(++beg, end, e);
     if ( beg==end )
       return create_error<error_code::UnexpectedEndFragment>(e, end);
+    */
+    ++beg;
 
     if ( as_array )
-      beg = self::deserialize<','>(v, beg, end, e);
+      beg = self::deserialize<true>(v, beg, end, e);
     else
-      beg = self::deserialize<Sep>(v, beg, end, e);
+      beg = self::deserialize<false>(v, beg, end, e);
 
     if ( beg==end )
       return create_error<error_code::UnexpectedEndFragment>(e, end);
@@ -97,52 +99,111 @@ private:
     return end;
   }
 
-  template<char Sep2, typename LL, typename RR, typename P>
-  static P deserialize_one( T& v, P beg, P end, json_error* e, fas::type_list<LL, RR>)
+  // string with separator
+  template<typename LL, typename RR, typename P>
+  static P deserialize_one( T& v, P beg, P end, json_error* e, fas::type_list<LL, RR>, fas::false_ )
   {
-    if ( beg==end ) return beg;
-    P cur = beg;
+    if ( beg==end ) 
+      return beg;
 
-    if ( Sep2==',' ) ++cur;
+    // Если разделитель не пробел, то разрешаем пробелы
+    if ( Sep!=' ' )
+    {
+      beg = parser::parse_space(beg, end, e);
+      if ( beg == end )
+        return beg;
+    }
+      
+    if ( *beg=='"' )
+      return beg;
+    
+    P cur = beg;
+    const char *pstr = LL()();
+
+    // парсим текущее значение
+    for ( ; cur!=end && *pstr!='\0' && *pstr==*cur; ++cur, ++pstr);
+
+    // если совпало 
+    if ( *pstr == '\0' && cur!=end )
+    {
+      if ( (Sep!=' ' && parser::is_space(cur, end)) || *cur==Sep || *cur=='"' )
+      {
+        v = static_cast<T>(v|LL::value);
+        beg = cur;
+        // Если разделитель не пробел, то разрешаем пробелы
+        if ( Sep!=' ' )
+        {
+          beg = parser::parse_space(beg, end, e);
+          if ( beg == end )
+            return beg;
+        }
+          
+        if ( *beg=='"' )
+          return beg;
+        
+        if ( *beg==Sep )
+          ++beg;
+      }
+    }
+    return self::deserialize_one(v, beg, end, e, RR(), fas::false_() );
+  }
+
+  // enum as json array
+  template<typename LL, typename RR, typename P>
+  static P deserialize_one( T& v, P beg, P end, json_error* e, fas::type_list<LL, RR>, fas::true_ )
+  {
+    beg = parser::parse_space(beg, end, e);
+    if ( beg==end ) return beg;
+    if ( *beg==']' )
+      return beg;
+
+    if ( *beg!='"' )
+      return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );;
+
+    P cur = beg;
+    ++cur;
+   
     const char *pstr = LL()();
     for ( ; cur!=end && *pstr!='\0' && *pstr==*cur; ++cur, ++pstr);
 
     if ( *pstr == '\0' && cur!=end )
     {
-      if ( parser::is_space(cur, end) || *cur==Sep2 || *cur=='"' || *cur==']' )
+      if ( *cur=='"' )
       {
         v = static_cast<T>(v|LL::value);
         beg = cur;
-        if ( Sep2==',' ) ++beg;
+        ++beg;
         beg = parser::parse_space(beg, end, e);
         if ( beg == end )
           return beg;
-        if ( *beg != Sep2 )
+        if ( *beg != ',' )
           return beg;
         ++beg;
         beg = parser::parse_space(beg, end, e);
       }
     }
-    return self::deserialize_one<Sep2>(v, beg, end, e, RR() );
+    return self::deserialize_one(v, beg, end, e, RR(), fas::true_() );
   }
 
-  template<char, typename P>
-  static P deserialize_one( T&, P beg, P, json_error*, fas::empty_list)
+  template<typename P, typename IsArr>
+  static P deserialize_one( T&, P beg, P, json_error*, fas::empty_list, IsArr)
   {
     return beg;
   }
 
-  template<char Sep2, typename P>
+  template<bool IsArray, typename P>
   static P deserialize( T& v, P beg, P end, json_error* e) 
   {
-    const char fin = ( Sep2 == ',' ) ? ']' : '"';
+    //const char fin = ( Sep2 == ',' ) ? ']' : '"';
+    const char fin = IsArray ? ']' : '"';
     while ( beg!=end && *beg!=fin )
     {
       P cur = beg;
-      beg = self::deserialize_one<Sep2>(v, beg, end, e, enum_list() );
+      beg = self::deserialize_one(v, beg, end, e, enum_list(), fas::bool_<IsArray>() );
       if ( cur == beg )
         return create_error<error_code::InvalidEnum>(e, end, std::distance(beg, end));
-      beg = parser::parse_space(beg, end, e);
+      // Зависит от сепаратора
+      // beg = parser::parse_space(beg, end, e);
       if ( beg == end )
         return create_error<error_code::UnexpectedEndFragment>(e, end);
     }

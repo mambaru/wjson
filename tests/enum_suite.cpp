@@ -189,10 +189,23 @@ UNIT(enum1, "")
   t << equal<expect, int>(flags, check ) << FAS_FL;
 
   flags = 0;  
+  json = "\"three, six, one\"";
+  serializer_t()(flags, json.begin(), json.end(), &e);
+  t << is_false<assert>(e) 
+    << ::wjson::strerror::message(e) << ": "
+    << ::wjson::strerror::trace(e, json.begin(), json.end()) << FAS_FL ;
+  t << equal<expect, int>(flags, check ) << FAS_FL;
+
+  
+  flags = 0;  
   json = "[ \"three\", \"six\", 1 ]";
   serializer_t()(flags, json.begin(), json.end(), &e);
   t << is_true<assert>(e) << FAS_FL;
-  t << equal<expect>( e.code(), error_code::InvalidEnum ) << FAS_FL;
+  t << stop;
+  t << equal<expect>( e.code(), error_code::ExpectedOf )     
+    << ::wjson::strerror::message(e) << ": "
+    << ::wjson::strerror::trace(e, json.begin(), json.end()) << FAS_FL ;
+
 }
 
 UNIT(enum2, "")
