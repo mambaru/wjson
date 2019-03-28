@@ -30,6 +30,8 @@ public:
   template<typename P>
   P operator() ( T& v, P beg, P end, json_error* e ) const
   {
+    v = T();
+    
     if (beg==end) 
       return create_error<error_code::UnexpectedEndFragment>(e, end);
 
