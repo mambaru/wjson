@@ -1,4 +1,5 @@
 #!/bin/bash
+# дефолтный скрипт для запуска демона копируется с переименованием при деплое 
 
 script_path=$(readlink -e $0)
 script_dir=$(dirname $script_path)
