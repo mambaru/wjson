@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fas/testing.hpp>
 #include <wjson/json.hpp>
+#include <wjson/_json.hpp>
 #include <wjson/name.hpp>
 #include <wjson/strerror.hpp>
 
@@ -188,16 +189,30 @@ UNIT(enum1, "")
   t << equal<expect, int>(flags, check ) << FAS_FL;
 
   flags = 0;  
+  json = "\"three, six, one\"";
+  serializer_t()(flags, json.begin(), json.end(), &e);
+  t << is_false<assert>(e) 
+    << ::wjson::strerror::message(e) << ": "
+    << ::wjson::strerror::trace(e, json.begin(), json.end()) << FAS_FL ;
+  t << equal<expect, int>(flags, check ) << FAS_FL;
+
+  
+  flags = 0;  
   json = "[ \"three\", \"six\", 1 ]";
   serializer_t()(flags, json.begin(), json.end(), &e);
   t << is_true<assert>(e) << FAS_FL;
-  t << equal<expect>( e.code(), error_code::InvalidEnum ) << FAS_FL;
+  t << stop;
+  t << equal<expect>( e.code(), error_code::ExpectedOf )     
+    << ::wjson::strerror::message(e) << ": "
+    << ::wjson::strerror::trace(e, json.begin(), json.end()) << FAS_FL ;
+
 }
 
 UNIT(enum2, "")
 {
   using namespace fas::testing;
   using namespace wjson;
+  
   int flags = static_cast<int>(count1::one)
             | static_cast<int>(count1::three)
             | static_cast<int>(count1::six);
@@ -218,6 +233,14 @@ UNIT(enum2, "")
 
   flags = 0;  
   json = "\"    six |  three   |  one   \"";
+  serializer_t()(flags, json.begin(), json.end(), &e);
+  t << is_false<assert>(e) 
+    << ::wjson::strerror::message(e) << ": "
+    << ::wjson::strerror::trace(e, json.begin(), json.end()) << FAS_FL ;
+  t << equal<expect, int>(flags, check ) << FAS_FL;
+
+  flags = 0;  
+  json = "[\"six\",\"three\",\"one\"]";
   serializer_t()(flags, json.begin(), json.end(), &e);
   t << is_false<assert>(e) 
     << ::wjson::strerror::message(e) << ": "
