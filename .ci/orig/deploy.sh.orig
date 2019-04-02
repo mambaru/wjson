@@ -10,12 +10,31 @@ else
   prj="$1"
 fi
 
+log=/log/${prj}.log
+dname="${prj}d"
+
+backup=$(date +%F-%X)
+sudo -u wwwrun mkdir $backup
+
+sudo -u wwwrun shopt -s extglob dotglob
+sudo -u wwwrun mv !($backup) $backup
+sudo -u wwwrun rm -rf $PWD
+sudo -u wwwrun shopt -u dotglob
+
 dir="/tmp/$USER/.deploy/$prj"
 arc="replaceme"
 mkdir -m 0777 -p "$dir"
 
-scp "gitlab-runner@repobuild2:/monamour/$prj/$arc" "$dir/"
-tar -xf "$dir/$arc" -C "$dir"
+scp "gitlab-runner@repobuild2:/monamour/$prj/$arc" "$dir/" || exit 1
+tar -xf "$dir/$arc" -C "$dir" || exit 1
 rm "$dir/$arc"
-sudo -u wwwrun cp $dir/* `pwd` || exit 1
+sudo -u wwwrun cp $dir/* $PWD || exit 1
 rm -rf $dir
+
+echo "Перезапуск $dname"
+while killall -q $dname; do
+  sleep 1;
+  tail $log
+done
+$PWD/${dname}.sh
+tail -f $log

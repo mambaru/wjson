@@ -1,6 +1,8 @@
 #!/bin/bash
 # Запускать только из корня проекта
-prjname=$(basename $PWD)
+prjnamed=$(basename $PWD)
+prjname=$(echo $prjnamed | rev | cut -c 2- | rev)
+
 refname=$(git rev-parse --abbrev-ref HEAD)
 buildtype=$1
 shared_static=$2
@@ -54,7 +56,7 @@ function deploy()
   cp -rfH ./configurations/common/* ./build/deploy/lead-up/ 2>/dev/null || true
   cp -rfH ./configurations/$1/* ./build/deploy/lead-up/ 2>/dev/null || true
   cp ./.ci/start.sh "./build/deploy/lead-up/${prjname}.sh" 2>/dev/null || true
-  arname="$prefix$prjname-$refname-$compiler$standard-$shared_static-$buildtype-$1.tar.gz"
+  arname="$prefix$prjnamed-$refname-$compiler$standard-$shared_static-$buildtype-$1.tar.gz"
   escaped_arname=$(printf '%s\n' "$arname" | sed 's:[\/&]:\\&:g;$!s/$/\\/')
   cat ./.ci/deploy.sh | sed -e "s/replaceme/${escaped_arname}/g" > ./build/deploy/lead-up/deploy.sh
   chmod +x ./build/deploy/lead-up/deploy.sh

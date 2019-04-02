@@ -4,7 +4,7 @@
 script_path=$(readlink -e $0)
 script_dir=$(dirname $script_path)
 project_name=$(basename $script_dir)
-project_path=$script_dir/$project_name
+project_path="$script_dir/${project_name}d"
 
 if [ ! -f "$project_path" ]; then
   echo "Имя запускаемого бинарника должно совпадать с именем директории"
