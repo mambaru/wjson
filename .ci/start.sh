@@ -12,10 +12,10 @@ if [ ! -f "$project_path" ]; then
 fi
 
 if [ -z $1 ]; then
-  if [[ "script_dir" == "$PWD" ]]; then
+  if [[ "$script_dir" == "$PWD" ]]; then
     conf="${project_name}.conf"
   else
-    conf="${project_path}.conf"
+    conf="$script_dir/${project_name}.conf"
   fi
   
   if [ ! -f $conf ]; then

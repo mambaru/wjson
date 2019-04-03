@@ -10,16 +10,12 @@ else
   prj="$1"
 fi
 
-log=/log/${prj}.log
+log=/logs/${prj}.log
 dname="${prj}d"
 
-backup=$(date +%F-%X)
+backup="../${prj}-$(date +%F-%X)"
 sudo -u wwwrun mkdir $backup
-
-sudo -u wwwrun shopt -s extglob dotglob
-sudo -u wwwrun mv !($backup) $backup
-sudo -u wwwrun rm -rf $PWD
-sudo -u wwwrun shopt -u dotglob
+sudo -u wwwrun mv $PWD/* $backup
 
 dir="/tmp/$USER/.deploy/$prj"
 arc="replaceme"
@@ -32,9 +28,9 @@ sudo -u wwwrun cp $dir/* $PWD || exit 1
 rm -rf $dir
 
 echo "Перезапуск $dname"
-while killall -q $dname; do
+while sudo -u wwwrun killall -q $dname; do
   sleep 1;
   tail $log
 done
-$PWD/${dname}.sh
+$PWD/${prj}.sh
 tail -f $log
