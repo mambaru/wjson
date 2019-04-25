@@ -447,7 +447,7 @@ private:
     if (beg==end) return false;
     if ( *beg=='{' ) return true;
     if ( *beg!='[' ) return false;
-    beg = parser::parse_space(++beg, end, 0);
+    beg = parser::parse_space(++beg, end, nullptr);
     return beg!=end && *beg==']';
   }
 

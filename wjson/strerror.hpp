@@ -64,7 +64,7 @@ public:
   {
     std::stringstream ss;
     ss << strerror::what(e);
-    if ( e.expected_of() != 0 )
+    if ( e.expected_of() != nullptr )
       ss << " '" << e.expected_of() << "'";
     return ss.str();
   }
@@ -96,7 +96,7 @@ public:
   {
     std::stringstream ss;
     ss << strerror::what(e);
-    if ( e.expected_of() != 0 )
+    if ( e.expected_of() != nullptr )
       ss << " '" << e.expected_of() << "'";
     if ( e )
     {
