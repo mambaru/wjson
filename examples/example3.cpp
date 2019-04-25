@@ -18,9 +18,9 @@ int main()
   str_t astr={'\0'};
   
   // Десериализация
-  sser_t()( sstr, english, english + std::strlen(english), 0);
-  vser_t()( vstr, russian, russian + std::strlen(russian), 0);
-  aser_t()( astr, chinese, chinese + std::strlen(chinese), 0);
+  sser_t()( sstr, english, english + std::strlen(english), NULL);
+  vser_t()( vstr, russian, russian + std::strlen(russian), NULL);
+  aser_t()( astr, chinese, chinese + std::strlen(chinese), NULL);
 
   // Результат
   std::cout << "English: " << sstr << "\tfrom JSON: " << english << std::endl;

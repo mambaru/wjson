@@ -46,7 +46,7 @@ void str1_bench()
     for (int i = 0; i < TESTS; i++)
     {
       std::string().swap(str);
-      value< std::string, 0 >::serializer()( str, std::begin(json), std::end(json), 0 );
+      value< std::string, 0 >::serializer()( str, std::begin(json), std::end(json), NULL );
     }
     auto finish = high_resolution_clock::now();
     
@@ -61,7 +61,7 @@ void str1_bench()
     for (int i = 0; i < TESTS; i++)
     {
       std::string().swap(str);
-      value< std::string, 40 >::serializer()( str, std::begin(json), std::end(json), 0 );
+      value< std::string, 40 >::serializer()( str, std::begin(json), std::end(json), NULL );
     }
     auto finish = high_resolution_clock::now();
     

@@ -34,7 +34,7 @@ int main()
 {
   std::string json = "\"жил был серенький козлик\"";
   int val = 0;
-  flags_json<' '>::serializer()(val, json.begin(), json.end(), 0 );
+  flags_json<' '>::serializer()(val, json.begin(), json.end(), nullptr );
   std::cout << json << " = " << val << std::endl;
 
   std::cout << 63 << " = ";

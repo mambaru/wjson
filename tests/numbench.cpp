@@ -52,7 +52,7 @@ void json_bench()
     auto start = high_resolution_clock::now();
     for (int i = 0; i < ARR_SIZE; i++)
     {
-      value<int>::serializer()( resarr[i], std::begin(numarr[i]), std::end(numarr[i]), 0 );
+      value<int>::serializer()( resarr[i], std::begin(numarr[i]), std::end(numarr[i]), NULL );
     }
     auto finish = high_resolution_clock::now();
     

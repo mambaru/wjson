@@ -13,7 +13,7 @@ int main()
   std::string json = "[1,\"2\",[3]]";
   
   std::cout << json << std::endl;
-  vect_json::serializer()( inv, json.begin(), json.end(), 0 );
+  vect_json::serializer()( inv, json.begin(), json.end(), NULL );
   //for ( auto& v : inv )
   for (size_t i = 0; i < inv.size(); ++i)
   {
@@ -22,16 +22,16 @@ int main()
     if ( wjson::parser::is_number(v.begin(), v.end()) )
     {
       int num = 0;
-      wjson::value<int>::serializer()( num, v.begin(), v.end(), 0);
+      wjson::value<int>::serializer()( num, v.begin(), v.end(), NULL);
       ++num;
       wjson::value<int>::serializer()( num, std::back_inserter(outv.back()) );
     }
     else if ( wjson::parser::is_string(v.begin(), v.end()) )
     {
       std::string snum;
-      wjson::value<std::string>::serializer()( snum, v.begin(), v.end(), 0);
+      wjson::value<std::string>::serializer()( snum, v.begin(), v.end(), NULL);
       int num = 0;
-      wjson::value<int>::serializer()( num, snum.begin(), snum.end(), 0);
+      wjson::value<int>::serializer()( num, snum.begin(), snum.end(), NULL);
       ++num;
       snum.clear();
       wjson::value<int>::serializer()( num, std::back_inserter(snum) );
@@ -41,7 +41,7 @@ int main()
     else if ( wjson::parser::is_array(v.begin(), v.end()) )
     {
       std::vector<int> vnum;
-      wjson::array< std::vector< wjson::value<int> > >::serializer()( vnum, v.begin(), v.end(), 0);
+      wjson::array< std::vector< wjson::value<int> > >::serializer()( vnum, v.begin(), v.end(), NULL);
       ++vnum[0];
       wjson::array< std::vector< wjson::value<int> > >::serializer()( vnum, std::back_inserter(outv.back()) );
     }

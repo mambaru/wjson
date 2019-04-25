@@ -18,11 +18,11 @@ int main()
   serializer_t()(value, std::back_inserter(json)); 
   std::cout << json << std::endl;
 
-  serializer_t()(value, json.begin(), json.end(), 0 ); 
+  serializer_t()(value, json.begin(), json.end(), nullptr ); 
   std::cout << value << std::endl;
 
   value=-1;
-  serializer4_t()(value, json.begin(), json.end(), 0 ); 
+  serializer4_t()(value, json.begin(), json.end(), nullptr ); 
   std::cout << value << std::endl;
 
   std::cout << std::endl;
@@ -33,11 +33,11 @@ int main()
   std::cout << json << std::endl;
 
   value=-1;
-  serializer4_t()(value, json.begin(), json.end(), 0 ); 
+  serializer4_t()(value, json.begin(), json.end(), nullptr ); 
   std::cout << value << std::endl;
 
   value=-1;
-  serializer_t()(value, json.begin(), json.end(), 0 ); 
+  serializer_t()(value, json.begin(), json.end(), nullptr ); 
   std::cout << value << std::endl;
 
   return 0;

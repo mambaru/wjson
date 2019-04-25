@@ -10,7 +10,7 @@ int main()
   dict d;
   std::string json = "{\"один\":1,\"два\":2,\"три\":3}";
   std::cout << json << std::endl;
-  dict_json::serializer()( d, json.begin(), json.end(), 0 );
+  dict_json::serializer()( d, json.begin(), json.end(), NULL );
   d["четыре"]=4;
   json.clear();
   dict_json::serializer()( d, std::back_inserter(json) );
