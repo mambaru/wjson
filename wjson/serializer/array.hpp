@@ -207,7 +207,7 @@ public:
   {
     if ( parser::is_null(beg, end) )
     {
-      for (int i = 0; i < N ; ++i)
+      for (size_t i = 0; i < N ; ++i)
       {
         // null для каждого элемента
         serializer()(t[i], beg, end, e);

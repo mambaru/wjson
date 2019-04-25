@@ -8,6 +8,7 @@
 
 #include <wjson/error.hpp>
 #include <fas/integral/int_.hpp>
+#include <fas/system/nullptr.hpp>
 
 namespace wjson{
 
@@ -447,7 +448,7 @@ private:
     if (beg==end) return false;
     if ( *beg=='{' ) return true;
     if ( *beg!='[' ) return false;
-    beg = parser::parse_space(++beg, end, nullptr);
+    beg = parser::parse_space(++beg, end, fas_nullptr);
     return beg!=end && *beg==']';
   }
 

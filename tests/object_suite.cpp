@@ -173,7 +173,7 @@ struct baz
 {
   int foo1;
   std::string foo2;
-  baz(): foo1(0) {};
+  baz(): foo1(0) {}
 };
 
 template<bool SecondPriority>

@@ -1,5 +1,6 @@
 #include <wjson/json.hpp>
 #include <wjson/strerror.hpp>
+#include <fas/system/nullptr.hpp>
 #include <iostream>
 
 int main()
@@ -10,7 +11,7 @@ int main()
   
   std::string json = "[ 42, null, \"абракадабра\", [1,2], {\"x\":[3,4]}, 7, true ]";
   typedef wjson::array< std::vector< wjson::raw_value<std::string> > > raw_json;
-  raw_json::serializer()(raw_in, json.begin(), json.end(), nullptr );
+  raw_json::serializer()(raw_in, json.begin(), json.end(), fas_nullptr );
   //for ( auto i : raw_in)
   for (size_t k=0; k < raw_in.size(); ++k)
   {
@@ -22,7 +23,7 @@ int main()
     else if ( wjson::parser::is_bool(i.begin(),i.end()) )
     {
       bool val = false;
-      wjson::value<bool>::serializer()(val, i.begin(),i.end(), nullptr );
+      wjson::value<bool>::serializer()(val, i.begin(),i.end(), fas_nullptr );
       std::cout << "Bool " << std::boolalpha << val << " from " << i << std::endl;
       val=true;
       raw_out.push_back(std::string());
@@ -31,7 +32,7 @@ int main()
     else if ( wjson::parser::is_number(i.begin(),i.end()) )
     {
       int val = 0;
-      wjson::value<int>::serializer()(val, i.begin(),i.end(), nullptr );
+      wjson::value<int>::serializer()(val, i.begin(),i.end(), fas_nullptr );
       std::cout << "Number " << val << " from " << i << std::endl;
       val *= -1;
       raw_out.push_back(std::string());
@@ -40,7 +41,7 @@ int main()
     else if ( wjson::parser::is_string(i.begin(),i.end()) )
     {
       std::string val;
-      wjson::value<std::string>::serializer()(val, i.begin(),i.end(), nullptr );
+      wjson::value<std::string>::serializer()(val, i.begin(),i.end(), fas_nullptr );
       std::cout << "String " << val << " from " << i << std::endl;
       std::reverse(val.begin(), val.end());
       raw_out.push_back(std::string());
@@ -50,7 +51,7 @@ int main()
     {
       typedef wjson::array<std::vector< wjson::value<int> > > vjson_t;
       std::vector<int> val;
-      vjson_t::serializer()(val, i.begin(),i.end(), nullptr );
+      vjson_t::serializer()(val, i.begin(),i.end(), fas_nullptr );
       std::cout << "Array " << val[0] << "," << val[1] << " from " << i << std::endl;
       std::reverse(val.begin(), val.end());
       raw_out.push_back(std::string());

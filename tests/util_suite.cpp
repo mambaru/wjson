@@ -1,6 +1,7 @@
-#include <fas/testing.hpp>
 #include <wjson/json.hpp>
 #include <wjson/strerror.hpp>
+#include <fas/testing.hpp>
+#include <fas/system/nullptr.hpp>
 #include <algorithm>
 #include <cstring>
 
@@ -86,12 +87,12 @@ UNIT(util4, "pointer")
     auto str = std::make_shared<std::string>("Привет мир!");
     ser( str, std::back_inserter( json ) );
     t << equal<expect>( json, "\"Привет мир!\"" ) << FAS_FL;
-    str = nullptr;
-    ser( str, json.begin(), json.end(), nullptr );
+    str = fas_nullptr;
+    ser( str, json.begin(), json.end(), fas_nullptr );
     t << equal<expect>( *str, "Привет мир!" ) << FAS_FL;
     json = "null";
-    ser( str, json.begin(), json.end(), nullptr );
-    t << equal<expect>( str, nullptr ) << FAS_FL;
+    ser( str, json.begin(), json.end(), fas_nullptr );
+    t << equal<expect>( str, fas_nullptr ) << FAS_FL;
     json.clear();
     ser( str, std::back_inserter( json ) );
     t << equal<expect>( json, "null" ) << FAS_FL;
@@ -104,12 +105,12 @@ UNIT(util4, "pointer")
     std::unique_ptr<std::string> str( new std::string("Привет мир!") );
     ser( str, std::back_inserter( json ) );
     t << equal<expect>( json, "\"Привет мир!\"" ) << FAS_FL;
-    str = nullptr;
-    ser( str, json.begin(), json.end(), nullptr );
+    str = fas_nullptr;
+    ser( str, json.begin(), json.end(), fas_nullptr );
     t << equal<expect>( *str, "Привет мир!" ) << FAS_FL;
     json = "null";
-    ser( str, json.begin(), json.end(), nullptr );
-    t << is_true<expect>( str == nullptr ) << FAS_FL;
+    ser( str, json.begin(), json.end(), fas_nullptr );
+    t << is_true<expect>( str == fas_nullptr ) << FAS_FL;
     json.clear();
     ser( str, std::back_inserter( json ) );
     t << equal<expect>( json, "null" ) << FAS_FL;
@@ -140,14 +141,14 @@ UNIT(util6, "quoted")
   quoted<int_json>::serializer()( val, std::back_inserter(json) );
   t << equal<expect>( json, "\"123456\"") << FAS_FL;
   val=0;
-  quoted<int_json>::serializer()( val, json.begin(), json.end(), nullptr );
+  quoted<int_json>::serializer()( val, json.begin(), json.end(), fas_nullptr );
   t << equal<expect>( val, 123456) <<  FAS_FL;
 
   val=123456;json.clear();
   quoted<int_json, false, false, 1>::serializer()( val, std::back_inserter(json) );
   t << equal<expect>( json, "123456") << FAS_FL;
   val=0;
-  quoted<int_json, false, false, 1>::serializer()( val, json.begin(), json.end(), nullptr );
+  quoted<int_json, false, false, 1>::serializer()( val, json.begin(), json.end(), fas_nullptr );
   t << equal<expect>( val, 123456) <<  FAS_FL;
 
   std::vector<int> arr;
@@ -157,7 +158,7 @@ UNIT(util6, "quoted")
   quoted<arr_json>::serializer()( arr, std::back_inserter(json) );
   t << equal<expect>( json, "\"[1,2,3]\"") << FAS_FL;
   arr.clear();
-  quoted<arr_json>::serializer()( arr, json.begin(), json.end(), nullptr );
+  quoted<arr_json>::serializer()( arr, json.begin(), json.end(), fas_nullptr );
 #if __cplusplus >= 201103L
   t << equal<expect>( arr, std::vector<int>{1,2,3} ) <<  FAS_FL;
 #endif
