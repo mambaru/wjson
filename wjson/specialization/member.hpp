@@ -19,10 +19,10 @@ struct member: N
   typedef typename J::target member_target;
   const char* operator()() const { return N::operator()(); }
 
-  member_target* ptr(T* t) { return static_cast<member_target*>(t->*m);};
-  const member_target* ptr(const T* t) const { return static_cast< const member_target*>(t->*m);};
-  member_target& ref(T& t) { return static_cast<member_target&>(t.*m); };
-  const member_target& ref(const T& t) const { return static_cast< const member_target&>(t.*m);};
+  member_target* ptr(T* t) { return static_cast<member_target*>(t->*m);}
+  const member_target* ptr(const T* t) const { return static_cast< const member_target*>(t->*m);}
+  member_target& ref(T& t) { return static_cast<member_target&>(t.*m); }
+  const member_target& ref(const T& t) const { return static_cast< const member_target&>(t.*m);}
 };
 
 }

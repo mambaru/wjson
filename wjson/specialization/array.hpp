@@ -90,7 +90,7 @@ struct array_base< std::list<J>, R>
   static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
 };
 
-template<typename J, int N, typename R>
+template<typename J, size_t N, typename R>
 struct array_base< J[N], R>
 {
   typedef J json_container[N];

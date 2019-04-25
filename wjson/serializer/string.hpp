@@ -293,7 +293,7 @@ private:
 };
 
 
-template<int N>
+template<size_t N>
 class serializerT< value< char[N]> >
   : serializerS<char, true>
 {

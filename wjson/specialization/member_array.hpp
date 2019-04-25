@@ -17,10 +17,10 @@ struct member_array
   typedef typename W::serializer serializer;
   typedef typename W::target wrapper_target;
   
-  static wrapper_target* ptr(T* t) { return static_cast<wrapper_target*>(t->*m);};
-  static const wrapper_target* ptr(const T* t)  { return static_cast< const wrapper_target*>(t->*m);};
-  static wrapper_target& ref(T& t) { return static_cast<wrapper_target&>(t.*m); };
-  static const wrapper_target& ref(const T& t) { return static_cast< const wrapper_target&>(t.*m);};
+  static wrapper_target* ptr(T* t) { return static_cast<wrapper_target*>(t->*m);}
+  static const wrapper_target* ptr(const T* t)  { return static_cast< const wrapper_target*>(t->*m);}
+  static wrapper_target& ref(T& t) { return static_cast<wrapper_target&>(t.*m); }
+  static const wrapper_target& ref(const T& t) { return static_cast< const wrapper_target&>(t.*m);}
 };
 
 
