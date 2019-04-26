@@ -88,6 +88,14 @@ private:
   std::ptrdiff_t _tail_of;
 };
 
+template<error_code::type code>
+inline void create_error(json_error* e, std::ptrdiff_t tail_of = 0)
+{
+  if ( e != fas_nullptr && !*e )
+    *e = json_error(code, tail_of);
+}
+
+
 template<error_code::type code, typename Itr>
 inline Itr create_error(json_error* e, Itr end, std::ptrdiff_t tail_of = 0)
 {

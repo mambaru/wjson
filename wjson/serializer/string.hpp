@@ -288,7 +288,7 @@ private:
     if ( c >= '0' && c<='9' ) return static_cast<Res>(  c - '0');
     if ( c >= 'a' && c<='f' ) return static_cast<Res>( (c - 'a') + 10 );
     if ( c >= 'A' && c<='F' ) return static_cast<Res>( (c - 'A') + 10 );
-    create_error<error_code::error_code::InvalidString>(e, fas_nullptr);
+    create_error<error_code::error_code::InvalidString>(e);
     return static_cast<Res>(0);
   }
 };
