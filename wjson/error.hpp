@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <iterator>
+#include <fas/system/nullptr.hpp>
 
 namespace wjson{
 
@@ -33,13 +34,13 @@ class json_error
 public:
   json_error()
     : _code(error_code::ValidJSON)
-    , _expected_of(0)
+    , _expected_of()
     , _tail_of(0) 
   {}
   
   json_error(error_code::type code_,  std::ptrdiff_t tail_of_ = 0 )
     : _code(code_)
-    , _expected_of(0)
+    , _expected_of()
     , _tail_of(tail_of_) 
   {}
 
@@ -77,7 +78,7 @@ public:
   void reset() 
   { 
     _code = error_code::ValidJSON;
-    _expected_of=0;
+    _expected_of = fas_nullptr;
     _tail_of=0;
   }
   
@@ -90,7 +91,7 @@ private:
 template<error_code::type code, typename Itr>
 inline Itr create_error(json_error* e, Itr end, std::ptrdiff_t tail_of = 0)
 {
-  if ( e != NULL && !*e )
+  if ( e != fas_nullptr && !*e )
     *e = json_error(code, tail_of);
   return end;
 }
@@ -98,7 +99,7 @@ inline Itr create_error(json_error* e, Itr end, std::ptrdiff_t tail_of = 0)
 template<error_code::type code, typename Itr >
 inline Itr create_error(json_error* e, Itr end, const char* msg, std::ptrdiff_t tail_of = 0)
 {
-  if ( e != NULL && !*e)
+  if ( e != fas_nullptr && !*e)
     *e = json_error(code, msg, tail_of);
   return end;
 }

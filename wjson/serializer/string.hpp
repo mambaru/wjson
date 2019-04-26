@@ -10,6 +10,7 @@
 #include <wjson/parser.hpp>
 
 #include <fas/integral/bool_.hpp>
+#include <fas/system/nullptr.hpp>
 
 #include <memory>
 #include <vector>
@@ -287,13 +288,13 @@ private:
     if ( c >= '0' && c<='9' ) return static_cast<Res>(  c - '0');
     if ( c >= 'a' && c<='f' ) return static_cast<Res>( (c - 'a') + 10 );
     if ( c >= 'A' && c<='F' ) return static_cast<Res>( (c - 'A') + 10 );
-    create_error<error_code::error_code::InvalidString>(e, static_cast<char*>(0));
+    create_error<error_code::error_code::InvalidString>(e, fas_nullptr);
     return static_cast<Res>(0);
   }
 };
 
 
-template<int N>
+template<size_t N>
 class serializerT< value< char[N]> >
   : serializerS<char, true>
 {
@@ -310,7 +311,7 @@ public:
   template<typename P>
   P operator() ( value_type& v, P beg, P end, json_error* e ) const
   {
-    for ( int i =0 ; i < N; ++i)
+    for ( size_t i =0 ; i < N; ++i)
       v[i]=0;
 
     if ( parser::is_null(beg, end) )

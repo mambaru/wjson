@@ -7,6 +7,7 @@
 #pragma once
 
 #include <wjson/predef.hpp>
+#include <fas/system/nullptr.hpp>
 #include <memory>
 
 namespace wjson{
@@ -19,7 +20,7 @@ public:
   P operator()( const T& ptr, P end) const 
   {
     // Можно обычный указатель
-    if ( ptr!=0 )
+    if ( ptr != fas_nullptr )
       return typename J::serializer()( *ptr, end);
     
     *(++end)='n';
@@ -42,7 +43,7 @@ public:
     }
     else
     {
-      ptr=0;
+      ptr=fas_nullptr;
       for (int i=0; (i < 4) && ( beg!=end ); ++i, ++beg);
     }
     return beg;
@@ -59,7 +60,7 @@ public:
     }
     else
     {
-      ptr=0;
+      ptr = fas_nullptr;
       for (int i=0; (i < 4) && (beg!=end); ++i, ++beg);
     }
     return beg;

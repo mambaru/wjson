@@ -1,5 +1,6 @@
 #include <wjson/json.hpp>
 #include <wjson/strerror.hpp>
+#include <fas/system/nullptr.hpp>
 #include <iostream>
 
 template<char S>
@@ -34,7 +35,7 @@ int main()
 {
   std::string json = "\"жил был серенький козлик\"";
   int val = 0;
-  flags_json<' '>::serializer()(val, json.begin(), json.end(), 0 );
+  flags_json<' '>::serializer()(val, json.begin(), json.end(), fas_nullptr );
   std::cout << json << " = " << val << std::endl;
 
   std::cout << 63 << " = ";

@@ -188,7 +188,7 @@ void json_bench2()
       beg+=strlen(jsons);
     }
     auto finish = high_resolution_clock::now();
-    serializer()(f, json, json + ARR_SIZE, 0 );
+    serializer()(f, json, json + ARR_SIZE, NULL );
     auto t = duration_cast<nanoseconds>(finish - start).count();
     if ( stime==0 || t < stime )
       stime = t;
@@ -259,7 +259,7 @@ void json_bench3()
       beg+=strlen(jsons);
     }
     auto finish = high_resolution_clock::now();
-    serializer()(f, json, json + ARR_SIZE, 0 );
+    serializer()(f, json, json + ARR_SIZE, NULL );
     auto t = duration_cast<nanoseconds>(finish - start).count();
     if ( stime==0 || t < stime )
       stime = t;
@@ -402,7 +402,7 @@ void sprintf_bench()
       
       sscanf( beg, "{\"field1\":%d,\"field2\":%d,\"field3\":%d,\"field5\":[%d,%d,%d,%d,%d]}",
                &(f2.field1), &(f2.field2), &(f2.field3), &(f2.field5[0]), &(f2.field5[1]), &(f2.field5[2]), &(f2.field5[3]), &(f2.field5[4]) );
-      beg = ::wjson::parser::parse_object(beg, end, 0);
+      beg = ::wjson::parser::parse_object(beg, end, NULL);
     }
     finish = high_resolution_clock::now();
 

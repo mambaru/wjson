@@ -1,5 +1,6 @@
 #include <wjson/json.hpp>
 #include <wjson/strerror.hpp>
+#include <fas/system/nullptr.hpp>
 #include <iostream>
 
 struct counter
@@ -49,7 +50,7 @@ int main()
   std::string json = "[\"one\",\"two\",\"three\"]";
   std::cout << json << std::endl;
   
-  array_counter_json::serializer()( cl, json.begin(), json.end(), 0 );
+  array_counter_json::serializer()( cl, json.begin(), json.end(), fas_nullptr );
   cl.push_back(counter::four);
   cl.push_back(counter::five);
   cl.push_back(counter::six);

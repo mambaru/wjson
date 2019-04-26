@@ -11,6 +11,7 @@
 #include <wjson/specialization/enumerator.hpp>
 #include <wjson/specialization/enum_value.hpp>
 #include <wjson/error.hpp>
+#include <fas/system/nullptr.hpp>
 #include <string>
 #include <sstream>
 
@@ -64,7 +65,7 @@ public:
   {
     std::stringstream ss;
     ss << strerror::what(e);
-    if ( e.expected_of() != 0 )
+    if ( e.expected_of() != fas_nullptr )
       ss << " '" << e.expected_of() << "'";
     return ss.str();
   }
@@ -96,7 +97,7 @@ public:
   {
     std::stringstream ss;
     ss << strerror::what(e);
-    if ( e.expected_of() != 0 )
+    if ( e.expected_of() != fas_nullptr )
       ss << " '" << e.expected_of() << "'";
     if ( e )
     {

@@ -135,7 +135,7 @@ struct value< std::vector<char>, R >
   typedef serializerT< value< target, R > > serializer;
 };
 
-template<int N>
+template<size_t N>
 struct value< char[N], -1 >
 {
   typedef char target[N];

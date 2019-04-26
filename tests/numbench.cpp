@@ -52,7 +52,7 @@ void json_bench()
     auto start = high_resolution_clock::now();
     for (int i = 0; i < ARR_SIZE; i++)
     {
-      value<int>::serializer()( resarr[i], std::begin(numarr[i]), std::end(numarr[i]), 0 );
+      value<int>::serializer()( resarr[i], std::begin(numarr[i]), std::end(numarr[i]), NULL );
     }
     auto finish = high_resolution_clock::now();
     
@@ -123,7 +123,7 @@ void atoi_bench()
   std::cout << "serialization time: " << stime << " ns" << std::endl;
   std::cout << "serialization rate: " << size_t(( 1000000000.0f/float(stime) ) * ARR_SIZE) << " persec" << std::endl;
   std::cout << "deserialization time: " << dtime << " ns" << std::endl;
-  std::cout << "deserialization rate: " << size_t(( 1000000000.0/float(dtime) ) * ARR_SIZE) << " persec" << std::endl;
+  std::cout << "deserialization rate: " << size_t(( 1000000000.0f/float(dtime) ) * ARR_SIZE) << " persec" << std::endl;
   std::cout << std::endl;
 }
 

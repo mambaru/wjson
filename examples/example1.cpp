@@ -1,5 +1,6 @@
 #include <wjson/json.hpp>
 #include <wjson/strerror.hpp>
+#include <fas/system/nullptr.hpp>
 #include <iostream>
 #include <sstream>
 #include <iterator>
@@ -31,11 +32,11 @@ int main()
   std::cout << "--- unserializer ---" << std::endl;
   
   value = 0;
-  serializer_t()(value, bufjson, bufjson + strlen(bufjson), 0 );
+  serializer_t()(value, bufjson, bufjson + strlen(bufjson), fas_nullptr );
   std::cout << value << std::endl;
   
   value = 0;
-  serializer_t()(value, strjson.begin(), strjson.end(), 0 );
+  serializer_t()(value, strjson.begin(), strjson.end(), fas_nullptr );
   std::cout << value << std::endl;
 
   return 0;

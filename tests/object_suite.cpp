@@ -131,7 +131,7 @@ UNIT(object1, "")
   std::string json1, json2;
   bar_json::serializer()( b1, std::back_inserter(json1) );
   t << message("json: ") << json1;
-  bar_json::serializer()( b2, json1.begin(), json1.end(), 0 );
+  bar_json::serializer()( b2, json1.begin(), json1.end(), NULL);
   bar_json::serializer()( b2, std::back_inserter(json2) );
   t << equal<expect>(json1, json2) << FAS_FL;
 }
@@ -173,7 +173,7 @@ struct baz
 {
   int foo1;
   std::string foo2;
-  baz(): foo1(0) {};
+  baz(): foo1(0) {}
 };
 
 template<bool SecondPriority>

@@ -191,7 +191,7 @@ public:
 };
 #endif // __cplusplus >= 201103L
 
-template< typename J, int N, typename RR, char L, char R >
+template< typename J, size_t N, typename RR, char L, char R >
 class serializerA< array_r< J[N], RR>, L, R >
 {
   typedef array_r< J[N], RR> array_type;
@@ -207,7 +207,7 @@ public:
   {
     if ( parser::is_null(beg, end) )
     {
-      for (int i = 0; i < N ; ++i)
+      for (size_t i = 0; i < N ; ++i)
       {
         // null для каждого элемента
         serializer()(t[i], beg, end, e);
