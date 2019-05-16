@@ -1,13 +1,13 @@
 {
-  "tag":"0.8.0",
+  "tag":"0.8.1",
   "release":"release-0.8",
-  
+
   "public":false,
   "paranoid":true,
   "coverage":true,
   "build_threads": 4,
   "gc": true,
-  
+
   "build-and-test":{
     "Release":true,
     "Debug":true,
@@ -25,30 +25,30 @@
       "17":false
     }
   },
-  
+
   "deploy": 
   {
     "standard":11,
     "compiler":"g++",
-    
+
     "Release":{
       "static":false,
       "shared":false,
-      
+
       "production":false,
       "devel":false
     },
     "RelWithDebInfo":{
       "static":false,
       "shared":false,
-      
+
       "production":false,
       "devel":false
     },
     "Debug":{
       "static":false,
       "shared":false,
-      
+
       "production":false,
       "devel":false
     }
