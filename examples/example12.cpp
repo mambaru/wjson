@@ -14,6 +14,7 @@ struct bar: foo
 {
   std::shared_ptr<foo> pfoo;
   std::vector<foo> vfoo;
+  bar(){}
 };
 
 struct foo_json
@@ -21,7 +22,7 @@ struct foo_json
   JSON_NAME(flag)
   JSON_NAME(value)
   JSON_NAME(string)
-  
+
   typedef wjson::object_array<
     foo,
     wjson::member_list<
@@ -32,14 +33,14 @@ struct foo_json
   > type;
   typedef type::serializer serializer;
   typedef type::target target;
-  typedef type::member_list member_list; 
+  typedef type::member_list member_list;
 };
 
 struct bar_json
 {
   typedef ::wjson::array< std::vector< foo_json > > vfoo_json;
   typedef ::wjson::pointer< std::shared_ptr<foo>, foo_json > pfoo_json;
-  
+
   typedef wjson::object_array<
     bar,
     wjson::member_list<
@@ -50,7 +51,7 @@ struct bar_json
   > type;
   typedef type::serializer serializer;
   typedef type::target target;
-  typedef type::member_list member_list; 
+  typedef type::member_list member_list;
 };
 
 int main()
@@ -64,7 +65,7 @@ int main()
   std::cout << json << std::endl;
   bar_json::serializer()(b, std::ostream_iterator<char>(std::cout) );
   std::cout << std::endl;
-  
+
   // [true,0,"Привет Мир",[],"pfoo":null]
   // [true,0,"Привет Мир",[[true,0,"Привет Мир"]],[true,0,"Привет Мир"]]
 }

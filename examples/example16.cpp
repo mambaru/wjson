@@ -8,7 +8,7 @@ int main()
   typedef   std::vector<std::string> raw_vect_t;
   raw_vect_t raw_in;
   raw_vect_t raw_out;
-  
+
   std::string json = "[ 42, null, \"абракадабра\", [1,2], {\"x\":[3,4]}, 7, true ]";
   typedef wjson::array< std::vector< wjson::raw_value<std::string> > > raw_json;
   raw_json::serializer()(raw_in, json.begin(), json.end(), fas_nullptr );

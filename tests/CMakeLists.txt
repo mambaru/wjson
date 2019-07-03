@@ -9,6 +9,7 @@ add_executable(num  num.cpp)
 set(
   test_source_list
   test_json.cpp
+  parser_suite.cpp
   value_suite.cpp
   array_suite.cpp
   object_suite.cpp
@@ -31,8 +32,5 @@ add_executable(
   ${FAS_TESTING_CPP}
 )
 
-add_test( NAME test_json COMMAND test_json WORKING_DIRECTORY ${UNIT_TEST_BIN_OUTPUT_DIR})
-
-if ( NOT CODE_COVERAGE )
-  add_test(NAME test_json-leak COMMAND valgrind --tool=memcheck --leak-check=full --error-exitcode=1 ./test_json WORKING_DIRECTORY ${UNIT_TEST_BIN_OUTPUT_DIR})
-endif()
+add_test(NAME test_json COMMAND test_json)
+add_test_memcheck(test_json)

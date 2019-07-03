@@ -108,10 +108,10 @@ private:
 
 
   template<typename P>
-  P parser::parse_space( P beg, P end, json_error* e) 
+  P parser::parse_space( P beg, P end, json_error* e)
   {
-    std::ptrdiff_t p = 0; 
-    return parser::parse_space(beg, end, p, e); 
+    std::ptrdiff_t p = 0;
+    return parser::parse_space(beg, end, p, e);
   }
 
   template<typename P>
@@ -142,18 +142,18 @@ private:
         }
         else
         {
-          if ( start_comment )
-            return create_error<error_code::UnexpectedEndFragment>(e, end, "Unterminated comment");
           break;
         }
       }
       ++beg; ++p;
     }
+    if ( start_comment )
+      return create_error<error_code::UnexpectedEndFragment>(e, end, "Unterminated comment");
     return beg;
   }
 
   template<typename P>
-  bool parser::is_space( P beg, P end ) 
+  bool parser::is_space( P beg, P end )
   {
     if (beg == end )
       return false;
@@ -170,16 +170,16 @@ private:
   }
 
   template<typename P>
-  bool parser::is_null( P beg, P end ) 
+  bool parser::is_null( P beg, P end )
   {
-    return beg!=end && *beg=='n'; 
+    return beg!=end && *beg=='n';
   }
 
   template<typename P>
-  P parser::parse_null( P beg, P end, json_error* e ) 
+  P parser::parse_null( P beg, P end, json_error* e )
   {
-    std::ptrdiff_t p = 0; 
-    return parser::parse_null(beg, end, p, e); 
+    std::ptrdiff_t p = 0;
+    return parser::parse_null(beg, end, p, e);
   }
 
   template<typename P>
@@ -194,9 +194,9 @@ private:
            && ++p && ++beg!=end && *beg=='l'
            && ++p && ++beg!=end && *beg=='l'
          )
-      { 
-        ++p ; 
-        return ++beg; 
+      {
+        ++p ;
+        return ++beg;
       }
 
       if (beg==end)
@@ -209,16 +209,16 @@ private:
   }
 
   template<typename P>
-  bool parser::is_bool( P beg, P end )  
-  { 
-    return beg!=end && (*beg=='t' || *beg=='f'); 
+  bool parser::is_bool( P beg, P end )
+  {
+    return beg!=end && (*beg=='t' || *beg=='f');
   }
 
   template<typename P>
   P parser::parse_bool( P beg, P end, json_error* e  )
   {
     std::ptrdiff_t p = 0;
-    return parser::parse_bool(beg, end, p, e); 
+    return parser::parse_bool(beg, end, p, e);
   }
 
   template<typename P>
@@ -229,12 +229,12 @@ private:
 
     if ( *beg=='t' )
     {
-      if (    ++p && ++beg!=end && *beg=='r' 
-           && ++p && ++beg!=end && *beg=='u' 
+      if (    ++p && ++beg!=end && *beg=='r'
+           && ++p && ++beg!=end && *beg=='u'
            && ++p && ++beg!=end && *beg=='e' )
       {
         ++p;
-        return ++beg; 
+        return ++beg;
       }
 
       if (beg==end)
@@ -263,16 +263,16 @@ private:
   }
 
   template<typename P>
-  bool parser::is_number( P beg, P end )  
+  bool parser::is_number( P beg, P end )
   {
-    return beg!=end && ( *beg=='-' || ( *beg>='0' && *beg<='9' ) ); 
+    return beg!=end && ( *beg=='-' || ( *beg>='0' && *beg<='9' ) );
   }
 
   template<typename P>
   P parser::parse_number( P beg, P end, json_error* e )
   {
     std::ptrdiff_t p = 0;
-    return parser::parse_number(beg, end, p, e); 
+    return parser::parse_number(beg, end, p, e);
   }
 
   template<typename P>
@@ -308,7 +308,7 @@ private:
       if ( (beg!=end) && (*beg=='-' || *beg=='+')) { ++beg; ++p; }
       if ( beg==end )
         return create_error<error_code::UnexpectedEndFragment>( e, end );
-      if ( *beg < '0' || *beg > '9' ) 
+      if ( *beg < '0' || *beg > '9' )
         return create_error<error_code::InvalidNumber>( e, end );
       beg = parser::parse_digit(beg, end, p);
     }
@@ -326,17 +326,17 @@ private:
   template<typename P>
   P parser::parse_string( P beg, P end, json_error* e )
   {
-    if (beg==end) 
+    if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>(e, end);
 
-    if (*beg!='"') 
+    if (*beg!='"')
       return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end));
 
     for ( ++beg; beg!=end && *beg!='"'; /*++beg*/)
     {
       if (*beg=='\\')
       {
-        if ( ++beg == end ) 
+        if ( ++beg == end )
           return create_error<error_code::UnexpectedEndFragment>(e, end);
 
         if ( *beg != '"' && *beg != '\\' && *beg != '/'
@@ -361,9 +361,9 @@ private:
       }
     }
 
-    if (beg==end) 
+    if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>(e, end);
-    if (*beg!='"') 
+    if (*beg!='"')
       return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end));
     return ++beg;
   }
@@ -371,16 +371,16 @@ private:
   template<typename P>
   P parser::parse_hex( P beg, P end, json_error* e )
   {
-    if (beg==end) 
+    if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     for (int i=0; i < 4; ++i, ++beg)
     {
-      if (beg==end) 
+      if (beg==end)
         return create_error<error_code::UnexpectedEndFragment>(e, end);
       if (   (*beg < '0' || *beg>'9')
           && (*beg < 'A' || *beg>'F')
-          && (*beg < 'a' || *beg>'f') 
+          && (*beg < 'a' || *beg>'f')
          )
       {
         return create_error<error_code::InvalidString>(e, end, std::distance(beg, end));
@@ -411,7 +411,7 @@ private:
   bool parser::is_utf8( P beg, P end)
   {
     if (beg==end) return false;
-    return   (*beg & 128)==0 
+    return   (*beg & 128)==0
           || (*beg & 224)==192
           || (*beg & 240)==224
           || (*beg & 248)==240
@@ -444,7 +444,7 @@ private:
   template<typename P>
   bool parser::is_object( P beg, P end )
   {
-    // [] <=> {} 
+    // [] <=> {}
     if (beg==end) return false;
     if ( *beg=='{' ) return true;
     if ( *beg!='[' ) return false;
@@ -476,19 +476,19 @@ private:
   {
     if ( !parser::is_string(beg, end) )
       return create_error<error_code::InvalidMember>( e, end, std::distance(beg, end) );
-      
+
     beg = parser::parse_string(beg, end, e);
-    if ( beg==end ) 
+    if ( beg==end )
       return create_error<error_code::UnexpectedEndFragment>( e, end );
     beg = parser::parse_space(beg, end, e);
     if ( beg==end )
       return create_error<error_code::UnexpectedEndFragment>( e, end );
-    if ( *(beg++)!=':' ) 
+    if ( *(beg++)!=':' )
       return create_error<error_code::ExpectedOf>( e, end, ":", std::distance(beg, end) );
     if ( beg==end )
       return create_error<error_code::UnexpectedEndFragment>( e, end );
     beg = parser::parse_space(beg, end, e);
-    if ( beg==end ) 
+    if ( beg==end )
       return create_error<error_code::UnexpectedEndFragment>( e, end );
     beg = parser::parse_value(beg, end, e);
     return beg;
@@ -520,7 +520,7 @@ private:
 
       if ( *beg==',' )  ++beg;
     }
-    if (beg == end || *beg!='}') 
+    if (beg == end || *beg!='}')
       return create_error<error_code::ExpectedOf>( e, end, "}", std::distance(beg, end) );
     ++beg;
     return beg;
@@ -540,11 +540,11 @@ private:
 
       beg = parser::parse_value(beg, end, e);
       beg = parser::parse_space(beg, end, e);
-      if (beg == end || ( *beg!=',' && *beg!=']' ) ) 
+      if (beg == end || ( *beg!=',' && *beg!=']' ) )
         return create_error<error_code::ExpectedOf>( e, end, "]", std::distance(beg, end) );
       if ( *beg==',' )  ++beg;
     }
-    if (beg == end || *beg!=']') 
+    if (beg == end || *beg!=']')
       return create_error<error_code::ExpectedOf>( e, end, "]", std::distance(beg, end) );
     ++beg;
     return beg;
@@ -575,7 +575,7 @@ private:
 
     for ( ;beg!=end; ++beg )
     {
-      if (*beg < '0' || *beg > '9') 
+      if (*beg < '0' || *beg > '9')
         break;
       v = static_cast<T>(v*10 + static_cast<T>(*beg - '0') );
     }

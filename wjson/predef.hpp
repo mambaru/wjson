@@ -39,10 +39,10 @@ struct member_array;
 template<typename J>
 struct base;
 
-template< typename T, typename L>
+template< typename T, typename L, typename Mode = strict_mode>
 struct enumerator;
 
-template< typename T, typename L, char Sep = ','>
+template< typename T, typename L, char Sep = ',', typename Mode = nonstrict_mode>
 struct flags;
 
 template<typename N, typename T, T v>

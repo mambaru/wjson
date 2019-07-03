@@ -9,14 +9,14 @@ os:
 before_install:
   - sudo apt-get update -qq
 
-install: 
-  - sudo apt-get install -y libc++-dev libboost-dev 
-  - sudo apt-get install -y libboost-system-dev libboost-program-options-dev 
+install:
+  - sudo apt-get install -y libc++-dev libboost-dev
+  - sudo apt-get install -y libboost-system-dev libboost-program-options-dev
   - sudo apt-get install -y libboost-filesystem-dev libboost-date-time-dev libboost-regex-dev valgrind doxygen
 
 compiler:
   - g++
-  - clang++ 
+  - clang++
 
 branches:
   only:
@@ -26,9 +26,9 @@ branches:
 script:
   - git submodule sync
   - git submodule update --init --force
-  - mkdir -p build 
-  - pushd build 
-  -   cmake .. -DCMAKE_CXX_COMPILER=$TRAVIS_COMPILER -DCMAKE_CXX_STANDARD=11 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DPARANOID_WARNING=ON
+  - mkdir -p build
+  - pushd build
+  -   cmake .. -DCMAKE_CXX_COMPILER=$TRAVIS_COMPILER -DCMAKE_CXX_STANDARD=11 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DPARANOID_WARNINGS=ON
   -   cmake --build .
   -   ctest --output-on-failure
   -   make clean

@@ -11,7 +11,7 @@ if [ -z "$1" ]; then
 else
   cov_report="$1"
 fi
-  
+
 if [ ! -d "$build_dir" ]; then
   echo "You need to build a project with the option -DCODE_COVERAGE=ON and run tests"
   exit 1
@@ -33,7 +33,7 @@ rm -f $cov_info
 echo "We collect data for the report..."
 lcov --quiet --capture --directory $build_dir --base-directory $project_dir --no-external --output-file $cov_info || exit 1
 echo "Delete data for submodules..."
-lcov --quiet --remove $cov_info 'external/*' --output-file $cov_info || exit 2
+lcov --quiet --remove $cov_info "`pwd`/external/*" --output-file $cov_info || exit 2
 
 if [ "$cov_report" != "--" ]; then
   rm -rf $cov_report
