@@ -12,11 +12,11 @@
 
 namespace wjson{
 
-template<typename T, typename L, char Sep>
-class serializerT< flags<T, L, Sep> >
+template<typename T, typename L, char Sep, typename Mode>
+class serializerT< flags<T, L, Sep, Mode> >
 {
   typedef typename flags<T, L>::enum_list enum_list;
-  typedef serializerT< flags<T, L, Sep> > self;
+  typedef serializerT< flags<T, L, Sep, Mode> > self;
 public:
   template<typename P>
   P operator()( const T& v, P end) const
@@ -39,16 +39,10 @@ public:
     if ( *beg == '[' )
     {
       as_array = true;
-      /*if ( Sep!=',' )
-        return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );*/
     }
     else if ( *beg != '"' )
       return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
 
-    /*beg = parser::parse_space(++beg, end, e);
-    if ( beg==end )
-      return create_error<error_code::UnexpectedEndFragment>(e, end);
-    */
     ++beg;
 
     if ( as_array )
@@ -103,7 +97,7 @@ private:
 
   // string with separator
   template<typename LL, typename RR, typename P>
-  static P deserialize_one( T& v, P beg, P end, json_error* e, fas::type_list<LL, RR>, fas::false_ )
+  static P deserialize_one( T& v, P beg, P end, json_error* e, fas::type_list<LL, RR>, fas::false_, bool ready )
   {
     if ( beg==end ) 
       return beg;
@@ -130,6 +124,7 @@ private:
     {
       if ( (Sep!=' ' && parser::is_space(cur, end)) || *cur==Sep || *cur=='"' )
       {
+        ready = true;
         v = static_cast<T>(v|LL::value);
         beg = cur;
         // Если разделитель не пробел, то разрешаем пробелы
@@ -147,12 +142,12 @@ private:
           ++beg;
       }
     }
-    return self::deserialize_one(v, beg, end, e, RR(), fas::false_() );
+    return self::deserialize_one(v, beg, end, e, RR(), fas::false_(), ready );
   }
 
   // enum as json array
   template<typename LL, typename RR, typename P>
-  static P deserialize_one( T& v, P beg, P end, json_error* e, fas::type_list<LL, RR>, fas::true_ )
+  static P deserialize_one( T& v, P beg, P end, json_error* e, fas::type_list<LL, RR>, fas::true_, bool ready )
   {
     beg = parser::parse_space(beg, end, e);
     if ( beg==end ) return beg;
@@ -172,6 +167,7 @@ private:
     {
       if ( *cur=='"' )
       {
+        ready = true;
         v = static_cast<T>(v|LL::value);
         beg = cur;
         ++beg;
@@ -184,14 +180,39 @@ private:
         beg = parser::parse_space(beg, end, e);
       }
     }
-    return self::deserialize_one(v, beg, end, e, RR(), fas::true_() );
+    return self::deserialize_one(v, beg, end, e, RR(), fas::true_(), ready );
   }
 
-  template<typename P, typename IsArr>
-  static P deserialize_one( T&, P beg, P, json_error*, fas::empty_list, IsArr)
+  template<typename P>
+  static P deserialize_one( T&, P beg, P end, json_error* e, fas::empty_list, fas::true_, bool ready)
   {
-    return beg;
+    if ( ready || fas::same_type<Mode, strict_mode>::value  )
+      return beg;
+
+    // parse unknown value
+    beg = parser::parse_space(beg, end, e);
+    if ( *beg==']' ) return beg;
+    beg = parser::parse_string(beg, end, e);
+    beg = parser::parse_space(beg, end, e);
+    if ( beg == end ) return beg;
+    if ( *beg == ',' ) ++beg;
+    return parser::parse_space(beg, end, e);
   }
+  
+  template<typename P>
+  static P deserialize_one( T&, P beg, P end, json_error* e, fas::empty_list, fas::false_, bool ready)
+  {
+    if ( ready || fas::same_type<Mode, strict_mode>::value  )
+      return beg;
+    
+    beg = parser::parse_space(beg, end, e);
+    for ( ; beg!=end && *beg!=Sep && *beg!='"'; ++beg);
+    beg = parser::parse_space(beg, end, e);
+    if ( beg == end ) return beg;
+    if ( *beg == Sep ) ++beg;
+    return parser::parse_space(beg, end, e);
+  }
+  
 
   template<bool IsArray, typename P>
   static P deserialize( T& v, P beg, P end, json_error* e) 
@@ -201,11 +222,10 @@ private:
     while ( beg!=end && *beg!=fin )
     {
       P cur = beg;
-      beg = self::deserialize_one(v, beg, end, e, enum_list(), fas::bool_<IsArray>() );
+      beg = self::deserialize_one(v, beg, end, e, enum_list(), fas::bool_<IsArray>(), false );
       if ( cur == beg )
         return create_error<error_code::InvalidEnum>(e, end, std::distance(beg, end));
-      // Зависит от сепаратора
-      // beg = parser::parse_space(beg, end, e);
+      
       if ( beg == end )
         return create_error<error_code::UnexpectedEndFragment>(e, end);
     }

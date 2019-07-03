@@ -11,12 +11,12 @@
 
 namespace wjson{
 
-template< typename T, typename L, char Sep>
+template< typename T, typename L, char Sep, typename Mode>
 struct flags
 {
   typedef T target;
   typedef typename fas::normalize<L>::type enum_list;
-  typedef serializerT< flags<T, enum_list, Sep> > serializer;
+  typedef serializerT< flags<T, enum_list, Sep, Mode> > serializer;
   typedef enum_list member_list;
 };
 
