@@ -42,7 +42,7 @@ stages:
   - publish
   - deploy
   - clean
-  
+
 night-build:
   stage: build
   script:
@@ -119,7 +119,7 @@ build-g++17:
     - /^build.*$/
     - pre-release
 
-    
+
 build-clang++11:
   stage: build
   script:
@@ -149,7 +149,7 @@ build-clang++17:
 
 #
 # ###########################################
-# 
+#
 
 cppcheck:
   stage: check
@@ -159,18 +159,18 @@ cppcheck:
   only:
     - /^check.*$/
     - pre-release
-    
+
 #
 # ###########################################
-# 
+#
 
 devel-wip:
   stage: merge
   script:
-    - export HOST=${CI_PROJECT_URL}  
-    - export CI_PROJECT_ID=${CI_PROJECT_ID} 
-    - export GITLAB_USER_ID=${GITLAB_USER_ID} 
-    - export PRIVATE_TOKEN=${PRIVATE_TOKEN} 
+    - export HOST=${CI_PROJECT_URL}
+    - export CI_PROJECT_ID=${CI_PROJECT_ID}
+    - export GITLAB_USER_ID=${GITLAB_USER_ID}
+    - export PRIVATE_TOKEN=${PRIVATE_TOKEN}
     - ./.ci/wip-automr.sh devel false
   only:
     - wip-devel
@@ -178,14 +178,14 @@ devel-wip:
 devel-any:
   stage: merge
   script:
-    - export HOST=${CI_PROJECT_URL}  
-    - export CI_PROJECT_ID=${CI_PROJECT_ID} 
-    - export GITLAB_USER_ID=${GITLAB_USER_ID} 
+    - export HOST=${CI_PROJECT_URL}
+    - export CI_PROJECT_ID=${CI_PROJECT_ID}
+    - export GITLAB_USER_ID=${GITLAB_USER_ID}
     - export PRIVATE_TOKEN=${PRIVATE_TOKEN}
     - ./.ci/automr.sh wip-devel true
   only:
     - /^devel-.*$/
-    
+
 pre-release:
   stage: merge
   script:
@@ -197,10 +197,10 @@ pre-release:
 master-release:
   stage: merge
   script:
-    - export HOST=${CI_PROJECT_URL} 
-    - export CI_PROJECT_ID=${CI_PROJECT_ID} 
-    - export GITLAB_USER_ID=${GITLAB_USER_ID} 
-    - export PRIVATE_TOKEN=${PRIVATE_TOKEN} 
+    - export HOST=${CI_PROJECT_URL}
+    - export CI_PROJECT_ID=${CI_PROJECT_ID}
+    - export GITLAB_USER_ID=${GITLAB_USER_ID}
+    - export PRIVATE_TOKEN=${PRIVATE_TOKEN}
     - ./.ci/automr.sh master false
   only:
     - pre-release
@@ -208,10 +208,10 @@ master-release:
 master-hotfix:
   stage: merge
   script:
-    - export HOST=${CI_PROJECT_URL}  
-    - export CI_PROJECT_ID=${CI_PROJECT_ID} 
-    - export GITLAB_USER_ID=${GITLAB_USER_ID} 
-    - export PRIVATE_TOKEN=${PRIVATE_TOKEN} 
+    - export HOST=${CI_PROJECT_URL}
+    - export CI_PROJECT_ID=${CI_PROJECT_ID}
+    - export GITLAB_USER_ID=${GITLAB_USER_ID}
+    - export PRIVATE_TOKEN=${PRIVATE_TOKEN}
     - ./.ci/wip-automr.sh master true
   only:
     - /^hotfix-.*$/
@@ -284,16 +284,16 @@ delete-branches:
     - /^build.*$/
     - /^check.*$/
     - /^deploy.*$/
-    
+
 push-to-github:
   stage: publish
   only:
     - master
   script:
-    - make coverage
     - git tag -f ${RELEASE_TAG}
     - git push -f --tags ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}
     - if [[ "$(python3 ./.ci/wamba-ci.py option public OFF)" == "ON" ]]; then
+    -   make coverage
     -   cp "./external/cmake-ci/migrate.sh" "/tmp/migrate-${CI_JOB_ID}.sh"
     -   cp "./external/cmake-ci/export.sh" "/tmp/export-${CI_JOB_ID}.sh"
     -   git branch -f mambaru
