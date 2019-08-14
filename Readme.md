@@ -1,6 +1,4 @@
 [![Coverage Status](https://coveralls.io/repos/github/mambaru/wjson/badge.svg?branch=master)](https://coveralls.io/github/mambaru/wjson?branch=master)
-[![pipeline status](http://github.lan/cpp/wjson/badges/wip-devel/pipeline.svg)](http://github.lan/cpp/wjson/commits/wip-devel)
-[![coverage report](http://gitlab7.lan/cpp/wjson/badges/wip-devel/coverage.svg)](http://github.lan/cpp/wjson/commits/wip-devel)
 
 
 # JSON сериализатор
