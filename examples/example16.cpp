@@ -8,7 +8,7 @@ int main()
   typedef   std::vector<std::string> raw_vect_t;
   raw_vect_t raw_in;
   raw_vect_t raw_out;
-  
+
   std::string json = "[ 42, null, \"абракадабра\", [1,2], {\"x\":[3,4]}, 7, true ]";
   typedef wjson::array< std::vector< wjson::raw_value<std::string> > > raw_json;
   raw_json::serializer()(raw_in, json.begin(), json.end(), fas_nullptr );
@@ -52,10 +52,13 @@ int main()
       typedef wjson::array<std::vector< wjson::value<int> > > vjson_t;
       std::vector<int> val;
       vjson_t::serializer()(val, i.begin(),i.end(), fas_nullptr );
-      std::cout << "Array " << val[0] << "," << val[1] << " from " << i << std::endl;
-      std::reverse(val.begin(), val.end());
-      raw_out.push_back(std::string());
-      vjson_t::serializer()( val, std::back_inserter(raw_out.back()) );
+      if ( !vnum.empty() )
+      {
+        std::cout << "Array " << val[0] << "," << val[1] << " from " << i << std::endl;
+        std::reverse(val.begin(), val.end());
+        raw_out.push_back(std::string());
+        vjson_t::serializer()( val, std::back_inserter(raw_out.back()) );
+      }
     }
     else
     {

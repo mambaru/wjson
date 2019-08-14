@@ -1,5 +1,5 @@
-duplicateExpression:./examples/example6.cpp:25
-duplicateExpression:./examples/example6.cpp:27
-duplicateExpression:./examples/example6.cpp:52
-duplicateExpression:./examples/example6.cpp:54
-constStatement:./tests/array_suite.cpp:105
+duplicateExpression:./examples/example6.cpp
+duplicateExpression:./tests/array_suite.cpp
+constStatement:./examples/example6.cpp
+constStatement:./tests/array_suite.cpp
+
