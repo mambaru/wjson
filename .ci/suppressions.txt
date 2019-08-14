@@ -2,4 +2,4 @@ duplicateExpression:./examples/example6.cpp
 duplicateExpression:./tests/array_suite.cpp
 constStatement:./examples/example6.cpp
 constStatement:./tests/array_suite.cpp
-
+containerOutOfBounds:./examples/example16.cpp:55

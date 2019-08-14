@@ -52,13 +52,10 @@ int main()
       typedef wjson::array<std::vector< wjson::value<int> > > vjson_t;
       std::vector<int> val;
       vjson_t::serializer()(val, i.begin(),i.end(), fas_nullptr );
-      if ( !vnum.empty() )
-      {
-        std::cout << "Array " << val[0] << "," << val[1] << " from " << i << std::endl;
-        std::reverse(val.begin(), val.end());
-        raw_out.push_back(std::string());
-        vjson_t::serializer()( val, std::back_inserter(raw_out.back()) );
-      }
+      std::cout << "Array " << val[0] << "," << val[1] << " from " << i << std::endl;
+      std::reverse(val.begin(), val.end());
+      raw_out.push_back(std::string());
+      vjson_t::serializer()( val, std::back_inserter(raw_out.back()) );
     }
     else
     {
