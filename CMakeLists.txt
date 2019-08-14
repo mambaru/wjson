@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 3.1)
 project(wjson)
 
-set(-Wnoexcept OFF)
 include(cmake/ci.cmake)
 
 if ( BUILD_TESTING )
-  add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
   rootlibs(faslib)
   enable_testing()
   include_directories(.)
