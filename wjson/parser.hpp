@@ -142,13 +142,13 @@ private:
         }
         else
         {
-          if ( start_comment )
-            return create_error<error_code::UnexpectedEndFragment>(e, end, "Unterminated comment");
           break;
         }
       }
       ++beg; ++p;
     }
+    if ( start_comment )
+      return create_error<error_code::UnexpectedEndFragment>(e, end, "Unterminated comment");
     return beg;
   }
 

@@ -1,6 +1,7 @@
 #include <fas/testing.hpp>
 
 BEGIN_TEST
+  RUN_SUITE(parser)
   RUN_SUITE(value)
   RUN_SUITE(array)
   RUN_SUITE(object)

@@ -244,7 +244,7 @@ UNIT(object3, "")
 
 BEGIN_SUITE(object, "")
   ADD_UNIT(object1)
-  //ADD_UNIT(object2)
-  //ADD_UNIT(object3)
+  ADD_UNIT(object2)
+  ADD_UNIT(object3)
 END_SUITE(object)
 
