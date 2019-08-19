@@ -1,3 +1,4 @@
+syntaxError:./tests/parser_suite.cpp:33
 duplicateExpression:./examples/example6.cpp
 duplicateExpression:./tests/array_suite.cpp
 constStatement:./examples/example6.cpp

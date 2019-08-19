@@ -37,10 +37,10 @@ public:
       return parser::parse_null(beg, end, e);
     }
 
-    if (beg==end) 
+    if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>(e, end);
 
-    if ( *beg != '{' ) 
+    if ( *beg != '{' )
     {
       if (*beg=='[')
       {
@@ -55,24 +55,24 @@ public:
     ++beg;
 
     beg = parser::parse_space(beg, end, e);
-    if ( beg==end ) 
+    if ( beg==end )
       return create_error<error_code::UnexpectedEndFragment>(e, end);
 
-    
+
     if ( *beg != '}')
     {
        beg = self::unserialize_members(t, beg, end, L(), false, e );
-       if ( beg==end ) 
+       if ( beg==end )
          return create_error<error_code::UnexpectedEndFragment>(e, end);
        beg = parser::parse_space(beg, end, e);
-       if ( beg==end ) 
+       if ( beg==end )
          return create_error<error_code::UnexpectedEndFragment>(e, end);
     }
 
-    if (beg==end) 
+    if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>(e, end);
 
-    if ( *(beg++) != '}' ) 
+    if ( *(beg++) != '}' )
       return create_error<error_code::ExpectedOf>(e, end,"}", std::distance(beg, end) + 1 );
 
     return beg;
@@ -170,7 +170,7 @@ private:
 
     beg = parser::parse_space(beg, end, e);
 
-    if (beg==end) 
+    if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( *beg == ',' )
@@ -184,7 +184,7 @@ private:
         beg = self::unserialize_members( t, beg, end, fas::type_list<C, R>() , false, e );
     }
 
-    if (beg==end) 
+    if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     if ( *beg != '}' )
@@ -199,7 +199,7 @@ private:
     if ( !search )
     {
       beg = parser::parse_space(beg, end, e);
-      if ( beg==end ) 
+      if ( beg==end )
         return create_error<error_code::UnexpectedEndFragment>(e, end);
 
       if ( *beg=='}' ) return beg;
@@ -208,16 +208,16 @@ private:
         P member_beg = beg;
         beg = parser::parse_member(beg, end, e);
         beg = parser::parse_space(beg, end, e);
-        if ( beg==end ) 
+        if ( beg==end )
           return create_error<error_code::UnexpectedEndFragment>(e, end);
-        if ( *beg=='}' ) 
+        if ( *beg=='}' )
         {
           if ( fas::same_type<Mode, nonstrict_mode>::value  )
             return beg;
           // Ошибка, неизвестный метод, для srict_mode
           return create_error<error_code::InvalidMember>(e, end, std::distance(member_beg, end));
         }
-        if ( *beg!=',' ) 
+        if ( *beg!=',' )
           return create_error<error_code::ExpectedOf>(e, end, ",", std::distance(beg, end) );
 
         ++beg;
@@ -234,9 +234,9 @@ private:
     }
     else
     {
-      if ( beg==end ) 
+      if ( beg==end )
         return create_error<error_code::UnexpectedEndFragment>(e, end);
-      if ( *beg=='}' ) 
+      if ( *beg=='}' )
         return beg;
       // Ошибка, неизвестный метод, для srict_mode
       return create_error<error_code::InvalidMember>(e, end, std::distance(beg, end));
@@ -250,32 +250,32 @@ private:
     P start = beg;
     if ( !parser::is_string(beg, end) )
       return create_error<error_code::ExpectedOf>(e, end, "\"", std::distance(beg, end) );
-      
+
     ++beg;
     unserialized = true;
     for ( ; beg!=end && *name!='\0' && *beg==*name && *beg!='"'; ++name, ++beg);
-  
-    if (beg==end) 
+
+    if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>(e, end);
 
-    if (*beg!='"' || *name!='\0') 
+    if (*beg!='"' || *name!='\0')
       unserialized = false;
 
-    if ( !unserialized ) 
+    if ( !unserialized )
       return start;
 
     ++beg;
     beg = parser::parse_space(beg, end, e);
-    if (beg==end) 
+    if (beg==end)
        return create_error<error_code::UnexpectedEndFragment>(e, end);
 
-    if (*beg!=':') 
+    if (*beg!=':')
       return create_error<error_code::ExpectedOf>(e, end, ":", std::distance(beg, end) );
 
     ++beg;
     beg = parser::parse_space(beg, end, e);
 
-    if (beg==end) 
+    if (beg==end)
        return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     return beg;
@@ -313,10 +313,10 @@ private:
     P itr = self::unserialize_member(t, beg, end, MR(), unserialized, &ee);
     if ( !ee )
     {
-      typename ML::serializer()(ML().ref(t), snull, snull+4, 0);
+      typename ML::serializer()(ML().ref(t), snull, snull+4, fas_nullptr);
       return itr;
     }
-    typename MR::serializer()(MR().ref(t), snull, snull+4, 0);
+    typename MR::serializer()(MR().ref(t), snull, snull+4, fas_nullptr);
     return self::unserialize_member(t, beg, end, ML(), unserialized, e);
   }
 
@@ -328,11 +328,11 @@ private:
     P itr = self::unserialize_member(t, beg, end, ML(), unserialized, &ee);
     if ( !ee )
     {
-      typename MR::serializer()(MR().ref(t), snull, snull+4, 0);
+      typename MR::serializer()(MR().ref(t), snull, snull+4, fas_nullptr);
       return itr;
     }
 
-    typename ML::serializer()(ML().ref(t), snull, snull+4, 0);
+    typename ML::serializer()(ML().ref(t), snull, snull+4, fas_nullptr);
     return self::unserialize_member(t, beg, end, MR(), unserialized, e);
   }
 };
