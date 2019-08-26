@@ -83,7 +83,7 @@ wip-build:
 main-build:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 11 Release -DPARANOID_WARNING=$PARANOID
+    - ./.ci/build-and-test.sh g++ 11 Release -DPARANOID_WARNINGS=$PARANOID
   only:
     - devel
     - pre-release
@@ -92,7 +92,7 @@ main-build:
 build-g++11:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 11 Debug -DPARANOID_WARNING=$PARANOID -DCODE_COVERAGE=$COVERAGE
+    - ./.ci/build-and-test.sh g++ 11 Debug -DPARANOID_WARNINGS=$PARANOID -DCODE_COVERAGE=$COVERAGE
     - if [[ "$COVERAGE" == "ON" ]]; then
     -   ./.ci/coverage-report.sh --
     -   lcov --summary build/${CI_PROJECT_NAME}-coverage.info
@@ -104,8 +104,8 @@ build-g++11:
 build-g++14:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 14 Release  -DPARANOID_WARNING=$PARANOID
-    - ./.ci/build-and-test.sh g++ 14 Debug  -DPARANOID_WARNING=$PARANOID
+    - ./.ci/build-and-test.sh g++ 14 Release  -DPARANOID_WARNINGS=$PARANOID
+    - ./.ci/build-and-test.sh g++ 14 Debug  -DPARANOID_WARNINGS=$PARANOID
   only:
     - /^build.*$/
     - pre-release
@@ -113,8 +113,8 @@ build-g++14:
 build-g++17:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 17 Release  -DPARANOID_WARNING=$PARANOID
-    - ./.ci/build-and-test.sh g++ 17 Debug  -DPARANOID_WARNING=$PARANOID
+    - ./.ci/build-and-test.sh g++ 17 Release  -DPARANOID_WARNINGS=$PARANOID
+    - ./.ci/build-and-test.sh g++ 17 Debug  -DPARANOID_WARNINGS=$PARANOID
   only:
     - /^build.*$/
     - pre-release
@@ -123,8 +123,8 @@ build-g++17:
 build-clang++11:
   stage: build
   script:
-    - ./.ci/build-and-test.sh clang++ 11 Release -DPARANOID_WARNING=$PARANOID
-    - ./.ci/build-and-test.sh clang++ 11 Debug  -DPARANOID_WARNING=$PARANOID
+    - ./.ci/build-and-test.sh clang++ 11 Release -DPARANOID_WARNINGS=$PARANOID
+    - ./.ci/build-and-test.sh clang++ 11 Debug  -DPARANOID_WARNINGS=$PARANOID
   only:
     - /^build.*$/
     - pre-release
@@ -132,8 +132,8 @@ build-clang++11:
 build-clang++14:
   stage: build
   script:
-    - ./.ci/build-and-test.sh clang++ 14 Release  -DPARANOID_WARNING=$PARANOID
-    - ./.ci/build-and-test.sh clang++ 14 Debug  -DPARANOID_WARNING=$PARANOID
+    - ./.ci/build-and-test.sh clang++ 14 Release  -DPARANOID_WARNINGS=$PARANOID
+    - ./.ci/build-and-test.sh clang++ 14 Debug  -DPARANOID_WARNINGS=$PARANOID
   only:
     - /^build.*$/
     - pre-release
