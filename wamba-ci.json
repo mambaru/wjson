@@ -1,7 +1,7 @@
 {
-  "tag":"0.8.1",
+  "tag":"0.8.2",
   "release":"release-0.8",
-  
+
   "public":true,
   "paranoid":true,
   "coverage":true,
