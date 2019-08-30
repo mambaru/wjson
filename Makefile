@@ -46,7 +46,9 @@ update: external
 	rm -f update.sh
 	wget http://github.lan/cpp/cmake-ci/raw/master/update.sh
 	bash update.sh
+	rm -f update.sh
 upgrade: update
 	rm -f upgrade.sh
 	wget http://github.lan/cpp/cmake-ci/raw/master/upgrade.sh
 	bash upgrade.sh
+	rm -f upgrade.sh

@@ -49,6 +49,9 @@ night-build:
     - git pull --ff-only origin devel
     - git pull --ff-only origin wip-devel
     - git submodule update
+    - rm -f need-night-upgrade.sh
+    - wget http://github.lan/cpp/cmake-ci/raw/master/ci/need-night-upgrade.sh
+    - bash need-night-upgrade.sh
     - rm -f update.sh
     - wget http://github.lan/cpp/cmake-ci/raw/master/update.sh
     - bash update.sh "Night Build "

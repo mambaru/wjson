@@ -31,3 +31,4 @@ fi
 export LD_LIBRARY_PATH="$script_dir/lib"
 
 sudo $project_path -C $conf -u wwwrun -d -a 60 --pid-dir=/logs/ ${@:2} 
+tail -f /logs/${project_name}.log
