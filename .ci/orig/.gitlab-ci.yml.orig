@@ -59,7 +59,7 @@ night-build:
     - wget http://github.lan/cpp/cmake-ci/raw/master/upgrade.sh
     - bash upgrade.sh "auto" "master" "Night Build "
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${CI_COMMIT_REF_NAME}
-    - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:wip-devel
+    - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:devel-night
   only:
     - night-build
 
