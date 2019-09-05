@@ -49,8 +49,7 @@ stages:
 night-build:
   stage: build
   script:
-    - git pull --ff-only ${PROJECT_SSH} wip-devel
-    - git submodule update --recursive
+    # в расписании указать ветку wip-devel
     - git rm -f need-night-upgrade.sh 2> /dev/null || true
     - wget http://github.lan/cpp/cmake-ci/raw/master/ci/need-night-upgrade.sh
     - bash need-night-upgrade.sh
@@ -60,7 +59,7 @@ night-build:
     - rm -f upgrade.sh
     - wget http://github.lan/cpp/cmake-ci/raw/master/upgrade.sh
     - bash upgrade.sh "auto" "master" "Night Build "
-    - count=$(git rev-list --count HEAD ^origin/devel)
+    - count=$(git rev-list --count HEAD ^origin/wip-devel)
     - if (( $count!=0 )); then
     -   git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:devel-night
     - else
