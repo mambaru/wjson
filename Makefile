@@ -19,10 +19,10 @@ external:
 build:
 	mkdir -p build
 static: external build
-	cd build && cmake .. -DBUILD_SHARED_LIBS=OFF
+	cd build && cmake .. -DBUILD_SHARED_LIBS=OFF -DEXTRA_WARNINGS=OFF
 	cmake --build ./build -- -j4
 shared: external build
-	cd build && cmake .. -DBUILD_SHARED_LIBS=ON
+	cd build && cmake .. -DBUILD_SHARED_LIBS=ON -DEXTRA_WARNINGS=OFF
 	cmake --build ./build -- -j4
 tests: 	external build
 	cd build && cmake .. -DBUILD_TESTING=ON
@@ -35,7 +35,7 @@ debug: external build
 	cd build && cmake .. -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE="Debug"
 	cmake --build ./build -- -j4
 coverage:	external build doc
-	cd build && cmake .. -DCODE_COVERAGE=ON
+	cd build && cmake .. -DCODE_COVERAGE=ON -DEXTRA_WARNINGS=OFF
 	cmake --build ./build -- -j4
 	cd build && ctest
 	if [ -f "./.ci/coverage-report.sh" ]; then ./.ci/coverage-report.sh docs/html/cov-report ; fi

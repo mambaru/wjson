@@ -23,6 +23,9 @@ before_script:
   - export DEPLOY_COMPILER="$(python3 ./.ci/wamba-ci.py get deploy.compiler g++)"
   - export PARANOID="$(python3 ./.ci/wamba-ci.py option paranoid ON)"
   - export COVERAGE="$(python3 ./.ci/wamba-ci.py option coverage ON)"
+  - if [[ "$(python3 ./.ci/wamba-ci.py option statistics OFF)" == "ON" ]]; then
+  -   export ENABLE_STAT="-DWFC_ENABLE_STAT=ON"
+  - fi
   - export DEPLOY_PREF="${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}-${DEPLOY_COMPILER}${DEPLOY_STANDARD}"
   - echo "RELEASE_BRANCH=${RELEASE_BRANCH}"
 
@@ -46,10 +49,9 @@ stages:
 night-build:
   stage: build
   script:
-    - git pull --ff-only origin devel
-    - git pull --ff-only origin wip-devel
-    - git submodule update
-    - rm -f need-night-upgrade.sh
+    - git pull --ff-only ${PROJECT_SSH} wip-devel
+    - git submodule update --recursive
+    - git rm -f need-night-upgrade.sh 2> /dev/null || true
     - wget http://github.lan/cpp/cmake-ci/raw/master/ci/need-night-upgrade.sh
     - bash need-night-upgrade.sh
     - rm -f update.sh
@@ -58,10 +60,14 @@ night-build:
     - rm -f upgrade.sh
     - wget http://github.lan/cpp/cmake-ci/raw/master/upgrade.sh
     - bash upgrade.sh "auto" "master" "Night Build "
-    - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${CI_COMMIT_REF_NAME}
-    - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:devel-night
+    - count=$(git rev-list --count HEAD ^origin/devel)
+    - if (( $count!=0 )); then
+    -   git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:devel-night
+    - else
+    -   echo "Нет изменений для автоматического слияния."
+    - fi
   only:
-    - night-build
+    - schedules
 
 basic-build:
   stage: build
@@ -75,7 +81,7 @@ wip-build:
   stage: build
   script:
     # Регулярка для настроек: .*\.\.\:\s\d+\.\d+%.*
-    - ./.ci/wip-build-and-test.sh -DCODE_COVERAGE=$COVERAGE
+    - ./.ci/wip-build-and-test.sh -DCODE_COVERAGE=$COVERAGE $ENABLE_STAT
     - if [[ "$COVERAGE" == "ON" ]]; then
     -   ./.ci/coverage-report.sh --
     -   lcov --summary build/${CI_PROJECT_NAME}-coverage.info
@@ -86,16 +92,18 @@ wip-build:
 main-build:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 11 Release -DPARANOID_WARNINGS=$PARANOID
+    - ./.ci/build-and-test.sh g++ 11 Release -DPARANOID_WARNINGS=$PARANOID $ENABLE_STAT
   only:
     - devel
     - pre-release
     - /^build.*$/
+  except:
+    - schedules
 
 build-g++11:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 11 Debug -DPARANOID_WARNINGS=$PARANOID -DCODE_COVERAGE=$COVERAGE
+    - ./.ci/build-and-test.sh g++ 11 Debug -DPARANOID_WARNINGS=$PARANOID -DCODE_COVERAGE=$COVERAGE $ENABLE_STAT
     - if [[ "$COVERAGE" == "ON" ]]; then
     -   ./.ci/coverage-report.sh --
     -   lcov --summary build/${CI_PROJECT_NAME}-coverage.info
@@ -107,8 +115,8 @@ build-g++11:
 build-g++14:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 14 Release  -DPARANOID_WARNINGS=$PARANOID
-    - ./.ci/build-and-test.sh g++ 14 Debug  -DPARANOID_WARNINGS=$PARANOID
+    - ./.ci/build-and-test.sh g++ 14 Release  -DPARANOID_WARNINGS=$PARANOID $ENABLE_STAT
+    - ./.ci/build-and-test.sh g++ 14 Debug  -DPARANOID_WARNINGS=$PARANOID $ENABLE_STAT
   only:
     - /^build.*$/
     - pre-release
@@ -116,8 +124,8 @@ build-g++14:
 build-g++17:
   stage: build
   script:
-    - ./.ci/build-and-test.sh g++ 17 Release  -DPARANOID_WARNINGS=$PARANOID
-    - ./.ci/build-and-test.sh g++ 17 Debug  -DPARANOID_WARNINGS=$PARANOID
+    - ./.ci/build-and-test.sh g++ 17 Release  -DPARANOID_WARNINGS=$PARANOID $ENABLE_STAT
+    - ./.ci/build-and-test.sh g++ 17 Debug  -DPARANOID_WARNINGS=$PARANOID $ENABLE_STAT
   only:
     - /^build.*$/
     - pre-release
@@ -126,8 +134,8 @@ build-g++17:
 build-clang++11:
   stage: build
   script:
-    - ./.ci/build-and-test.sh clang++ 11 Release -DPARANOID_WARNINGS=$PARANOID
-    - ./.ci/build-and-test.sh clang++ 11 Debug  -DPARANOID_WARNINGS=$PARANOID
+    - ./.ci/build-and-test.sh clang++ 11 Release -DPARANOID_WARNINGS=$PARANOID $ENABLE_STAT
+    - ./.ci/build-and-test.sh clang++ 11 Debug  -DPARANOID_WARNINGS=$PARANOID $ENABLE_STAT
   only:
     - /^build.*$/
     - pre-release
@@ -135,8 +143,8 @@ build-clang++11:
 build-clang++14:
   stage: build
   script:
-    - ./.ci/build-and-test.sh clang++ 14 Release  -DPARANOID_WARNINGS=$PARANOID
-    - ./.ci/build-and-test.sh clang++ 14 Debug  -DPARANOID_WARNINGS=$PARANOID
+    - ./.ci/build-and-test.sh clang++ 14 Release  -DPARANOID_WARNINGS=$PARANOID $ENABLE_STAT
+    - ./.ci/build-and-test.sh clang++ 14 Debug  -DPARANOID_WARNINGS=$PARANOID $ENABLE_STAT
   only:
     - /^build.*$/
     - pre-release
@@ -144,8 +152,8 @@ build-clang++14:
 build-clang++17:
   stage: build
   script:
-    - ./.ci/build-and-test.sh clang++ 17 Release
-    - ./.ci/build-and-test.sh clang++ 17 Debug
+    - ./.ci/build-and-test.sh clang++ 17 Release -DPARANOID_WARNINGS=$PARANOID $ENABLE_STAT
+    - ./.ci/build-and-test.sh clang++ 17 Debug -DPARANOID_WARNINGS=$PARANOID $ENABLE_STAT
   only:
     - /^build.*$/
     - pre-release
@@ -178,6 +186,7 @@ devel-wip:
   only:
     - wip-devel
 
+
 devel-any:
   stage: merge
   script:
@@ -196,6 +205,8 @@ pre-release:
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:pre-release
   only:
     - devel
+  except:
+    - schedules
 
 master-release:
   stage: merge
@@ -245,12 +256,12 @@ release-deploy:
       - "${DEPLOY_PREF}-shared-Debug-devel.tar.gz"
     expire_in: 1 week
   script:
-    - ./.ci/build-and-deploy.sh Release static
-    - ./.ci/build-and-deploy.sh Release shared
-    - ./.ci/build-and-deploy.sh RelWithDebInfo static
-    - ./.ci/build-and-deploy.sh RelWithDebInfo shared
-    - ./.ci/build-and-deploy.sh Debug static
-    - ./.ci/build-and-deploy.sh Debug shared
+    - ./.ci/build-and-deploy.sh Release static $ENABLE_STAT
+    - ./.ci/build-and-deploy.sh Release shared $ENABLE_STAT
+    - ./.ci/build-and-deploy.sh RelWithDebInfo static $ENABLE_STAT
+    - ./.ci/build-and-deploy.sh RelWithDebInfo shared $ENABLE_STAT
+    - ./.ci/build-and-deploy.sh Debug static $ENABLE_STAT
+    - ./.ci/build-and-deploy.sh Debug shared $ENABLE_STAT
   only:
     - /^release-.*$/
     - deploy
@@ -263,7 +274,7 @@ deploy-rel:
       - "${DEPLOY_PREF}-static-Release-devel.tar.gz"
     expire_in: 1 week
   script:
-    - ./.ci/build-and-deploy.sh Release static
+    - ./.ci/build-and-deploy.sh Release static $ENABLE_STAT
   only:
     - /^deploy-rel.*$/
 
@@ -275,7 +286,7 @@ deploy-deb:
       - "${DEPLOY_PREF}-static-Debug-devel.tar.gz"
     expire_in: 1 week
   script:
-    - ./.ci/build-and-deploy.sh Debug static
+    - ./.ci/build-and-deploy.sh Debug static $ENABLE_STAT
   only:
     - /^deploy-deb.*$/
 
