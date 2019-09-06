@@ -61,7 +61,7 @@ night-build:
     - bash upgrade.sh "auto" "master" "Night Build "
     - count=$(git rev-list --count HEAD ^origin/wip-devel)
     - if (( $count!=0 )); then
-    -   git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:devel-night
+    -   git push -f ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:devel-night
     - else
     -   echo "Нет изменений для автоматического слияния."
     - fi
