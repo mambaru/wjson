@@ -87,6 +87,8 @@ wip-build:
     - fi
   only:
     - wip-devel
+  except:
+    - schedules
 
 main-build:
   stage: build
