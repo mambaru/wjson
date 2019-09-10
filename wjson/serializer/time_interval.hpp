@@ -76,6 +76,8 @@ public:
         case 's':
           v += cur * fractions;
           break;
+        default:
+          break;
       }
       ++beg;
     }
