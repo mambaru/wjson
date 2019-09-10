@@ -73,12 +73,12 @@ UNIT(time_interval1, "")
   static const time_t tmks =  tms * 1000;
   std::string org = "{\"timeout_s\":\"3h44s\",\"timeout_ms\":\"3h44s666ms\",\"timeout_mks\":\"3h44s666000ms\"}";
 
-  A a{ts, tms, tmks};
+  A a={ts, tms, tmks};
   json.clear();
   A_json::serializer()(a, std::back_inserter(json) );
   t << equal<expect>(json, org) << FAS_FL;
 
-  A b{0, 0, 0};
+  A b={0, 0, 0};
   A_json::serializer()(b, json.begin(), json.end(), &e );
   t << is_false<expect>(e) << FAS_FL;
   t << equal<expect, time_t>(b.timeout_s, ts) << FAS_FL;
@@ -92,7 +92,7 @@ UNIT(time_interval1, "")
      << "}";
 
   json = ss.str();
-  A c{0, 0, 0};
+  A c={0, 0, 0};
   A_json::serializer()(c, json.begin(), json.end(), &e );
   t << is_false<expect>(e) << FAS_FL;
   t << equal<expect, time_t>(c.timeout_s, ts) << FAS_FL;

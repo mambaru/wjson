@@ -28,3 +28,4 @@
 #include <wjson/specialization/member_value.hpp>
 #include <wjson/specialization/time_interval.hpp>
 #include <wjson/_json.hpp>
+#include <wjson/utility/multi_deserializer.hpp>

@@ -1,9 +1,12 @@
 #include <wjson/json.hpp>
 #include <wjson/strerror.hpp>
+#include <wjson/utility/multi_deserializer.hpp>
 #include <fas/testing.hpp>
 #include <fas/system/nullptr.hpp>
 #include <algorithm>
 #include <cstring>
+
+namespace {
 
 UNIT(errors, "errors")
 {
@@ -250,6 +253,90 @@ UNIT(util7, "raw_quoted")
   t << equal<expect>( arr, "[1,[1,2,3,4],3]") << FAS_FL;
 }
 
+#if __cplusplus >= 201103L
+int multi_test(const std::string& json, bool& first, int& second, std::string& third, std::vector<int>& fourth, wjson::json_error* e )
+{
+  return
+    wjson::multi_deserializer<
+      wjson::value<bool>,
+      wjson::value<int>,
+      wjson::value<std::string>,
+      wjson::vector_of< wjson::value<int> >
+    >(
+      json.begin(),
+      json.end(),
+      first,
+      second,
+      third,
+      fourth,
+      e
+  );
+}
+
+UNIT(utility, "utility")
+{
+  using namespace fas::testing;
+  using namespace wjson;
+
+  bool first = 0;
+  int second = 0;
+  std::string third;
+  std::vector<int> fourth;
+
+  std::string json = "123";
+
+
+  int res = multi_test(json, first, second, third, fourth, nullptr);
+
+  t << equal<expect, int>( res, 1) << FAS_FL;
+  t << equal<expect, bool>( first, false) << FAS_FL;
+  t << equal<expect, int>( second, 123) << FAS_FL;
+  t << equal<expect, std::string>( third, "") << FAS_FL;
+  t << equal<expect, size_t>( fourth.size(), 0) << FAS_FL;
+  second = 0;
+
+  json = "true";
+  res = multi_test(json, first, second, third, fourth, nullptr);
+  t << equal<expect, int>( res, 0) << FAS_FL;
+  t << equal<expect, bool>( first, true) << FAS_FL;
+  t << equal<expect, int>( second, 0) << FAS_FL;
+  t << equal<expect, std::string>( third, "") << FAS_FL;
+  t << equal<expect, size_t>( fourth.size(), 0) << FAS_FL;
+  first = false;
+
+  json = "[1,2,3]";
+  res = multi_test(json, first, second, third, fourth, nullptr);
+  t << equal<expect, int>( res, 3) << FAS_FL;
+  t << equal<expect, bool>( first, false) << FAS_FL;
+  t << equal<expect, int>( second, 0) << FAS_FL;
+  t << equal<expect, std::string>( third, "") << FAS_FL;
+  t << equal<expect, size_t>( fourth.size(), 3) << FAS_FL;
+  fourth.clear();
+
+  json_error e;
+  json = "{}";
+  res = multi_test(json, first, second, third, fourth, &e);
+  t << equal<expect, int>( res, 4) << FAS_FL;
+  t << equal<expect, bool>( first, false) << FAS_FL;
+  t << equal<expect, int>( second, 0) << FAS_FL;
+  t << equal<expect, std::string>( third, "") << FAS_FL;
+  t << equal<expect, size_t>( fourth.size(), 0) << FAS_FL;
+  t << is_false<expect>(e) << FAS_FL;
+
+  json = "{[1,2,3]}";
+  res = multi_test(json, first, second, third, fourth, &e);
+  t << equal<expect, int>( res, 4) << FAS_FL;
+  t << equal<expect, bool>( first, false) << FAS_FL;
+  t << equal<expect, int>( second, 0) << FAS_FL;
+  t << equal<expect, std::string>( third, "") << FAS_FL;
+  t << equal<expect, size_t>( fourth.size(), 0) << FAS_FL;
+  t << is_true<expect>(e) << FAS_FL;
+
+}
+#endif
+
+}
+
 BEGIN_SUITE(util, "")
   ADD_UNIT(errors)
   ADD_UNIT(util1)
@@ -259,4 +346,7 @@ BEGIN_SUITE(util, "")
   ADD_UNIT(util5)
   ADD_UNIT(util6)
   ADD_UNIT(util7)
+#if __cplusplus >= 201103L
+  ADD_UNIT(utility)
+#endif
 END_SUITE(util)

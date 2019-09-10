@@ -38,7 +38,7 @@ lcov --quiet --remove $cov_info "`pwd`/external/*" --output-file $cov_info || ex
 if [ "$cov_report" != "--" ]; then
   rm -rf $cov_report
   echo "Create html report..."
-  mkdir $cov_report
+  mkdir -p $cov_report
   genhtml --quiet -o $cov_report $cov_info || exit 3
 
   lcov --summary $cov_info
