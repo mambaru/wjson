@@ -22,7 +22,7 @@ public:
   P operator()( const T& v, P end) const
   {
     *(end++)= ( Sep == ',' ? '[' : '"' );
-    end = self::serialize(v, enum_list(), end,true);
+    end = self::serialize(v, enum_list(), end, true);
     *(end++)=( Sep == ',' ? ']' : '"' );
     return end;
   }
@@ -31,8 +31,8 @@ public:
   P operator() ( T& v, P beg, P end, json_error* e ) const
   {
     v = T();
-    
-    if (beg==end) 
+
+    if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>(e, end);
 
     bool as_array = false;
@@ -67,7 +67,7 @@ private:
   {
     if ( ( (LL::value!=static_cast<T>(0)) && (LL::value & v) == LL::value) || (v == LL::value) )
     {
-      if (!isFirst) 
+      if (!isFirst)
         *(end++) = Sep;
 
       if ( Sep==',' )
@@ -75,7 +75,7 @@ private:
 
       const char* val = LL()();
 
-      for ( ; *val!='\0' ; ++val) 
+      for ( ; *val!='\0' ; ++val)
         *(end++) = *val;
 
       if ( Sep==',' )
@@ -99,7 +99,7 @@ private:
   template<typename LL, typename RR, typename P>
   static P deserialize_one( T& v, P beg, P end, json_error* e, fas::type_list<LL, RR>, fas::false_, bool ready )
   {
-    if ( beg==end ) 
+    if ( beg==end )
       return beg;
 
     // Если разделитель не пробел, то разрешаем пробелы
@@ -109,17 +109,17 @@ private:
       if ( beg == end )
         return beg;
     }
-      
+
     if ( *beg=='"' )
       return beg;
-    
+
     P cur = beg;
     const char *pstr = LL()();
 
     // парсим текущее значение
     for ( ; cur!=end && *pstr!='\0' && *pstr==*cur; ++cur, ++pstr);
 
-    // если совпало 
+    // если совпало
     if ( *pstr == '\0' && cur!=end )
     {
       if ( (Sep!=' ' && parser::is_space(cur, end)) || *cur==Sep || *cur=='"' )
@@ -134,10 +134,10 @@ private:
           if ( beg == end )
             return beg;
         }
-          
+
         if ( *beg=='"' )
           return beg;
-        
+
         if ( *beg==Sep )
           ++beg;
       }
@@ -159,7 +159,7 @@ private:
 
     P cur = beg;
     ++cur;
-   
+
     const char *pstr = LL()();
     for ( ; cur!=end && *pstr!='\0' && *pstr==*cur; ++cur, ++pstr);
 
@@ -198,13 +198,13 @@ private:
     if ( *beg == ',' ) ++beg;
     return parser::parse_space(beg, end, e);
   }
-  
+
   template<typename P>
   static P deserialize_one( T&, P beg, P end, json_error* e, fas::empty_list, fas::false_, bool ready)
   {
     if ( ready || fas::same_type<Mode, strict_mode>::value  )
       return beg;
-    
+
     beg = parser::parse_space(beg, end, e);
     for ( ; beg!=end && *beg!=Sep && *beg!='"'; ++beg);
     beg = parser::parse_space(beg, end, e);
@@ -212,10 +212,10 @@ private:
     if ( *beg == Sep ) ++beg;
     return parser::parse_space(beg, end, e);
   }
-  
+
 
   template<bool IsArray, typename P>
-  static P deserialize( T& v, P beg, P end, json_error* e) 
+  static P deserialize( T& v, P beg, P end, json_error* e)
   {
     //const char fin = ( Sep2 == ',' ) ? ']' : '"';
     const char fin = IsArray ? ']' : '"';
@@ -225,7 +225,7 @@ private:
       beg = self::deserialize_one(v, beg, end, e, enum_list(), fas::bool_<IsArray>(), false );
       if ( cur == beg )
         return create_error<error_code::InvalidEnum>(e, end, std::distance(beg, end));
-      
+
       if ( beg == end )
         return create_error<error_code::UnexpectedEndFragment>(e, end);
     }

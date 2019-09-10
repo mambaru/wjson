@@ -35,7 +35,7 @@ debug: external build
 	cd build && cmake .. -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE="Debug"
 	cmake --build ./build -- -j4
 coverage:	external build doc
-	cd build && cmake .. -DCODE_COVERAGE=ON -DEXTRA_WARNINGS=OFF
+	cd build && cmake .. -DCODE_COVERAGE=ON -DEXTRA_WARNINGS=OFF -DBUILD_TESTING=ON
 	cmake --build ./build -- -j4
 	cd build && ctest
 	if [ -f "./.ci/coverage-report.sh" ]; then ./.ci/coverage-report.sh docs/html/cov-report ; fi

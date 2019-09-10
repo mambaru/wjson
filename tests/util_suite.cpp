@@ -13,7 +13,7 @@ UNIT(util1, "raw_value")
   std::string json="\"Привет мир!\"";
   std::string value;
   raw_value< std::string >::serializer ser;
-  ser( value, json.begin(), json.end(), NULL);
+  ser( value, json.begin(), json.end(), fas_nullptr);
   t << equal<expect>(json, value) << FAS_FL;
   json.clear();;
   ser( value, std::back_inserter(json) );
@@ -29,13 +29,13 @@ UNIT(util2, "raw_range")
   typedef std::pair<std::string::iterator, std::string::iterator> range_t;
   range_t value;
   iterator_pair<range_t>::serializer ser;
-  ser( value, json.begin(), json.end(), NULL );
+  ser( value, json.begin(), json.end(), fas_nullptr );
   t << equal<expect>(json, std::string(value.first, value.second)) << FAS_FL;
   json.clear();
     ser( value, std::back_inserter(json) );
   t << equal<expect>(json, std::string(value.first, value.second) ) << FAS_FL;
 }
-namespace 
+namespace
 {
   struct foo
   {
@@ -51,16 +51,16 @@ UNIT(util3, "member_value")
   using namespace fas::testing;
   using namespace wjson;
 
-  
+
   bar b;
-  
+
   std::string json;
   typename member_value< bar, foo, int, &foo::value, value<int> >::serializer ser;
   ser( b, std::back_inserter(json) );
-  
+
   t << equal<expect>( json, "12345" ) << FAS_FL;
   std::reverse(json.begin(), json.end());
-  ser( b, json.begin(), json.end(), NULL );
+  ser( b, json.begin(), json.end(), fas_nullptr );
   t << equal<expect>( b.value, 54321 ) << FAS_FL;
 }
 
@@ -68,7 +68,7 @@ UNIT(util4, "pointer")
 {
   using namespace fas::testing;
   using namespace wjson;
-  
+
   {
     std::string *str = new std::string;
     std::string json;
@@ -123,7 +123,7 @@ UNIT(util5, "pair")
 {
   using namespace fas::testing;
   using namespace wjson;
-  
+
   std::pair<std::string, int> p("foo", 12345 );
   field< value< std::string>, value<int> >::serializer ser;
   std::string json;
@@ -162,7 +162,7 @@ UNIT(util6, "quoted")
 #if __cplusplus >= 201103L
   t << equal<expect>( arr, std::vector<int>{1,2,3} ) <<  FAS_FL;
 #endif
-  
+
   json = "\"[1,[1,2,3,4],3]\"";
   json_error e;
   arr.clear();
@@ -178,7 +178,7 @@ UNIT(util7, "raw_quoted")
   using namespace wjson;
   std::string val = "123456";
   std::string json;
-  
+
   raw_quoted<std::string>::serializer()( val, std::back_inserter(json) );
   t << equal<expect>( json, "\"123456\"") << FAS_FL;
   val="0";
@@ -191,7 +191,7 @@ UNIT(util7, "raw_quoted")
   json.clear();
   raw_quoted<std::string, false, false, 1>::serializer()( val, std::back_inserter(json) );
   t << equal<expect>( json, "123456") << FAS_FL;
-  
+
   val="0";
   raw_quoted<std::string, false, false, 1>::serializer()( val, json.begin(), json.end(), &e );
   t << is_false<assert>(e) << strerror::message(e) << FAS_FL;
@@ -207,14 +207,14 @@ UNIT(util7, "raw_quoted")
 #if __cplusplus >= 201103L
   t << equal<expect>( arr, "[1,2,3]" ) <<  FAS_FL;
 #endif
-  
+
   json = "\"[1,[1,2,3,4],3]\"";
-  
+
   arr.clear();
   raw_quoted<std::string>::serializer()( arr, json.begin(), json.end(), &e );
   t << is_false<assert>(e) << strerror::message(e) << FAS_FL;
   t << equal<expect>( arr, "[1,[1,2,3,4],3]") << FAS_FL;
-  
+
 }
 
 BEGIN_SUITE(util, "")

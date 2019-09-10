@@ -1,6 +1,10 @@
-[![Coverage Status](https://coveralls.io/repos/github/mambaru/wjson/badge.svg?branch=master)](https://coveralls.io/github/mambaru/wjson?branch=master)
 [![pipeline status](http://github.lan/cpp/wjson/badges/wip-devel/pipeline.svg)](http://github.lan/cpp/wjson/commits/wip-devel)
-[![coverage report](http://gitlab7.lan/cpp/wjson/badges/wip-devel/coverage.svg)](http://github.lan/cpp/wjson/commits/wip-devel)
+[![pipeline status](http://github.lan/cpp/wjson/badges/pre-release/pipeline.svg)](http://github.lan/cpp/wjson/commits/pre-release)
+[![coverage report](http://github.lan/cpp/wjson/badges/wip-devel/coverage.svg)](http://github.lan/cpp/wjson/commits/wip-devel)
+[![coverage report](http://github.lan/cpp/wjson/badges/pre-release/coverage.svg)](http://github.lan/cpp/wjson/commits/pre-release)
+[![Build Status](https://travis-ci.com/mambaru/wjson.svg?branch=master)](https://travis-ci.com/mambaru/wjson)
+[![Build Status](https://travis-ci.com/mambaru/wjson.svg?branch=mambaru)](https://travis-ci.com/mambaru/wjson)
+[![Coverage Status](https://coveralls.io/repos/github/mambaru/wjson/badge.svg?branch=master)](https://coveralls.io/github/mambaru/wjson?branch=master)
 
 
 # JSON сериализатор
@@ -11,7 +15,7 @@
 * Документация [doxygen](https://mambaru.github.io/wjson/index.html)
 * Отчет [coverage](https://mambaru.github.io/wjson/cov-report/index.html)
 
-Простой в использовании, быстрый, декларативный сериализатор/десериализатор непосредственно в структуры данных. 
+Простой в использовании, быстрый, декларативный сериализатор/десериализатор непосредственно в структуры данных.
 Например для структуры:
 ```cpp
 struct foo

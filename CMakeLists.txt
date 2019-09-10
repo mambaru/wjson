@@ -3,7 +3,7 @@ project(wjson)
 
 include(cmake/ci.cmake)
 
-if ( BUILD_TESTING )
+if ( BUILD_TESTING OR CODE_COVERAGE)
   rootlibs(faslib)
   enable_testing()
   include_directories(.)

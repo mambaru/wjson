@@ -16,12 +16,13 @@ set(
   dict_suite.cpp
   enum_suite.cpp
   util_suite.cpp
+  time_suite.cpp
 )
 
 if ( NOT ${CMAKE_CXX_STANDARD} EQUAL 98 )
   set(
-    test_source_list 
-    ${test_source_list} 
+    test_source_list
+    ${test_source_list}
     _json_suite.cpp
   )
 endif()
