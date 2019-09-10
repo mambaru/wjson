@@ -94,14 +94,14 @@ private:
 
 
   template<typename P>
-  value_type write_if_(P& beg, const value_type& value, char ch)
+  value_type write_if_(P& beg, const value_type& v, char ch)
   {
-    if ( value != 0)
+    if ( v != 0)
     {
-      typename value<value_type>::serializer()(value, beg);
+      typename wjson::value<value_type>::serializer()(v, beg);
       *(beg++)=ch;
     }
-    return value;
+    return v;
   }
 };
 

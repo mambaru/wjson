@@ -5,6 +5,40 @@
 #include <algorithm>
 #include <cstring>
 
+UNIT(errors, "errors")
+{
+  using namespace fas::testing;
+  using namespace wjson;
+  std::string any = "1,2,3,4,5";
+  json_error je;
+  create_error<error_code::ExpectedOf>(&je);
+  je.reset();
+  create_error<error_code::ExpectedOf>(&je, any.begin(), ";", 3 );
+  t << equal<expect, int>(je.tail_of(), 3) << FAS_FL;
+  t << equal<expect, int>(je.code(), error_code::ExpectedOf) << FAS_FL;
+
+  std::string err = wjson::strerror::message_trace(je, any.begin(), any.end());
+  wjson::error_code_json::serializer()( error_code::InvalidRequest, std::back_inserter(any) );
+  wjson::error_code_json::serializer()( error_code::InvalidJSON, std::back_inserter(any) );
+  wjson::error_code_json::serializer()( error_code::InvalidNull, std::back_inserter(any) );
+  wjson::error_code_json::serializer()( error_code::InvalidBool, std::back_inserter(any) );
+  wjson::error_code_json::serializer()( error_code::InvalidString, std::back_inserter(any) );
+  wjson::error_code_json::serializer()( error_code::InvalidMember, std::back_inserter(any) );
+
+  je.reset();
+  any.clear();
+
+  create_error<error_code::InvalidRequest>(&je, any.begin(), "l", 100);
+  t << equal<expect, int>(je.tail_of(), 100) << FAS_FL;
+  size_t whe = wjson::strerror::where( je, any.begin(), any.end() );
+  t << equal<expect, int>(je.tail_of(), 100) << FAS_FL;
+  t << equal<expect, int>(whe, 0) << FAS_FL;
+  t << message(err) << any;
+  const char* perr = wjson::strerror::what(je);
+  t << equal<expect, std::string>(perr, "Invalid JSON-RPC Request") << FAS_FL;
+
+}
+
 UNIT(util1, "raw_value")
 {
   using namespace fas::testing;
@@ -214,10 +248,10 @@ UNIT(util7, "raw_quoted")
   raw_quoted<std::string>::serializer()( arr, json.begin(), json.end(), &e );
   t << is_false<assert>(e) << strerror::message(e) << FAS_FL;
   t << equal<expect>( arr, "[1,[1,2,3,4],3]") << FAS_FL;
-
 }
 
 BEGIN_SUITE(util, "")
+  ADD_UNIT(errors)
   ADD_UNIT(util1)
   ADD_UNIT(util2)
   ADD_UNIT(util3)
