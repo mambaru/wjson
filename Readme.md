@@ -1,17 +1,13 @@
-[![Coverage Status](https://coveralls.io/repos/github/mambaru/wjson/badge.svg?branch=master)](https://coveralls.io/github/mambaru/wjson?branch=master)
-[![pipeline status](http://github.lan/cpp/wjson/badges/wip-devel/pipeline.svg)](http://github.lan/cpp/wjson/commits/wip-devel)
-[![coverage report](http://gitlab7.lan/cpp/wjson/badges/wip-devel/coverage.svg)](http://github.lan/cpp/wjson/commits/wip-devel)
-
+![](https://github.com/mambaru/wjson/workflows/C/C++%20CI/badge.svg?branch=master)
+![](https://github.com/mambaru/wjson/workflows/C/C++%20CI/badge.svg?branch=mambaru)
 
 # JSON сериализатор
 
-* Статья на [хабре](https://habrahabr.ru/post/311262/) с примерами и бенчмарками.
-* Репозитарий на [github.com](https://github.com/mambaru/wjson)
-* Документация [wiki](https://github.com/mambaru/wjson/wiki)
-* Документация [doxygen](https://mambaru.github.io/wjson/index.html)
-* Отчет [coverage](https://mambaru.github.io/wjson/cov-report/index.html)
+Статья на [хабре](https://habrahabr.ru/post/311262/) с примерами и бенчмарками.
+Документация [doxygen](https://mambaru.github.io/wjson/index.html)
+Репозитарий на [github.com](https://github.com/mambaru/wjson)
 
-Простой в использовании, быстрый, декларативный сериализатор/десериализатор непосредственно в структуры данных. 
+Простой в использовани, быстрый, декларативный сериализатор/десериализатор непосредственно в структуры данных.
 Например для структуры:
 ```cpp
 struct foo
@@ -21,6 +17,7 @@ struct foo
   std::vector<std::string> foo3;
 };
 ```
+
 Нужно создать JSON-описание:
 ```cpp
 struct foo_json
@@ -29,12 +26,12 @@ struct foo_json
   JSON_NAME(foo2)
   JSON_NAME(foo3)
 
-  typedef wjson::object<
+  typedef ::iow::json::object<
     foo,
     wjson::member_list<
       wjson::member<n_foo1, foo, int, &foo::foo1>,
       wjson::member<n_foo2, foo, std::string, &foo::foo2>,
-      wjson::member<n_foo3, foo, std::vector<std::string>, &foo::foo3, wjson::vector_of_strings<10> >
+      wjson::member<n_foo3, foo, std::vector<std::string>, &foo::foo3, iow::json::vector_of_strings<10> >
     >
   > type;
 
@@ -64,10 +61,10 @@ foo_json::serializer()( f, json.begin(), json.end(), &e );
   {
     std::cout << "Error code: " << e.code() << std::endl;
     std::cout << "Error tail of: " << e.tail_of() << std::endl;
-    std::cout << "Error position: " << wjson::strerror::where(e, json.begin(), json.end() ) << std::endl;
+    std::cout << "Error position: " << ::wjson::strerror::where(e, json.begin(), json.end() ) << std::endl;
     std::cout << "Error expected of: " << e.expected_of() << std::endl;
-    std::cout << "Error message: " << wjson::strerror::message(e) << std::endl;
-    std::cout << "Error trace: " << wjson::strerror::trace(e, json.begin(), json.end()) << std::endl;
+    std::cout << "Error message: " << ::wjson::strerror::message(e) << std::endl;
+    std::cout << "Error trace: " << ::wjson::strerror::trace(e, json.begin(), json.end()) << std::endl;
   }
 ```
 

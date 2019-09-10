@@ -6,6 +6,7 @@
 #include <wjson/json.hpp>
 #include <wjson/name.hpp>
 #include <cstring>
+#include <fas/system/nullptr.hpp>
 
 #define TESTS 1000000
 
@@ -25,7 +26,7 @@ void str1_bench()
   time_t dtime1 = std::numeric_limits< time_t >::max();
   time_t dtime2 = std::numeric_limits< time_t >::max();
 
-  for (int x=0; x < 5; ++x) 
+  for (int x=0; x < 5; ++x)
   {
     auto start = high_resolution_clock::now();
     for (int i = 0; i < TESTS; i++)
@@ -34,37 +35,37 @@ void str1_bench()
       value<std::string>::serializer()( str, std::back_inserter(json) );
     }
     auto finish = high_resolution_clock::now();
-    
+
     time_t t = duration_cast<nanoseconds>(finish - start).count();
     if ( stime==0 || t < stime )
       stime = t;
   }
 
-  for (int x=0; x < 5; ++x) 
+  for (int x=0; x < 5; ++x)
   {
     auto start = high_resolution_clock::now();
     for (int i = 0; i < TESTS; i++)
     {
       std::string().swap(str);
-      value< std::string, 0 >::serializer()( str, std::begin(json), std::end(json), NULL );
+      value< std::string, 0 >::serializer()( str, std::begin(json), std::end(json), fas_nullptr );
     }
     auto finish = high_resolution_clock::now();
-    
+
     time_t t = duration_cast<nanoseconds>(finish - start).count();
     if ( dtime1==0 || t < dtime1 )
       dtime1 = t;
   }
 
-  for (int x=0; x < 5; ++x) 
+  for (int x=0; x < 5; ++x)
   {
     auto start = high_resolution_clock::now();
     for (int i = 0; i < TESTS; i++)
     {
       std::string().swap(str);
-      value< std::string, 40 >::serializer()( str, std::begin(json), std::end(json), NULL );
+      value< std::string, 40 >::serializer()( str, std::begin(json), std::end(json), fas_nullptr );
     }
     auto finish = high_resolution_clock::now();
-    
+
     time_t t = duration_cast<nanoseconds>(finish - start).count();
     if ( dtime2==0 || t < dtime2 )
       dtime2 = t;

@@ -2,6 +2,7 @@
 #include <wjson/json.hpp>
 #include <wjson/name.hpp>
 #include <wjson/strerror.hpp>
+#include <fas/system/nullptr.hpp>
 
 namespace {
 
@@ -131,7 +132,7 @@ UNIT(object1, "")
   std::string json1, json2;
   bar_json::serializer()( b1, std::back_inserter(json1) );
   t << message("json: ") << json1;
-  bar_json::serializer()( b2, json1.begin(), json1.end(), NULL);
+  bar_json::serializer()( b2, json1.begin(), json1.end(), fas_nullptr);
   bar_json::serializer()( b2, std::back_inserter(json2) );
   t << equal<expect>(json1, json2) << FAS_FL;
 }

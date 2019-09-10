@@ -2,6 +2,7 @@
 #include <wjson/name.hpp>
 #include <cstring>
 #include <iostream>
+#include <fas/system/nullptr.hpp>
 
 #if __cplusplus >= 201103L
 #include <chrono>
@@ -25,7 +26,7 @@ struct foo
 
   bool check(const foo& f) const
   {
-    return 
+    return
        this->field1 == f.field1
     && this->field2 == f.field2
     && this->field3 == f.field3
@@ -54,7 +55,7 @@ struct foo_json
 };
 
 const size_t ARR_SIZE = 100000000;
-#ifdef NDEBUG 
+#ifdef NDEBUG
 const size_t TESTS = 500;
 const size_t SER_COUNT = 1000;
 #else
@@ -135,7 +136,7 @@ void sprintf_bench()
   for (size_t j=0; j < TESTS; ++j)
   {
     memset(json, 0, ARR_SIZE);
-    
+
     char* beg = json;
     char* end = json + ARR_SIZE;
     auto start = high_resolution_clock::now();
@@ -162,7 +163,7 @@ void sprintf_bench()
       // beg = [10,20,30,[1,2,3,4,5]] ....
       /*int sres = */sscanf( beg, "[%d,%d,%d,[%d,%d,%d,%d,%d]]",
                &(f2.field1), &(f2.field2), &(f2.field3), &(f2.field5[0]), &(f2.field5[1]), &(f2.field5[2]), &(f2.field5[3]), &(f2.field5[4]) );
-      beg = ::wjson::parser::parse_array(beg, end, NULL);
+      beg = ::wjson::parser::parse_array(beg, end, fas_nullptr);
     }
     finish = high_resolution_clock::now();
 

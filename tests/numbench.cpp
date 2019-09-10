@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fas/system/nullptr.hpp>
 
 #if __cplusplus >= 201103L
 
@@ -29,11 +30,11 @@ void json_bench()
   memset( numarr, 0, sizeof(numarr) );
   memset( resarr, 0, sizeof(resarr) );
 
-  
+
   time_t stime = std::numeric_limits< time_t >::max();
   time_t dtime = std::numeric_limits< time_t >::max();
 
-  for (int x=0; x < 5; ++x) 
+  for (int x=0; x < 5; ++x)
   {
     auto start = high_resolution_clock::now();
     for (int i = 0; i < ARR_SIZE; i++)
@@ -41,21 +42,21 @@ void json_bench()
       value<int>::serializer()( i, numarr[i] );
     }
     auto finish = high_resolution_clock::now();
-    
+
     time_t t = duration_cast<nanoseconds>(finish - start).count();
     if ( stime==0 || t < stime )
       stime = t;
   }
 
-  for (int x=0; x < 5; ++x) 
+  for (int x=0; x < 5; ++x)
   {
     auto start = high_resolution_clock::now();
     for (int i = 0; i < ARR_SIZE; i++)
     {
-      value<int>::serializer()( resarr[i], std::begin(numarr[i]), std::end(numarr[i]), NULL );
+      value<int>::serializer()( resarr[i], std::begin(numarr[i]), std::end(numarr[i]), fas_nullptr );
     }
     auto finish = high_resolution_clock::now();
-    
+
     time_t t = duration_cast<nanoseconds>(finish - start).count();
     if ( dtime==0 || t < dtime )
       dtime = t;
@@ -84,7 +85,7 @@ void atoi_bench()
   time_t stime = std::numeric_limits< time_t >::max();
   time_t dtime = std::numeric_limits< time_t >::max();
 
-  for (int x=0; x < 5; ++x) 
+  for (int x=0; x < 5; ++x)
   {
     auto start = high_resolution_clock::now();
     for (size_t i = 0; i < ARR_SIZE; i++)
@@ -93,13 +94,13 @@ void atoi_bench()
       //value<int>::serializer()( i, numarr[i] );
     }
     auto finish = high_resolution_clock::now();
-    
+
     time_t t = duration_cast<nanoseconds>(finish - start).count();
     if ( stime==0 || t < stime )
       stime = t;
   }
 
-  for (int x=0; x < 5; ++x) 
+  for (int x=0; x < 5; ++x)
   {
     auto start = high_resolution_clock::now();
     for (size_t i = 0; i < ARR_SIZE; i++)
@@ -108,7 +109,7 @@ void atoi_bench()
       //value<int>::serializer()( resarr[i], std::begin(numarr[i]), std::end(numarr[i]), 0 );
     }
     auto finish = high_resolution_clock::now();
-    
+
     time_t t = duration_cast<nanoseconds>(finish - start).count();
     if ( dtime==0 || t < dtime )
       dtime = t;
@@ -117,8 +118,8 @@ void atoi_bench()
   /*for (int i = 0; i < ARR_SIZE; i++)
     std::cout << resarr[i] << " ";
   std::cout << std::endl;*/
-    
-  
+
+
 
   std::cout << "serialization time: " << stime << " ns" << std::endl;
   std::cout << "serialization rate: " << size_t(( 1000000000.0f/float(stime) ) * ARR_SIZE) << " persec" << std::endl;
@@ -146,7 +147,7 @@ void ss_bench()
 
 
   std::cout << "stringstream benchmark: " << std::endl;
-  
+
   memset( numarr, 0, sizeof(numarr) );
   memset( resarr, 0, sizeof(resarr) );
 
@@ -158,7 +159,7 @@ void ss_bench()
   time_t dtime = std::numeric_limits< time_t >::max();
 
   std::stringstream ss;
-  for (int x=0; x < 5; ++x) 
+  for (int x=0; x < 5; ++x)
   {
     auto start = high_resolution_clock::now();
     for (size_t i = 0; i < ARR_SIZE; i++)
@@ -167,13 +168,13 @@ void ss_bench()
       ss << i;
     }
     auto finish = high_resolution_clock::now();
-    
+
     time_t t = duration_cast<nanoseconds>(finish - start).count();
     if ( stime==0 || t < stime )
       stime = t;
   }
 
-  for (int x=0; x < 5; ++x) 
+  for (int x=0; x < 5; ++x)
   {
     auto start = high_resolution_clock::now();
     for (size_t i = 0; i < ARR_SIZE; i++)
@@ -182,7 +183,7 @@ void ss_bench()
       ss >> resarr[i];
     }
     auto finish = high_resolution_clock::now();
-    
+
     time_t t = duration_cast<nanoseconds>(finish - start).count();
     if ( dtime==0 || t < dtime )
       dtime = t;

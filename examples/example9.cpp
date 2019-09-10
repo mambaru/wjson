@@ -7,7 +7,7 @@ struct foo
   bool flag;
   int value;
   std::string string;
-  foo(): flag(false), value(0) {}
+  foo(): flag(false), value(0), string("") {}
 };
 
 struct bar: foo
@@ -60,7 +60,7 @@ int main()
 {
   std::string json="{\"flag\":true,\"value\":0,\"string\":\"Привет Мир\",\"vfoo\":[],\"pfoo\":null}";
   bar b;
-  bar_json::serializer()( b, json.begin(), json.end(), NULL );
+  bar_json::serializer()( b, json.begin(), json.end(), fas_nullptr );
 
   b.flag = true;
   b.vfoo.push_back( static_cast<const foo&>(b));

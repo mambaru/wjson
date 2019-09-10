@@ -1,0 +1,33 @@
+.clang11Debug:
+  extends:
+    - .build_template
+    - .clang++11Debug
+  before_script:
+    - export CXX_STANDARD=11 CXX_COMPILER=clang++ BUILD_TYPE=Debug
+    - export BLDIR="BUILD_CLANG11Debug" CMAKE_ARGS=""
+
+.clang11RelWithDebInfo:
+  extends:
+    - .build_template
+    - .clang++11RelWithDebInfo
+  before_script:
+    - export CXX_STANDARD=11 CXX_COMPILER=clang++ BUILD_TYPE=RelWithDebInfo
+    - export BLDIR="BUILD_CLANG11RelWithDebInfo" CMAKE_ARGS=""
+
+.clang11Release:
+  extends:
+    - .build_template
+    - .clang++11Release
+  before_script:
+    - export CXX_STANDARD=11 CXX_COMPILER=clang++ BUILD_TYPE=Release
+    - export BLDIR="BUILD_CLANG11Release" CMAKE_ARGS=""
+
+clang++ 11 Debug:
+  extends: .clang11Debug
+
+clang++ 11 RelWithDebInfo:
+  extends: .clang11RelWithDebInfo
+
+clang++ 11 Release:
+  extends: .clang11Release
+

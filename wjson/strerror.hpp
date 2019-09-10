@@ -119,9 +119,10 @@ private:
     return strerror::what_(code, R());
   }
 
-  static const char* what_( int , fas::empty_list )
+  template<typename L>
+  static const char* what_( int , fas::type_list<L, fas::empty_list> )
   {
-    return "";
+    return L()();
   }
 };
 

@@ -1,10 +1,14 @@
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${UNIT_TEST_BIN_OUTPUT_DIR})
 
+link_libraries(faslib wjson)
+
 add_executable(benchmark benchmark.cpp)
 add_executable(numbench  numbench.cpp)
 add_executable(strbench  strbench.cpp)
 add_executable(objarrbench  objarrbench.cpp)
 add_executable(num  num.cpp)
+
+wci_utils(benchmark numbench strbench objarrbench num)
 
 set(
   test_source_list
@@ -16,21 +20,20 @@ set(
   dict_suite.cpp
   enum_suite.cpp
   util_suite.cpp
+  time_suite.cpp
 )
 
 if ( NOT ${CMAKE_CXX_STANDARD} EQUAL 98 )
   set(
-    test_source_list 
-    ${test_source_list} 
+    test_source_list
+    ${test_source_list}
     _json_suite.cpp
   )
 endif()
 
-add_executable(
-  test_json
-  ${test_source_list}
-  ${FAS_TESTING_CPP}
-)
+add_executable(test_json ${test_source_list})
+target_link_libraries(test_json PRIVATE fas::testing)
+wci_test(NAME test_json COMMAND test_json)
 
-add_test(NAME test_json COMMAND test_json)
-add_test_memcheck(test_json)
+
+

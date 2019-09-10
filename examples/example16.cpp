@@ -23,7 +23,7 @@ int main()
     else if ( wjson::parser::is_bool(i.begin(),i.end()) )
     {
       bool val = false;
-      wjson::value<bool>::serializer()(val, i.begin(),i.end(), fas_nullptr );
+      wjson::value<bool>::serializer()( val, i.begin(),i.end(), fas_nullptr );
       std::cout << "Bool " << std::boolalpha << val << " from " << i << std::endl;
       val=true;
       raw_out.push_back(std::string());
@@ -50,7 +50,7 @@ int main()
     else if ( wjson::parser::is_array(i.begin(),i.end()) )
     {
       typedef wjson::array<std::vector< wjson::value<int> > > vjson_t;
-      std::vector<int> val;
+      std::vector<int> val=std::vector<int>();
       vjson_t::serializer()(val, i.begin(),i.end(), fas_nullptr );
       std::cout << "Array " << val[0] << "," << val[1] << " from " << i << std::endl;
       std::reverse(val.begin(), val.end());

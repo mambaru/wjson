@@ -1,5 +1,6 @@
 #include <wjson/json.hpp>
 #include <wjson/strerror.hpp>
+#include <fas/system/nullptr.hpp>
 #include <iostream>
 
 int main()
@@ -11,18 +12,18 @@ int main()
   std::string json="[     1,\t2,\n3,\n4,  5 ]";
   std::cout << json << " -> ";
   vint_t vint={100, 200, 300};
-  vint_json::serializer vint_ser;
-  vint_ser(vint, json.begin(), json.end(), NULL);
+  typedef vint_json::serializer vint_ser;
+  vint_ser()(vint, json.begin(), json.end(), fas_nullptr);
   json.clear();
-  vint_ser(vint, std::back_inserter(json));
+  vint_ser()(vint, std::back_inserter(json));
   std::cout << json << std::endl << std::endl;
-  
+
   typedef vint_t vvint_t[3];
   typedef wjson::array< vint_json[3] > vvint_json;
   json="[ [], [1], [2, 3], [4, 5, 6] ]";
   std::cout << json << " -> ";
   vvint_t vvint1={{100,100,100},{200, 200, 200}, {300, 300, 300}};
-  vvint_json::serializer()(vvint1, json.begin(), json.end(), NULL);
+  vvint_json::serializer()(vvint1, json.begin(), json.end(), fas_nullptr);
   json.clear();
   vvint_json::serializer()(vvint1, std::back_inserter(json));
   std::cout << json << std::endl << std::endl;
@@ -49,10 +50,10 @@ int main()
       {320, 321, 322}
     }
   };
-  vvvint_json::serializer()(vvvint, json.begin(), json.end(), NULL);
+  vvvint_json::serializer()(vvvint, json.begin(), json.end(), fas_nullptr);
   json.clear();
   vvvint_json::serializer()(vvvint, std::back_inserter(json));
   std::cout << json << std::endl;
-  
+
   return 0;
 }

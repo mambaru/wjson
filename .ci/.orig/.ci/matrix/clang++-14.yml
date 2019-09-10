@@ -1,0 +1,34 @@
+.clang14Debug:
+  extends:
+    - .build_template
+    - .clang++14Debug
+  before_script:
+    - export CXX_STANDARD=14 CXX_COMPILER=clang++ BUILD_TYPE=Debug
+    - export BLDIR="BUILD_CLANG14Debug" CMAKE_ARGS=""
+
+.clang14RelWithDebInfo:
+  extends:
+    - .build_template
+    - .clang++14RelWithDebInfo
+  before_script:
+    - export CXX_STANDARD=14 CXX_COMPILER=clang++ BUILD_TYPE=RelWithDebInfo
+    - export BLDIR="BUILD_CLANG14RelWithDebInfo" CMAKE_ARGS=""
+
+.clang14Release:
+  extends:
+    - .build_template
+    - .clang++14Release
+  before_script:
+    - export CXX_STANDARD=14 CXX_COMPILER=clang++ BUILD_TYPE=Release
+    - export BLDIR="BUILD_CLANG14Release" CMAKE_ARGS=""
+
+
+clang++ 14 Debug:
+  extends: .clang14Debug
+
+clang++ 14 RelWithDebInfo:
+  extends: .clang14RelWithDebInfo
+
+clang++ 14 Release:
+  extends: .clang14Release
+

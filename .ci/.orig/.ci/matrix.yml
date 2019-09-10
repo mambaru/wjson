@@ -1,0 +1,83 @@
+
+###################################################################
+#                                                                 #
+# Список всех доступных вариантов сборок для этапов               #
+# с параноидальным уровнем предупреждений и тестами               #
+#   none  - не собирать                                           #
+#   always - на всех бранчах                                      #
+#   <<имя бранча>> - только для бранчей                           #
+#     wip-devel  - только devel                                   #
+#     devel  - только devel                                       #
+#     pre-release - только pre-release                            #
+#     maser - только master                                       #
+#                                                                 #
+###################################################################
+
+# regexp например: /^devel-.*$/
+# paranoid сборка с cppcheck (унаслодовать)
+
+variables:
+  DISTRIB_STANDARD: 11
+  DISTRIB_COMPILER: "g++"
+
+  DISTRIB_WIP: "Debug"
+  DISTRIB_DEVEL: "RelWithDebInfo"
+  DISTRIB_PRERELEASE: "RelWithDebInfo"
+  DISTRIB_RELEASE: "Release"
+  DISTRIB_DRAFT: "Debug"
+  DISTRIB_BUGFIX: "RelWithDebInfo"
+
+  BASIC_BUILD_TYPE: "Release"
+
+# g++
+.g++98Debug: { only: [] }
+.g++98RelWithDebInfo: { only: [] }
+.g++98Release: { only: [] }
+
+.g++11Debug: { only: [wip-devel, build] }
+.g++11RelWithDebInfo: { only: [devel, build] }
+.g++11Release: { only: [ master, build] }
+
+.g++14Debug: { only: [pre-release, build] }
+.g++14RelWithDebInfo: { only: [] }
+.g++14Release: { only: [pre-release, build] }
+
+.g++17Debug: { only: [] }
+.g++17RelWithDebInfo: { only: [] }
+.g++17Release: { only: [] }
+
+# clang++
+.clang++98Debug: { only: [] }
+.clang++98RelWithDebInfo: { only: [] }
+.clang++98Release: { only: [] }
+
+.clang++11Debug: { only: [pre-release, build] }
+.clang++11RelWithDebInfo: { only: [] }
+.clang++11Release: { only: [pre-release, build] }
+
+.clang++14Debug: { only: [pre-release, build] }
+.clang++14RelWithDebInfo: { only: [] }
+.clang++14Release: { only: [pre-release, build] }
+
+.clang++17Debug: { only: [] }
+.clang++17RelWithDebInfo: { only: [] }
+.clang++17Release: { only: [] }
+
+# базовая сборка (build чтобы увидеть что базовая сбока все же собирается )
+.basic: { only: [/^devel-.*$/, build] }
+.draft: { only: [draft] }
+.hotfix: { only: [hotfix] }
+
+# cppcheck
+.cppcheck: { only: [pre-release, check] }
+
+include:
+  - local: /.ci/matrix/build.yml
+  - local: /.ci/matrix/g++-98.yml
+  - local: /.ci/matrix/g++-11.yml
+  - local: /.ci/matrix/g++-14.yml
+  - local: /.ci/matrix/g++-17.yml
+  - local: /.ci/matrix/clang++-98.yml
+  - local: /.ci/matrix/clang++-11.yml
+  - local: /.ci/matrix/clang++-14.yml
+  - local: /.ci/matrix/clang++-17.yml

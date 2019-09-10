@@ -3,6 +3,7 @@
 #include <wjson/strerror.hpp>
 #include <cstring>
 #include <iostream>
+#include <fas/system/nullptr.hpp>
 
 #if __cplusplus >= 201103L
 #include <chrono>
@@ -30,7 +31,7 @@ struct foo
 
   bool check(const foo& f)
   {
-    return 
+    return
        this->field1 == f.field1
     && this->field2 == f.field2
     && this->field3 == f.field3
@@ -92,7 +93,7 @@ struct foo_json4
 };
 
 const size_t ARR_SIZE = 100000000;
-#ifdef NDEBUG 
+#ifdef NDEBUG
 const size_t TESTS = 1000;
 const size_t SER_COUNT = 1000;
 #else
@@ -165,11 +166,11 @@ void json_bench2()
   typedef foo2_json::serializer serializer;
   char* json = new char[ARR_SIZE];
   std::fill_n(json, ARR_SIZE, '\0' );
-  
+
   const char* jsons = "{\"5field\":[45678,56789,67890,78901,89012],\"1field\":12345,\"2field\":23456,\"3field\":34567}";
   std::cout<< jsons << std::endl;
   strcpy( json, jsons );
-  
+
   foo f;
   f.init();
   std::vector<foo> vf;
@@ -188,7 +189,7 @@ void json_bench2()
       beg+=strlen(jsons);
     }
     auto finish = high_resolution_clock::now();
-    serializer()(f, json, json + ARR_SIZE, NULL );
+    serializer()(f, json, json + ARR_SIZE, fas_nullptr );
     auto t = duration_cast<nanoseconds>(finish - start).count();
     if ( stime==0 || t < stime )
       stime = t;
@@ -236,11 +237,11 @@ void json_bench3()
   typedef foo_json::serializer serializer;
   char* json = new char[ARR_SIZE];
   std::fill_n(json, ARR_SIZE, '\0' );
-  
+
   const char* jsons = "{\"field5\":[45678,56789,67890,78901,89012],\"field1\":12345,\"field2\":23456,\"field3\":34567}";
   std::cout<< jsons << std::endl;
   strcpy( json, jsons );
-  
+
   foo f;
   f.init();
   std::vector<foo> vf;
@@ -259,7 +260,7 @@ void json_bench3()
       beg+=strlen(jsons);
     }
     auto finish = high_resolution_clock::now();
-    serializer()(f, json, json + ARR_SIZE, NULL );
+    serializer()(f, json, json + ARR_SIZE, fas_nullptr );
     auto t = duration_cast<nanoseconds>(finish - start).count();
     if ( stime==0 || t < stime )
       stime = t;
@@ -376,7 +377,7 @@ void sprintf_bench()
   for (size_t j=0; j < TESTS; ++j)
   {
     memset(json, 0, ARR_SIZE);
-    
+
     char* beg = json;
     char* end = json + ARR_SIZE;
     auto start = high_resolution_clock::now();
@@ -399,10 +400,10 @@ void sprintf_bench()
     {
       auto& f2 = vf[fi++];
       ++dcount;
-      
+
       sscanf( beg, "{\"field1\":%d,\"field2\":%d,\"field3\":%d,\"field5\":[%d,%d,%d,%d,%d]}",
                &(f2.field1), &(f2.field2), &(f2.field3), &(f2.field5[0]), &(f2.field5[1]), &(f2.field5[2]), &(f2.field5[3]), &(f2.field5[4]) );
-      beg = ::wjson::parser::parse_object(beg, end, NULL);
+      beg = ::wjson::parser::parse_object(beg, end, fas_nullptr);
     }
     finish = high_resolution_clock::now();
 
