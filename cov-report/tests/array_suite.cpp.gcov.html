@@ -1,0 +1,380 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - wjson-coverage.info - tests/array_suite.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">tests</a> - array_suite.cpp<span style="font-size: 80%;"> (source / <a href="array_suite.cpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">wjson-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">194</td>
+            <td class="headerCovTableEntry">194</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-11</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">37</td>
+            <td class="headerCovTableEntry">37</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #include &lt;fas/testing.hpp&gt;</a>
+<span class="lineNum">       2 </span>            : #include &lt;wjson/json.hpp&gt;
+<span class="lineNum">       3 </span>            : #include &lt;wjson/error.hpp&gt;
+<span class="lineNum">       4 </span>            : #include &lt;wjson/strerror.hpp&gt;
+<a name="5"><span class="lineNum">       5 </span>            : </a>
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span><span class="lineCov">          3 : UNIT(array1, &quot;Одномерный массив&quot;)</span>
+<span class="lineNum">       8 </span>            : {
+<span class="lineNum">       9 </span>            :   using namespace fas::testing;
+<span class="lineNum">      10 </span>            :   using namespace wjson;
+<span class="lineNum">      11 </span>            : 
+<span class="lineNum">      12 </span><span class="lineCov">          1 :   std::string json;</span>
+<span class="lineNum">      13 </span><span class="lineCov">          1 :   int nums[5]={1,2,3,4,5};</span>
+<span class="lineNum">      14 </span>            :   array&lt; value&lt;int&gt;[5] &gt;::serializer ser;
+<span class="lineNum">      15 </span><span class="lineCov">          1 :   ser(nums, std::back_inserter(json) );</span>
+<span class="lineNum">      16 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( json, &quot;[1,2,3,4,5]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      17 </span>            : 
+<span class="lineNum">      18 </span><span class="lineCov">          1 :   std::fill_n(nums, 5, 0);</span>
+<span class="lineNum">      19 </span><span class="lineCov">          1 :   json_error e;</span>
+<span class="lineNum">      20 </span><span class="lineCov">          1 :   ser(nums, json.begin(), json.end(), &amp;e);</span>
+<span class="lineNum">      21 </span><span class="lineCov">          1 :   t &lt;&lt; is_false&lt;expect&gt;(e) &lt;&lt; strerror::where( e, json.begin(), json.end() ) &lt;&lt; &quot;: &quot; &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      22 </span>            : 
+<span class="lineNum">      23 </span><span class="lineCov">          1 :   json.clear();</span>
+<span class="lineNum">      24 </span><span class="lineCov">          1 :   ser(nums, std::back_inserter(json) );</span>
+<span class="lineNum">      25 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( json, &quot;[1,2,3,4,5]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      26 </span>            : 
+<span class="lineNum">      27 </span>            :   // Проверки ошибок
+<span class="lineNum">      28 </span><span class="lineCov">          1 :   json = &quot;1,2,3,4,5]&quot;;</span>
+<span class="lineNum">      29 </span><span class="lineCov">          1 :   e.reset();</span>
+<span class="lineNum">      30 </span><span class="lineCov">          1 :   ser(nums, json.begin(), json.end(), &amp;e);</span>
+<span class="lineNum">      31 </span>            :   
+<span class="lineNum">      32 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;Test JSON error: &quot;) &lt;&lt; strerror::message(e) &lt;&lt; strerror::trace(e, json.begin(), json.end() );</span>
+<span class="lineNum">      33 </span><span class="lineCov">          1 :   t &lt;&lt; is_true&lt;expect&gt;(e) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      34 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( strerror::where( e, json.begin(), json.end()  ), 0ul) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      35 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( strerror::message(e), &quot;Expected Of '['&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      36 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( strerror::trace(e, json.begin(), json.end() ), &quot;&gt;&gt;&gt;1,2,3,4,5]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      37 </span>            :   
+<span class="lineNum">      38 </span><span class="lineCov">          1 :   json = &quot;[1,2,3,4,5&quot;;</span>
+<span class="lineNum">      39 </span><span class="lineCov">          1 :   e.reset();</span>
+<span class="lineNum">      40 </span><span class="lineCov">          1 :   ser(nums, json.begin(), json.end(), &amp;e);</span>
+<span class="lineNum">      41 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;Test JSON error: &quot;) &lt;&lt; strerror::message(e) &lt;&lt; strerror::trace(e, json.begin(), json.end() );</span>
+<span class="lineNum">      42 </span><span class="lineCov">          1 :   t &lt;&lt; is_true&lt;expect&gt;(e) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      43 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(strerror::where(e, json.begin(), json.end()), json.size()) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      44 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(strerror::message(e), &quot;Unexpected End of Fragment&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      45 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(strerror::trace(e, json.begin(), json.end() ), &quot;[1,2,3,4,5&lt;&lt;&lt;&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      46 </span>            : 
+<span class="lineNum">      47 </span>            :   
+<span class="lineNum">      48 </span><span class="lineCov">          1 :   json = &quot;[1,2,3,[4,5]&quot;;</span>
+<span class="lineNum">      49 </span><span class="lineCov">          1 :   e.reset();</span>
+<span class="lineNum">      50 </span><span class="lineCov">          1 :   ser(nums, json.begin(), json.end(), &amp;e);</span>
+<span class="lineNum">      51 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;Test JSON error: &quot;) &lt;&lt; strerror::message(e) &lt;&lt; strerror::trace(e, json.begin(), json.end() );</span>
+<span class="lineNum">      52 </span><span class="lineCov">          1 :   t &lt;&lt; is_true&lt;expect&gt;(e) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      53 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(strerror::where(e, json.begin(), json.end()), 7ul) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      54 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(strerror::message(e), &quot;Invalid Number&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      55 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(strerror::trace( e, json.begin(), json.end() ), &quot;[1,2,3,&gt;&gt;&gt;[4,5]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      56 </span>            : 
+<span class="lineNum">      57 </span>            :   
+<span class="lineNum">      58 </span><span class="lineCov">          1 :   json = &quot;[1,2,3 4,5]&quot;;</span>
+<span class="lineNum">      59 </span><span class="lineCov">          1 :   e.reset();</span>
+<span class="lineNum">      60 </span><span class="lineCov">          1 :   ser(nums, json.begin(), json.end(), &amp;e);</span>
+<span class="lineNum">      61 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;Test JSON error: &quot;) &lt;&lt; strerror::message(e) &lt;&lt; strerror::trace(e, json.begin(), json.end() );</span>
+<span class="lineNum">      62 </span><span class="lineCov">          1 :   t &lt;&lt; is_true&lt;expect&gt;(e) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      63 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(strerror::where(e, json.begin(), json.end()), 7ul) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      64 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(strerror::message(e), &quot;Expected Of ','&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      65 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(strerror::trace(e, json.begin(), json.end() ), &quot;[1,2,3 &gt;&gt;&gt;4,5]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      66 </span>            : 
+<span class="lineNum">      67 </span><span class="lineCov">          1 :   json = &quot;[1,2,'3 4',5]&quot;;</span>
+<span class="lineNum">      68 </span><span class="lineCov">          1 :   e.reset();</span>
+<span class="lineNum">      69 </span><span class="lineCov">          1 :   ser(nums, json.begin(), json.end(), &amp;e);</span>
+<span class="lineNum">      70 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;Test JSON error: &quot;) &lt;&lt; strerror::message(e) &lt;&lt; strerror::trace(e, json.begin(), json.end() );</span>
+<span class="lineNum">      71 </span><span class="lineCov">          1 :   t &lt;&lt; is_true&lt;expect&gt;(e) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      72 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(strerror::where(e, json.begin(), json.end()), 5ul) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      73 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(strerror::message(e), &quot;Invalid Number&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      74 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(strerror::trace(e, json.begin(), json.end() ), &quot;[1,2,&gt;&gt;&gt;'3 4',5]&quot;) &lt;&lt; FAS_FL;</span>
+<a name="75"><span class="lineNum">      75 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">      76 </span>            : 
+<span class="lineNum">      77 </span><span class="lineCov">          3 : UNIT(array2, &quot;Двумерный массив&quot;)</span>
+<span class="lineNum">      78 </span>            : {
+<span class="lineNum">      79 </span>            :   using namespace fas::testing;
+<span class="lineNum">      80 </span>            :   using namespace wjson;
+<span class="lineNum">      81 </span>            : 
+<span class="lineNum">      82 </span><span class="lineCov">          1 :   std::string json;</span>
+<span class="lineNum">      83 </span><span class="lineCov">          1 :   int nums[2][2]={{1,2},{3,4}};</span>
+<span class="lineNum">      84 </span>            :   typedef array&lt; value&lt;int&gt;[2] &gt; array1_json;
+<span class="lineNum">      85 </span>            :   typedef array&lt; array1_json[2] &gt; array2_json;
+<span class="lineNum">      86 </span>            :   array2_json::serializer ser;
+<span class="lineNum">      87 </span><span class="lineCov">          1 :   ser(nums, std::back_inserter(json) );</span>
+<span class="lineNum">      88 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( json, &quot;[[1,2],[3,4]]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      89 </span>            : 
+<span class="lineNum">      90 </span><span class="lineCov">          1 :   json=&quot;[[4,3],[2,1]]&quot;;</span>
+<span class="lineNum">      91 </span><span class="lineCov">          1 :   json_error e;</span>
+<span class="lineNum">      92 </span><span class="lineCov">          1 :   ser(nums, json.begin(), json.end(), &amp;e);</span>
+<span class="lineNum">      93 </span><span class="lineCov">          1 :   t &lt;&lt; is_false&lt;expect&gt;(e) &lt;&lt; strerror::message(e) &lt;&lt; strerror::trace(e, json.begin(), json.end() ) &lt;&lt; &quot;: &quot; &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      94 </span><span class="lineCov">          1 :   json.clear();</span>
+<span class="lineNum">      95 </span><span class="lineCov">          1 :   ser(nums, std::back_inserter(json) );</span>
+<span class="lineNum">      96 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( json, &quot;[[4,3],[2,1]]&quot;) &lt;&lt; FAS_FL;</span>
+<a name="97"><span class="lineNum">      97 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">      98 </span>            : 
+<span class="lineNum">      99 </span><span class="lineCov">          3 : UNIT(array3, &quot;Трехмерный массив&quot;)</span>
+<span class="lineNum">     100 </span>            : {
+<span class="lineNum">     101 </span>            :   using namespace fas::testing;
+<span class="lineNum">     102 </span>            :   using namespace wjson;
+<span class="lineNum">     103 </span>            : 
+<span class="lineNum">     104 </span><span class="lineCov">          1 :   std::string json;</span>
+<span class="lineNum">     105 </span><span class="lineCov">          1 :   int nums[2][2][1]={{{1},{2}},{{3},{4}}};</span>
+<span class="lineNum">     106 </span>            :   typedef array&lt; value&lt;int&gt;[1] &gt; array1_json;
+<span class="lineNum">     107 </span>            :   typedef array&lt; array1_json[2] &gt; array2_json;
+<span class="lineNum">     108 </span>            :   typedef array&lt; array2_json[2] &gt; array3_json;
+<span class="lineNum">     109 </span>            :   array3_json::serializer ser;
+<span class="lineNum">     110 </span><span class="lineCov">          1 :   ser(nums, std::back_inserter(json) );</span>
+<span class="lineNum">     111 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( json, &quot;[[[1],[2]],[[3],[4]]]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     112 </span>            : 
+<span class="lineNum">     113 </span><span class="lineCov">          1 :   json=&quot;[[[4],[3]],[[2],[1]]]&quot;;</span>
+<span class="lineNum">     114 </span><span class="lineCov">          1 :   json_error e;</span>
+<span class="lineNum">     115 </span><span class="lineCov">          1 :   ser(nums, json.begin(), json.end(), &amp;e);</span>
+<span class="lineNum">     116 </span><span class="lineCov">          1 :   t &lt;&lt; is_false&lt;expect&gt;(e) &lt;&lt; strerror::message(e) &lt;&lt; strerror::trace(e, json.begin(), json.end() ) &lt;&lt; &quot;: &quot; &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     117 </span><span class="lineCov">          1 :   json.clear();</span>
+<span class="lineNum">     118 </span><span class="lineCov">          1 :   ser(nums, std::back_inserter(json) );</span>
+<span class="lineNum">     119 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( json, &quot;[[[4],[3]],[[2],[1]]]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     120 </span>            : 
+<span class="lineNum">     121 </span>            :   // при десериализации перезапишем только последнюю [1] на [5]
+<span class="lineNum">     122 </span><span class="lineCov">          1 :   json=&quot;[[[],[]],[[],[5]]]&quot;;</span>
+<span class="lineNum">     123 </span><span class="lineCov">          1 :   ser(nums, json.begin(), json.end(), &amp;e);</span>
+<span class="lineNum">     124 </span><span class="lineCov">          1 :   t &lt;&lt; is_false&lt;expect&gt;(e) &lt;&lt; strerror::message(e) &lt;&lt; strerror::trace(e, json.begin(), json.end() ) &lt;&lt; &quot;: &quot; &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     125 </span><span class="lineCov">          1 :   json.clear();</span>
+<span class="lineNum">     126 </span><span class="lineCov">          1 :   ser(nums, std::back_inserter(json) );</span>
+<span class="lineNum">     127 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( json, &quot;[[[4],[3]],[[2],[5]]]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     128 </span>            : 
+<span class="lineNum">     129 </span>            :   // Обнулим все элементы кроме последнего
+<span class="lineNum">     130 </span><span class="lineCov">          1 :   json=&quot;[[[null],[null]],[[null],[5]]]&quot;;</span>
+<span class="lineNum">     131 </span><span class="lineCov">          1 :   ser(nums, json.begin(), json.end(), &amp;e);</span>
+<span class="lineNum">     132 </span><span class="lineCov">          1 :   t &lt;&lt; is_false&lt;expect&gt;(e) &lt;&lt; strerror::message(e) &lt;&lt; strerror::trace(e, json.begin(), json.end() ) &lt;&lt; &quot;: &quot; &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     133 </span><span class="lineCov">          1 :   json.clear();</span>
+<span class="lineNum">     134 </span><span class="lineCov">          1 :   ser(nums, std::back_inserter(json) );</span>
+<span class="lineNum">     135 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( json, &quot;[[[0],[0]],[[0],[5]]]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     136 </span>            : 
+<span class="lineNum">     137 </span>            :   // сбросим все
+<span class="lineNum">     138 </span><span class="lineCov">          1 :   json=&quot;null&quot;;</span>
+<span class="lineNum">     139 </span><span class="lineCov">          1 :   ser(nums, json.begin(), json.end(), &amp;e);</span>
+<span class="lineNum">     140 </span><span class="lineCov">          1 :   t &lt;&lt; is_false&lt;expect&gt;(e) &lt;&lt; strerror::message(e) &lt;&lt; strerror::trace(e, json.begin(), json.end() ) &lt;&lt; &quot;: &quot; &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     141 </span><span class="lineCov">          1 :   json.clear();</span>
+<span class="lineNum">     142 </span><span class="lineCov">          1 :   ser(nums, std::back_inserter(json) );</span>
+<span class="lineNum">     143 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( json, &quot;[[[0],[0]],[[0],[0]]]&quot;) &lt;&lt; FAS_FL;</span>
+<a name="144"><span class="lineNum">     144 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">     145 </span>            : 
+<span class="lineNum">     146 </span><span class="lineCov">          3 : UNIT(array4, &quot;std::vector&lt; std::string &gt;&quot;)</span>
+<span class="lineNum">     147 </span>            : {
+<span class="lineNum">     148 </span>            :   using namespace fas::testing;
+<span class="lineNum">     149 </span>            :   using namespace wjson;
+<span class="lineNum">     150 </span>            : 
+<span class="lineNum">     151 </span><span class="lineCov">          1 :   std::string json;</span>
+<span class="lineNum">     152 </span><span class="lineCov">          2 :   std::vector&lt; std::string &gt; vs;</span>
+<span class="lineNum">     153 </span>            :   vector_of_strings&lt; 10 &gt;::serializer ser;
+<span class="lineNum">     154 </span><span class="lineCov">          1 :   vs.push_back(&quot;Привет&quot;);</span>
+<span class="lineNum">     155 </span><span class="lineCov">          1 :   vs.push_back(&quot;Мир&quot;);</span>
+<span class="lineNum">     156 </span><span class="lineCov">          1 :   vs.push_back(&quot;!&quot;);</span>
+<span class="lineNum">     157 </span><span class="lineCov">          1 :   vs.push_back(&quot;世界你好!&quot;);</span>
+<span class="lineNum">     158 </span><span class="lineCov">          1 :   ser(vs, std::back_inserter(json));</span>
+<span class="lineNum">     159 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( json, &quot;[\&quot;Привет\&quot;,\&quot;Мир\&quot;,\&quot;!\&quot;,\&quot;世界你好!\&quot;]&quot; ) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     160 </span><span class="lineCov">          1 :   json = &quot;[\&quot;Привет\&quot;,\&quot;Мир\&quot;,\&quot;!\&quot;,\&quot;\u4e16\u754c\u4f60\u597d!\&quot;]&quot;;</span>
+<span class="lineNum">     161 </span><span class="lineCov">          1 :   t &lt;&lt; message( &quot;re-serialization&quot; ) &lt;&lt; json &lt;&lt; &quot; -&gt; &quot; &lt;&lt; &quot;[\&quot;Привет\&quot;,\&quot;Мир\&quot;,\&quot;!\&quot;,\&quot;世界你好!\&quot;]&quot; ;</span>
+<span class="lineNum">     162 </span><span class="lineCov">          1 :   json_error e;</span>
+<span class="lineNum">     163 </span><span class="lineCov">          1 :   vs.clear();</span>
+<span class="lineNum">     164 </span><span class="lineCov">          1 :   ser(vs, json.begin(), json.end(), &amp;e);</span>
+<span class="lineNum">     165 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( vs[0], &quot;Привет&quot; ) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     166 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( vs[1], &quot;Мир&quot; ) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     167 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;( vs[2], &quot;!&quot; ) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     168 </span><span class="lineCov">          2 :   t &lt;&lt; equal&lt;expect&gt;( vs[3], &quot;世界你好!&quot; ) &lt;&lt; FAS_FL;</span>
+<a name="169"><span class="lineNum">     169 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">     170 </span>            : 
+<span class="lineNum">     171 </span><span class="lineCov">          3 : UNIT(array5, &quot;std::deque&lt; int &gt;&quot;)</span>
+<span class="lineNum">     172 </span>            : {
+<span class="lineNum">     173 </span>            :   using namespace fas::testing;
+<span class="lineNum">     174 </span>            :   using namespace wjson;
+<span class="lineNum">     175 </span>            : 
+<span class="lineNum">     176 </span><span class="lineCov">          1 :   std::string json;</span>
+<span class="lineNum">     177 </span><span class="lineCov">          2 :   std::deque&lt; int &gt; dq;</span>
+<span class="lineNum">     178 </span><span class="lineCov">          6 :   for (int i=1;i != 6; ++i )</span>
+<span class="lineNum">     179 </span><span class="lineCov">          5 :     dq.push_back(i);</span>
+<span class="lineNum">     180 </span>            :   array&lt; std::deque&lt; value&lt;int&gt; &gt; &gt;::serializer ser;
+<span class="lineNum">     181 </span><span class="lineCov">          1 :   ser(dq, std::back_inserter(json));</span>
+<span class="lineNum">     182 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(json, &quot;[1,2,3,4,5]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     183 </span><span class="lineCov">          2 :   std::deque&lt; int &gt; dq2;</span>
+<span class="lineNum">     184 </span><span class="lineCov">          1 :   json_error e;</span>
+<span class="lineNum">     185 </span><span class="lineCov">          1 :   ser(dq2, json.begin(), json.end(), &amp;e );</span>
+<span class="lineNum">     186 </span><span class="lineCov">          1 :   t &lt;&lt; is_false&lt;expect&gt;(e) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     187 </span><span class="lineCov">          2 :   t &lt;&lt; equal&lt;expect&gt;(dq, dq2) &lt;&lt; FAS_FL;</span>
+<a name="188"><span class="lineNum">     188 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">     189 </span>            : 
+<span class="lineNum">     190 </span><span class="lineCov">          3 : UNIT(array6, &quot;std::list&lt; int &gt;&quot;)</span>
+<span class="lineNum">     191 </span>            : {
+<span class="lineNum">     192 </span>            :   using namespace fas::testing;
+<span class="lineNum">     193 </span>            :   using namespace wjson;
+<span class="lineNum">     194 </span>            : 
+<span class="lineNum">     195 </span><span class="lineCov">          1 :   std::string json;</span>
+<span class="lineNum">     196 </span><span class="lineCov">          2 :   std::list&lt; int &gt; dq;</span>
+<span class="lineNum">     197 </span><span class="lineCov">          6 :   for (int i=1;i != 6; ++i )</span>
+<span class="lineNum">     198 </span><span class="lineCov">          5 :     dq.push_back(i);</span>
+<span class="lineNum">     199 </span>            :   array&lt; std::list&lt; value&lt;int&gt; &gt; &gt;::serializer ser;
+<span class="lineNum">     200 </span><span class="lineCov">          1 :   ser(dq, std::back_inserter(json));</span>
+<span class="lineNum">     201 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(json, &quot;[1,2,3,4,5]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     202 </span><span class="lineCov">          2 :   std::list&lt; int &gt; dq2;</span>
+<span class="lineNum">     203 </span><span class="lineCov">          1 :   json_error e;</span>
+<span class="lineNum">     204 </span><span class="lineCov">          1 :   ser(dq2, json.begin(), json.end(), &amp;e );</span>
+<span class="lineNum">     205 </span><span class="lineCov">          1 :   t &lt;&lt; is_false&lt;expect&gt;(e) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     206 </span><span class="lineCov">          2 :   t &lt;&lt; equal&lt;expect&gt;(dq, dq2) &lt;&lt; FAS_FL;</span>
+<a name="207"><span class="lineNum">     207 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">     208 </span>            : 
+<span class="lineNum">     209 </span><span class="lineCov">          3 : UNIT(array7, &quot;std::set&lt; int &gt;&quot;)</span>
+<span class="lineNum">     210 </span>            : {
+<span class="lineNum">     211 </span>            :   using namespace fas::testing;
+<span class="lineNum">     212 </span>            :   using namespace wjson;
+<span class="lineNum">     213 </span>            : 
+<span class="lineNum">     214 </span><span class="lineCov">          1 :   std::string json;</span>
+<span class="lineNum">     215 </span><span class="lineCov">          2 :   std::set&lt; int &gt; dq;</span>
+<span class="lineNum">     216 </span><span class="lineCov">          6 :   for (int i=1;i != 6; ++i )</span>
+<span class="lineNum">     217 </span><span class="lineCov">          5 :     dq.insert(i);</span>
+<span class="lineNum">     218 </span>            :   array&lt; std::set&lt; value&lt;int&gt; &gt; &gt;::serializer ser;
+<span class="lineNum">     219 </span><span class="lineCov">          1 :   ser(dq, std::back_inserter(json));</span>
+<span class="lineNum">     220 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(json, &quot;[1,2,3,4,5]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     221 </span><span class="lineCov">          2 :   std::set&lt; int &gt; dq2;</span>
+<span class="lineNum">     222 </span><span class="lineCov">          1 :   json_error e;</span>
+<span class="lineNum">     223 </span><span class="lineCov">          1 :   ser(dq2, json.begin(), json.end(), &amp;e );</span>
+<span class="lineNum">     224 </span><span class="lineCov">          1 :   t &lt;&lt; is_false&lt;expect&gt;(e) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     225 </span><span class="lineCov">          2 :   t &lt;&lt; equal&lt;expect&gt;(dq, dq2) &lt;&lt; FAS_FL;</span>
+<a name="226"><span class="lineNum">     226 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">     227 </span>            : 
+<span class="lineNum">     228 </span><span class="lineCov">          3 : UNIT(array8, &quot;std::multiset&lt; int &gt;&quot;)</span>
+<span class="lineNum">     229 </span>            : {
+<span class="lineNum">     230 </span>            :   using namespace fas::testing;
+<span class="lineNum">     231 </span>            :   using namespace wjson;
+<span class="lineNum">     232 </span>            : 
+<span class="lineNum">     233 </span><span class="lineCov">          1 :   std::string json;</span>
+<span class="lineNum">     234 </span><span class="lineCov">          2 :   std::multiset&lt; int &gt; dq;</span>
+<span class="lineNum">     235 </span><span class="lineCov">          6 :   for (int i=1;i != 6; ++i )</span>
+<span class="lineNum">     236 </span><span class="lineCov">          5 :     dq.insert(i);</span>
+<span class="lineNum">     237 </span><span class="lineCov">          1 :   dq.insert(1);</span>
+<span class="lineNum">     238 </span><span class="lineCov">          1 :   dq.insert(1);</span>
+<span class="lineNum">     239 </span>            :   array&lt; std::multiset&lt; value&lt;int&gt; &gt; &gt;::serializer ser;
+<span class="lineNum">     240 </span><span class="lineCov">          1 :   ser(dq, std::back_inserter(json));</span>
+<span class="lineNum">     241 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(json, &quot;[1,1,1,2,3,4,5]&quot;) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     242 </span><span class="lineCov">          2 :   std::multiset&lt; int &gt; dq2;</span>
+<span class="lineNum">     243 </span><span class="lineCov">          1 :   json_error e;</span>
+<span class="lineNum">     244 </span><span class="lineCov">          1 :   ser(dq2, json.begin(), json.end(), &amp;e );</span>
+<span class="lineNum">     245 </span><span class="lineCov">          1 :   t &lt;&lt; is_false&lt;expect&gt;(e) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     246 </span><span class="lineCov">          2 :   t &lt;&lt; equal&lt;expect&gt;(dq, dq2) &lt;&lt; FAS_FL;</span>
+<a name="247"><span class="lineNum">     247 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">     248 </span>            : 
+<span class="lineNum">     249 </span><span class="lineCov">          3 : UNIT(array9, &quot;std::unordered_set&lt; int &gt;&quot;)</span>
+<span class="lineNum">     250 </span>            : {
+<span class="lineNum">     251 </span>            :   using namespace fas::testing;
+<span class="lineNum">     252 </span>            :   using namespace wjson;
+<span class="lineNum">     253 </span>            : 
+<span class="lineNum">     254 </span>            : #if __cplusplus &gt;= 201103L
+<span class="lineNum">     255 </span><span class="lineCov">          1 :   std::string json;</span>
+<span class="lineNum">     256 </span><span class="lineCov">          2 :   std::unordered_set&lt; int &gt; dq = {1,2,3,4,5};</span>
+<span class="lineNum">     257 </span>            :   array&lt; std::unordered_set&lt; value&lt;int&gt; &gt; &gt;::serializer ser;
+<span class="lineNum">     258 </span><span class="lineCov">          1 :   ser(dq, std::back_inserter(json));</span>
+<span class="lineNum">     259 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;unordered_set: &quot;) &lt;&lt; json;</span>
+<span class="lineNum">     260 </span>            :   // t &lt;&lt; equal&lt;expect&gt;(json, &quot;[1,2,3,4,5]&quot;) &lt;&lt; FAS_FL;
+<span class="lineNum">     261 </span><span class="lineCov">          2 :   std::unordered_set&lt; int &gt; dq2;</span>
+<span class="lineNum">     262 </span><span class="lineCov">          1 :   json_error e;</span>
+<span class="lineNum">     263 </span><span class="lineCov">          1 :   ser(dq2, json.begin(), json.end(), &amp;e );</span>
+<span class="lineNum">     264 </span><span class="lineCov">          1 :   t &lt;&lt; is_false&lt;expect&gt;(e) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     265 </span><span class="lineCov">          2 :   t &lt;&lt; equal&lt;expect&gt;(dq, dq2) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     266 </span>            : #else
+<span class="lineNum">     267 </span>            :   t &lt;&lt; nothing;
+<span class="lineNum">     268 </span>            : #endif
+<a name="269"><span class="lineNum">     269 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">     270 </span>            : 
+<span class="lineNum">     271 </span><span class="lineCov">          3 : UNIT(array10, &quot;std::unordered_multiset&lt; int &gt;&quot;)</span>
+<span class="lineNum">     272 </span>            : {
+<span class="lineNum">     273 </span>            :   using namespace fas::testing;
+<span class="lineNum">     274 </span>            :   using namespace wjson;
+<span class="lineNum">     275 </span>            : #if __cplusplus &gt;= 201103L
+<span class="lineNum">     276 </span><span class="lineCov">          1 :   std::string json;</span>
+<span class="lineNum">     277 </span><span class="lineCov">          2 :   std::unordered_multiset&lt; int &gt; dq = {1,2,3,4,5};</span>
+<span class="lineNum">     278 </span>            :   array&lt; std::unordered_multiset&lt; value&lt;int&gt; &gt; &gt;::serializer ser;
+<span class="lineNum">     279 </span><span class="lineCov">          1 :   ser(dq, std::back_inserter(json));</span>
+<span class="lineNum">     280 </span>            :   // t &lt;&lt; equal&lt;expect&gt;(json, &quot;[1,2,3,4,5]&quot;) &lt;&lt; FAS_FL;
+<span class="lineNum">     281 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;unordered_multiset: &quot;) &lt;&lt; json;</span>
+<span class="lineNum">     282 </span><span class="lineCov">          2 :   std::unordered_multiset&lt; int &gt; dq2;</span>
+<span class="lineNum">     283 </span><span class="lineCov">          1 :   json_error e;</span>
+<span class="lineNum">     284 </span><span class="lineCov">          1 :   ser(dq2, json.begin(), json.end(), &amp;e );</span>
+<span class="lineNum">     285 </span><span class="lineCov">          1 :   t &lt;&lt; is_false&lt;expect&gt;(e) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     286 </span><span class="lineCov">          2 :   t &lt;&lt; equal&lt;expect&gt;(dq, dq2) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     287 </span>            : #else
+<span class="lineNum">     288 </span>            :   t &lt;&lt; nothing;
+<span class="lineNum">     289 </span>            : #endif
+<span class="lineNum">     290 </span><span class="lineCov">          1 : }</span>
+<a name="291"><span class="lineNum">     291 </span>            : </a>
+<span class="lineNum">     292 </span>            : 
+<span class="lineNum">     293 </span><span class="lineCov">          1 : BEGIN_SUITE(array, &quot;&quot;)</span>
+<span class="lineNum">     294 </span>            :   ADD_UNIT(array1)
+<span class="lineNum">     295 </span>            :   ADD_UNIT(array2)
+<span class="lineNum">     296 </span>            :   ADD_UNIT(array3)
+<span class="lineNum">     297 </span>            :   ADD_UNIT(array4)
+<span class="lineNum">     298 </span>            :   ADD_UNIT(array5)
+<span class="lineNum">     299 </span>            :   ADD_UNIT(array6)
+<span class="lineNum">     300 </span>            :   ADD_UNIT(array7)
+<span class="lineNum">     301 </span>            :   ADD_UNIT(array8)
+<a name="302"><span class="lineNum">     302 </span>            :   ADD_UNIT(array9)</a>
+<span class="lineNum">     303 </span>            :   ADD_UNIT(array10)
+<span class="lineNum">     304 </span><span class="lineCov">          7 : END_SUITE(array)</span>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

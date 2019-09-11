@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - wjson-coverage.info - wjson/serializer/iterator_pair.hpp</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">wjson/serializer</a> - iterator_pair.hpp<span style="font-size: 80%;"> (source / <a href="iterator_pair.hpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">wjson-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">8</td>
+            <td class="headerCovTableEntry">11</td>
+            <td class="headerCovTableEntryLo">72.7 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-11</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : //</a>
+<span class="lineNum">       2 </span>            : // Author: Vladimir Migashko &lt;migashko@gmail.com&gt;, (C) 2008-2016
+<span class="lineNum">       3 </span>            : //
+<span class="lineNum">       4 </span>            : // Copyright: See COPYING file that comes with this distribution
+<span class="lineNum">       5 </span>            : //
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span>            : #pragma once
+<span class="lineNum">       8 </span>            : 
+<span class="lineNum">       9 </span>            : #include &lt;wjson/predef.hpp&gt;
+<span class="lineNum">      10 </span>            : #include &lt;wjson/error.hpp&gt;
+<span class="lineNum">      11 </span>            : #include &lt;wjson/parser.hpp&gt;
+<span class="lineNum">      12 </span>            : #include &lt;algorithm&gt;
+<span class="lineNum">      13 </span>            : 
+<span class="lineNum">      14 </span>            : namespace wjson{
+<span class="lineNum">      15 </span>            : 
+<span class="lineNum">      16 </span>            : template&lt;typename T&gt;
+<span class="lineNum">      17 </span>            : class serializerT&lt; iterator_pair&lt;T&gt; &gt;
+<span class="lineNum">      18 </span>            : {
+<a name="19"><span class="lineNum">      19 </span>            : public:</a>
+<span class="lineNum">      20 </span>            :   template&lt;typename P&gt;
+<span class="lineNum">      21 </span><span class="lineCov">          1 :   P operator()( const T&amp; v, P end ) const</span>
+<span class="lineNum">      22 </span>            :   {
+<span class="lineNum">      23 </span><span class="lineCov">          1 :     if ( v.first != v.second )</span>
+<span class="lineNum">      24 </span><span class="lineCov">          1 :       return std::copy(v.first, v.second, end );</span>
+<span class="lineNum">      25 </span>            :     else
+<span class="lineNum">      26 </span>            :     {
+<span class="lineNum">      27 </span><span class="lineNoCov">          0 :       *(end++)='&quot;';</span>
+<span class="lineNum">      28 </span><span class="lineNoCov">          0 :       *(end++)='&quot;';</span>
+<span class="lineNum">      29 </span><span class="lineNoCov">          0 :       return end;</span>
+<span class="lineNum">      30 </span>            :     }
+<span class="lineNum">      31 </span>            :   }
+<a name="32"><span class="lineNum">      32 </span>            : </a>
+<span class="lineNum">      33 </span>            :   template&lt;typename P&gt;
+<span class="lineNum">      34 </span><span class="lineCov">          1 :   P operator() ( T&amp; v, P beg, P end, json_error* e ) const</span>
+<span class="lineNum">      35 </span>            :   {
+<span class="lineNum">      36 </span><span class="lineCov">          1 :     v.first = beg;</span>
+<span class="lineNum">      37 </span><span class="lineCov">          1 :     beg = parser::parse_value(beg, end, e);</span>
+<span class="lineNum">      38 </span><span class="lineCov">          1 :     v.second = beg;</span>
+<span class="lineNum">      39 </span><span class="lineCov">          1 :     return beg;</span>
+<span class="lineNum">      40 </span>            :   }
+<span class="lineNum">      41 </span>            : };
+<span class="lineNum">      42 </span>            : 
+<span class="lineNum">      43 </span>            : }
+<span class="lineNum">      44 </span>            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

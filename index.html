@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.15"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>wjson: Титульная страница</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="customdoxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">wjson
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Создано системой Doxygen 1.8.15 -->
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',false,false,'search.php','Поиск');
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div class="PageDoc"><div class="header">
+  <div class="headertitle">
+<div class="title">wjson Документация</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><p class=""><a href="https://travis-ci.com/mambaru/wjson"></a> <a href="https://travis-ci.com/mambaru/wjson"></a> <a href="https://coveralls.io/github/mambaru/wjson?branch=master"></a></p>
+<h1>JSON сериализатор</h1>
+<ul>
+<li>Статья на <a href="https://habrahabr.ru/post/311262/">хабре</a> с примерами и бенчмарками.</li>
+<li>Репозитарий на <a href="https://github.com/mambaru/wjson">github.com</a></li>
+<li>Документация <a href="https://github.com/mambaru/wjson/wiki">wiki</a></li>
+<li>Документация <a href="https://mambaru.github.io/wjson/index.html">doxygen</a></li>
+<li>Отчет <a href="https://mambaru.github.io/wjson/cov-report/index.html">coverage</a></li>
+</ul>
+<p class="">Простой в использовании, быстрый, декларативный сериализатор/десериализатор непосредственно в структуры данных. Например для структуры: </p><div class="fragment"><div class="line"><span class="keyword">struct </span>foo</div><div class="line">{</div><div class="line">  <span class="keywordtype">int</span> foo1 = 0;</div><div class="line">  std::string foo2;</div><div class="line">  std::vector&lt;std::string&gt; foo3;</div><div class="line">};</div></div><!-- fragment --><p> Нужно создать JSON-описание: </p><div class="fragment"><div class="line"><span class="keyword">struct </span>foo_json</div><div class="line">{</div><div class="line">  <a class="code" href="name_8hpp.html#a9277ad1df0498c3712e4552dd218e220">JSON_NAME</a>(foo1)</div><div class="line">  <a class="code" href="name_8hpp.html#a9277ad1df0498c3712e4552dd218e220">JSON_NAME</a>(foo2)</div><div class="line">  <a class="code" href="name_8hpp.html#a9277ad1df0498c3712e4552dd218e220">JSON_NAME</a>(foo3)</div><div class="line"></div><div class="line">  <span class="keyword">typedef</span> <a class="code" href="structwjson_1_1object.html">wjson::object</a>&lt;</div><div class="line">    foo,</div><div class="line">    <a class="code" href="structwjson_1_1member__list.html">wjson::member_list</a>&lt;</div><div class="line">      <a class="code" href="structwjson_1_1member.html">wjson::member&lt;n_foo1, foo, int, &amp;foo::foo1&gt;</a>,</div><div class="line">      <a class="code" href="structwjson_1_1member.html">wjson::member&lt;n_foo2, foo, std::string, &amp;foo::foo2&gt;</a>,</div><div class="line">      <a class="code" href="structwjson_1_1member.html">wjson::member&lt;n_foo3, foo, std::vector&lt;std::string&gt;</a>, &amp;foo::foo3, <a class="code" href="structwjson_1_1vector__of__strings.html">wjson::vector_of_strings&lt;10&gt;</a> &gt;</div><div class="line">    &gt;</div><div class="line">  &gt; type;</div><div class="line"></div><div class="line">  <span class="keyword">typedef</span> type::target target;</div><div class="line">  <span class="keyword">typedef</span> type::serializer serializer;</div><div class="line">  <span class="keyword">typedef</span> type::member_list member_list;</div><div class="line">};</div></div><!-- fragment --><p> И можно сериализовывать: </p><div class="fragment"><div class="line">foo f;</div><div class="line">std::string json;</div><div class="line">foo_json::serializer()( f, std::back_inserter(json) );</div></div><!-- fragment --><p> Или сразу в stdout: </p><div class="fragment"><div class="line">foo_json::serializer()( f, std::ostreambuf_iterator&lt;char&gt;(std::cout) );</div></div><!-- fragment --><p> Для десериализации нужна пара итераторов произвольного доступа: </p><div class="fragment"><div class="line">wjson::error e;</div><div class="line">foo_json::serializer()( f, json.begin(), json.end(), &amp;e );</div></div><!-- fragment --><p> Если есть ошибка: </p><div class="fragment"><div class="line"><span class="keywordflow">if</span> ( e )</div><div class="line">{</div><div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;Error code: &quot;</span> &lt;&lt; e.code() &lt;&lt; std::endl;</div><div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;Error tail of: &quot;</span> &lt;&lt; e.tail_of() &lt;&lt; std::endl;</div><div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;Error position: &quot;</span> &lt;&lt; <a class="code" href="classwjson_1_1strerror.html#a168ba4f8b762e8e807765465d19906bd">wjson::strerror::where</a>(e, json.begin(), json.end() ) &lt;&lt; std::endl;</div><div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;Error expected of: &quot;</span> &lt;&lt; e.expected_of() &lt;&lt; std::endl;</div><div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;Error message: &quot;</span> &lt;&lt; <a class="code" href="classwjson_1_1strerror.html#a36e0ed5663acb7b84877a17653246580">wjson::strerror::message</a>(e) &lt;&lt; std::endl;</div><div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;Error trace: &quot;</span> &lt;&lt; <a class="code" href="classwjson_1_1strerror.html#a0dc623968ddb36b7549baa3cf9a89200">wjson::strerror::trace</a>(e, json.begin(), json.end()) &lt;&lt; std::endl;</div><div class="line">}</div></div><!-- fragment --><p class=""><a href="https://github.com/mambaru/wjson/wiki">Подробнее...</a> </p>
+</div></div><!-- PageDoc -->
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+Создано системой &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.15
+</small></address>
+</body>
+</html>

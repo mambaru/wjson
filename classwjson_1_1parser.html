@@ -1,0 +1,969 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.15"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>wjson: Класс wjson::parser</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="customdoxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">wjson
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Создано системой Doxygen 1.8.15 -->
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',false,false,'search.php','Поиск');
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="namespacewjson.html">wjson</a></li><li class="navelem"><a class="el" href="classwjson_1_1parser.html">parser</a></li>  </ul>
+</div>
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#pub-static-methods">Открытые статические члены</a> &#124;
+<a href="classwjson_1_1parser-members.html">Полный список членов класса</a>  </div>
+  <div class="headertitle">
+<div class="title">Класс wjson::parser</div>  </div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="parser_8hpp_source.html">parser.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Открытые статические члены</h2></td></tr>
+<tr class="memitem:ab1ca70217c7f01ed084d4234c3602cad"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:ab1ca70217c7f01ed084d4234c3602cad"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#ab1ca70217c7f01ed084d4234c3602cad">is_space</a> (P beg, P end)</td></tr>
+<tr class="separator:ab1ca70217c7f01ed084d4234c3602cad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84206bbe94af972c2dd211f2b0ecfbc0"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:a84206bbe94af972c2dd211f2b0ecfbc0"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a84206bbe94af972c2dd211f2b0ecfbc0">is_null</a> (P beg, P end)</td></tr>
+<tr class="separator:a84206bbe94af972c2dd211f2b0ecfbc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d4094a0978b1ea327bee7857c84234f"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:a1d4094a0978b1ea327bee7857c84234f"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a1d4094a0978b1ea327bee7857c84234f">is_bool</a> (P beg, P end)</td></tr>
+<tr class="separator:a1d4094a0978b1ea327bee7857c84234f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aedbac51d74edb780c1cf0a2741978ca4"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:aedbac51d74edb780c1cf0a2741978ca4"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#aedbac51d74edb780c1cf0a2741978ca4">is_number</a> (P beg, P end)</td></tr>
+<tr class="separator:aedbac51d74edb780c1cf0a2741978ca4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43e90fd195a024831967f1543684e373"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:a43e90fd195a024831967f1543684e373"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a43e90fd195a024831967f1543684e373">is_string</a> (P beg, P end)</td></tr>
+<tr class="separator:a43e90fd195a024831967f1543684e373"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95d9b69ae3888586b8c97579e7ce5e87"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:a95d9b69ae3888586b8c97579e7ce5e87"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a95d9b69ae3888586b8c97579e7ce5e87">is_utf8</a> (P beg, P end)</td></tr>
+<tr class="separator:a95d9b69ae3888586b8c97579e7ce5e87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb93ac322f991b59363e0272e49ef8b7"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:aeb93ac322f991b59363e0272e49ef8b7"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#aeb93ac322f991b59363e0272e49ef8b7">is_object</a> (P beg, P end)</td></tr>
+<tr class="separator:aeb93ac322f991b59363e0272e49ef8b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57a7c0a849c2d3e514233aa24baa16cd"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:a57a7c0a849c2d3e514233aa24baa16cd"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a57a7c0a849c2d3e514233aa24baa16cd">is_array</a> (P beg, P end)</td></tr>
+<tr class="separator:a57a7c0a849c2d3e514233aa24baa16cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a384bdb0123cfc456c528db2f15d172a2"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:a384bdb0123cfc456c528db2f15d172a2"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a384bdb0123cfc456c528db2f15d172a2">parse_space</a> (P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:a384bdb0123cfc456c528db2f15d172a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70e5aa6cfe654d266b176339a016b1a0"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:a70e5aa6cfe654d266b176339a016b1a0"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a70e5aa6cfe654d266b176339a016b1a0">parse_null</a> (P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:a70e5aa6cfe654d266b176339a016b1a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fdd584077c169832c6864ab1b7e1a30"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:a4fdd584077c169832c6864ab1b7e1a30"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a4fdd584077c169832c6864ab1b7e1a30">parse_bool</a> (P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:a4fdd584077c169832c6864ab1b7e1a30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a593e51c2f79e419eb709acb7e713d3b6"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:a593e51c2f79e419eb709acb7e713d3b6"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a593e51c2f79e419eb709acb7e713d3b6">parse_number</a> (P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:a593e51c2f79e419eb709acb7e713d3b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed26665f26a6adb07dfd7cde30e688b9"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:aed26665f26a6adb07dfd7cde30e688b9"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#aed26665f26a6adb07dfd7cde30e688b9">parse_string</a> (P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:aed26665f26a6adb07dfd7cde30e688b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8e7e87a28c9cfbc7445f42a759ea8af"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:ad8e7e87a28c9cfbc7445f42a759ea8af"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#ad8e7e87a28c9cfbc7445f42a759ea8af">parse_utf8</a> (P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:ad8e7e87a28c9cfbc7445f42a759ea8af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa050dd890b85f16702de1f7501bf2abb"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:aa050dd890b85f16702de1f7501bf2abb"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#aa050dd890b85f16702de1f7501bf2abb">parse_hex</a> (P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:aa050dd890b85f16702de1f7501bf2abb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a6274aa342240f780381d1fd087c206"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:a7a6274aa342240f780381d1fd087c206"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a7a6274aa342240f780381d1fd087c206">parse_object</a> (P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:a7a6274aa342240f780381d1fd087c206"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52ecac3c30a24dfb48ea49a5a2004972"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:a52ecac3c30a24dfb48ea49a5a2004972"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a52ecac3c30a24dfb48ea49a5a2004972">parse_array</a> (P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:a52ecac3c30a24dfb48ea49a5a2004972"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95810c5815fe51d3c8f01ebd2b7d3d3d"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:a95810c5815fe51d3c8f01ebd2b7d3d3d"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a95810c5815fe51d3c8f01ebd2b7d3d3d">parse_value</a> (P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:a95810c5815fe51d3c8f01ebd2b7d3d3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad115d5de2d6425e2ee192d73bc8b31ae"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:ad115d5de2d6425e2ee192d73bc8b31ae"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#ad115d5de2d6425e2ee192d73bc8b31ae">parse_member</a> (P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:ad115d5de2d6425e2ee192d73bc8b31ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d2c9bba381351f2ec1832980c1f966e"><td class="memTemplParams" colspan="2">template&lt;typename T , typename P &gt; </td></tr>
+<tr class="memitem:a4d2c9bba381351f2ec1832980c1f966e"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a4d2c9bba381351f2ec1832980c1f966e">unserialize_integer</a> (T &amp;v, P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:a4d2c9bba381351f2ec1832980c1f966e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Методы</h2>
+<a id="a57a7c0a849c2d3e514233aa24baa16cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57a7c0a849c2d3e514233aa24baa16cd">&#9670;&nbsp;</a></span>is_array()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool wjson::parser::is_array </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1d4094a0978b1ea327bee7857c84234f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d4094a0978b1ea327bee7857c84234f">&#9670;&nbsp;</a></span>is_bool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool wjson::parser::is_bool </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a84206bbe94af972c2dd211f2b0ecfbc0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84206bbe94af972c2dd211f2b0ecfbc0">&#9670;&nbsp;</a></span>is_null()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool wjson::parser::is_null </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aedbac51d74edb780c1cf0a2741978ca4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aedbac51d74edb780c1cf0a2741978ca4">&#9670;&nbsp;</a></span>is_number()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool wjson::parser::is_number </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aeb93ac322f991b59363e0272e49ef8b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb93ac322f991b59363e0272e49ef8b7">&#9670;&nbsp;</a></span>is_object()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool wjson::parser::is_object </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab1ca70217c7f01ed084d4234c3602cad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1ca70217c7f01ed084d4234c3602cad">&#9670;&nbsp;</a></span>is_space()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool wjson::parser::is_space </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a43e90fd195a024831967f1543684e373"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43e90fd195a024831967f1543684e373">&#9670;&nbsp;</a></span>is_string()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool wjson::parser::is_string </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a95d9b69ae3888586b8c97579e7ce5e87"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95d9b69ae3888586b8c97579e7ce5e87">&#9670;&nbsp;</a></span>is_utf8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool wjson::parser::is_utf8 </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a52ecac3c30a24dfb48ea49a5a2004972"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52ecac3c30a24dfb48ea49a5a2004972">&#9670;&nbsp;</a></span>parse_array()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::parse_array </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4fdd584077c169832c6864ab1b7e1a30"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4fdd584077c169832c6864ab1b7e1a30">&#9670;&nbsp;</a></span>parse_bool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::parse_bool </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa050dd890b85f16702de1f7501bf2abb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa050dd890b85f16702de1f7501bf2abb">&#9670;&nbsp;</a></span>parse_hex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::parse_hex </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad115d5de2d6425e2ee192d73bc8b31ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad115d5de2d6425e2ee192d73bc8b31ae">&#9670;&nbsp;</a></span>parse_member()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::parse_member </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a70e5aa6cfe654d266b176339a016b1a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70e5aa6cfe654d266b176339a016b1a0">&#9670;&nbsp;</a></span>parse_null()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::parse_null </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a593e51c2f79e419eb709acb7e713d3b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a593e51c2f79e419eb709acb7e713d3b6">&#9670;&nbsp;</a></span>parse_number()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::parse_number </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7a6274aa342240f780381d1fd087c206"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a6274aa342240f780381d1fd087c206">&#9670;&nbsp;</a></span>parse_object()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::parse_object </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a384bdb0123cfc456c528db2f15d172a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a384bdb0123cfc456c528db2f15d172a2">&#9670;&nbsp;</a></span>parse_space()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::parse_space </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aed26665f26a6adb07dfd7cde30e688b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed26665f26a6adb07dfd7cde30e688b9">&#9670;&nbsp;</a></span>parse_string()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::parse_string </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad8e7e87a28c9cfbc7445f42a759ea8af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8e7e87a28c9cfbc7445f42a759ea8af">&#9670;&nbsp;</a></span>parse_utf8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::parse_utf8 </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a95810c5815fe51d3c8f01ebd2b7d3d3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95810c5815fe51d3c8f01ebd2b7d3d3d">&#9670;&nbsp;</a></span>parse_value()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::parse_value </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4d2c9bba381351f2ec1832980c1f966e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d2c9bba381351f2ec1832980c1f966e">&#9670;&nbsp;</a></span>unserialize_integer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::unserialize_integer </td>
+          <td>(</td>
+          <td class="paramtype">T &amp;&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>Объявления и описания членов класса находятся в файле:<ul>
+<li>wjson/<a class="el" href="parser_8hpp_source.html">parser.hpp</a></li>
+</ul>
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+Создано системой &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.15
+</small></address>
+</body>
+</html>

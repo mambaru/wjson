@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - wjson-coverage.info - wjson/serializer/time_interval.hpp</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">wjson/serializer</a> - time_interval.hpp<span style="font-size: 80%;"> (source / <a href="time_interval.hpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">wjson-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">44</td>
+            <td class="headerCovTableEntry">52</td>
+            <td class="headerCovTableEntryMed">84.6 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-11</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">9</td>
+            <td class="headerCovTableEntry">9</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : //</a>
+<span class="lineNum">       2 </span>            : // Author: Vladimir Migashko &lt;migashko@gmail.com&gt;, (C) 2008-2016
+<span class="lineNum">       3 </span>            : //
+<span class="lineNum">       4 </span>            : // Copyright: See COPYING file that comes with this distribution
+<span class="lineNum">       5 </span>            : //
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span>            : #pragma once
+<span class="lineNum">       8 </span>            : 
+<span class="lineNum">       9 </span>            : #include &lt;wjson/predef.hpp&gt;
+<span class="lineNum">      10 </span>            : #include &lt;wjson/error.hpp&gt;
+<span class="lineNum">      11 </span>            : #include &lt;wjson/parser.hpp&gt;
+<span class="lineNum">      12 </span>            : 
+<span class="lineNum">      13 </span>            : namespace wjson{
+<span class="lineNum">      14 </span>            : 
+<span class="lineNum">      15 </span>            : template&lt;typename T, T fractions&gt;
+<span class="lineNum">      16 </span>            : class serializerT&lt; time_interval&lt;T, fractions&gt; &gt;
+<span class="lineNum">      17 </span>            : {
+<span class="lineNum">      18 </span>            :   typedef T value_type;
+<a name="19"><span class="lineNum">      19 </span>            : public:</a>
+<span class="lineNum">      20 </span>            :   template&lt;typename P&gt;
+<span class="lineNum">      21 </span><span class="lineCov">         10 :   P operator()( const T&amp; v, P beg)</span>
+<span class="lineNum">      22 </span>            :   {
+<span class="lineNum">      23 </span><span class="lineCov">         10 :     value_type seconds = v/fractions ;</span>
+<span class="lineNum">      24 </span><span class="lineCov">         10 :     *(beg++) = '&quot;';</span>
+<span class="lineNum">      25 </span><span class="lineCov">         10 :     value_type days = write_if_(beg, seconds/(86400), 'd');</span>
+<span class="lineNum">      26 </span><span class="lineCov">         10 :     value_type hours = write_if_(beg, (seconds - days*86400)/3600, 'h');</span>
+<span class="lineNum">      27 </span><span class="lineCov">         10 :     write_if_(beg, (seconds - hours*3600 - days*86400)/60, 'm');</span>
+<span class="lineNum">      28 </span><span class="lineCov">         10 :     write_if_(beg,  seconds%60, 's');</span>
+<span class="lineNum">      29 </span><span class="lineCov">         10 :     if ( write_if_(beg, v%fractions, 'm') )</span>
+<span class="lineNum">      30 </span><span class="lineCov">          8 :       *(beg++) = 's';</span>
+<span class="lineNum">      31 </span><span class="lineCov">         10 :     *(beg++) = '&quot;';</span>
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span><span class="lineCov">         10 :     return beg;</span>
+<span class="lineNum">      34 </span>            :   }
+<a name="35"><span class="lineNum">      35 </span>            : </a>
+<span class="lineNum">      36 </span>            :   template&lt;typename P&gt;
+<span class="lineNum">      37 </span><span class="lineCov">          7 :   P operator() ( T&amp; v, P beg, P end, json_error* e )</span>
+<span class="lineNum">      38 </span>            :   {
+<span class="lineNum">      39 </span><span class="lineCov">          7 :     if (beg==end)</span>
+<span class="lineNum">      40 </span><span class="lineNoCov">          0 :       return create_error&lt;error_code::UnexpectedEndFragment&gt;( e, end );</span>
+<span class="lineNum">      41 </span>            : 
+<span class="lineNum">      42 </span><span class="lineCov">          7 :     v = T();</span>
+<span class="lineNum">      43 </span>            : 
+<span class="lineNum">      44 </span><span class="lineCov">          7 :     if ( parser::is_null(beg, end) )</span>
+<span class="lineNum">      45 </span>            :     {
+<span class="lineNum">      46 </span><span class="lineNoCov">          0 :       v = T();</span>
+<span class="lineNum">      47 </span><span class="lineNoCov">          0 :       return parser::parse_null(beg, end, e);</span>
+<span class="lineNum">      48 </span>            :     }
+<span class="lineNum">      49 </span>            : 
+<span class="lineNum">      50 </span><span class="lineCov">          7 :     if ( parser::is_number(beg, end) )</span>
+<span class="lineNum">      51 </span><span class="lineCov">          3 :       return typename value&lt;T&gt;::serializer()(v, beg, end, e);</span>
+<span class="lineNum">      52 </span><span class="lineCov">          4 :     else if ( !parser::is_string(beg, end))</span>
+<span class="lineNum">      53 </span><span class="lineNoCov">          0 :       return create_error&lt;error_code::InvalidString&gt;( e, end );</span>
+<span class="lineNum">      54 </span>            : 
+<span class="lineNum">      55 </span>            : 
+<span class="lineNum">      56 </span><span class="lineCov">         21 :     for ( ++beg; beg!=end &amp;&amp; *beg!='&quot;'; )</span>
+<span class="lineNum">      57 </span>            :     {
+<span class="lineNum">      58 </span><span class="lineCov">         13 :       T cur = T();</span>
+<span class="lineNum">      59 </span><span class="lineCov">         13 :       beg = typename value&lt;T&gt;::serializer()(cur, beg, end, e);</span>
+<span class="lineNum">      60 </span><span class="lineCov">         13 :       if (!e) return beg;</span>
+<span class="lineNum">      61 </span><span class="lineCov">         13 :       switch( *beg ) // строка валидная, так что за пределы не вышли,</span>
+<span class="lineNum">      62 </span>            :       {
+<span class="lineNum">      63 </span><span class="lineCov">          1 :         case 'd': v += cur * 86400 * fractions; break;</span>
+<span class="lineNum">      64 </span><span class="lineCov">          4 :         case 'h': v += cur * 3600 * fractions; break;</span>
+<span class="lineNum">      65 </span>            :         case 'm':
+<span class="lineNum">      66 </span><span class="lineCov">          4 :           ++beg;</span>
+<span class="lineNum">      67 </span><span class="lineCov">          4 :           if (beg==end)</span>
+<span class="lineNum">      68 </span><span class="lineNoCov">          0 :             return create_error&lt;error_code::UnexpectedEndFragment&gt;( e, end );</span>
+<span class="lineNum">      69 </span><span class="lineCov">          4 :           if ( *beg!='s')</span>
+<span class="lineNum">      70 </span>            :           {
+<span class="lineNum">      71 </span><span class="lineCov">          1 :             v += cur * 60 * fractions;</span>
+<span class="lineNum">      72 </span><span class="lineCov">          1 :             continue;</span>
+<span class="lineNum">      73 </span>            :           } // миллисекунды
+<span class="lineNum">      74 </span><span class="lineCov">          3 :           v += cur;</span>
+<span class="lineNum">      75 </span><span class="lineCov">          3 :           break;</span>
+<span class="lineNum">      76 </span>            :         case 's':
+<span class="lineNum">      77 </span><span class="lineCov">          4 :           v += cur * fractions;</span>
+<span class="lineNum">      78 </span><span class="lineCov">          4 :           break;</span>
+<span class="lineNum">      79 </span>            :         default:
+<span class="lineNum">      80 </span><span class="lineNoCov">          0 :           break;</span>
+<span class="lineNum">      81 </span>            :       }
+<span class="lineNum">      82 </span><span class="lineCov">         12 :       ++beg;</span>
+<span class="lineNum">      83 </span>            :     }
+<span class="lineNum">      84 </span>            : 
+<span class="lineNum">      85 </span><span class="lineCov">          4 :     if (beg==end)</span>
+<span class="lineNum">      86 </span><span class="lineNoCov">          0 :       return create_error&lt;error_code::UnexpectedEndFragment&gt;( e, end );</span>
+<span class="lineNum">      87 </span><span class="lineCov">          4 :     if ( *beg != '&quot;')</span>
+<span class="lineNum">      88 </span><span class="lineNoCov">          0 :       return create_error&lt;error_code::InvalidString&gt;( e, end );</span>
+<span class="lineNum">      89 </span><span class="lineCov">          4 :     ++beg;</span>
+<span class="lineNum">      90 </span><span class="lineCov">          4 :     return beg;</span>
+<span class="lineNum">      91 </span>            :   }
+<span class="lineNum">      92 </span>            : 
+<span class="lineNum">      93 </span>            : private:
+<span class="lineNum">      94 </span>            : 
+<a name="95"><span class="lineNum">      95 </span>            : </a>
+<span class="lineNum">      96 </span>            :   template&lt;typename P&gt;
+<span class="lineNum">      97 </span><span class="lineCov">         50 :   value_type write_if_(P&amp; beg, const value_type&amp; v, char ch)</span>
+<span class="lineNum">      98 </span>            :   {
+<span class="lineNum">      99 </span><span class="lineCov">         50 :     if ( v != 0)</span>
+<span class="lineNum">     100 </span>            :     {
+<span class="lineNum">     101 </span><span class="lineCov">         29 :       typename wjson::value&lt;value_type&gt;::serializer()(v, beg);</span>
+<span class="lineNum">     102 </span><span class="lineCov">         29 :       *(beg++)=ch;</span>
+<span class="lineNum">     103 </span>            :     }
+<span class="lineNum">     104 </span><span class="lineCov">         50 :     return v;</span>
+<span class="lineNum">     105 </span>            :   }
+<span class="lineNum">     106 </span>            : };
+<span class="lineNum">     107 </span>            : 
+<span class="lineNum">     108 </span>            : }
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>
