@@ -28,7 +28,7 @@ struct foo
   int   counter2 ;
   int   counter3 ;
 
-  count1::type counter ; 
+  count1::type counter ;
 
   foo()
     : flags(0)
@@ -102,7 +102,7 @@ struct enum_flags2
 
 struct count_json
 {
-  typedef ::wjson::enumerator<count1::type, enum_list1::type > type;
+  typedef ::wjson::enumerator<count1::type, enum_list1::type, wjson::nonstrict_mode > type;
   typedef type::target target;
   typedef type::serializer serializer;
   typedef type::member_list member_list;
@@ -119,7 +119,7 @@ struct count2_json
 template<char Sep>
 struct flags1_json
 {
-  typedef ::wjson::flags<int, enum_flags1::type, Sep > type;
+  typedef ::wjson::flags<int, enum_flags1::type, Sep, wjson::strict_mode > type;
   typedef typename type::target target;
   typedef typename type::serializer serializer;
   typedef typename type::member_list member_list;
@@ -128,7 +128,7 @@ struct flags1_json
 template<char Sep>
 struct flags2_json
 {
-  typedef ::wjson::flags<int, enum_flags2::type, Sep > type;
+  typedef ::wjson::flags<int, enum_flags2::type, Sep, wjson::strict_mode> type;
   typedef typename type::target target;
   typedef typename type::serializer serializer;
   typedef typename type::member_list member_list;
@@ -168,41 +168,43 @@ UNIT(enum1, "")
   int check = flags;
   typedef flags2_json<','>::serializer serializer_t;
   std::string json;
+  json.reserve(100);
   serializer_t()(flags, std::back_inserter(json));
   t << message("json:") << json;
   t << equal<expect>(json, "[\"one\",\"three\",\"six\"]" ) << FAS_FL;
   flags = 0;
   ::wjson::json_error e;
 
+
   serializer_t()(flags, json.begin(), json.end(), &e);
-  t << is_false<assert>(e) 
+  t << is_false<assert>(e)
     << ::wjson::strerror::message(e) << ": "
     << ::wjson::strerror::trace(e, json.begin(), json.end()) << FAS_FL;
   t << equal<expect, int>(flags, check ) << FAS_FL;
 
-  flags = 0;  
+  flags = 0;
   json = "[ \"three\", \"six\", \"one\" ]";
   serializer_t()(flags, json.begin(), json.end(), &e);
-  t << is_false<assert>(e) 
+  t << is_false<assert>(e)
     << ::wjson::strerror::message(e) << ": "
     << ::wjson::strerror::trace(e, json.begin(), json.end()) << FAS_FL ;
   t << equal<expect, int>(flags, check ) << FAS_FL;
 
-  flags = 0;  
+  flags = 0;
   json = "\"three, six, one\"";
   serializer_t()(flags, json.begin(), json.end(), &e);
-  t << is_false<assert>(e) 
+  t << is_false<assert>(e)
     << ::wjson::strerror::message(e) << ": "
     << ::wjson::strerror::trace(e, json.begin(), json.end()) << FAS_FL ;
   t << equal<expect, int>(flags, check ) << FAS_FL;
 
-  
-  flags = 0;  
+
+  flags = 0;
   json = "[ \"three\", \"six\", 1 ]";
   serializer_t()(flags, json.begin(), json.end(), &e);
   t << is_true<assert>(e) << FAS_FL;
   t << stop;
-  t << equal<expect>( e.code(), error_code::ExpectedOf )     
+  t << equal<expect>( e.code(), error_code::ExpectedOf )
     << ::wjson::strerror::message(e) << ": "
     << ::wjson::strerror::trace(e, json.begin(), json.end()) << FAS_FL ;
 
@@ -212,13 +214,14 @@ UNIT(enum2, "")
 {
   using namespace fas::testing;
   using namespace wjson;
-  
+
   int flags = static_cast<int>(count1::one)
             | static_cast<int>(count1::three)
             | static_cast<int>(count1::six);
   int check = flags;
   typedef flags2_json<'|'>::serializer serializer_t;
   std::string json;
+  json.reserve(100);
   serializer_t()(flags, std::back_inserter(json));
   t << message("json:") << json;
   t << equal<expect>(json, "\"one|three|six\"" ) << FAS_FL;
@@ -226,34 +229,33 @@ UNIT(enum2, "")
   ::wjson::json_error e;
 
   serializer_t()(flags, json.begin(), json.end(), &e);
-  t << is_false<assert>(e) 
+  t << is_false<assert>(e)
     << ::wjson::strerror::message(e) << ": "
     << ::wjson::strerror::trace(e, json.begin(), json.end()) << FAS_FL ;
   t << equal<expect, int>(flags, check ) << FAS_FL;
 
-  flags = 0;  
+  flags = 0;
   json = "\"    six |  three   |  one   \"";
   serializer_t()(flags, json.begin(), json.end(), &e);
-  t << is_false<assert>(e) 
+  t << is_false<assert>(e)
     << ::wjson::strerror::message(e) << ": "
     << ::wjson::strerror::trace(e, json.begin(), json.end()) << FAS_FL ;
   t << equal<expect, int>(flags, check ) << FAS_FL;
 
-  flags = 0;  
+  flags = 0;
   json = "[\"six\",\"three\",\"one\"]";
   serializer_t()(flags, json.begin(), json.end(), &e);
-  t << is_false<assert>(e) 
+  t << is_false<assert>(e)
     << ::wjson::strerror::message(e) << ": "
     << ::wjson::strerror::trace(e, json.begin(), json.end()) << FAS_FL ;
   t << equal<expect, int>(flags, check ) << FAS_FL;
 
-  flags = 0;  
+  flags = 0;
   json = "\"three |six | 1 \"";
   serializer_t()(flags, json.begin(), json.end(), &e);
   t << is_true<assert>(e) << FAS_FL;
   t << equal<expect>( e.code(), error_code::InvalidEnum ) << FAS_FL;
   t << message("error:") << ::wjson::strerror::message(e) << ": " << ::wjson::strerror::trace(e, json.begin(), json.end());
-  
 }
 
 
@@ -261,7 +263,7 @@ UNIT(enum3, "")
 {
   using namespace fas::testing;
   foo f;
-  
+
   f.counter = count1::four;
   f.flags   = static_cast<int>(count1::one)
             | static_cast<int>(count1::three)
@@ -271,13 +273,14 @@ UNIT(enum3, "")
 
 
   std::string json;
+  json.reserve(100);
   foo_json<','>::serializer()(f, std::back_inserter(json));
   t << message("json:") << json;
-  
+
   f = foo();
   ::wjson::json_error e;
   foo_json<','>::serializer()(f, json.begin(), json.end(), &e);
-  t << is_false<assert>(e) 
+  t << is_false<assert>(e)
     << ::wjson::strerror::message(e) << ": "
     << ::wjson::strerror::trace(e, json.begin(), json.end()) ;
   t << equal<expect, int>( static_cast<int>(f.counter), static_cast<int>(count1::four) ) << FAS_FL;
@@ -290,22 +293,23 @@ UNIT(enum4, "")
 {
   using namespace fas::testing;
   foo f;
-  
+
   f.counter = count1::four;
   f.flags   = static_cast<int>(count1::one)
             | static_cast<int>(count1::three)
             | static_cast<int>(count1::six);
   f.counter2 = 32 ;
   f.flags2  = static_cast<int>(count1::three);
-  
+
   std::string json;
+  json.reserve(100);
   foo_json<'+'>::serializer()(f, std::back_inserter(json));
   t << message("json:") << json;
-  
+
   f = foo();
   ::wjson::json_error e;
   foo_json<'+'>::serializer()(f, json.begin(), json.end(), &e);
-  t << is_false<assert>(e) 
+  t << is_false<assert>(e)
     << ::wjson::strerror::message(e) << ": "
     << ::wjson::strerror::trace(e, json.begin(), json.end()) ;
   t << equal<expect, int>( static_cast<int>(f.counter), static_cast<int>(count1::four) ) << FAS_FL;
@@ -314,10 +318,27 @@ UNIT(enum4, "")
   t << equal<expect, int>(f.flags2, int(count1::three) ) << FAS_FL;
 }
 
+UNIT(enum5, "")
+{
+  using namespace fas::testing;
+  std::string json="\"six1\"";
+  count1::type result =  count1::type();
+  t << equal<expect, int>(result, 0) << FAS_FL;
+  ::wjson::json_error e;
+  count_json::serializer()(result, json.begin(), json.end(), &e);
+  t << is_false<assert>(e)
+    << ::wjson::strerror::message(e) << ": "
+    << ::wjson::strerror::trace(e, json.begin(), json.end())
+    << FAS_FL;
+  t << equal<expect, int>(result, 0) << FAS_FL;
+
+}
+
 BEGIN_SUITE(enumerator, "enumerator")
   ADD_UNIT(enum1)
   ADD_UNIT(enum2)
   ADD_UNIT(enum3)
   ADD_UNIT(enum4)
+  ADD_UNIT(enum5)
 END_SUITE(enumerator)
 

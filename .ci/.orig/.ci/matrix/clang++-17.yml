@@ -1,0 +1,34 @@
+.clang17Debug:
+  extends:
+    - .build_template
+    - .clang++17Debug
+  before_script:
+    - export CXX_STANDARD=17 CXX_COMPILER=clang++ BUILD_TYPE=Debug
+    - export BLDIR="BUILD_CLANG17Debug" CMAKE_ARGS=""
+
+.clang17RelWithDebInfo:
+  extends:
+    - .build_template
+    - .clang++17RelWithDebInfo
+  before_script:
+    - export CXX_STANDARD=17 CXX_COMPILER=clang++ BUILD_TYPE=RelWithDebInfo
+    - export BLDIR="BUILD_CLANG17RelWithDebInfo" CMAKE_ARGS=""
+
+.clang17Release:
+  extends:
+    - .build_template
+    - .clang++17Release
+  before_script:
+    - export CXX_STANDARD=17 CXX_COMPILER=clang++ BUILD_TYPE=Release
+    - export BLDIR="BUILD_CLANG17Release" CMAKE_ARGS=""
+
+
+clang++ 17 Debug:
+  extends: .clang17Debug
+
+clang++ 17 RelWithDebInfo:
+  extends: .clang17RelWithDebInfo
+
+clang++ 17 Release:
+  extends: .clang17Release
+

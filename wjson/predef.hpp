@@ -22,7 +22,14 @@ template<typename T, int R = -1>
 struct array;
 
 struct strict_mode;
+
 struct nonstrict_mode;
+
+template<typename T = time_t, T fractions = 1000>
+struct time_interval;
+
+template<typename J, typename JList>
+struct variant;
 
 template<typename T, typename L, typename Mode = nonstrict_mode>
 struct object;
@@ -39,10 +46,10 @@ struct member_array;
 template<typename J>
 struct base;
 
-template< typename T, typename L>
+template< typename T, typename L, typename Mode = strict_mode>
 struct enumerator;
 
-template< typename T, typename L, char Sep = ','>
+template< typename T, typename L, char Sep = ',', typename Mode = nonstrict_mode>
 struct flags;
 
 template<typename N, typename T, T v>
@@ -63,7 +70,7 @@ struct dict_map;
 template<typename VJ>
 struct dict_multimap;
 
-/// 
+///
 
 template<typename T = std::string, int R = -1>
 struct raw_value;
@@ -117,13 +124,13 @@ struct member_p;
 template<typename ...Args>
 using member_list = typename fas::type_list_n<Args...>::type;
 #else
-template< typename T1 = fas::empty_list,  typename T2 = fas::empty_list,  typename T3 = fas::empty_list,  
+template< typename T1 = fas::empty_list,  typename T2 = fas::empty_list,  typename T3 = fas::empty_list,
           typename T4 = fas::empty_list,  typename T5 = fas::empty_list,  typename T6 = fas::empty_list,
-          typename T7 = fas::empty_list,  typename T8 = fas::empty_list,  typename T9 = fas::empty_list,  
+          typename T7 = fas::empty_list,  typename T8 = fas::empty_list,  typename T9 = fas::empty_list,
           typename T10 = fas::empty_list, typename T11 = fas::empty_list, typename T12 = fas::empty_list,
-          typename T13 = fas::empty_list, typename T14 = fas::empty_list, typename T15 = fas::empty_list, 
+          typename T13 = fas::empty_list, typename T14 = fas::empty_list, typename T15 = fas::empty_list,
           typename T16 = fas::empty_list, typename T17 = fas::empty_list, typename T18 = fas::empty_list,
-          typename T19 = fas::empty_list, typename T20 = fas::empty_list, typename T21 = fas::empty_list, 
+          typename T19 = fas::empty_list, typename T20 = fas::empty_list, typename T21 = fas::empty_list,
           typename T22 = fas::empty_list, typename T23 = fas::empty_list, typename T24 = fas::empty_list,
           typename T25 = fas::empty_list, typename T26 = fas::empty_list
 >

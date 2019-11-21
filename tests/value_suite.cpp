@@ -3,9 +3,6 @@
 #include <wjson/strerror.hpp>
 #include <algorithm>
 
-
-
-
 template<typename T, typename V, typename VV>
 void value_serializer_test(T& t, const VV& v, const std::string& chk, int line)
 {
@@ -93,7 +90,7 @@ UNIT(string_unit, "")
   using namespace fas::testing;
   value_serializer_test<T, std::string>(t, "привет", "\"привет\"", __LINE__);
   value_serializer_test<T, std::string>(t, "😶☺😇🙄🤗😇🙄☺😎🙄", "\"😶☺😇🙄🤗😇🙄☺😎🙄\"", __LINE__);
-  
+
 }
 
 UNIT(string1, "" )
@@ -124,11 +121,11 @@ UNIT(string1, "" )
   str3[17]=static_cast<char>(0x82);//static_cast<char>(130);
 
   t << equal<expect>(str2, str3) << FAS_FL;
-  
+
   for (size_t i=0 ; i < str2.size() ; ++i)
     t << equal<expect, int>( static_cast<unsigned char>(str2[i]), static_cast<unsigned char>(str3[i])) << "i=" << i << ". " << FAS_FL;
-  
-  
+
+
   json = "\"\u4E16\u754C\u4F60\u597D\"";
   value< std::string >::serializer()(str, json.begin(), json.end(), &e );
   t << equal<expect>(str, "世界你好") << FAS_FL;

@@ -30,9 +30,9 @@ struct error_code_json
   JSON_NAME2(InvalidMemberr, "Invalid Member")
   JSON_NAME2(InvalidEnum, "Invalid Enum")
   JSON_NAME2(InvalidRequest, "Invalid JSON-RPC Request")
-  
+
   typedef enumerator<
-    int, 
+    int,
     ::wjson::member_list<
       enum_value<ValidJSON, int, static_cast<int>(error_code::ValidJSON)>,
       enum_value<InvalidJSON, int, static_cast<int>(error_code::InvalidJSON)>,
@@ -56,7 +56,7 @@ struct error_code_json
 class strerror
 {
 public:
-  static const char* what(const json_error& e)  
+  static const char* what(const json_error& e)
   {
     return strerror::what_( e.code(), error_code_json::member_list() );
   }
@@ -82,7 +82,7 @@ public:
   }
 
   template<typename P>
-  static std::string trace( const json_error& e, P beg, P end ) 
+  static std::string trace( const json_error& e, P beg, P end )
   {
     if ( !e )
       return std::string(beg, end);
@@ -93,7 +93,7 @@ public:
   }
 
   template<typename P>
-  static std::string message_trace( const json_error& e, P beg, P end ) 
+  static std::string message_trace( const json_error& e, P beg, P end )
   {
     std::stringstream ss;
     ss << strerror::what(e);
@@ -102,8 +102,8 @@ public:
     if ( e )
     {
       ss  << ": "
-          << std::string(beg, end - e.tail_of() ) 
-          << ( e.tail_of() ? ">>>" : "<<<") 
+          << std::string(beg, end - e.tail_of() )
+          << ( e.tail_of() ? ">>>" : "<<<")
           << std::string(end - e.tail_of(), end);
     }
     return ss.str();
@@ -119,9 +119,10 @@ private:
     return strerror::what_(code, R());
   }
 
-  static const char* what_( int , fas::empty_list )
+  template<typename L>
+  static const char* what_( int , fas::type_list<L, fas::empty_list> )
   {
-    return "";
+    return L()();
   }
 };
 

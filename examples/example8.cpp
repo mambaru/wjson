@@ -52,13 +52,13 @@ int main()
 {
   std::string json="{\"flag\":false,\"value\":0,\"string\":\"Привет Мир\",\"data\":[1,2]";
   bar b;
-  bar_json::serializer()( b, json.begin(), json.end(), NULL );
+  bar_json::serializer()( b, json.begin(), json.end(), fas_nullptr );
   b.flag = true;
   b.data.push_back(3);
   std::cout << json << std::endl;
   bar2_json::serializer()(b, std::ostream_iterator<char>(std::cout) );
   std::cout << std::endl;
-  
+
   // {"flag":false,"value":0,"string":"Привет Мир","data":[1,2]
   // {"flag":true,"value":0,"string":"Привет Мир","data":[1,2,3]}
 }

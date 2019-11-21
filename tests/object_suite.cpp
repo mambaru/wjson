@@ -2,9 +2,10 @@
 #include <wjson/json.hpp>
 #include <wjson/name.hpp>
 #include <wjson/strerror.hpp>
+#include <fas/system/nullptr.hpp>
 
 namespace {
-  
+
 struct foo
 {
   int foo1;
@@ -30,10 +31,10 @@ struct foo_json
   JSON_NAME(foo2)
   JSON_NAME(foo3)
   JSON_NAME(foo4)
-  
+
   struct foo4
   {
-    void operator()(foo& f, const std::vector<int>& v) const 
+    void operator()(foo& f, const std::vector<int>& v) const
     {
       f.set_foo4(v);
     }
@@ -42,7 +43,7 @@ struct foo_json
       return f.get_foo4();
     }
   };
-  
+
   typedef ::wjson::object<
     foo,
     ::wjson::member_list<
@@ -131,7 +132,7 @@ UNIT(object1, "")
   std::string json1, json2;
   bar_json::serializer()( b1, std::back_inserter(json1) );
   t << message("json: ") << json1;
-  bar_json::serializer()( b2, json1.begin(), json1.end(), NULL);
+  bar_json::serializer()( b2, json1.begin(), json1.end(), fas_nullptr);
   bar_json::serializer()( b2, std::back_inserter(json2) );
   t << equal<expect>(json1, json2) << FAS_FL;
 }
@@ -145,12 +146,12 @@ UNIT(object2, "")
   b1.foo2 = "aqualung";
   b1.bar1.foo1 = -100500;
   b1.bar1.foo2 = "drowned";
-  
+
   b1.bar2.push_back( b1 );
   b1.bar2.push_back( b1.bar1 );
   b1.bar3["Ingeborga"] = b1;
   b1.bar3["Dapkūnaitė"] = b1.bar1;
-  
+
 #if __cplusplus >= 201103L
   b1.foo3.clear();
   b1.foo3 = {"one", "two", "three"};
@@ -162,13 +163,13 @@ UNIT(object2, "")
   std::string json1, json2;
   bar_array_json::serializer()( b1, std::back_inserter(json1) );
   t << message("json: ") << json1;
-  bar_array_json::serializer()( b2, json1.begin(), json1.end(), 0 );
+  bar_array_json::serializer()( b2, json1.begin(), json1.end(), fas_nullptr );
   bar_array_json::serializer()( b2, std::back_inserter(json2) );
   t << equal<expect>(json1, json2) << FAS_FL;
 }
 
 namespace {
-  
+
 struct baz
 {
   int foo1;
@@ -219,7 +220,7 @@ void object3_toster( T& t )
   if ( e ) t << message("ERROR:") << ::wjson::strerror::message(e);
   t << equal<expect>( b.foo2, "hello" ) << FAS_FL;
   t << equal<expect>( b.foo1, 0 ) << FAS_FL;
-  
+
   json.clear();
   b.foo1 = 123;
   b.foo2 = "hello";
@@ -244,7 +245,7 @@ UNIT(object3, "")
 
 BEGIN_SUITE(object, "")
   ADD_UNIT(object1)
-  //ADD_UNIT(object2)
-  //ADD_UNIT(object3)
+  ADD_UNIT(object2)
+  ADD_UNIT(object3)
 END_SUITE(object)
 

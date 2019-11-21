@@ -1,0 +1,41 @@
+
+## g++-98
+
+.cpp98Debug:
+  extends:
+    - .build_template
+    - .g++98Debug
+  before_script:
+    - export CXX_STANDARD=98 CXX_COMPILER=g++ BUILD_TYPE=Debug
+    - export BLDIR="BUILD_CPP98Debug" CMAKE_ARGS=""
+
+.cpp98RelWithDebInfo:
+  extends:
+    - .build_template
+    - .g++98RelWithDebInfo
+  before_script:
+    - export CXX_STANDARD=98  CXX_COMPILER=g++ BUILD_TYPE=RelWithDebInfo
+    - export BLDIR="BUILD_CPP98RelWithDebInfo" CMAKE_ARGS=""
+
+.cpp98Release:
+  extends:
+    - .build_template
+    - .g++98Release
+  before_script:
+    - export CXX_STANDARD=98  CXX_COMPILER=g++ BUILD_TYPE=Release
+    - export BLDIR="BUILD_CPP98Release" CMAKE_ARGS=""
+
+
+########
+# build_rules
+########
+
+c++ 98 Debug:
+  extends: .cpp98Debug
+
+c++ 98 RelWithDebInfo:
+  extends: .cpp98RelWithDebInfo
+
+c++ 98 Release:
+  extends: .cpp98Release
+

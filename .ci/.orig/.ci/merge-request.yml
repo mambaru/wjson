@@ -1,0 +1,48 @@
+.merge request:
+  stage: merge request
+  before_script:
+    - export HOST=${CI_PROJECT_URL}
+    - export CI_PROJECT_ID=${CI_PROJECT_ID}
+    - export GITLAB_USER_ID=${GITLAB_USER_ID}
+    - export PRIVATE_TOKEN=${PRIVATE_TOKEN}
+
+wip merge:
+  extends: .merge request
+  script:
+    - ${SCRIPTS}/merge-request.sh wip-devel delete squash
+  only:
+    - /^devel.+$/
+
+devel merge:
+  extends: .merge request
+  script:
+    - "export WIP_STATUS='WIP: '"
+    - ${SCRIPTS}/merge-request.sh devel
+  only:
+    - wip-devel
+
+make pre-release:
+  stage: merge request
+  script:
+    - git branch -a
+    - git push -f ${PROJECT_SSH} HEAD:refs/heads/pre-release
+  only:
+    - devel
+    
+master merge:
+  extends: .merge request
+  script:
+    - if [[ "${ALLOW_AHEAD_MASTER}" != "ON" ]]; then ${SCRIPTS}/masterchef.sh; fi
+    - ${SCRIPTS}/merge-request.sh master delete
+  only:
+    - pre-release
+    - hotfix
+    
+make release:
+  extends: .merge request
+  script:
+    - git tag -f ${RELEASE_TAG}
+    - git push -f --tags ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}
+    - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${RELEASE_BRANCH}
+  only:
+    - master

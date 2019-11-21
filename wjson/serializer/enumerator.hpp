@@ -12,11 +12,11 @@
 
 namespace wjson{
 
-template<typename T, typename L>
-class serializerT< enumerator<T, L> >
+template<typename T, typename L, typename Mode>
+class serializerT< enumerator<T, L, Mode> >
 {
-  typedef typename enumerator<T, L>::enum_list enum_list;
-  typedef serializerT< enumerator<T, L> > self;
+  typedef typename enumerator<T, L, Mode>::enum_list enum_list;
+  typedef serializerT< enumerator<T, L, Mode> > self;
 public:
 
   template<typename P>
@@ -97,7 +97,7 @@ private:
   template<typename P>
   static bool deserialize( T& , fas::empty_list, P , P )
   {
-    return false;
+    return fas::same_type<Mode, nonstrict_mode>::value;
   }
 };
 

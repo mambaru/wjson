@@ -12,29 +12,29 @@ int main()
   int value = 12345;
 
   std::cout << "--- serializer ---" << std::endl;
-  
+
   char bufjson[100];
-  char* ptr = serializer_t()(value, bufjson); 
+  char* ptr = serializer_t()(value, bufjson);
   *ptr = '\0';
   std::cout << bufjson << std::endl;
 
   std::string strjson;
-  serializer_t()(value, std::back_inserter(strjson)); 
+  serializer_t()(value, std::back_inserter(strjson));
   std::cout << strjson << std::endl;
 
   std::stringstream ssjson;
-  serializer_t()(value, std::ostreambuf_iterator<char>(ssjson)); 
+  serializer_t()(value, std::ostreambuf_iterator<char>(ssjson));
   std::cout << ssjson.str() << std::endl;
 
-  serializer_t()(value, std::ostreambuf_iterator<char>(std::cout)); 
+  serializer_t()(value, std::ostreambuf_iterator<char>(std::cout));
   std::cout << std::endl;
 
   std::cout << "--- unserializer ---" << std::endl;
-  
+
   value = 0;
   serializer_t()(value, bufjson, bufjson + strlen(bufjson), fas_nullptr );
   std::cout << value << std::endl;
-  
+
   value = 0;
   serializer_t()(value, strjson.begin(), strjson.end(), fas_nullptr );
   std::cout << value << std::endl;

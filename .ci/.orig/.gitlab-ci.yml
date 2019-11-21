@@ -1,0 +1,68 @@
+include:
+  - local: /wamba-ci.yml
+  - local: /.ci/settings.yml
+  - local: /.ci/matrix.yml
+  - local: /.ci/merge-request.yml
+
+variables:
+  GIT_SUBMODULE_STRATEGY: normal
+  PROJECT_SSH: "git@github.lan:${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}.git"
+  GITHUB_SSH:  "git@github.com:mambaru/${CI_PROJECT_NAME}.git"
+  SCRIPTS: "${CI_PROJECT_DIR}/external/cmake-ci/scripts"
+
+before_script:
+  - echo "RELEASE_TAG:$RELEASE_TAG"
+  - echo "RELEASE_BRANCH:$RELEASE_BRANCH"
+  - echo "PUSH_TO_GITHUB:$PUSH_TO_GITHUB"
+  - echo "MAKE_ARTIFACTS:$MAKE_ARTIFACTS"
+  - echo "BUILD_THREADS:$BUILD_THREADS"
+  - echo "PARANOID_WARNING:$PARANOID_WARNING"
+  - echo "FINISH_CLEANING:$FINISH_CLEANING"
+  - git submodule deinit --force .
+  - git submodule sync
+  - git submodule update --init
+
+stages:
+  - masterchef      # проверка допустимости мерджа с мастером (ветки субмодулей не должны опережать мастер-ветку)
+  - cppcheck
+  - build
+  - merge request
+  - release         # пуш в текущую ветку релиза
+  - deploy
+  - github.com      # пуш в github.com для opensource проектов
+  - clean
+
+night build:
+  stage: build
+  script:
+    - echo "Ночная сборка $CI_COMMIT_REF_NAME"
+    - git checkout "$CI_COMMIT_REF_NAME"
+    - git pull origin "$CI_COMMIT_REF_NAME"
+    - ${SCRIPTS}/update.sh "Night Build update auto commit"
+    - ${SCRIPTS}/superchef.sh
+    - ${SCRIPTS}/upgrade.sh "auto" "master" "Night Build auto upgrade"
+    - count=$(git rev-list --count HEAD ^origin/wip-devel)
+    - if (( $count!=0 )); then
+    -   git push -f ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:devel-night
+    - else
+    -   echo "Нет изменений для автоматического слияния."
+    - fi
+  only:
+    - schedules
+
+push-to-github:
+  stage: github.com
+  script:
+    - ${SCRIPTS}/github.com.sh
+  only:
+    - master
+
+delete branches:
+  stage: clean
+  script:
+    - git push ${PROJECT_SSH} :${CI_COMMIT_REF_NAME}
+  only:
+    - build
+    - check
+    - draft
+    - bugfix

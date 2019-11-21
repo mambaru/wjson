@@ -4,7 +4,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 
-#pragma once 
+#pragma once
 
 #include <cstddef>
 #include <iterator>
@@ -24,7 +24,7 @@ struct error_code
     InvalidBool = 6,
     InvalidString = 7,
     InvalidMember = 8,
-    InvalidEnum = 9, 
+    InvalidEnum = 9,
     InvalidRequest = 10
   } type;
 };
@@ -35,19 +35,19 @@ public:
   json_error()
     : _code(error_code::ValidJSON)
     , _expected_of()
-    , _tail_of(0) 
+    , _tail_of(0)
   {}
-  
+
   json_error(error_code::type code_,  std::ptrdiff_t tail_of_ = 0 )
     : _code(code_)
     , _expected_of()
-    , _tail_of(tail_of_) 
+    , _tail_of(tail_of_)
   {}
 
   json_error(error_code::type code_,  const char *sym, std::ptrdiff_t tail_of_ = 0 )
     : _code(code_)
     , _expected_of(sym)
-    , _tail_of(tail_of_) 
+    , _tail_of(tail_of_)
   {}
 
   error_code::type type() const
@@ -60,28 +60,28 @@ public:
     return static_cast<int>(_code);
   }
 
-  const char* expected_of() const 
+  const char* expected_of() const
   {
     return _expected_of;
   }
 
-  std::ptrdiff_t tail_of() const 
+  std::ptrdiff_t tail_of() const
   {
-    return _tail_of; 
+    return _tail_of;
   }
 
-  operator bool () const 
+  operator bool () const
   {
-    return _code!=error_code::ValidJSON; 
+    return _code!=error_code::ValidJSON;
   }
 
-  void reset() 
-  { 
+  void reset()
+  {
     _code = error_code::ValidJSON;
     _expected_of = fas_nullptr;
     _tail_of=0;
   }
-  
+
 private:
   error_code::type _code;
   const char* _expected_of;
@@ -89,10 +89,10 @@ private:
 };
 
 template<error_code::type code>
-inline void create_error(json_error* e, std::ptrdiff_t tail_of = 0)
+inline void create_error(json_error* e)
 {
   if ( e != fas_nullptr && !*e )
-    *e = json_error(code, tail_of);
+    *e = json_error(code);
 }
 
 
