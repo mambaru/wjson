@@ -18,6 +18,6 @@ jobs:
     - name: make check
       run: cd build && ctest
     - name: Create Pull Request
-      uses: migashko/create-pull-request@v1
+      uses: peter-evans/create-pull-request@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
