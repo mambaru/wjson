@@ -1,7 +1,0 @@
-# Список подавлений для cppcheck относительно корня проекта. Примеры
-# Для конкретной строки:
-# missingInclude:./daemon/demod.cpp:1
-# Для всего файла:
-# missingInclude:./daemon/demod.cpp
-# Для всего проекта:
-# missingInclude:
