@@ -1,6 +1,9 @@
 name: C/C++ CI
 
-on: [push]
+on: 
+  push:
+    branches:
+      - mambaru
 
 jobs:
   build:
@@ -10,7 +13,9 @@ jobs:
     - name: setup
       run: sudo apt-get install -y valgrind
     - name: init
-      run: mkdir -p build
+      run: |
+        rm -rf external
+        mkdir -p build
     - name: configure
       run: cd build && cmake .. -DBUILD_TESTING=ON -DPARANOID_WARNINGS=OFF
     - name: make

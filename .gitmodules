@@ -3,5 +3,5 @@
 	url = https://github.com/mambaru/cmake-ci.git
 [submodule "external/faslib"]
 	path = external/faslib
-	url = git@github.lan:cpp/faslib.git
+	url = https://github.com/migashko/faslib.git
 	branch = master
