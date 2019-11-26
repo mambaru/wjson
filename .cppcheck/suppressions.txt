@@ -1,6 +1,7 @@
 # Список подавлений для cppcheck относительно корня проекта. Примеры
-duplicateExpression:./examples/example6.cpp
-constStatement:./examples/example6.cpp
-duplicateExpression:./tests/array_suite.cpp
-constStatement:./tests/array_suite.cpp
-syntaxError:
+# Для конкретной строки:
+# missingInclude:./daemon/demod.cpp:1
+# Для всего файла:
+# missingInclude:./daemon/demod.cpp
+# Для всего проекта:
+# missingInclude:
