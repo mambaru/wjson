@@ -1,0 +1,41 @@
+name: C++ CI
+
+on:
+  push:
+    branches:
+      - mambaru
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: setup
+      run: |
+        sudo locale-gen ru_RU
+        sudo locale-gen ru_RU.UTF-8
+        sudo update-locale
+        sudo apt-get install -y libboost-system-dev libboost-program-options-dev 
+        sudo apt-get install -y libboost-filesystem-dev libboost-date-time-dev libboost-regex-dev
+        mkdir -p build
+    - name: init
+      run: |
+        git submodule update --init external/cmake-ci
+        pushd external/cmake-ci
+          git checkout master
+        popd
+        rsync -a external/cmake-ci/root-ci/ ./
+        date +"%F %X" >> ./.github/build_history.txt
+    - name: configure
+      run: cd build && cmake .. -DBUILD_TESTING=ON -DPARANOID_WARNINGS=OFF -DNO_MEMCHECK=ON
+    - name: make
+      run: cmake --build ./build
+    - name: make check
+      run: cd build && ctest --output-on-failure
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        base: master
+        branch: mambaru
+        branch-suffix: none
