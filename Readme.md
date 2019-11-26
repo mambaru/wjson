@@ -1,5 +1,6 @@
-![](https://github.com/mambaru/wjson/workflows/C/C++%20CI/badge.svg?branch=master)
-![](https://github.com/mambaru/wjson/workflows/C/C++%20CI/badge.svg?branch=mambaru)
+[![Build Status](https://github.com/mambaru/wjson/workflows/C/C++%20CI/badge.svg?branch=master)](https://github.com/mambaru/wjson/tree/master)
+[![Build Status](https://github.com/mambaru/wjson/workflows/C/C++%20CI/badge.svg?branch=mambaru)](https://github.com/mambaru/wjson/tree/mambaru)
+[![Coverage Report](http://github.lan/cpp/wjson/badges/pre-release/coverage.svg)](http://github.lan/cpp/wjson/commits/pre-release)
 
 # JSON сериализатор
 
