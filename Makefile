@@ -59,5 +59,5 @@ clean:
 	rm build/CMakeCache.txt
 update: init
 	./external/cmake-ci/scripts/update.sh ${ARGS}
-upgrade: init
+upgrade: update
 	./external/cmake-ci/scripts/upgrade.sh ${ARGS}
