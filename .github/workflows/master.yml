@@ -14,6 +14,9 @@ jobs:
       run: |
         sudo locale-gen ru_RU
         sudo locale-gen ru_RU.UTF-8
+        sudo update-locale
+        sudo apt-get install -y libboost-system-dev libboost-program-options-dev 
+        sudo apt-get install -y libboost-filesystem-dev libboost-date-time-dev libboost-regex-dev
         mkdir -p build
     - name: configure
       run: cd build && cmake .. -DBUILD_TESTING=ON -DPARANOID_WARNINGS=OFF -DNO_MEMCHECK=ON

@@ -15,6 +15,8 @@ jobs:
         sudo locale-gen ru_RU
         sudo locale-gen ru_RU.UTF-8
         sudo update-locale
+        sudo apt-get install -y libboost-system-dev libboost-program-options-dev 
+        sudo apt-get install -y libboost-filesystem-dev libboost-date-time-dev libboost-regex-dev
         mkdir -p build
     - name: init
       run: |
