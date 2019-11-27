@@ -34,7 +34,7 @@ shared: init
 tests: 	init
 	cd build && cmake .. -DBUILD_TESTING=ON
 	cmake --build ./build -- $(or ${ARGS},-j4)
-	cd build && ctest
+	cd build && ctest --output-on-failure
 paranoid: init
 	cd build && cmake .. -DBUILD_TESTING=ON -DPARANOID_WARNINGS=ON
 	cmake --build ./build -- $(or ${ARGS},-j4)
