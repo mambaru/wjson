@@ -14,7 +14,7 @@ help:
 	@echo "	make update"
 	@echo "	make upgrade"
 	@echo "Example:"
-	@echo "	make shared "
+	@echo "	make static "
 	@echo "	make shared VERBOSE=1 ARGS=-j5"
 
 doc:
@@ -34,7 +34,7 @@ shared: init
 tests: 	init
 	cd build && cmake .. -DBUILD_TESTING=ON
 	cmake --build ./build -- $(or ${ARGS},-j4)
-	cd build && ctest
+	cd build && ctest --output-on-failure
 paranoid: init
 	cd build && cmake .. -DBUILD_TESTING=ON -DPARANOID_WARNINGS=ON
 	cmake --build ./build -- $(or ${ARGS},-j4)
@@ -58,6 +58,6 @@ clean:
 	cd build && make clean
 	rm build/CMakeCache.txt
 update: init
-	./external/cmake-ci/scripts/update.sh ${ARGS}
+	./external/cmake-ci/scripts/update.sh
 upgrade: update
-	./external/cmake-ci/scripts/upgrade.sh ${ARGS}
+	./external/cmake-ci/scripts/upgrade.sh no-auto master
