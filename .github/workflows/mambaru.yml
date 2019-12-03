@@ -38,10 +38,11 @@ jobs:
     - name: make gh-pages
       run: |
         git clone -b gh-pages https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git /tmp/gh-pages
+        docdir="$PWD/docs/html/"
         pushd /tmp/gh-pages
           git config --global user.email "${GITHUB_ACTOR}@https://users.noreply.github.com/"
           git config --global user.name "${GITHUB_ACTOR}"
-          rsync -a --update ../docs/html/ ./
+          rsync -a --update $docdir ./
           git add --all
           COMMIT_MESSAGE="Update pages on $(date +'%Y-%m-%d %H:%M:%S')"
           git diff-index --quiet --cached HEAD -- && echo "No changes!" && exit 0 || echo $COMMIT_MESSAGE
