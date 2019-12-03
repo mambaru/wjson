@@ -6,6 +6,9 @@ language: cpp
 os:
   - linux
 
+git:
+  submodules: false
+
 before_install:
   - sudo apt-get update -qq
 
