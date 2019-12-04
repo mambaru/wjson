@@ -1,15 +1,18 @@
+
 [![Build Status](https://github.com/mambaru/wjson/workflows/C++%20CI/badge.svg?branch=master)](https://github.com/mambaru/wjson/tree/master)
 [![Build Status](https://github.com/mambaru/wjson/workflows/C++%20CI/badge.svg?branch=mambaru)](https://github.com/mambaru/wjson/tree/mambaru)
-[![Coverage Report](http://github.lan/cpp/wjson/badges/pre-release/coverage.svg)](http://github.lan/cpp/wjson/commits/pre-release)
+[![codecov](https://codecov.io/gh/mambaru/wjson/branch/master/graph/badge.svg)](https://codecov.io/gh/mambaru/wjson)
 
 # JSON сериализатор
 
-Статья на [хабре](https://habrahabr.ru/post/311262/) с примерами и бенчмарками.
-Документация [doxygen](https://mambaru.github.io/wjson/index.html)
-Репозитарий на [github.com](https://github.com/mambaru/wjson)
+* Статья на [хабре](https://habrahabr.ru/post/311262/) с примерами и бенчмарками.
+* Документация [doxygen](https://mambaru.github.io/wjson/index.html)
+* Репозитарий на [github.com](https://github.com/mambaru/wjson)
+* Отчет [coverage](https://migashko.github.io/faslib/cov-report/index.html)
 
 Простой в использовани, быстрый, декларативный сериализатор/десериализатор непосредственно в структуры данных.
 Например для структуры:
+
 ```cpp
 struct foo
 {
