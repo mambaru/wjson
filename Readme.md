@@ -1,6 +1,9 @@
 
+[![tag](https://img.shields.io/github/v/tag/mambaru/wjson.svg?sort=semver)](https://github.com/mambaru/wjson/tree/master)
 [![Build Status](https://github.com/mambaru/wjson/workflows/C++%20CI/badge.svg?branch=master)](https://github.com/mambaru/wjson/tree/master)
 [![Build Status](https://github.com/mambaru/wjson/workflows/C++%20CI/badge.svg?branch=mambaru)](https://github.com/mambaru/wjson/tree/mambaru)
+[![Build Status](https://travis-ci.com/mambaru/wjson.svg?branch=master)](https://travis-ci.com/mambaru/wjson)
+[![Build Status](https://travis-ci.com/mambaru/wjson.svg?branch=mambaru)](https://travis-ci.com/mambaru/wjson)
 [![codecov](https://codecov.io/gh/mambaru/wjson/branch/master/graph/badge.svg)](https://codecov.io/gh/mambaru/wjson)
 
 # JSON сериализатор
@@ -30,7 +33,7 @@ struct foo_json
   JSON_NAME(foo2)
   JSON_NAME(foo3)
 
-  typedef ::iow::json::object<
+  typedef wjson::object<
     foo,
     wjson::member_list<
       wjson::member<n_foo1, foo, int, &foo::foo1>,
@@ -65,10 +68,10 @@ foo_json::serializer()( f, json.begin(), json.end(), &e );
   {
     std::cout << "Error code: " << e.code() << std::endl;
     std::cout << "Error tail of: " << e.tail_of() << std::endl;
-    std::cout << "Error position: " << ::wjson::strerror::where(e, json.begin(), json.end() ) << std::endl;
+    std::cout << "Error position: " << wjson::strerror::where(e, json.begin(), json.end() ) << std::endl;
     std::cout << "Error expected of: " << e.expected_of() << std::endl;
-    std::cout << "Error message: " << ::wjson::strerror::message(e) << std::endl;
-    std::cout << "Error trace: " << ::wjson::strerror::trace(e, json.begin(), json.end()) << std::endl;
+    std::cout << "Error message: " << wjson::strerror::message(e) << std::endl;
+    std::cout << "Error trace: " << wjson::strerror::trace(e, json.begin(), json.end()) << std::endl;
   }
 ```
 
