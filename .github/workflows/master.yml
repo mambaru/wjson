@@ -31,7 +31,7 @@ jobs:
         git pull --tags https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git
         tag=$(git describe --tags `git rev-list --tags --max-count=1`)
         echo "  tag=$tag"
-        git config --global user.email "${GITHUB_ACTOR}@https://users.noreply.github.com/"
-        git config --global user.name "${GITHUB_ACTOR}"
+        git config --global user.email "migashko@gmail.com"
+        git config --global user.name "Vladimir Migashko"
         git tag --force -a $tag -m "update from github actions"
         git push --force --tags https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git HEAD:master
