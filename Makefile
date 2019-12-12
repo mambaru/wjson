@@ -22,6 +22,7 @@ doc:
 	if hash doxygen 2>/dev/null; then doxygen; fi
 init:
 	mkdir -p build
+	rm -rf ./build/CMakeCache.txt 
 	if [ ! -d external/cmake-ci/cmake ]; then git submodule update --init external/cmake-ci; fi
 cppcheck: init
 	./external/cmake-ci/scripts/cppcheck-ci.sh
@@ -39,7 +40,7 @@ paranoid: init
 	cd build && cmake .. -DBUILD_TESTING=ON -DPARANOID_WARNINGS=ON
 	cmake --build ./build -- $(or ${ARGS},-j4)
 debug: init
-	cd build && cmake .. -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE="Debug"
+	cd build && cmake .. -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE="Debug" -DEXTRA_WARNINGS=ON
 	cmake --build ./build -- $(or ${ARGS},-j4)
 coverage: init
 	cd build && cmake .. -DCODE_COVERAGE=ON -DDISABLE_WARNINGS=ON
