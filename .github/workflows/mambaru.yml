@@ -40,8 +40,8 @@ jobs:
           git clone -b gh-pages https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git /tmp/gh-pages
           docdir="$PWD/docs/html/"
           pushd /tmp/gh-pages
-            git config --global user.email "${GITHUB_ACTOR}@https://users.noreply.github.com/"
-            git config --global user.name "${GITHUB_ACTOR}"
+            git config --global user.email "migashko@gmail.com"
+            git config --global user.name "Vladimir Migashko"
             rsync -arv --update $docdir ./
             git add --all
             COMMIT_MESSAGE="Update pages on $(date +'%Y-%m-%d %H:%M:%S')"

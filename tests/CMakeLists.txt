@@ -1,5 +1,3 @@
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${UNIT_TEST_BIN_OUTPUT_DIR})
-
 link_libraries(faslib wjson)
 
 add_executable(benchmark benchmark.cpp)
@@ -33,7 +31,7 @@ endif()
 
 add_executable(test_json ${test_source_list})
 target_link_libraries(test_json PRIVATE fas::testing)
-wci_test(NAME test_json COMMAND test_json)
+wci_test(NAME test_json TARGET test_json)
 
 
 
