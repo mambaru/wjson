@@ -152,4 +152,14 @@ struct member_if;
 template<typename J>
 class serializerT;
 
+template<typename T = fas::empty_type, typename Mode = strict_mode>
+struct empty_object
+{
+  typedef wjson::object<T, wjson::member_list< >, Mode > type;
+  typedef typename type::serializer serializer;
+  typedef typename type::target target;
+  typedef typename type::member_list member_list;
+};
+
+
 }
