@@ -15,10 +15,20 @@ jobs:
         sudo locale-gen ru_RU
         sudo locale-gen ru_RU.UTF-8
         sudo update-locale
+        
         sudo apt-get install -y libboost-system-dev libboost-program-options-dev
         sudo apt-get install -y libboost-filesystem-dev libboost-date-time-dev libboost-regex-dev
         sudo apt-get install -y lcov
+        
+        if [[ "${GITHUB_REPOSITORY}" == *"prefixdb"* ]]; then
+          sudo apt-get install libsnappy-dev
+          sudo apt-get install zlib1g-dev
+          sudo apt-get install libbz2-dev
+          sudo apt-get install liblz4-dev
+          sudo apt-get install libzstd-dev
+        fi
         mkdir -p build
+        
     - name: make coverage
       run: |
         make coverage
@@ -26,6 +36,26 @@ jobs:
           export CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }}
           bash <(curl -s https://codecov.io/bash)
         popd
+
+    - name: make docs
+      run: |
+        make doc
+
+    - name: push docs
+      run: |
+        git clone -b gh-pages https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git /tmp/gh-pages
+        docdir="$PWD/docs/html/"
+        pushd /tmp/gh-pages
+          git config --global user.email "migashko@gmail.com"
+          git config --global user.name "Vladimir Migashko"
+          rsync -arv --update $docdir ./
+          git add --all
+          COMMIT_MESSAGE="Update pages on $(date +'%Y-%m-%d %H:%M:%S')"
+          git diff-index --quiet --cached HEAD -- && echo "No changes!" && exit 0 || echo $COMMIT_MESSAGE
+          git commit -m "${COMMIT_MESSAGE}"
+          git push https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git gh-pages:gh-pages
+        popd
+
     - name: push tag
       run: |
         git pull --tags https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git

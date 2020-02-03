@@ -16,6 +16,7 @@ install:
   - sudo apt-get install -y libc++-dev libboost-dev 
   - sudo apt-get install -y libboost-system-dev libboost-program-options-dev 
   - sudo apt-get install -y libboost-filesystem-dev libboost-date-time-dev libboost-regex-dev valgrind doxygen
+  - [[ "${TRAVIS_REPO_SLUG}" == *"prefixdb"* ]] && sudo apt-get install -y libsnappy-dev zlib1g-dev libbz2-dev liblz4-dev libzstd-dev
 
 compiler:
   - g++
