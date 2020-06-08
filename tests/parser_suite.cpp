@@ -88,6 +88,59 @@ UNIT(parse_bool, "")
   t << is_true<assert>(er) << FAS_FL;
 }
 
+UNIT(parse_integer, "")
+{
+  using namespace fas::testing;
+  using namespace wjson;
+  std::string json="-3e-12";
+  json_error er;
+  std::string::iterator itr = parser::parse_integer(json.begin(), json.end(), &er);
+  t << is_false<assert>(er) << FAS_FL;
+  t << equal<assert>(itr, json.begin() + 2 ) <<FAS_FL;
+  parser::parse_integer(json.end(), json.end(), &er);
+  t << is_true<assert>(er) << FAS_FL;
+  er.reset();
+
+  json.erase(json.begin(), json.begin()+2); // e-12
+  parser::parse_integer(json.begin(), json.end(), &er);
+  t << is_true<assert>(er) << FAS_FL;
+
+  json="-";
+  er.reset();
+  parser::parse_integer(json.begin(), json.end(), &er);
+  t << is_true<assert>(er) << FAS_FL;
+
+  json="-123";
+  er.reset();
+  itr = parser::parse_integer(json.begin(), json.end(), &er);
+  t << is_false<assert>(er) << FAS_FL;
+  t << equal<assert>(itr, json.end() ) <<FAS_FL;
+
+  json="-123.X";
+  er.reset();
+  itr = parser::parse_integer(json.begin(), json.end(), &er);
+  t << is_false<assert>(er) << FAS_FL;
+  t << equal<assert>(itr, json.begin()+4) <<FAS_FL;
+
+  json="-A";
+  er.reset();
+  parser::parse_integer(json.begin(), json.end(), &er);
+  t << is_true<assert>(er) << FAS_FL;
+
+  json="1.";
+  er.reset();
+  itr = parser::parse_integer(json.begin(), json.end(), &er);
+  t << is_false<assert>(er) << FAS_FL;
+  t << equal<assert>(itr, json.begin() + 1 ) <<FAS_FL;
+
+
+  json="123eX";
+  er.reset();
+  itr = parser::parse_integer(json.begin(), json.end(), &er);
+  t << is_false<assert>(er) << FAS_FL;
+  t << equal<assert>(itr, json.begin() + 3 ) <<FAS_FL;
+}
+
 UNIT(parse_number, "")
 {
   using namespace fas::testing;
@@ -128,8 +181,6 @@ UNIT(parse_number, "")
   er.reset();
   parser::parse_number(json.begin(), json.end(), &er);
   t << is_true<assert>(er) << FAS_FL;
-
-
 }
 
 UNIT(parse_string, "")
@@ -158,6 +209,7 @@ BEGIN_SUITE(parser, "parser")
   ADD_UNIT(parse_null)
   ADD_UNIT(parse_bool)
   ADD_UNIT(parse_number)
+  ADD_UNIT(parse_integer)
   ADD_UNIT(parse_string)
 END_SUITE(parser)
 

@@ -54,6 +54,9 @@ public:
   static P parse_number( P beg, P end, json_error* e );
 
   template<typename P>
+  static P parse_integer( P beg, P end, json_error* e );
+
+  template<typename P>
   static P parse_string( P beg, P end, json_error* e );
 
   template<typename P>
@@ -90,6 +93,9 @@ private:
 
   template<typename P>
   static P parse_number( P beg, P end, std::ptrdiff_t& p, json_error* e );
+
+  template<typename P>
+  static P parse_integer( P beg, P end, std::ptrdiff_t& p, json_error* e );
 
   template<typename P>
   static P parse_digit( P beg, P end, std::ptrdiff_t& p );
@@ -276,20 +282,43 @@ private:
   }
 
   template<typename P>
-  P parser::parse_number( P beg, P end, std::ptrdiff_t& p, json_error* e )
+  P parser::parse_integer( P beg, P end, json_error* e )
+  {
+    std::ptrdiff_t p = 0;
+    return parser::parse_integer(beg, end, p, e);
+  }
+
+  template<typename P>
+  P parser::parse_integer( P beg, P end, std::ptrdiff_t& p, json_error* e )
   {
     if (beg==end)
       return create_error<error_code::UnexpectedEndFragment>( e, end );
 
-    if ( beg!=end && *beg=='-') { ++beg; ++p; }
+    if ( beg!=end && *beg=='-')
+    {
+      ++beg; ++p;
+    }
+
     if ( beg==end )
       return create_error<error_code::UnexpectedEndFragment>( e, end );
 
-    if ( *beg == '0') { ++beg; ++p; }
+    if ( *beg == '0')
+    {
+      ++beg; ++p;
+    }
     else if ( *beg >='1' && *beg <='9' )
+    {
       beg = parser::parse_digit(beg, end, p);
+    }
     else
       return create_error<error_code::InvalidNumber>( e, end );
+    return beg;
+  }
+
+  template<typename P>
+  P parser::parse_number( P beg, P end, std::ptrdiff_t& p, json_error* e )
+  {
+    beg = parser::parse_integer(beg, end, p, e);
 
     if ( beg!=end && *beg=='.' )
     {
