@@ -11,26 +11,19 @@ wci_utils(benchmark numbench strbench objarrbench num)
 set(
   test_source_list
   test_json.cpp
-  parser_suite.cpp
-  value_suite.cpp
-  array_suite.cpp
-  object_suite.cpp
-  dict_suite.cpp
-  enum_suite.cpp
-  util_suite.cpp
-  time_suite.cpp
+    parser_suite.cpp
+    value_suite.cpp
+    array_suite.cpp
+    object_suite.cpp
+    dict_suite.cpp
+    enum_suite.cpp
+    util_suite.cpp
+    time_suite.cpp
+    _json_suite.cpp
 )
 
-if ( NOT ${CMAKE_CXX_STANDARD} EQUAL 98 )
-  set(
-    test_source_list
-    ${test_source_list}
-    _json_suite.cpp
-  )
-endif()
-
 add_executable(test_json ${test_source_list})
-target_link_libraries(test_json PRIVATE fas::testing)
+target_link_libraries(test_json PUBLIC fas::testing)
 wci_test(NAME test_json TARGET test_json)
 
 
