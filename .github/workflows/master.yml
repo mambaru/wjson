@@ -15,13 +15,19 @@ jobs:
         sudo locale-gen ru_RU
         sudo locale-gen ru_RU.UTF-8
         sudo update-locale
-        
+
         sudo apt-get install -y doxygen
         sudo apt-get install -y libboost-system-dev libboost-program-options-dev
         sudo apt-get install -y libboost-filesystem-dev libboost-date-time-dev libboost-regex-dev
         sudo apt-get install -y lcov
-        
+
         if [[ "${GITHUB_REPOSITORY}" == *"prefixdb"* ]]; then
+          sudo apt-get install libsnappy-dev
+          sudo apt-get install zlib1g-dev
+          sudo apt-get install libbz2-dev
+          sudo apt-get install liblz4-dev
+          sudo apt-get install libzstd-dev
+        elif [[ "${GITHUB_REPOSITORY}" == *"btp"* ]]; then
           sudo apt-get install libsnappy-dev
           sudo apt-get install zlib1g-dev
           sudo apt-get install libbz2-dev
@@ -29,7 +35,7 @@ jobs:
           sudo apt-get install libzstd-dev
         fi
         mkdir -p build
-        
+
     - name: make coverage
       run: |
         make coverage
