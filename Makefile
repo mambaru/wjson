@@ -22,7 +22,7 @@ doc:
 	if hash doxygen 2>/dev/null; then doxygen; fi
 init:
 	mkdir -p build
-	rm -rf ./build/CMakeCache.txt 
+	rm -rf ./build/CMakeCache.txt
 	if [ ! -d external/cmake-ci/cmake ]; then git submodule update --init external/cmake-ci; fi
 cppcheck: init
 	./external/cmake-ci/scripts/cppcheck-ci.sh
@@ -61,4 +61,4 @@ clean:
 update: init
 	./external/cmake-ci/scripts/update.sh
 upgrade: update
-	./external/cmake-ci/scripts/upgrade.sh no-auto master
+	./external/cmake-ci/scripts/upgrade.sh

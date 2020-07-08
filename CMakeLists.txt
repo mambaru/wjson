@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 3.1)
+
 project(wjson)
 
 include(cmake/ci.cmake)
 
 wci_getlib(NAME faslib)
+
 add_library(wjson INTERFACE)
+
 target_include_directories(wjson INTERFACE ${wjson_SOURCE_DIR})
+
 target_link_libraries(wjson INTERFACE faslib)
 
 if ( BUILD_TESTING OR CODE_COVERAGE)
