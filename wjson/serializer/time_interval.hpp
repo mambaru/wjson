@@ -1,5 +1,5 @@
 //
-// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2008-2016
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2019
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -9,6 +9,7 @@
 #include <wjson/predef.hpp>
 #include <wjson/error.hpp>
 #include <wjson/parser.hpp>
+#include <fas/system/nullptr.hpp>
 
 namespace wjson{
 
@@ -52,12 +53,11 @@ public:
     else if ( !parser::is_string(beg, end))
       return create_error<error_code::InvalidString>( e, end );
 
-
     for ( ++beg; beg!=end && *beg!='"'; )
     {
       T cur = T();
       beg = typename value<T>::serializer()(cur, beg, end, e);
-      if (!e) return beg;
+      if ( (e!=fas_nullptr && *e) || (beg==end) ) return beg;
       switch( *beg ) // строка валидная, так что за пределы не вышли,
       {
         case 'd': v += cur * 86400 * fractions; break;
@@ -91,7 +91,6 @@ public:
   }
 
 private:
-
 
   template<typename P>
   value_type write_if_(P& beg, const value_type& v, char ch)

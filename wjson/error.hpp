@@ -72,6 +72,11 @@ public:
 
   operator bool () const
   {
+    return this->status();
+  }
+
+  bool status() const
+  {
     return _code!=error_code::ValidJSON;
   }
 

@@ -4,3 +4,4 @@ constStatement:./examples/example6.cpp
 duplicateExpression:./tests/array_suite.cpp
 constStatement:./tests/array_suite.cpp
 syntaxError:
+unusedFunction:./tests/schema_suite.cpp
