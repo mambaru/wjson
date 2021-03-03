@@ -28,6 +28,9 @@ struct nonstrict_mode;
 template<typename T = time_t, T fractions = 1000>
 struct time_interval;
 
+template<typename T = size_t, T metric = 1>
+struct size_value;
+
 template<typename J, typename JList>
 struct variant;
 

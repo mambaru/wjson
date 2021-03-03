@@ -19,6 +19,8 @@ set(
     enum_suite.cpp
     util_suite.cpp
     time_suite.cpp
+    size_suite.cpp
+    schema_suite.cpp
     _json_suite.cpp
 )
 

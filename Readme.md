@@ -1,3 +1,8 @@
+[![pipeline status](https://gitlab.mamba.ru/cpp/wjson/badges/master/pipeline.svg)](https://gitlab.mamba.ru/cpp/wjson/commits/master)
+[![pipeline status](https://gitlab.mamba.ru/cpp/wjson/badges/pre-release/pipeline.svg)](https://gitlab.mamba.ru/cpp/wjson/commits/master)
+[![pipeline status](https://gitlab.mamba.ru/cpp/wjson/badges/devel/pipeline.svg)](https://gitlab.mamba.ru/cpp/wjson/commits/devel)
+[![pipeline status](https://gitlab.mamba.ru/cpp/wjson/badges/wip-devel/pipeline.svg)](https://gitlab.mamba.ru/cpp/wjson/commits/wip-devel)
+[![Coverage Report](https://gitlab.mamba.ru/cpp/wjson/badges/pre-release/coverage.svg)](https://gitlab.mamba.ru/cpp/wjson/commits/master)
 
 [![tag](https://img.shields.io/github/v/tag/mambaru/wjson.svg?sort=semver)](https://github.com/mambaru/wjson/tree/master)
 [![Build Status](https://github.com/mambaru/wjson/workflows/C++%20CI/badge.svg?branch=master)](https://github.com/mambaru/wjson/tree/master)
