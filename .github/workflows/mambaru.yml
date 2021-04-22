@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: Установка пакетов
+      - name: Install packages
         run: |
           sudo locale-gen ru_RU
           sudo locale-gen ru_RU.UTF-8
@@ -21,20 +21,19 @@ jobs:
           ./boost-setup.sh
         working-directory: ./.github/workflows
 
-
-      - name: Подключение субмодулей (прописаны в cmake)
+      - name: Coverage report and push to master branches
         run: |
-          mkdir -p build
-          pushd build
-            cmake ..
-          popd
-
-      - name: Коммит субмодулей
-        run: |
-          git checkout -b mamba-ready
           echo "Субмодули подключаються при первой сборке (фиксируем их)"
           git config --global user.email "migashko@gmail.com"
           git config --global user.name "Vladimir Migashko"
+          git pull origin master
+          make coverage-report
           git add .
           git commit -am "[subm] build submodule autocommit" || true
-          git push -f https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git mamba-ready:mamba-ready
+          pushd build
+             export CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }}
+             bash <(curl -s https://codecov.io/bash)
+          popd
+          git push https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git HEAD:master
+          git push https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git :mamba-ready > /dev/null || true
+          git push https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git :mambaru || echo "Delete mambaru FAIL"
