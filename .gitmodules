@@ -1,6 +1,0 @@
-[submodule "external/cmake-ci"]
-	path = external/cmake-ci
-	url = https://github.com/mambaru/cmake-ci.git
-[submodule "external/faslib"]
-	path = external/faslib
-	url = https://github.com/migashko/faslib.git
