@@ -1,0 +1,7 @@
+[submodule "external/cmake-ci"]
+	path = external/cmake-ci
+	url = ../cmake-ci.git
+[submodule "external/faslib"]
+	path = external/faslib
+	url = ../../migashko/faslib.git
+	branch = master
