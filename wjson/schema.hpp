@@ -41,10 +41,10 @@ public:
   template<typename T>
   struct has_schema_t
   {
-    enum { value = has_schema1_t<T>::value +
-                   has_schema2_t<T>::value +
-                   has_schema3_t<T>::value +
-                   has_schema4_t<T>::value
+    enum { value = static_cast<int>(has_schema1_t<T>::value) +
+                   static_cast<int>(has_schema2_t<T>::value) +
+                   static_cast<int>(has_schema3_t<T>::value) +
+                   static_cast<int>(has_schema4_t<T>::value)
     };
   };
 
