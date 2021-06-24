@@ -13,10 +13,8 @@ jobs:
 
       - name: Install packages
         run: |
-          sudo locale-gen ru_RU
-          sudo locale-gen ru_RU.UTF-8
-          sudo update-locale
-          sudo apt-get install -y lcov
+          export GITHUB_REPOSITORY=${GITHUB_REPOSITORY}
+          bash setup.sh
         working-directory: ./.github/workflows
 
       - name: Coverage report and push to master branches
@@ -31,8 +29,7 @@ jobs:
           git commit -am "[subm] build submodule autocommit" || true
           pushd build
              export CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }}
-             bash <(curl -s https://codecov.io/bash)
+             bash <(curl -s https://codecov.io/bash) || echo "Coverage FAIL!"
           popd
           git push https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git HEAD:master
-          git push https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git :mamba-ready 2> /dev/null || true
           git push https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git :mambaru || echo "Delete mambaru FAIL"
