@@ -20,6 +20,8 @@ help:
 	@echo "	make shared VERBOSE=1 ARGS=-j5"
 	@echo "	BUILD_SHARED=OFF make tests"
 
+CMAKE ?= cmake
+
 doc:
 	rm -rf docs
 	if hash doxygen 2>/dev/null; then doxygen; fi
@@ -27,45 +29,46 @@ runup:
 	mkdir -p build
 	rm -rf ./build/CMakeCache.txt
 	if [ ! -d external/cmake-ci/cmake ]; then git submodule update --init external/cmake-ci; fi
+
 init: runup
-	cmake -B ./build
+	${CMAKE} -B ./build
 	./external/cmake-ci/scripts/after_make.sh
 cppcheck: runup
 	./external/cmake-ci/scripts/cppcheck-ci.sh
 release: runup
-	cd build && cmake .. -DDISABLE_WARNINGS=ON
-	cmake --build ./build -- $(or ${ARGS},-j4)
+	cd build && ${CMAKE} .. -DDISABLE_WARNINGS=ON
+	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 static: runup
-	cd build && cmake .. -DBUILD_SHARED_LIBS=OFF -DDISABLE_WARNINGS=ON
-	cmake --build ./build -- $(or ${ARGS},-j4)
+	cd build && ${CMAKE} .. -DBUILD_SHARED_LIBS=OFF -DDISABLE_WARNINGS=ON
+	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 shared: runup
-	cd build && cmake .. -DBUILD_SHARED_LIBS=ON -DDISABLE_WARNINGS=ON
-	cmake --build ./build -- $(or ${ARGS},-j4)
+	cd build && ${CMAKE} .. -DBUILD_SHARED_LIBS=ON -DDISABLE_WARNINGS=ON
+	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 tests: 	runup
-	cd build && cmake .. -DBUILD_TESTING=ON
-	cmake --build ./build -- $(or ${ARGS},-j4)
+	cd build && ${CMAKE} .. -DBUILD_TESTING=ON
+	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	cd build && ctest --output-on-failure
 	./external/cmake-ci/scripts/after_make.sh
 paranoid: runup
-	cd build && cmake .. -DBUILD_TESTING=ON -DPARANOID_WARNINGS=ON
-	cmake --build ./build -- $(or ${ARGS},-j4)
+	cd build && ${CMAKE} .. -DBUILD_TESTING=ON -DPARANOID_WARNINGS=ON
+	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 debug: runup
-	cd build && cmake .. -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE="Debug" -DEXTRA_WARNINGS=ON
-	cmake --build ./build -- $(or ${ARGS},-j4)
+	cd build && ${CMAKE} .. -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE="Debug" -DEXTRA_WARNINGS=ON
+	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 coverage: runup
-	cd build && cmake .. -DCODE_COVERAGE=ON -DDISABLE_WARNINGS=ON
-	cmake --build ./build -- $(or ${ARGS},-j4)
+	cd build && ${CMAKE} .. -DCODE_COVERAGE=ON -DDISABLE_WARNINGS=ON
+	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 	cd build && ctest
 	./external/cmake-ci/scripts/coverage-report.sh build summary
 coverage-report: runup
-	cd build && cmake .. -DCODE_COVERAGE=ON -DDISABLE_WARNINGS=ON
-	cmake --build ./build -- $(or ${ARGS},-j4)
+	cd build && ${CMAKE} .. -DCODE_COVERAGE=ON -DDISABLE_WARNINGS=ON
+	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 	cd build && ctest
 	mkdir -p docs
