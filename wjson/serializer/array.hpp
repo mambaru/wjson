@@ -146,7 +146,7 @@ public:
 
     for (;beg!=end && bitr!=eitr;)
     {
-      beg = parser::parse_space(beg, end);
+      beg = parser::parse_space(beg, end, e);
       if (beg==end) 
         return create_error<error_code::UnexpectedEndFragment>(e, end);
       if (*beg==R) 
@@ -155,7 +155,7 @@ public:
       target tg;
       beg = serializer()( tg, beg, end, e);
       *(bitr++) = tg;
-      beg = parser::parse_space(beg, end);
+      beg = parser::parse_space(beg, end, e);
       if (beg==end) 
         return create_error<error_code::UnexpectedEndFragment>(e, end);
       if (*beg==R) 

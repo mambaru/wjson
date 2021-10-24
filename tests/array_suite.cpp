@@ -289,6 +289,28 @@ UNIT(array10, "std::unordered_multiset< int >")
 #endif
 }
 
+UNIT(array11, "std::array< double >")
+{
+  using namespace fas::testing;
+  using namespace wjson;
+
+#if __cplusplus >= 201103L
+  std::string json;
+  std::array< double, 5 > dq = { 1.1,2.2,3.3,4.4,5.5 };
+  array< std::array< value<double,2>, 5 > >::serializer ser;
+  ser(dq, std::back_inserter(json));
+  t << message("std::array< double >: ") << json;
+  // t << equal<expect>(json, "[1,2,3,4,5]") << FAS_FL;
+  std::array< double, 5 > dq2;
+  json_error e;
+  ser(dq2, json.begin(), json.end(), &e );
+  t << is_false<expect>(e) << FAS_FL;
+  t << equal<expect>(dq, dq2) << FAS_FL;
+#else
+  t << nothing;
+#endif
+}
+
 
 BEGIN_SUITE(array, "")
   ADD_UNIT(array1)
@@ -301,4 +323,5 @@ BEGIN_SUITE(array, "")
   ADD_UNIT(array8)
   ADD_UNIT(array9)
   ADD_UNIT(array10)
+  ADD_UNIT(array11)
 END_SUITE(array)
