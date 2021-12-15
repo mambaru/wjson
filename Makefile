@@ -18,7 +18,7 @@ help:
 	@echo "Example:"
 	@echo "	make static "
 	@echo "	make shared VERBOSE=1 ARGS=-j5"
-	@echo "	BUILD_SHARED=OFF make tests"
+	@echo "	BUILD_SHARED_LIBS=ON make tests"
 
 CMAKE ?= cmake
 
