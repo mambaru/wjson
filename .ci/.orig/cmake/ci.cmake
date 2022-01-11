@@ -1,4 +1,7 @@
-MACRO(wci_init path)
+
+if ( NOT IS_WCI_PROJECT )
+
+  set(path "${PROJECT_SOURCE_DIR}")
 
   if(NOT EXISTS ${path}/external/cmake-ci/cmake/target.cmake)
     execute_process(
@@ -10,7 +13,7 @@ MACRO(wci_init path)
         EXIT_CODE
       ERROR_QUIET
     )
-
+    
     if ( ${EXIT_CODE} EQUAL 0 )
       set(IS_WCI_PROJECT TRUE)
     else()
@@ -19,41 +22,13 @@ MACRO(wci_init path)
   else()
     set(IS_WCI_PROJECT TRUE)
   endif()
-  include(options)  
-ENDMACRO()
-
-MACRO(wci_cmake)
-  wci_init(${CMAKE_CURRENT_SOURCE_DIR})
-  include(repos)
-  include(target)
-  include(getlibs)
-ENDMACRO()
-
-if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR )
-  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-  list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/external/cmake-ci/cmake)
-  wci_cmake()
-  set(WCI_SUPERMODULE "SUPERMODULE")
-else()
-  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-  wci_init(${CMAKE_SOURCE_DIR})
-  if (NOT IS_WCI_PROJECT )
-    if ( WCI_SUPERMODULE )
-      wci_cmake()
-    elseif( NOT WCI_SUBSUB)
-      macro(wci_getlib)
-      endmacro()
-      macro(wci_test)
-      endmacro()
-      macro(wci_targets)
-      endmacro()
-      macro(wci_utils)
-      endmacro()
-      macro(wci_add_options)
-      endmacro()
-      macro(wci_remove_options)
-      endmacro()
-    endif()
-    set(WCI_SUBSUB TRUE)
+  
+  if ( IS_WCI_PROJECT )
+    list(APPEND CMAKE_MODULE_PATH ${path}/external/cmake-ci/cmake)
+    list(APPEND CMAKE_MODULE_PATH ${path}/cmake)
+    include(cmake-ci)
+    set( WCI_SUPERMODULE ON)
+    set( WCI_DIR "${path}")
   endif()
-endif()
+  
+endif(NOT IS_WCI_PROJECT)
