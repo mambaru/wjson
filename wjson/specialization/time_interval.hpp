@@ -19,4 +19,13 @@ struct time_interval
   typedef serializerT< time_interval<T, fractions> > serializer;
 };
 
+template<typename T>
+struct time_interval_s: time_interval<T, 1>{};
+
+template<typename T>
+struct time_interval_ms: time_interval<T, 1000>{};
+
+template<typename T>
+struct time_interval_mks: time_interval<T, 1000000>{};
+
 }

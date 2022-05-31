@@ -28,51 +28,84 @@ UNIT(time_interval1, "")
   using namespace fas::testing;
   std::string json;
   time_t now = 1568112168666 + 3600000;
-  wjson::time_interval<>::serializer()(now, std::back_inserter(json));
+  wjson::time_interval_ms<>::serializer()(now, std::back_inserter(json));
   t << equal<expect, std::string>(json, "\"18149d11h42m48s666ms\"") << FAS_FL;
 
   json.clear();
   now = 999;
-  wjson::time_interval<>::serializer()(now, std::back_inserter(json));
+  wjson::time_interval_ms<>::serializer()(now, std::back_inserter(json));
   t << equal<expect, std::string>(json, "\"999ms\"") << FAS_FL;
 
   json.clear();
   now = 1000;
-  wjson::time_interval<>::serializer()(now, std::back_inserter(json));
+  wjson::time_interval_ms<>::serializer()(now, std::back_inserter(json));
   t << equal<expect, std::string>(json, "\"1s\"") << FAS_FL;
 
   json.clear();
   now = 1001;
-  wjson::time_interval<>::serializer()(now, std::back_inserter(json));
+  wjson::time_interval_ms<>::serializer()(now, std::back_inserter(json));
   t << equal<expect, std::string>(json, "\"1s1ms\"") << FAS_FL;
 
   json.clear();
   now = 61001;
-  wjson::time_interval<>::serializer()(now, std::back_inserter(json));
+  wjson::time_interval_ms<>::serializer()(now, std::back_inserter(json));
   t << equal<expect, std::string>(json, "\"1m1s1ms\"") << FAS_FL;
 
   json.clear();
   now = 3661*1000 + 1 ;
-  wjson::time_interval<>::serializer()(now, std::back_inserter(json));
+  wjson::time_interval_ms<>::serializer()(now, std::back_inserter(json));
   t << equal<expect, std::string>(json, "\"1h1m1s1ms\"") << FAS_FL;
 
   json.clear();
   now = (3600*24 + 3600 + 60 + 1)*1000 + 1;
-  wjson::time_interval<>::serializer()(now, std::back_inserter(json));
+  wjson::time_interval_ms<>::serializer()(now, std::back_inserter(json));
   t << equal<expect, std::string>(json, "\"1d1h1m1s1ms\"") << FAS_FL;
 
+  json.clear();
+  now = (3600l*24 + 3600 + 60 + 1)*1000000 + 1000 + 1;
+  wjson::time_interval<time_t, 1000000>::serializer()(now, std::back_inserter(json));
+  t << equal<expect, std::string>(json, "\"1d1h1m1s1ms1mks\"") << FAS_FL;
+
   now=0;
-  json="\"1d1h1m1s1ms\"";
+  json="\"1d1h1m1s1ms1mks\"";
   wjson::json_error e;
-  wjson::time_interval<>::serializer()(now, json.begin(), json.end(), &e);
-  t << is_false<expect>(e) << FAS_FL;
+  wjson::time_interval_ms<>::serializer()(now, json.begin(), json.end(), &e);
+  t << is_false<expect>(e) << wjson::strerror::what(e)<< FAS_FL;
   t << equal<expect, time_t>(now, (3600*24 + 3600 + 60 + 1)*1000 + 1) << FAS_FL;
+
+  now=0;
+  json="\"1234567890ms\"";
+  wjson::time_interval<time_t, 1000000>::serializer()(now, json.begin(), json.end(), &e);
+  t << is_false<expect>(e) << wjson::strerror::what(e)<< FAS_FL;
+  t << equal<expect, time_t>(now, 1234567890000) << FAS_FL;
+
+  now=0;
+  json="\"1d1h1m1s1ms1mks\"";
+  wjson::time_interval<time_t, 1000000>::serializer()(now, json.begin(), json.end(), &e);
+  t << is_false<expect>(e) << FAS_FL;
+  t << equal<expect, time_t>(now, (3600ul*24 + 3600 + 60 + 1)*1000000 + 1000 + 1) << FAS_FL;
+
+  now=0;
+  json="\"1s11111111mks\"";
+  wjson::time_interval<time_t, 1>::serializer()(now, json.begin(), json.end(), &e);
+  t << is_false<expect>(e) << FAS_FL;
+  t << equal<expect, time_t>(now, 12) << FAS_FL;
 
   static const time_t ts = 3600*3 + 44;
   static const time_t tms =  ts * 1000 + 666;
-  static const time_t tmks =  tms * 1000;
-  std::string org = "{\"timeout_s\":\"3h44s\",\"timeout_ms\":\"3h44s666ms\",\"timeout_mks\":\"3h44s666000ms\"}";
+  static const time_t tmks =  tms * 1000 + 777;
+  std::string org = "{\"timeout_s\":\"3h44s\",\"timeout_ms\":\"3h44s666ms\",\"timeout_mks\":\"3h44s666ms777mks\"}";
 
+  now=0;
+  json="\"3h44s666ms777mks\"";
+  wjson::time_interval<time_t, 1000000>::serializer()(now, json.begin(), json.end(), &e);
+  t << is_false<expect>(e) << FAS_FL;
+  t << equal<expect, time_t>(now, tmks ) << FAS_FL;
+  json.clear();
+  wjson::time_interval<time_t, 1000000>::serializer()(now, std::back_inserter(json));
+  t << equal<expect, std::string>(json, "\"3h44s666ms777mks\"") << FAS_FL;
+  
+  
   A a={ts, tms, tmks};
   json.clear();
   A_json::serializer()(a, std::back_inserter(json) );
@@ -98,7 +131,6 @@ UNIT(time_interval1, "")
   t << equal<expect, time_t>(c.timeout_s, ts) << FAS_FL;
   t << equal<expect, time_t>(c.timeout_ms, tms) << FAS_FL;
   t << equal<expect, time_t>(c.timeout_mks, tmks) << FAS_FL;
-
 }
 
 }

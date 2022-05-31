@@ -42,6 +42,12 @@ public:
 public:
 
   template<typename P>
+  static P parse( P beg, P end, json_error* e );
+
+  template<typename P, typename PO>
+  static P despace( P beg, P end, PO out, json_error* e );
+
+  template<typename P>
   static P parse_space( P beg, P end, json_error* e);
 
   template<typename P>
@@ -111,6 +117,43 @@ private:
 
 
 /// ///////////////////////////////////////////////////////////////////////////
+
+
+  template<typename P>
+  P parser::parse( P beg, P end, json_error* e )
+  {
+    return parse_value(beg, end, e);
+  }
+
+  template<typename P, typename PO>
+  P parser::despace( P beg, P end, PO out, json_error* e )
+  {
+    while (beg!=end)
+    {
+      beg = parser::parse_space(beg, end, e);
+      if ( beg == end )
+        return beg;
+
+      P start = beg;
+      if ( parser::is_string(beg, end) )
+        beg = parser::parse_string(beg, end, e);
+      else if ( parser::is_number(beg, end) )
+        beg = parser::parse_number(beg, end, e);
+      else if ( parser::is_bool(beg, end) )
+        beg = parser::parse_bool(beg, end, e);
+      else if ( parser::is_null(beg, end) )
+        beg = parser::parse_null(beg, end, e);
+      else // [,]{:}
+        ++beg;
+
+      if ( e==fas_nullptr || !*e )
+      {
+        for (;start!=beg;++start)
+          *(out++)=*start;
+      }
+    }
+    return beg;
+  }
 
 
   template<typename P>

@@ -25,8 +25,17 @@ struct strict_mode;
 
 struct nonstrict_mode;
 
-template<typename T = time_t, T fractions = 1000>
+template<typename T, T fractions>
 struct time_interval;
+
+template<typename T = time_t>
+struct time_interval_s;
+
+template<typename T = time_t>
+struct time_interval_ms;
+
+template<typename T = time_t>
+struct time_interval_mks;
 
 template<typename T = size_t, T metric = 1>
 struct size_value;

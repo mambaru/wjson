@@ -1,5 +1,5 @@
 //
-// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2019
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2019, 2022
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -27,8 +27,17 @@ public:
     value_type hours = write_if_(beg, (seconds - days*86400)/3600, 'h');
     write_if_(beg, (seconds - hours*3600 - days*86400)/60, 'm');
     write_if_(beg,  seconds%60, 's');
-    if ( write_if_(beg, v%fractions, 'm') )
-      *(beg++) = 's';
+    if ( v%fractions != 0 )
+    {
+      value_type tail = v%fractions;
+      value_type ms = (tail*1000)/fractions;
+      value_type mks = tail - ms*1000;
+      mks = (mks*1000000)/fractions;
+      if ( ms > 0 && write_if_(beg, ms, 'm') )
+        *(beg++) = 's';
+      if ( mks > 0 && write_if_(beg, mks, 'm') )
+        { *(beg++) = 'k'; *(beg++) = 's'; }
+    }
     *(beg++) = '"';
 
     return beg;
@@ -58,23 +67,33 @@ public:
       T cur = T();
       beg = typename value<T>::serializer()(cur, beg, end, e);
       if ( (e!=fas_nullptr && *e) || (beg==end) ) return beg;
-      switch( *beg ) // строка валидная, так что за пределы не вышли,
+      switch( *beg ) 
       {
-        case 'd': v += cur * 86400 * fractions; break;
-        case 'h': v += cur * 3600 * fractions; break;
+        case 'd': v += cur * 86400 * fractions; break; // day
+        case 'h': v += cur * 3600 * fractions; break;  // hours
         case 'm':
           ++beg;
-          if (beg==end)
-            return create_error<error_code::UnexpectedEndFragment>( e, end );
-          if ( *beg!='s')
+          if ( beg==end )
           {
-            v += cur * 60 * fractions;
-            continue;
-          } // миллисекунды
-          v += cur;
-          break;
+              v += cur * 60 * fractions; // m
+              continue; 
+          }
+          switch ( *beg )
+          {
+            case 's': 
+              v += (cur*fractions)/1000; 
+              ++beg; 
+              continue; // ms
+            case 'k': 
+              v += (cur*fractions)/1000000; 
+              ++beg; 
+              ++beg; 
+              continue; // mks
+            default: v += cur * 60 * fractions; continue; // m
+          };
+          continue;
         case 's':
-          v += cur * fractions;
+          v += cur * fractions; // s
           break;
         default:
           break;
