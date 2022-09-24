@@ -183,13 +183,13 @@ struct dict_base< std::unordered_map<JK, JV>, R>
 template<typename JK, typename JV, typename R>
 struct dict_base< std::unordered_multimap<JK, JV>, R>
 {
-  typedef std::unordered_map<JK, JV> json_container;
+  typedef std::unordered_multimap<JK, JV> json_container;
   typedef typename JK::target key;
   typedef typename JV::target value;
   typedef std::pair<key, value> pair_type;
   typedef field< JK , JV > json_value;
   typedef typename json_value::target target;
-  typedef std::unordered_map< key, value > target_container;
+  typedef std::unordered_multimap< key, value > target_container;
   typedef serializerA< dict_r< json_container, R >, '{', '}' > serializer;
 
   typedef std::insert_iterator<target_container> inserter_iterator;
