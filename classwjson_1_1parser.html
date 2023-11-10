@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<meta name="generator" content="Doxygen 1.8.17"/>
+<meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>wjson: Класс wjson::parser</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
@@ -27,7 +27,7 @@
 </table>
 </div>
 <!-- end header part -->
-<!-- Создано системой Doxygen 1.8.17 -->
+<!-- Создано системой Doxygen 1.9.1 -->
 <script type="text/javascript" src="menudata.js"></script>
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript">
@@ -79,6 +79,12 @@ $(function() {
 <tr class="memitem:a57a7c0a849c2d3e514233aa24baa16cd"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
 <tr class="memitem:a57a7c0a849c2d3e514233aa24baa16cd"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a57a7c0a849c2d3e514233aa24baa16cd">is_array</a> (P beg, P end)</td></tr>
 <tr class="separator:a57a7c0a849c2d3e514233aa24baa16cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae440e2606d8a34972321ae2e7da8946b"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:ae440e2606d8a34972321ae2e7da8946b"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#ae440e2606d8a34972321ae2e7da8946b">parse</a> (P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:ae440e2606d8a34972321ae2e7da8946b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4df2a8c4d456b797c529794f69f4117"><td class="memTemplParams" colspan="2">template&lt;typename P , typename PO &gt; </td></tr>
+<tr class="memitem:af4df2a8c4d456b797c529794f69f4117"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#af4df2a8c4d456b797c529794f69f4117">despace</a> (P beg, P end, PO out, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
+<tr class="separator:af4df2a8c4d456b797c529794f69f4117"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a384bdb0123cfc456c528db2f15d172a2"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
 <tr class="memitem:a384bdb0123cfc456c528db2f15d172a2"><td class="memTemplItemLeft" align="right" valign="top">static P&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwjson_1_1parser.html#a384bdb0123cfc456c528db2f15d172a2">parse_space</a> (P beg, P end, <a class="el" href="classwjson_1_1json__error.html">json_error</a> *e)</td></tr>
 <tr class="separator:a384bdb0123cfc456c528db2f15d172a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -120,6 +126,56 @@ $(function() {
 <tr class="separator:a4d2c9bba381351f2ec1832980c1f966e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Методы</h2>
+<a id="af4df2a8c4d456b797c529794f69f4117"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4df2a8c4d456b797c529794f69f4117">&#9670;&nbsp;</a></span>despace()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename PO &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::despace </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">PO&#160;</td>
+          <td class="paramname"><em>out</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a57a7c0a849c2d3e514233aa24baa16cd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a57a7c0a849c2d3e514233aa24baa16cd">&#9670;&nbsp;</a></span>is_array()</h2>
 
@@ -408,6 +464,50 @@ template&lt;typename P &gt; </div>
           <td></td>
           <td class="paramtype">P&#160;</td>
           <td class="paramname"><em>end</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae440e2606d8a34972321ae2e7da8946b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae440e2606d8a34972321ae2e7da8946b">&#9670;&nbsp;</a></span>parse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P wjson::parser::parse </td>
+          <td>(</td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>beg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">P&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classwjson_1_1json__error.html">json_error</a> *&#160;</td>
+          <td class="paramname"><em>e</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1008,9 +1108,7 @@ template&lt;typename T , typename P &gt; </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Создано системой &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.17
+Создано системой&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

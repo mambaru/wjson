@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<meta name="generator" content="Doxygen 1.8.17"/>
+<meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>wjson: Титульная страница</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
@@ -27,7 +27,7 @@
 </table>
 </div>
 <!-- end header part -->
-<!-- Создано системой Doxygen 1.8.17 -->
+<!-- Создано системой Doxygen 1.9.1 -->
 <script type="text/javascript" src="menudata.js"></script>
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript">
@@ -43,7 +43,7 @@ $(function() {
 <div class="title">wjson Документация</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a href="https://github.com/mambaru/wjson/tree/master"><object type="image/svg+xml" data="https://img.shields.io/github/v/tag/mambaru/wjson.svg?sort=semver" style="pointer-events: none;">tag</object></a> <a href="https://github.com/mambaru/wjson/tree/master"><object type="image/svg+xml" data="https://github.com/mambaru/wjson/workflows/C++%20CI/badge.svg?branch=master" style="pointer-events: none;">Build Status</object></a> <a href="https://github.com/mambaru/wjson/tree/mambaru"><object type="image/svg+xml" data="https://github.com/mambaru/wjson/workflows/C++%20CI/badge.svg?branch=mambaru" style="pointer-events: none;">Build Status</object></a> <a href="https://travis-ci.com/mambaru/wjson"><object type="image/svg+xml" data="https://travis-ci.com/mambaru/wjson.svg?branch=master" style="pointer-events: none;">Build Status</object></a> <a href="https://travis-ci.com/mambaru/wjson"><object type="image/svg+xml" data="https://travis-ci.com/mambaru/wjson.svg?branch=mambaru" style="pointer-events: none;">Build Status</object></a> <a href="https://codecov.io/gh/mambaru/wjson"><object type="image/svg+xml" data="https://codecov.io/gh/mambaru/wjson/branch/master/graph/badge.svg" style="pointer-events: none;">codecov</object></a></p>
+<div class="textblock"><p><a class="anchor" id="md_Readme"></a><a href="https://github.com/mambaru/wjson/tree/master"><img src="https://img.shields.io/github/v/tag/mambaru/wjson.svg?sort=semver" alt="tag" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/mambaru/wjson/tree/master"><img src="https://github.com/mambaru/wjson/workflows/C++%20CI/badge.svg?branch=master" alt="Build Status" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/mambaru/wjson/tree/mambaru"><img src="https://github.com/mambaru/wjson/workflows/C++%20CI/badge.svg?branch=mambaru" alt="Build Status" style="pointer-events: none;" class="inline"/></a> <a href="https://travis-ci.com/mambaru/wjson"><img src="https://travis-ci.com/mambaru/wjson.svg?branch=master" alt="Build Status" style="pointer-events: none;" class="inline"/></a> <a href="https://travis-ci.com/mambaru/wjson"><img src="https://travis-ci.com/mambaru/wjson.svg?branch=mambaru" alt="Build Status" style="pointer-events: none;" class="inline"/></a> <a href="https://codecov.io/gh/mambaru/wjson"><img src="https://codecov.io/gh/mambaru/wjson/branch/master/graph/badge.svg" alt="codecov" style="pointer-events: none;" class="inline"/></a></p>
 <h1><a class="anchor" id="autotoc_md0"></a>
 JSON сериализатор</h1>
 <ul>
@@ -78,13 +78,17 @@ JSON сериализатор</h1>
 <div class="line">  <span class="keyword">typedef</span> type::serializer serializer;</div>
 <div class="line">  <span class="keyword">typedef</span> type::member_list member_list;</div>
 <div class="line">};</div>
-</div><!-- fragment --><p>И можно сериализовывать: </p><div class="fragment"><div class="line">foo f;</div>
+<div class="ttc" id="aname_8hpp_html_a9277ad1df0498c3712e4552dd218e220"><div class="ttname"><a href="name_8hpp.html#a9277ad1df0498c3712e4552dd218e220">JSON_NAME</a></div><div class="ttdeci">#define JSON_NAME(X)</div><div class="ttdef"><b>Definition:</b> name.hpp:11</div></div>
+<div class="ttc" id="astructwjson_1_1member__list_html"><div class="ttname"><a href="structwjson_1_1member__list.html">wjson::member_list</a></div><div class="ttdef"><b>Definition:</b> predef.hpp:158</div></div>
+<div class="ttc" id="astructwjson_1_1member_html"><div class="ttname"><a href="structwjson_1_1member.html">wjson::member</a></div><div class="ttdef"><b>Definition:</b> predef.hpp:50</div></div>
+<div class="ttc" id="astructwjson_1_1object_html"><div class="ttname"><a href="structwjson_1_1object.html">wjson::object</a></div><div class="ttdef"><b>Definition:</b> predef.hpp:47</div></div>
+</div><!-- fragment --><p> И можно сериализовывать: </p><div class="fragment"><div class="line">foo f;</div>
 <div class="line">std::string json;</div>
 <div class="line">foo_json::serializer()( f, std::back_inserter(json) );</div>
-</div><!-- fragment --><p>Или сразу в stdout: </p><div class="fragment"><div class="line">foo_json::serializer()( f, std::ostreambuf_iterator&lt;char&gt;(std::cout) );</div>
-</div><!-- fragment --><p>Для десериализации нужна пара итераторов произвольного доступа: </p><div class="fragment"><div class="line">wjson::error e;</div>
+</div><!-- fragment --><p> Или сразу в stdout: </p><div class="fragment"><div class="line">foo_json::serializer()( f, std::ostreambuf_iterator&lt;char&gt;(std::cout) );</div>
+</div><!-- fragment --><p> Для десериализации нужна пара итераторов произвольного доступа: </p><div class="fragment"><div class="line">wjson::error e;</div>
 <div class="line">foo_json::serializer()( f, json.begin(), json.end(), &amp;e );</div>
-</div><!-- fragment --><p>Если есть ошибка: </p><div class="fragment"><div class="line"><span class="keywordflow">if</span> ( e )</div>
+</div><!-- fragment --><p> Если есть ошибка: </p><div class="fragment"><div class="line"><span class="keywordflow">if</span> ( e )</div>
 <div class="line">{</div>
 <div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;Error code: &quot;</span> &lt;&lt; e.code() &lt;&lt; std::endl;</div>
 <div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;Error tail of: &quot;</span> &lt;&lt; e.tail_of() &lt;&lt; std::endl;</div>
@@ -93,21 +97,15 @@ JSON сериализатор</h1>
 <div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;Error message: &quot;</span> &lt;&lt; <a class="code" href="classwjson_1_1strerror.html#a36e0ed5663acb7b84877a17653246580">wjson::strerror::message</a>(e) &lt;&lt; std::endl;</div>
 <div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;Error trace: &quot;</span> &lt;&lt; <a class="code" href="classwjson_1_1strerror.html#a0dc623968ddb36b7549baa3cf9a89200">wjson::strerror::trace</a>(e, json.begin(), json.end()) &lt;&lt; std::endl;</div>
 <div class="line">}</div>
+<div class="ttc" id="aclasswjson_1_1strerror_html_a0dc623968ddb36b7549baa3cf9a89200"><div class="ttname"><a href="classwjson_1_1strerror.html#a0dc623968ddb36b7549baa3cf9a89200">wjson::strerror::trace</a></div><div class="ttdeci">static std::string trace(const json_error &amp;e, P beg, P end)</div><div class="ttdef"><b>Definition:</b> strerror.hpp:85</div></div>
+<div class="ttc" id="aclasswjson_1_1strerror_html_a168ba4f8b762e8e807765465d19906bd"><div class="ttname"><a href="classwjson_1_1strerror.html#a168ba4f8b762e8e807765465d19906bd">wjson::strerror::where</a></div><div class="ttdeci">static size_t where(const json_error &amp;e, P beg, P end)</div><div class="ttdef"><b>Definition:</b> strerror.hpp:74</div></div>
+<div class="ttc" id="aclasswjson_1_1strerror_html_a36e0ed5663acb7b84877a17653246580"><div class="ttname"><a href="classwjson_1_1strerror.html#a36e0ed5663acb7b84877a17653246580">wjson::strerror::message</a></div><div class="ttdeci">static std::string message(const json_error &amp;e)</div><div class="ttdef"><b>Definition:</b> strerror.hpp:64</div></div>
 </div><!-- fragment --><p><a href="https://github.com/mambaru/wjson/wiki">Подробнее...</a> </p>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
-<div class="ttc" id="aname_8hpp_html_a9277ad1df0498c3712e4552dd218e220"><div class="ttname"><a href="name_8hpp.html#a9277ad1df0498c3712e4552dd218e220">JSON_NAME</a></div><div class="ttdeci">#define JSON_NAME(X)</div><div class="ttdef"><b>Definition:</b> name.hpp:11</div></div>
-<div class="ttc" id="aclasswjson_1_1strerror_html_a36e0ed5663acb7b84877a17653246580"><div class="ttname"><a href="classwjson_1_1strerror.html#a36e0ed5663acb7b84877a17653246580">wjson::strerror::message</a></div><div class="ttdeci">static std::string message(const json_error &amp;e)</div><div class="ttdef"><b>Definition:</b> strerror.hpp:64</div></div>
-<div class="ttc" id="astructwjson_1_1object_html"><div class="ttname"><a href="structwjson_1_1object.html">wjson::object</a></div><div class="ttdef"><b>Definition:</b> predef.hpp:38</div></div>
-<div class="ttc" id="aclasswjson_1_1strerror_html_a168ba4f8b762e8e807765465d19906bd"><div class="ttname"><a href="classwjson_1_1strerror.html#a168ba4f8b762e8e807765465d19906bd">wjson::strerror::where</a></div><div class="ttdeci">static size_t where(const json_error &amp;e, P beg, P end)</div><div class="ttdef"><b>Definition:</b> strerror.hpp:74</div></div>
-<div class="ttc" id="astructwjson_1_1member_html"><div class="ttname"><a href="structwjson_1_1member.html">wjson::member</a></div><div class="ttdef"><b>Definition:</b> predef.hpp:41</div></div>
-<div class="ttc" id="astructwjson_1_1member__list_html"><div class="ttname"><a href="structwjson_1_1member__list.html">wjson::member_list</a></div><div class="ttdef"><b>Definition:</b> predef.hpp:140</div></div>
-<div class="ttc" id="aclasswjson_1_1strerror_html_a0dc623968ddb36b7549baa3cf9a89200"><div class="ttname"><a href="classwjson_1_1strerror.html#a0dc623968ddb36b7549baa3cf9a89200">wjson::strerror::trace</a></div><div class="ttdeci">static std::string trace(const json_error &amp;e, P beg, P end)</div><div class="ttdef"><b>Definition:</b> strerror.hpp:85</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Создано системой &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.17
+Создано системой&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>
