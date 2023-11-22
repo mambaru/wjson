@@ -4,6 +4,7 @@ help:
 	@echo "	make shared"
 	@echo "	make static"
 	@echo "	make release"
+	@echo "	make install"
 	@echo "	make tests"
 	@echo "	make doc"
 	@echo "	make cppcheck"
@@ -35,10 +36,6 @@ init: runup
 	./external/cmake-ci/scripts/after_make.sh
 cppcheck: runup
 	./external/cmake-ci/scripts/cppcheck-ci.sh
-release: runup
-	cd build && ${CMAKE} .. -DDISABLE_WARNINGS=ON
-	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
-	./external/cmake-ci/scripts/after_make.sh
 static: runup
 	cd build && ${CMAKE} .. -DBUILD_SHARED_LIBS=OFF -DDISABLE_WARNINGS=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
@@ -47,6 +44,13 @@ shared: runup
 	cd build && ${CMAKE} .. -DBUILD_SHARED_LIBS=ON -DDISABLE_WARNINGS=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
+release: runup
+	cd build && ${CMAKE} .. -DDISABLE_WARNINGS=ON
+	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
+	./external/cmake-ci/scripts/after_make.sh
+install: runup
+	cd build && ${CMAKE} .. -DDISABLE_WARNINGS=ON
+	${CMAKE} --install ./build
 tests: 	runup
 	cd build && ${CMAKE} .. -DBUILD_TESTING=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
