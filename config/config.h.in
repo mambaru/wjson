@@ -1,0 +1,44 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2012
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
+#ifndef FAS_SYSTEM_CONFIG_HPP
+#define FAS_SYSTEM_CONFIG_HPP
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#cmakedefine HAVE_SYS_TIME_H
+
+#cmakedefine HAVE_SYS_RESORCE_H
+#cmakedefine HAVE_UNISTD_H
+
+
+/* Define to 1 if you have the <sys/timeb.h> header file. */
+#cmakedefine HAVE_SYS_TIMEB_H
+
+/* Define to 1 if you have the <windows.h> header file. */
+#cmakedefine HAVE_WINDOWS_H
+
+/* Define to 1 if you have the <io.h> header file. */
+#cmakedefine HAVE_IO_H
+
+/* Define to 1 if you have the `gettimeofday' function. */
+#cmakedefine HAVE_GETTIMEOFDAY_FUNC
+
+/* Define to 1 if you have the `socket' function. */
+#cmakedefine HAVE_SOCKET_FUNC
+
+/* Define to 1 if you have the `clock_gettime' function. */
+#cmakedefine HAVE_CLOCK_GETTIME_FUNC
+#cmakedefine HAVE_FTIME_FUNC
+#cmakedefine HAVE__FTIME_FUNC
+#cmakedefine HAVE__FTIME_S_FUNC
+#cmakedefine HAVE_ISATTY_FUNC
+#cmakedefine HAVE__ISATTY_FUNC
+#cmakedefine HAVE_GETRUSAGE_FUNC
+#cmakedefine HAVE_USLEEP_FUNC
+#cmakedefine HAVE_RT_LIB
+
+#endif
+

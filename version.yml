@@ -1,0 +1,4 @@
+variables:
+  RELEASE_TAG: "0.9.8"
+  RELEASE_BRANCH: "release-0.9"
+

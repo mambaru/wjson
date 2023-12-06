@@ -9,6 +9,7 @@
 #include <fas/type_list.hpp>
 
 #include <string>
+#include <ctime>
 
 namespace wjson{
 

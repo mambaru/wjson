@@ -17,10 +17,12 @@ add_executable(example14 example14.cpp)
 add_executable(example15 example15.cpp)
 add_executable(example16 example16.cpp)
 add_executable(example17 example17.cpp)
+add_executable(example18 example17.cpp)
 
 wci_utils(example1 example2 example3 example4 example5)
 wci_utils(example6 example7 example8 example10 example11)
 wci_utils(example13 example14 example15 example16 example17)
+wci_utils(example18)
 
 if ( NOT ${CMAKE_CXX_STANDARD} EQUAL 98 )
   add_executable(example9 example9.cpp)

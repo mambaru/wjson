@@ -4,7 +4,6 @@ help:
 	@echo "	make shared"
 	@echo "	make static"
 	@echo "	make release"
-	@echo "	make install"
 	@echo "	make tests"
 	@echo "	make doc"
 	@echo "	make cppcheck"
@@ -16,12 +15,18 @@ help:
 	@echo "	make clean"
 	@echo "	make update"
 	@echo "	make upgrade"
+	@echo "	make install"
+	@echo "	make docker-build"
+	@echo "	make docker-run"
+	@echo "	make docker-rm"
 	@echo "Example:"
 	@echo "	make static "
 	@echo "	make shared VERBOSE=1 ARGS=-j5"
 	@echo "	BUILD_SHARED_LIBS=ON make tests"
+	@echo "	make install ARGS="--prefix ./build/test-install"
 
 CMAKE ?= cmake
+PRJ = `basename ${PWD}`
 
 doc:
 	rm -rf docs
@@ -36,6 +41,10 @@ init: runup
 	./external/cmake-ci/scripts/after_make.sh
 cppcheck: runup
 	./external/cmake-ci/scripts/cppcheck-ci.sh
+release: runup
+	cd build && ${CMAKE} .. -DDISABLE_WARNINGS=ON
+	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
+	./external/cmake-ci/scripts/after_make.sh
 static: runup
 	cd build && ${CMAKE} .. -DBUILD_SHARED_LIBS=OFF -DDISABLE_WARNINGS=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
@@ -44,13 +53,6 @@ shared: runup
 	cd build && ${CMAKE} .. -DBUILD_SHARED_LIBS=ON -DDISABLE_WARNINGS=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
-release: runup
-	cd build && ${CMAKE} .. -DDISABLE_WARNINGS=ON
-	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
-	./external/cmake-ci/scripts/after_make.sh
-install: runup
-	cd build && ${CMAKE} .. -DDISABLE_WARNINGS=ON
-	${CMAKE} --install ./build
 tests: 	runup
 	cd build && ${CMAKE} .. -DBUILD_TESTING=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
@@ -86,3 +88,11 @@ update: runup
 	./external/cmake-ci/scripts/update.sh
 upgrade: update
 	./external/cmake-ci/scripts/upgrade.sh
+install: runup
+	${CMAKE} --install ./build ${ARGS}
+docker-build:
+	docker build -t ${PRJ} -f Dockerfile.build .
+docker-run:
+	docker run --rm -it ${PRJ}
+docker-rm:
+	docker rmi ${PRJ}

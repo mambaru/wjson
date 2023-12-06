@@ -26,6 +26,7 @@ set(
 
 add_executable(test_json ${test_source_list})
 target_link_libraries(test_json PUBLIC fas::testing)
+#target_link_libraries(test_json PUBLIC fas_testing)
 wci_test(NAME test_json TARGET test_json)
 
 
