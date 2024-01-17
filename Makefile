@@ -23,7 +23,7 @@ help:
 	@echo "	make static "
 	@echo "	make shared VERBOSE=1 ARGS=-j5"
 	@echo "	BUILD_SHARED_LIBS=ON make tests"
-	@echo "	make install ARGS="--prefix ./build/test-install"
+	@echo "	make install ARGS=\"--prefix ./build/test-install\""
 
 CMAKE ?= cmake
 PRJ = `basename ${PWD}`
