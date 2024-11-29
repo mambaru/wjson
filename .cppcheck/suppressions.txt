@@ -1,4 +1,4 @@
 duplicateExpression:./examples/example6.cpp
 constStatement:./examples/example6.cpp
 unknownMacro:
-invalidPrintfArgType_uint:./tests/numbench.cpp:93
+invalidPrintfArgType_uint:./tests/numbench.cpp

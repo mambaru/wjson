@@ -8,6 +8,8 @@
 #include <chrono>
 #include <cstring>
 
+namespace {
+
 //const size_t NUM_SIZE = 20;
 const int ARR_SIZE = 10000000;
 typedef char numstr_t[20];
@@ -200,6 +202,8 @@ void ss_bench()
   std::cout << "deserialization time: " << dtime << " ns" << std::endl;
   std::cout << "deserialization rate: " << size_t(( 1000000000.0f/float(dtime) ) * ARR_SIZE) << " persec" << std::endl;
   std::cout << std::endl;
+}
+
 }
 
 int main()
