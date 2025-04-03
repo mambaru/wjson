@@ -10,7 +10,7 @@
 #include <string>
 #include <algorithm>
 namespace wjson{ namespace literals{
-  inline std::string operator "" _json(const char* str, size_t size)
+  inline std::string operator ""_json(const char* str, size_t size)
   {
     std::string res(str, size);
     std::replace( res.begin(), res.end(), '\'', '"'); 
