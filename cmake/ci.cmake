@@ -25,6 +25,7 @@ if ( NOT IS_WCI_PROJECT )
   
   if ( IS_WCI_PROJECT )
     list(APPEND CMAKE_MODULE_PATH ${path}/external/cmake-ci/cmake)
+    list(APPEND CMAKE_MODULE_PATH ${path}/external/cmake-ci/goodies)
     list(APPEND CMAKE_MODULE_PATH ${path}/cmake)
     include(cmake-ci)
     set( WCI_SUPERMODULE ON)

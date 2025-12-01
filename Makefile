@@ -32,10 +32,12 @@ doc:
 	rm -rf docs
 	if hash doxygen 2>/dev/null; then doxygen; fi
 runup:
-	mkdir -p build
+	mkdir -p build || exit 1
 	rm -rf ./build/CMakeCache.txt
-	if [ ! -d external/cmake-ci/cmake ]; then git submodule update --init external/cmake-ci; fi
-
+	@if [ ! -d external/cmake-ci/cmake ]; then \
+		git submodule update --init external/cmake-ci || exit 1; \
+		git submodule update --init configurations 2>/dev/null || true; \
+	fi
 init: runup
 	${CMAKE} -B ./build
 	./external/cmake-ci/scripts/after_make.sh
