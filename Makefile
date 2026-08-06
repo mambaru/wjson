@@ -29,7 +29,9 @@ CMAKE ?= cmake
 PRJ = `basename ${PWD}`
 
 doc:
-	rm -rf docs
+	# только сгенерированное; исходники в docs/*.md не трогаем
+	rm -rf docs/html docs/latex docs/xml docs/rtf docs/man
+	mkdir -p docs
 	if hash doxygen 2>/dev/null; then doxygen; fi
 runup:
 	mkdir -p build || exit 1
@@ -39,43 +41,43 @@ runup:
 		git submodule update --init configurations 2>/dev/null || true; \
 	fi
 init: runup
-	${CMAKE} -B ./build
+	${CMAKE} -B ./build -DWCI_FETCH_LIBS=OFF
 	./external/cmake-ci/scripts/after_make.sh
 cppcheck: runup
 	./external/cmake-ci/scripts/cppcheck-ci.sh
 release: runup
-	cd build && ${CMAKE} .. -DDISABLE_WARNINGS=ON
+	cd build && ${CMAKE} .. -DDISABLE_WARNINGS=ON -DWCI_FETCH_LIBS=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 static: runup
-	cd build && ${CMAKE} .. -DBUILD_SHARED_LIBS=OFF -DDISABLE_WARNINGS=ON
+	cd build && ${CMAKE} .. -DBUILD_SHARED_LIBS=OFF -DDISABLE_WARNINGS=ON -DWCI_FETCH_LIBS=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 shared: runup
-	cd build && ${CMAKE} .. -DBUILD_SHARED_LIBS=ON -DDISABLE_WARNINGS=ON
+	cd build && ${CMAKE} .. -DBUILD_SHARED_LIBS=ON -DDISABLE_WARNINGS=ON -DWCI_FETCH_LIBS=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 tests: 	runup
-	cd build && ${CMAKE} .. -DBUILD_TESTING=ON
+	cd build && ${CMAKE} .. -DBUILD_TESTING=ON -DWCI_FETCH_LIBS=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	cd build && ctest --output-on-failure
 	./external/cmake-ci/scripts/after_make.sh
 paranoid: runup
-	cd build && ${CMAKE} .. -DBUILD_TESTING=ON -DPARANOID_WARNINGS=ON
+	cd build && ${CMAKE} .. -DBUILD_TESTING=ON -DPARANOID_WARNINGS=ON -DWCI_FETCH_LIBS=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 debug: runup
-	cd build && ${CMAKE} .. -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE="Debug" -DEXTRA_WARNINGS=ON
+	cd build && ${CMAKE} .. -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE="Debug" -DEXTRA_WARNINGS=ON -DWCI_FETCH_LIBS=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 coverage: runup
-	cd build && ${CMAKE} .. -DCODE_COVERAGE=ON -DDISABLE_WARNINGS=ON
+	cd build && ${CMAKE} .. -DCODE_COVERAGE=ON -DDISABLE_WARNINGS=ON -DWCI_FETCH_LIBS=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 	cd build && ctest
 	./external/cmake-ci/scripts/coverage-report.sh build summary
 coverage-report: runup
-	cd build && ${CMAKE} .. -DCODE_COVERAGE=ON -DDISABLE_WARNINGS=ON
+	cd build && ${CMAKE} .. -DCODE_COVERAGE=ON -DDISABLE_WARNINGS=ON -DWCI_FETCH_LIBS=ON
 	${CMAKE} --build ./build -- $(or ${ARGS},-j4)
 	./external/cmake-ci/scripts/after_make.sh
 	cd build && ctest
@@ -83,10 +85,11 @@ coverage-report: runup
 	mkdir -p docs/html
 	./external/cmake-ci/scripts/coverage-report.sh build docs/html/cov-report
 clean:
-	rm -rf docs
+	# только сгенерированное; исходники в docs/*.md не трогаем
+	rm -rf docs/html docs/latex docs/xml docs/rtf docs/man
 	cd build && make clean
 	rm build/CMakeCache.txt
-update: runup
+update:
 	./external/cmake-ci/scripts/update.sh
 upgrade: update
 	./external/cmake-ci/scripts/upgrade.sh
