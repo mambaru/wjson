@@ -22,6 +22,12 @@ configure_package_config_file(
   ${CMAKE_CURRENT_LIST_DIR}/../config/projectConfig.cmake.in ${PROJECT_NAME}Config.cmake
   INSTALL_DESTINATION ${package_config_destination}
 )
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../config/projectConfig.local.cmake.in")
+  file(READ "${CMAKE_CURRENT_LIST_DIR}/../config/projectConfig.local.cmake.in" _wci_local_config)
+  file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" "\n${_wci_local_config}")
+  unset(_wci_local_config)
+endif()
 write_basic_package_version_file(
   ${PROJECT_NAME}ConfigVersion.cmake
   VERSION ${PROJECT_VERSION}
